@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import Realm from "realm";
 import type {Node} from 'react';
 import {
   SafeAreaView,
@@ -16,6 +17,7 @@ import {
   Text,
   useColorScheme,
   View,
+  Button
 } from 'react-native';
 
 import {
@@ -25,6 +27,35 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+// Schema for Realm
+const TaskSchema = {
+  name: "Task",
+  properties: {
+    _id: "int",
+    name: "string",
+    status: "string?",
+  },
+  primaryKey: "_id",
+};
+
+// Open a Realm
+const realm = new Realm({
+  schema: [TaskSchema],
+});
+
+// Write a ToDo with random ID to database
+function createToDo() {
+  let task1;
+  realm.write(() => {
+    task1 = realm.create('Task', {
+      _id: Math.floor(Math.random() * 100000),
+      name: 'go grocery shopping',
+      status: 'Open',
+    });
+    console.log(`created one task: ${task1.name} with id ${task1._id}`);
+  });
+}
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -74,6 +105,9 @@ const App: () => Node = () => {
             Edit <Text style={styles.highlight}>App.js</Text> to change this
             screen and then come back to see your edits.
           </Section>
+          <Button title="create ToDo" onPress={createToDo}>
+          {' '}
+        </Button>
           <Section title="See Your Changes">
             <ReloadInstructions />
           </Section>
