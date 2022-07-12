@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import Realm from "realm";
+import {useEffect} from 'react';
+import Realm from 'realm';
 import type {Node} from 'react';
 import {
   SafeAreaView,
@@ -17,8 +18,10 @@ import {
   Text,
   useColorScheme,
   View,
-  Button
+  Button,
 } from 'react-native';
+
+import {addPlugin} from 'react-native-flipper';
 
 import {
   Colors,
@@ -30,13 +33,13 @@ import {
 
 // Schema for Realm
 const TaskSchema = {
-  name: "Task",
+  name: 'Task',
   properties: {
-    _id: "int",
-    name: "string",
-    status: "string?",
+    _id: 'int',
+    name: 'string',
+    status: 'string?',
   },
-  primaryKey: "_id",
+  primaryKey: '_id',
 };
 
 // Open a Realm
@@ -56,6 +59,18 @@ function createToDo() {
     console.log(`created one task: ${task1.name} with id ${task1._id}`);
   });
 }
+
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    console.log('onConnect');
+  },
+  onDisconnect() {
+    console.log('onDisconnect');
+  },
+});
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -106,8 +121,8 @@ const App: () => Node = () => {
             screen and then come back to see your edits.
           </Section>
           <Button title="create ToDo" onPress={createToDo}>
-          {' '}
-        </Button>
+            {' '}
+          </Button>
           <Section title="See Your Changes">
             <ReloadInstructions />
           </Section>
