@@ -45,7 +45,6 @@ const TaskSchema = {
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema],
-  path: 
 });
 
 // Write a ToDo with random ID to database
