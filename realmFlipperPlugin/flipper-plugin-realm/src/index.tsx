@@ -11,14 +11,20 @@ type RealmPluginState = {
 type Events = {
   // newData: Data;
   getObjects: ObjectsMessage
+  getSchemas: SchemaMessage
 };
 
 type Methods = {
   getObjects: (data: SchemaType) => Promise<Object[]>
+  getSchemas: () => Promise<Object[]>
 }
 
 type ObjectsMessage = {
   objects: Array<Object>
+}
+
+type SchemaMessage = {
+  schemas: Array<Object>
 }
 
 type SchemaType = {
@@ -40,6 +46,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({...state, objects: data.objects})
   })
 
+  client.onMessage('getSchemas', (data: SchemaMessage) => {
+    console.log("received schemas",data.schemas)
+    const state = pluginState.get()
+    pluginState.set({...state, schemas: data.schemas})
+  })
+
   client.addMenuEntry({
     action: 'clear',
     handler: async () => {
@@ -51,7 +63,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send("getObjects", ({schema: 'Task'}))
   }
 
-  return {state: pluginState, getObjects};
+  const getSchemas = () => {
+    client.send("getSchemas", undefined);
+  }
+
+  return {state: pluginState, getObjects, getSchemas};
 }
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#building-a-user-interface-for-the-plugin
@@ -59,14 +75,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  console.log(state.objects)
+  console.log(state.schemas)
 
   return (
     <Layout.ScrollContainer>
 <Button onClick = {() => instance.getObjects()} title="Get Objects" >button</Button>
+<Button onClick = {() => instance.getSchemas()} title="Get Objects" >get schemas</Button>
       {state.objects.map((obj) => {
         // @ts-ignore
         return (<div key={ obj._id}>{JSON.stringify(obj)}</div>)
+      })}
+      <div>SCHEMAS</div>
+      {state.schemas.map((schema) => {
+        // @ts-ignore
+        return (<div key={ schema.name}>{JSON.stringify(schema)}</div>)
       })}
     </Layout.ScrollContainer>
     
