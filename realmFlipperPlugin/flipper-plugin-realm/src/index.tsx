@@ -7,11 +7,20 @@ import { Button, Radio, Typography, RadioChangeEvent } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
 import {useCallback} from 'react';
+import SchemaVisualizer from './pages/SchemaVisualizer';
 type RealmPluginState = {
   database: Number, 
   objects: Array<Object>,
-  schemas: Array<Object>,
+  schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL'
+}
+
+export type SchemaResponseObject = {
+  name: String,
+  embedded: boolean,
+  assymetric: boolean,
+  primaryKey: String,
+  properties: Array<Object>
 }
 
 type Events = {
@@ -21,8 +30,8 @@ type Events = {
 };
 
 type Methods = {
-  getObjects: (data: SchemaType) => Promise<Object[]>
-  getSchemas: () => Promise<Object[]>
+  getObjects: (data: SchemaRequest) => Promise<Object[]>
+  getSchemas: () => Promise<SchemaResponseObject[]>
 }
 
 type ObjectsMessage = {
@@ -30,10 +39,10 @@ type ObjectsMessage = {
 }
 
 type SchemaMessage = {
-  schemas: Array<Object>
+  schemas: Array<SchemaResponseObject>
 }
 
-type SchemaType = {
+type SchemaRequest = {
   schema: String;
 }
 
@@ -150,7 +159,7 @@ export function Component() {
       </div>
       ) : null} 
       {state.viewMode === 'schemas' ?
-            <div>schemas tab</div>
+            <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
       : null} 
       {state.viewMode === 'RQL' ? 
               <div>RQL tab</div>
