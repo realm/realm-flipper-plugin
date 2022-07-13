@@ -292,4 +292,8 @@ google-services.json
 # Ignore code-workspaces
 *.code-workspace
 
+
+# watchman
+*/.watchmanconfig
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,reactnative,react

@@ -65,6 +65,11 @@ addPlugin({
     return 'realm';
   },
   onConnect(connection) {
+    connection.receive('getObjects', obj => {
+      const schema = obj.schema;
+      const objects = realm.objects(schema);
+      connection.send('getObjects', {objects: objects});
+    });
     console.log('onConnect');
   },
   onDisconnect() {
