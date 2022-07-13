@@ -45,6 +45,7 @@ const TaskSchema = {
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema],
+  path: 
 });
 
 // Write a ToDo with random ID to database
@@ -69,6 +70,10 @@ addPlugin({
       const schema = obj.schema;
       const objects = realm.objects(schema);
       connection.send('getObjects', {objects: objects});
+    });
+    connection.receive('getSchemas', () => {
+      const schema = realm.schema;
+      connection.send('getSchemas', {schemas: schema});
     });
     console.log('onConnect');
   },
