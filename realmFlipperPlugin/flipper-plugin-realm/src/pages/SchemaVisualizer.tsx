@@ -8,8 +8,6 @@ function createColumnConfig(columns: string[]) {
         key: c,
         title: c,
         onRender(row) {
-            console.log("row",row)
-            console.log("c", c)
           return renderValue(row[c]);
         },
       }),
@@ -17,9 +15,8 @@ function createColumnConfig(columns: string[]) {
     return columnObjs;
   }
   function createRows(
-    columns: string[],
-    rows: Value[][],
-  ): {[key: string]: Value}[] {
+    properties: Object[]
+  ): Object[] {
     return rows.map((values) =>
       values.reduce((acc: {[key: string]: Value}, cur: Value, i: number) => {
         acc[columns[i]] = cur;
@@ -30,49 +27,19 @@ function createColumnConfig(columns: string[]) {
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     const {schemas} = props;
     const [schemaObjects] = schemas
-    const {properties} = schemaObjects
-    console.log("schemaobjects",schemaObjects)
-    console.log("properties",properties)
+    const {properties, primaryKey} = schemaObjects
     let newRows = []
     Object.entries(properties).forEach(([key, value], index) => {
-        console.log(value)
-        console.log(index)
         let newObj = {}
         Object.entries(value).forEach(([key, value]) => {
-            console.log("here", key,value)
             newObj[key]={type: typeof value, value: value}
         })
+        console.log("value here", value)
+        newObj["primaryKey"]={type: "boolean", value: primaryKey===value.name}
         newRows.push(newObj)
        // newRows[index]=
     })
-    const rowObjss =[
-        {
-            "name": {
-                "type": "string",
-                "value": "locale" 
-            },
-            "type": {
-                "type": "string",
-                "value": "TEXT"
-            },
-            "mapTo": {
-                "type": "boolean",
-                "value": true
-            },
-            "indexed": {
-                "type": "null"
-            },
-            "optional": {
-                "type": "boolean",
-                "value": false
-            },
-            "primaryKey": {
-                "type": "null"
-            }
-        }
-    ]
-    console.log("rowObjss",rowObjss)
-    const columns =  ["name","type", "mapTo","indexed", "optional"] //primarykey
+    const columns =  ["name","type", "mapTo","indexed", "optional", "primaryKey"]
     const columnObjs = useMemoize(
         (columns: string[]) => createColumnConfig(columns),
         [columns],
