@@ -8,17 +8,19 @@ import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 
 import React from 'react';
 import {useCallback} from 'react';
 import SchemaVisualizer from './pages/SchemaVisualizer';
+import SchemaSelect from './components/SchemaSelect'
 type RealmPluginState = {
   database: Number, 
   objects: Array<Object>,
   schemas: Array<SchemaResponseObject>,
-  viewMode: 'data' | 'schemas' | 'RQL'
+  viewMode: 'data' | 'schemas' | 'RQL',
+  selectedSchema: string
 }
 
 export type SchemaResponseObject = {
-  name: String,
+  name: string,
   embedded: boolean,
-  assymetric: boolean,
+  asymmetric: boolean,
   primaryKey: String,
   properties: {[key: string]: SchemaPropertyValue}
 }
@@ -61,7 +63,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     database: 0,
     objects: [],
     schemas: [],
-    viewMode: 'data'
+    viewMode: 'data',
+    selectedSchema: ''
   });
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
@@ -100,11 +103,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  return {state: pluginState, getObjects, getSchemas, updateViewMode};
+  const updateSelectedSchema = (event: {schema: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedSchema: event.schema,
+    });
+  };
+
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, updateSelectedSchema};
 }
 
-// Read more: https://fbflipper.com/docs/tutorial/js-custom#building-a-user-interface-for-the-plugin
-// API: https://fbflipper.com/docs/extending/flipper-plugin#react-hooks
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -151,6 +160,7 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
+      <SchemaSelect></SchemaSelect>
      {state.viewMode === 'data' ? (
       <div>
         <Button onClick = {() => instance.getObjects()} title="Get Objects" >button</Button>

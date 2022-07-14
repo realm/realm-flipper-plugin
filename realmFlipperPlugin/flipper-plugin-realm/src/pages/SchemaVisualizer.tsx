@@ -5,7 +5,7 @@ import { DataTable, DataTableColumn, Layout, useMemoize } from 'flipper-plugin';
 import React from "react";
 import { SchemaPropertyValue, SchemaResponseObject } from '../index';
 import { renderValue, Value } from '../utils/TypeBasedValueRenderer';
-function createColumnConfig(columns: string[]) {
+export function createColumnConfig(columns: string[]) {
     const columnObjs: DataTableColumn<{[key: string]: Value}>[] = columns.map(
       (c) => ({
         key: c,
@@ -18,7 +18,7 @@ function createColumnConfig(columns: string[]) {
     return columnObjs;
   }
 
-  function createRows(properties: { [key: string]: SchemaPropertyValue; }, primaryKey: String): {[key: string]: Value}[] {
+  export function createRows(properties: { [key: string]: SchemaPropertyValue; }, primaryKey: String): {[key: string]: Value}[] {
     let newRows: {[key: string]: Value}[] = []
     Object.values(properties).forEach((value: SchemaPropertyValue) => {
       let rowObj: {[key: string]: Value} = {}
@@ -34,19 +34,24 @@ function createColumnConfig(columns: string[]) {
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     const {schemas} = props;
     const [schemaObjects] = schemas
+    if (!schemaObjects) {
+      return (<div>No schemas found</div>);
+    }
     const {name, properties, primaryKey} = schemaObjects
     const columns =  ["name","type", "mapTo","indexed", "optional", "primaryKey"]
     const columnObjs = useMemoize(
         (columns: string[]) => createColumnConfig(columns),
         [columns],
-      );
+    );
     const rows = createRows(properties, primaryKey);
     
-    
+    console.log("cols",columnObjs)
+    console.log("rows",rows)
     return (
        <Layout.Container height={400}>
         <Typography >{name}</Typography>
         <DataTable<{[key: string]: Value}>
+          data-testid = {name}
           records={rows}
           columns={columnObjs}
           enableSearchbar={false}
