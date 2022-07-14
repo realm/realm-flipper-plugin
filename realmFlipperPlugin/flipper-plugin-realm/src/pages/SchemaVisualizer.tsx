@@ -1,8 +1,10 @@
+import {
+  Typography
+} from 'antd';
+import { DataTable, DataTableColumn, Layout, useMemoize } from 'flipper-plugin';
 import React from "react";
-import {Value, renderValue} from '../utils/TypeBasedValueRenderer';
-import {SchemaResponseObject, SchemaPropertyValue} from '../index'
-import {DataTable, DataTableColumn, Layout, useMemoize} from 'flipper-plugin';
-
+import { SchemaPropertyValue, SchemaResponseObject } from '../index';
+import { renderValue, Value } from '../utils/TypeBasedValueRenderer';
 function createColumnConfig(columns: string[]) {
     const columnObjs: DataTableColumn<{[key: string]: Value}>[] = columns.map(
       (c) => ({
@@ -30,7 +32,6 @@ function createColumnConfig(columns: string[]) {
     return newRows;
   }
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
-    console.log(props)
     const {schemas} = props;
     const [schemaObjects] = schemas
     const {name, properties, primaryKey} = schemaObjects
@@ -44,7 +45,7 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     
     return (
        <Layout.Container height={400}>
-        <Text>{name}</h1>
+        <Typography >{name}</Typography>
         <DataTable<{[key: string]: Value}>
           records={rows}
           columns={columnObjs}

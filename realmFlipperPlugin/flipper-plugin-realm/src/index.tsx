@@ -20,7 +20,15 @@ export type SchemaResponseObject = {
   embedded: boolean,
   assymetric: boolean,
   primaryKey: String,
-  properties: Array<Object>
+  properties: {[key: string]: SchemaPropertyValue}
+}
+
+export type SchemaPropertyValue = {
+  name: string,
+  indexed: boolean,
+  optional: boolean,
+  type:string,
+  mapTo: string
 }
 
 type Events = {
