@@ -45,7 +45,7 @@ const BoldSpan = styled.span({
         {tableOptions}
     </Select>
     <Button onClick={() => console.log("REFRESH clicked!")} type="default">
-    Refresh
+        Refresh
     </Button>
 </Toolbar>
     )

@@ -34,6 +34,9 @@ function createColumnConfig(columns: string[]) {
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     const {schemas} = props;
     const [schemaObjects] = schemas
+    if (!schemaObjects) {
+      return (<div>No schemas found</div>);
+    }
     const {name, properties, primaryKey} = schemaObjects
     const columns =  ["name","type", "mapTo","indexed", "optional", "primaryKey"]
     const columnObjs = useMemoize(
