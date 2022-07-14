@@ -8,6 +8,8 @@ import React from 'react';
 import { useCallback } from 'react';
 import {plugin} from '../index';
 
+const {Option} = Select;
+
 const BoldSpan = styled.span({
     fontSize: 12,
     color: '#90949c',
@@ -15,7 +17,7 @@ const BoldSpan = styled.span({
     textTransform: 'uppercase',
   });
 
-  export default () => {    
+  export default () => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state);
     const onSchemaSelected = useCallback(
@@ -28,9 +30,9 @@ const BoldSpan = styled.span({
     );
     state.schemas.map(({name}) => console.log("task",name))
     const tableOptions = state.schemas.map(({name}) => (
-        <Select key={name} value={name}>
+        <Option key={name} value={name}>
             {name}
-        </Select>
+        </Option>
     ))
     
     return(

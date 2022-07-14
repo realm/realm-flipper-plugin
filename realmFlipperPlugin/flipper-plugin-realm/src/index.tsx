@@ -20,7 +20,7 @@ type RealmPluginState = {
 export type SchemaResponseObject = {
   name: string,
   embedded: boolean,
-  assymetric: boolean,
+  asymmetric: boolean,
   primaryKey: String,
   properties: {[key: string]: SchemaPropertyValue}
 }
