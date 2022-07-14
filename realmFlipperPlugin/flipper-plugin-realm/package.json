@@ -21,8 +21,8 @@
   },
   "peerDependencies": {
     "@emotion/styled": "latest",
-    "flipper-plugin": "^0.153.0",
     "antd": "latest",
+    "flipper-plugin": "^0.153.0",
     "react": "latest",
     "react-dom": "latest"
   },
@@ -32,11 +32,12 @@
     "@emotion/styled": "latest",
     "@testing-library/react": "latest",
     "@types/jest": "latest",
-    "@types/react": "latest",
+    "@types/react": "^18.0.15",
     "@types/react-dom": "latest",
     "antd": "latest",
-    "flipper-plugin": "latest",
+    "css-loader": "^6.7.1",
     "flipper-pkg": "latest",
+    "flipper-plugin": "latest",
     "jest": "latest",
     "jest-mock-console": "latest",
     "react": "latest",
@@ -48,5 +49,8 @@
     "setupFiles": [
       "<rootDir>/jest-setup.ts"
     ]
+  },
+  "dependencies": {
+    "pretty-print-json": "^1.2.5"
   }
 }
