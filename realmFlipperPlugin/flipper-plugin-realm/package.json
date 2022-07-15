@@ -21,8 +21,8 @@
   },
   "peerDependencies": {
     "@emotion/styled": "latest",
-    "flipper-plugin": "^0.153.0",
     "antd": "latest",
+    "flipper-plugin": "^0.153.0",
     "react": "latest",
     "react-dom": "latest"
   },
@@ -31,22 +31,29 @@
     "@babel/preset-typescript": "latest",
     "@emotion/styled": "latest",
     "@testing-library/react": "latest",
-    "@types/jest": "latest",
+    "@types/jest": "^28.1.5",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "antd": "latest",
-    "flipper-plugin": "latest",
     "flipper-pkg": "latest",
-    "jest": "latest",
+    "flipper-plugin": "latest",
+    "jest": "^28.1.3",
     "jest-mock-console": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "ts-jest": "^28.0.6",
     "typescript": "latest"
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "transformIgnorePatterns": [
+      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
+    ],
     "setupFiles": [
       "<rootDir>/jest-setup.ts"
     ]
+  },
+  "dependencies": {
+    "jest-environment-jsdom": "^28.1.3"
   }
 }

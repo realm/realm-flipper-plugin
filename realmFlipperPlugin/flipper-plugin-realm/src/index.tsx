@@ -12,12 +12,31 @@ import RealmQueryLanguage from "./pages/RealmQueryLanguage"
 export type RealmPluginState = {
   database: Number, 
   objects: Array<Object>,
-  schemas: Array<Object>,
+  schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
   query: String,
   queryHistory: Array<String>,
   errorMsg?: String
   queryFavourites: Array<String>,
+  selectedSchema: string
+}
+import SchemaVisualizer from './pages/SchemaVisualizer';
+import SchemaSelect from './components/SchemaSelect'
+
+export type SchemaResponseObject = {
+  name: string,
+  embedded: boolean,
+  asymmetric: boolean,
+  primaryKey: String,
+  properties: {[key: string]: SchemaPropertyValue}
+}
+
+export type SchemaPropertyValue = {
+  name: string,
+  indexed: boolean,
+  optional: boolean,
+  type:string,
+  mapTo: string
 }
 
 type Events = {
@@ -28,9 +47,9 @@ type Events = {
 };
 
 type Methods = {
-  getObjects: (data: SchemaType) => Promise<Object[]>
-  getSchemas: () => Promise<Object[]>
   executeQuery: (query: QueryObject) => Promise<Object[]>
+  getObjects: (data: SchemaRequest) => Promise<Object[]>
+  getSchemas: () => Promise<SchemaResponseObject[]>
 }
 
 type ObjectsMessage = {
@@ -38,10 +57,10 @@ type ObjectsMessage = {
 }
 
 type SchemaMessage = {
-  schemas: Array<Object>
+  schemas: Array<SchemaResponseObject>
 }
 
-type SchemaType = {
+type SchemaRequest = {
   schema: String;
 }
 
@@ -63,7 +82,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     viewMode: 'data',
     query: '',
     queryHistory: [],
-    queryFavourites: []
+    queryFavourites: [],
+    selectedSchema: ''
   });
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
@@ -116,7 +136,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const executeQuery = () => {
     const history = pluginState.get().queryHistory
-    if (history.length == 0 || history.at(-1) != pluginState.get().query) {
+    if (history.length == 0 || history[history.length - 1] != pluginState.get().query) {
       pluginState.update(st => {
         if (history.length + 1 > 10) {
           st.queryHistory.shift()
@@ -127,11 +147,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get()
     client.send('executeQuery', {query: state.query})
   }
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery};
+  const updateSelectedSchema = (event: {schema: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedSchema: event.schema,
+    });
+  };
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema};
 }
 
-// Read more: https://fbflipper.com/docs/tutorial/js-custom#building-a-user-interface-for-the-plugin
-// API: https://fbflipper.com/docs/extending/flipper-plugin#react-hooks
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -176,6 +201,7 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
+      <SchemaSelect></SchemaSelect>
      {state.viewMode === 'data' ? (
       <div>
         <Button onClick = {() => instance.getObjects()} title="Get Objects" >button</Button>
@@ -192,7 +218,7 @@ export function Component() {
       </div>
       ) : null} 
       {state.viewMode === 'schemas' ?
-            <div>schemas tab</div>
+            <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
       : null} 
       {state.viewMode === 'RQL' ? (<>
         <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
