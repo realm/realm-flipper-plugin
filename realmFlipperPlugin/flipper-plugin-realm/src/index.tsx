@@ -53,8 +53,8 @@ type Methods = {
 }
 
 type ObjectsMessage = {
-  objects: Array<Object>
-}
+  objects: Array<Object>;
+};
 
 type SchemaMessage = {
   schemas: Array<SchemaResponseObject>
@@ -62,7 +62,7 @@ type SchemaMessage = {
 
 type SchemaRequest = {
   schema: String;
-}
+};
 
 type QueryObject = {
   query: String;
@@ -86,17 +86,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedSchema: ''
   });
 
-  client.onMessage("getObjects", (data: ObjectsMessage) => {
-    console.log("received objects",data.objects)
-    const state = pluginState.get()
-    pluginState.set({...state, objects: data.objects})
-  })
+  // Specify wether objects should be displayed in tabular or object view
+  var tableView = false;
 
-  client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log("received schemas",data.schemas)
-    const state = pluginState.get()
-    pluginState.set({...state, schemas: data.schemas})
-  })
+  client.onMessage("getObjects", (data: ObjectsMessage) => {
+    console.log("received objects", data.objects);
+    const state = pluginState.get();
+    pluginState.set({ ...state, objects: data.objects });
+  });
+
+  client.onMessage("getSchemas", (data: SchemaMessage) => {
+    console.log("received schemas", data.schemas);
+    const state = pluginState.get();
+    pluginState.set({ ...state, schemas: data.schemas });
+  });
 
   client.onMessage('executeQuery', (data: QueryResult) => {
     const state = pluginState.get()
@@ -111,26 +114,26 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.addMenuEntry({
-    action: 'clear',
+    action: "clear",
     handler: async () => {
-     // pluginState.set({});
+      // pluginState.set({});
     },
   });
 
-  const getObjects = () => {
-    client.send("getObjects", ({schema: 'Task'}))
-  }
+  const getObjects = (tableView: boolean) => {
+    const state = pluginState.get();
+    pluginState.set({ ...state, objectTableView: tableView });
+    client.send("getObjects", { schema: "Task" });
+  };
 
   const getSchemas = () => {
     client.send("getSchemas", undefined);
-  }
+  };
 
-  const updateViewMode = (event: {
-    viewMode: 'data' | 'schemas' | 'RQL';
-  }) => {
+  const updateViewMode = (event: { viewMode: "data" | "schemas" | "RQL" }) => {
     pluginState.update((state) => {
       state.viewMode = event.viewMode;
-     // state.error = null;
+      // state.error = null;
     });
   };
 
@@ -165,21 +168,21 @@ export function Component() {
 
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
-      instance.updateViewMode({viewMode: evt.target.value ?? 'data'});
+      instance.updateViewMode({ viewMode: evt.target.value ?? "data" });
     },
-    [instance],
+    [instance]
   );
 
   const onDataClicked = useCallback(() => {
-    instance.updateViewMode({viewMode: 'data'});
+    instance.updateViewMode({ viewMode: "data" });
   }, [instance]);
 
   const onSchemasClicked = useCallback(() => {
-    instance.updateViewMode({viewMode: 'schemas'});
+    instance.updateViewMode({ viewMode: "schemas" });
   }, [instance]);
 
   const onRQLClicked = useCallback(() => {
-    instance.updateViewMode({viewMode: 'RQL'});
+    instance.updateViewMode({ viewMode: "RQL" });
   }, [instance]);
   // console.log(state.viewMode)
 
@@ -188,15 +191,15 @@ export function Component() {
       <Toolbar position="top">
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
-            <TableOutlined style={{marginRight: 5}} />
+            <TableOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Data</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onSchemasClicked} value="schemas">
-            <SettingOutlined style={{marginRight: 5}} />
+            <SettingOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Schemas</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onRQLClicked} value="RQL">
-            <ConsoleSqlOutlined style={{marginRight: 5}} />
+            <ConsoleSqlOutlined style={{ marginRight: 5 }} />
             <Typography.Text>RQL</Typography.Text>
           </Radio.Button>
         </Radio.Group>
@@ -208,7 +211,20 @@ export function Component() {
         <Button onClick = {() => instance.getSchemas()} title="Get Objects" >get schemas</Button>
               {state.objects.map((obj) => {
                 // @ts-ignore
-                return (<div key={ obj._id}>{JSON.stringify(obj)}</div>)
+                //return (<div key={ obj._id}>{JSON.stringify(obj)}</div>)
+                return (
+                  // @ts-ignore
+                  <div> TABLE</div>
+                );
+              })
+            : state.objects.map((obj) => {
+                //return (<div key={ obj._id}>{JSON.stringify(obj)}</div>)
+                return (
+                  // @ts-ignore
+                  <Prettyjson key={obj._id} json={obj}>
+                    {" "}
+                  </Prettyjson>
+                );
               })}
               <div>SCHEMAS</div>
               {state.schemas.map((schema) => {
@@ -225,6 +241,5 @@ export function Component() {
       </>
       ) : null}
     </Layout.Container>
-    
   );
 }
