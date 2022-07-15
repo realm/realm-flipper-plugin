@@ -31,24 +31,14 @@
     "@babel/preset-typescript": "latest",
     "@emotion/styled": "latest",
     "@testing-library/react": "latest",
-<<<<<<< HEAD
     "@types/jest": "^28.1.5",
     "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "antd": "latest",
-    "flipper-pkg": "latest",
-    "flipper-plugin": "latest",
-    "jest": "^28.1.3",
-=======
-    "@types/jest": "latest",
-    "@types/react": "^18.0.15",
     "@types/react-dom": "latest",
     "antd": "latest",
     "css-loader": "^6.7.1",
     "flipper-pkg": "latest",
     "flipper-plugin": "latest",
     "jest": "latest",
->>>>>>> finn/visualize-objects
     "jest-mock-console": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -65,10 +55,7 @@
     ]
   },
   "dependencies": {
-<<<<<<< HEAD
-    "jest-environment-jsdom": "^28.1.3"
-=======
+    "jest-environment-jsdom": "^28.1.3",
     "pretty-print-json": "^1.2.5"
->>>>>>> finn/visualize-objects
   }
 }
