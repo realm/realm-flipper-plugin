@@ -67,7 +67,7 @@ function onObjectsChange(objects, changes) {
     // but you can update a UI list, etc. based on the index.
     console.log(`Looks like Dog #${index} has left the realm.`);
     if (realmConnection) {
-      realmConnection.send('liveObjectDeleted', {objects: objects, index: index});
+      realmConnection.send('liveObjectDeleted', {index: index});
     }
   });
   // Handle newly added Dog objects
@@ -75,7 +75,7 @@ function onObjectsChange(objects, changes) {
     const inserted = objects[index];
     console.log(`Welcome our new friend, ${inserted._id}!`);
     if (realmConnection) {
-      realmConnection.send('liveObjectAdded', {objects: objects, index: index});
+      realmConnection.send('liveObjectAdded', {newObject: inserted});
     }
   });
   // Handle Dog objects that were modified
@@ -83,7 +83,7 @@ function onObjectsChange(objects, changes) {
     const modified = objects[index];
     console.log(`Hey ${modified.name}, you look different!`);
     if (realmConnection) {
-      realmConnection.send('liveObjectEdited', {objects: objects, index: index});
+      realmConnection.send('liveObjectEdited', {newObject: modified, index: index});
     }
   });
 }

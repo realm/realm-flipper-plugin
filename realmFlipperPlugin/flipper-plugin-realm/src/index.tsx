@@ -38,6 +38,9 @@ type Events = {
   // newData: Data;
   getObjects: ObjectsMessage
   getSchemas: SchemaMessage
+  liveObjectAdded: AddLiveObjectRequest
+  liveObjectDeleted: DeleteLiveObjectRequest
+  liveObjectEdited: EditLiveObjectRequest
 };
 
 type Methods = {
@@ -55,6 +58,19 @@ type SchemaMessage = {
 
 type SchemaRequest = {
   schema: String;
+}
+
+type AddLiveObjectRequest = {
+  newObject: Object
+}
+
+type DeleteLiveObjectRequest = {
+  index: number
+}
+
+type EditLiveObjectRequest = {
+  newObject: Object
+  index: number
 }
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
@@ -80,25 +96,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({...state, schemas: data.schemas})
   })
 
-  client.onMessage("liveObjectAdded", (data: any) => {
-    console.log("received object",data);
-    const state = pluginState.get()
-    const newObject = data.objects[data.index];
-    pluginState.set({...state, objects: [...state.objects, newObject]})
+  client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+    const state = pluginState.get();
+    const {newObject} = data;
+    pluginState.set({...state, objects: [...state.objects, newObject]});
   })
 
-  client.onMessage("liveObjectDeleted", (data: any) => {
-    console.log("received object",data);
-    const state = pluginState.get()
-    pluginState.set({...state, objects: [...state.objects.splice(data.index, 1)]})
+  client.onMessage("liveObjectDeleted", (data: DeleteLiveObjectRequest) => {
+    const state = pluginState.get();
+    pluginState.set({...state, objects: [...state.objects.splice(data.index, 1)]});
   })
 
-  client.onMessage("liveObjectEdited", (data: any) => {
-    console.log("received object",data);
-    const state = pluginState.get()
-    const updatedObject = data.objects[data.index];
-    
-    pluginState.set({...state, objects: [...state.objects, data.objects[data.index]]})
+  client.onMessage("liveObjectEdited", (data: EditLiveObjectRequest) => {
+    const state = pluginState.get();
+    const {newObject} = data;
+    pluginState.set({...state, objects: [...state.objects.splice(data.index, 1, newObject)]});
   })
 
   client.addMenuEntry({
