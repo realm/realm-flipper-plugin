@@ -3,8 +3,10 @@ import {
   DatabaseOutlined, HistoryOutlined,
   SettingOutlined, TableOutlined
 } from '@ant-design/icons';
-import { Button, Radio, Typography, RadioChangeEvent, Input, Alert, Select } from 'antd';
-const { Option } = Select;
+import { StarOutlined } from '@ant-design/icons';
+
+import { Button, Radio, Typography, RadioChangeEvent, Input, Alert, Select, AutoComplete } from 'antd';
+const { Option } = AutoComplete;
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import {useCallback} from 'react';
@@ -13,9 +15,10 @@ type RealmPluginState = {
   objects: Array<Object>,
   schemas: Array<Object>,
   viewMode: 'data' | 'schemas' | 'RQL',
-  query: string,
+  query: String,
   queryHistory: Array<String>,
-  errorMsg?: string
+  errorMsg?: String
+  queryFavourites: Array<String>,
 }
 
 type Events = {
@@ -60,7 +63,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemas: [],
     viewMode: 'data',
     query: '',
-    queryHistory: []
+    queryHistory: [],
+    queryFavourites: []
   });
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
@@ -112,11 +116,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const executeQuery = () => {
-    pluginState.update(st => {
-      st.queryHistory = [...st.queryHistory, st.query]
-    })
+    const history = pluginState.get().queryHistory
+    if (history.length == 0 || history.at(-1) != pluginState.get().query) {
+      pluginState.update(st => {
+        if (history.length + 1 > 10) {
+          st.queryHistory.shift()
+        }
+        st.queryHistory = [...st.queryHistory, st.query]
+      })
+    }
     const state = pluginState.get()
-    // state.queryHistory.push(state.query)
     client.send('executeQuery', {query: state.query})
   }
   return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery};
@@ -150,14 +159,30 @@ export function Component() {
   }, [instance]);
 
 
-  const onTextChange = (event: any) => {
+  const onTextChange = (event: String) => {
+    console.log("onTextChange", event);
     instance.state.update(st => {
-      if (event.target) {
-        st.query = event.target.value
-      }
+      st.query = event
     })
   }
 
+  const onStar = () => {
+    console.log("onStar");
+    const state = instance.state.get()
+    if (!state.queryFavourites.includes(state.query)) {
+      instance.state.update(st => {
+        st.queryFavourites = [...st.queryFavourites, st.query]
+      })
+    }
+  }
+  const render2 = (query: String, id: number) => (
+    {
+      label: query,
+      value: query,
+      key: id
+    }
+    // <Option value={query} key={id}>query</Option>
+  );
   console.log(state.viewMode)
 
   return (
@@ -198,19 +223,35 @@ export function Component() {
       : null} 
       {state.viewMode === 'RQL' ? (<>
         <Input.Group compact>
-          <Input  style={{ width: 'calc(100% - 200px)' }} 
+          <AutoComplete style={{ width: 'calc(100% - 115px)' }} 
             placeholder="Enter a query to filter the data"
-            onChange={(onTextChange)} id="msgbox"
-            onPressEnter={instance.executeQuery}
+            onSearch={onTextChange} id="msgbox"
+            onChange={onTextChange}
+            onKeyUp={(ev) => {
+              if (ev.key == 'Enter')
+                instance.executeQuery()
+            }}
+            // onPressEnter={instance.executeQuery}
             allowClear
-            />
+            showSearch
+            options={[{
+              label: 'History',
+              options: state.queryHistory.map((val, id) => render2(val, 2 * id)).reverse()
+            },
+            {
+              label: 'Favourites',
+              options: state.queryFavourites.map((val, id) => render2(val, 2 * id + 1)).reverse()
+            }]}
+            backfill={true}
+            >
+          </AutoComplete>
           <Button type="primary" onClick={instance.executeQuery} title="executeButton">Execute</Button>
+          <Button icon={<StarOutlined />} onClick={onStar}></Button>
         </Input.Group>
-        <Input.Group>
-          <Select style={{width: '100%'}}>
-            {state.queryHistory.map(query => <Option key={query} value={query}>{query}</Option>)}
-          </Select>
-        </Input.Group>
+        {state.objects.map((obj) => {
+          // @ts-ignore
+          return (<div key={ obj._id}>{JSON.stringify(obj)}</div>)
+        })}
       {state.errorMsg ? (
         <Alert
           message="Error"
