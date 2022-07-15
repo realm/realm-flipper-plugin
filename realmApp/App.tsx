@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import Realm from 'realm';
 import type {Node} from 'react';
 import {
@@ -30,7 +30,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-
+let realmConnection = null;
 // Schema for Realm
 const TaskSchema = {
   name: 'Task',
@@ -60,14 +60,50 @@ function createToDo() {
   });
 }
 
+function onObjectsChange(objects, changes) {
+  // Handle deleted Dog objects
+  changes.deletions.forEach((index) => {
+    // You cannot directly access deleted objects,
+    // but you can update a UI list, etc. based on the index.
+    console.log(`Looks like Dog #${index} has left the realm.`);
+    if (realmConnection) {
+      realmConnection.send('liveObjectDeleted', {objects: objects, index: index});
+    }
+  });
+  // Handle newly added Dog objects
+  changes.insertions.forEach((index) => {
+    const inserted = objects[index];
+    console.log(`Welcome our new friend, ${inserted._id}!`);
+    if (realmConnection) {
+      realmConnection.send('liveObjectAdded', {objects: objects, index: index});
+    }
+  });
+  // Handle Dog objects that were modified
+  changes.modifications.forEach((index) => {
+    const modified = objects[index];
+    console.log(`Hey ${modified.name}, you look different!`);
+    if (realmConnection) {
+      realmConnection.send('liveObjectEdited', {objects: objects, index: index});
+    }
+  });
+}
+
 addPlugin({
   getId() {
     return 'realm';
   },
   onConnect(connection) {
+    realmConnection = connection;
     connection.receive('getObjects', obj => {
       const schema = obj.schema;
       const objects = realm.objects(schema);
+      try {
+        objects.addListener(onObjectsChange);
+      } catch (error) {
+        console.error(
+          `An exception was thrown within the change listener: ${error}`
+        );
+      }
       connection.send('getObjects', {objects: objects});
     });
     connection.receive('getSchemas', () => {

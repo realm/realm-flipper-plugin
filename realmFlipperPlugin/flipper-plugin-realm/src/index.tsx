@@ -9,6 +9,7 @@ import React from 'react';
 import {useCallback} from 'react';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import SchemaSelect from './components/SchemaSelect'
+
 type RealmPluginState = {
   database: Number, 
   objects: Array<Object>,
@@ -77,6 +78,27 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log("received schemas",data.schemas)
     const state = pluginState.get()
     pluginState.set({...state, schemas: data.schemas})
+  })
+
+  client.onMessage("liveObjectAdded", (data: any) => {
+    console.log("received object",data);
+    const state = pluginState.get()
+    const newObject = data.objects[data.index];
+    pluginState.set({...state, objects: [...state.objects, newObject]})
+  })
+
+  client.onMessage("liveObjectDeleted", (data: any) => {
+    console.log("received object",data);
+    const state = pluginState.get()
+    pluginState.set({...state, objects: [...state.objects.splice(data.index, 1)]})
+  })
+
+  client.onMessage("liveObjectEdited", (data: any) => {
+    console.log("received object",data);
+    const state = pluginState.get()
+    const updatedObject = data.objects[data.index];
+    
+    pluginState.set({...state, objects: [...state.objects, data.objects[data.index]]})
   })
 
   client.addMenuEntry({
@@ -178,11 +200,10 @@ export function Component() {
       ) : null} 
       {state.viewMode === 'schemas' ?
             <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
-      : null} 
-      {state.viewMode === 'RQL' ? 
+      : null}
+      {state.viewMode === 'RQL' ?
               <div>RQL tab</div>
       : null}
     </Layout.Container>
-    
   );
 }
