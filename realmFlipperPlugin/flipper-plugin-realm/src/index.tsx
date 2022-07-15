@@ -1,21 +1,27 @@
 import {
   ConsoleSqlOutlined,
-  DatabaseOutlined, HistoryOutlined,
   SettingOutlined, TableOutlined
 } from '@ant-design/icons';
-import { Button, Radio, Typography, RadioChangeEvent } from 'antd';
+
+import { Button, Radio, Typography, RadioChangeEvent, AutoComplete } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
 import {useCallback} from 'react';
-import SchemaVisualizer from './pages/SchemaVisualizer';
-import SchemaSelect from './components/SchemaSelect'
-type RealmPluginState = {
+import RealmQueryLanguage from "./pages/RealmQueryLanguage"
+
+export type RealmPluginState = {
   database: Number, 
   objects: Array<Object>,
   schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
+  query: String,
+  queryHistory: Array<String>,
+  errorMsg?: String
+  queryFavourites: Array<String>,
   selectedSchema: string
 }
+import SchemaVisualizer from './pages/SchemaVisualizer';
+import SchemaSelect from './components/SchemaSelect'
 
 export type SchemaResponseObject = {
   name: string,
@@ -37,9 +43,11 @@ type Events = {
   // newData: Data;
   getObjects: ObjectsMessage
   getSchemas: SchemaMessage
+  executeQuery: QueryResult
 };
 
 type Methods = {
+  executeQuery: (query: QueryObject) => Promise<Object[]>
   getObjects: (data: SchemaRequest) => Promise<Object[]>
   getSchemas: () => Promise<SchemaResponseObject[]>
 }
@@ -56,6 +64,14 @@ type SchemaRequest = {
   schema: String;
 }
 
+type QueryObject = {
+  query: String;
+}
+
+type QueryResult = {
+  result: Array<Object> | string
+}
+
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
 export function plugin(client: PluginClient<Events, Methods>) {
@@ -64,6 +80,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     objects: [],
     schemas: [],
     viewMode: 'data',
+    query: '',
+    queryHistory: [],
+    queryFavourites: [],
     selectedSchema: ''
   });
 
@@ -77,6 +96,18 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log("received schemas",data.schemas)
     const state = pluginState.get()
     pluginState.set({...state, schemas: data.schemas})
+  })
+
+  client.onMessage('executeQuery', (data: QueryResult) => {
+    const state = pluginState.get()
+    if (typeof data.result === 'string') {
+      console.log("query failed", data.result)
+      pluginState.set({...state, errorMsg: data.result})
+    }
+    else {
+      console.log("query succeeded", data.result)
+      pluginState.set({...state, objects: data.result, errorMsg: undefined})
+    }
   })
 
   client.addMenuEntry({
@@ -103,6 +134,19 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const executeQuery = () => {
+    const history = pluginState.get().queryHistory
+    if (history.length == 0 || history[history.length - 1] != pluginState.get().query) {
+      pluginState.update(st => {
+        if (history.length + 1 > 10) {
+          st.queryHistory.shift()
+        }
+        st.queryHistory = [...st.queryHistory, st.query]
+      })
+    }
+    const state = pluginState.get()
+    client.send('executeQuery', {query: state.query})
+  }
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
     pluginState.set({
@@ -110,14 +154,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
       selectedSchema: event.schema,
     });
   };
-
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, updateSelectedSchema};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema};
 }
 
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  console.log(state.schemas)
+  // console.log(state.schemas)
 
 
   const onViewModeChanged = useCallback(
@@ -138,9 +181,7 @@ export function Component() {
   const onRQLClicked = useCallback(() => {
     instance.updateViewMode({viewMode: 'RQL'});
   }, [instance]);
-
-
-  console.log(state.viewMode)
+  // console.log(state.viewMode)
 
   return (
     <Layout.Container grow>
@@ -179,9 +220,10 @@ export function Component() {
       {state.viewMode === 'schemas' ?
             <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
       : null} 
-      {state.viewMode === 'RQL' ? 
-              <div>RQL tab</div>
-      : null}
+      {state.viewMode === 'RQL' ? (<>
+        <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
+      </>
+      ) : null}
     </Layout.Container>
     
   );

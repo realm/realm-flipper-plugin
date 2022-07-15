@@ -74,6 +74,19 @@ addPlugin({
       const schema = realm.schema;
       connection.send('getSchemas', {schemas: schema});
     });
+    connection.receive('executeQuery', query => {
+      const schema = realm.schema[0]
+      const objs = realm.objects(schema.name)
+
+      let res;
+      try {
+        res = {result: objs.filtered(query.query)}
+      } catch (err) {
+        res = {result: err.message}
+      }
+      
+      connection.send('executeQuery', res)
+    });
     console.log('onConnect');
   },
   onDisconnect() {
