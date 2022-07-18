@@ -5,9 +5,13 @@ import {
 
 import { Button, Radio, Typography, RadioChangeEvent, AutoComplete } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {useCallback} from 'react';
 import RealmQueryLanguage from "./pages/RealmQueryLanguage"
+import SchemaVisualizer from './pages/SchemaVisualizer';
+import SchemaSelect from './components/SchemaSelect'
+import DataVisualizer from './pages/DataVisualizer';
+import ViewSelecter from './components/ViewSelecter';
 
 export type RealmPluginState = {
   database: Number, 
@@ -18,12 +22,9 @@ export type RealmPluginState = {
   queryHistory: Array<String>,
   errorMsg?: String
   queryFavourites: Array<String>,
-  selectedSchema: string
+  selectedSchema: string,
+  selectedDataView: 'object' | 'table'
 }
-import SchemaVisualizer from './pages/SchemaVisualizer';
-import SchemaSelect from './components/SchemaSelect'
-
-import DataVisualizer from './pages/DataVisualizer';
 
 export type SchemaResponseObject = {
   name: string,
@@ -85,7 +86,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: '',
     queryHistory: [],
     queryFavourites: [],
-    selectedSchema: ''
+    selectedSchema: '',
+    selectedDataView: 'object',
   });
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
@@ -156,13 +158,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
       selectedSchema: event.schema,
     });
   };
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema};
+
+  const updateDataViewMode = (event: {
+    viewMode: 'object' | 'table';
+  }) => {
+    pluginState.update((state) => {
+      state.selectedDataView = event.viewMode;
+     // state.error = null;
+    });
+  };
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode};
 }
 
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  // console.log(state.schemas)
 
 
   const onViewModeChanged = useCallback(
@@ -174,6 +184,7 @@ export function Component() {
 
   const onDataClicked = useCallback(() => {
     instance.getObjects();
+    instance.getSchemas();
     instance.updateViewMode({viewMode: 'data'});
   }, [instance]);
 
@@ -184,11 +195,11 @@ export function Component() {
   const onRQLClicked = useCallback(() => {
     instance.updateViewMode({viewMode: 'RQL'});
   }, [instance]);
-  // console.log(state.viewMode)
 
   return (
-    <Layout.Container grow>
+    <Layout.ScrollContainer>
       <Toolbar position="top">
+        <ViewSelecter></ViewSelecter>
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
             <TableOutlined style={{marginRight: 5}} />
@@ -204,18 +215,17 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
-      <SchemaSelect></SchemaSelect>
      {state.viewMode === 'data' ? (
       <DataVisualizer objects = {state.objects}> </DataVisualizer>
       ) : null} 
       {state.viewMode === 'schemas' ?
-            <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
+      <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
       : null} 
       {state.viewMode === 'RQL' ? (<>
         <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
       </>
       ) : null}
-    </Layout.Container>
+    </Layout.ScrollContainer>
     
   );
 }
