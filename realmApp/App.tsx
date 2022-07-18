@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-
+import {RealmPlugin} from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -42,11 +42,40 @@ const TaskSchema = {
   primaryKey: '_id',
 };
 
+const CarSchema = {
+  name: 'Car',
+  properties: {
+    _id: 'int',
+    name: 'string',
+    speed: 'string?',
+    ferrari: 'string?',
+  },
+  primaryKey: '_id',
+};
+
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema],
+  schema: [TaskSchema, CarSchema],
 });
 
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, CarSchema]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Hello');
+  },
+});
+
+//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -60,39 +89,18 @@ function createToDo() {
   });
 }
 
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    connection.receive('getObjects', obj => {
-      const schema = obj.schema;
-      const objects = realm.objects(schema);
-      connection.send('getObjects', {objects: objects});
+function createCar() {
+  let car1;
+  realm.write(() => {
+    car1 = realm.create('Car', {
+      _id: Math.floor(Math.random() * 100000),
+      name: 'toyota',
+      speed: '193',
+      ferrari: 'false',
     });
-    connection.receive('getSchemas', () => {
-      const schema = realm.schema;
-      connection.send('getSchemas', {schemas: schema});
-    });
-    connection.receive('executeQuery', query => {
-      const schema = realm.schema[0]
-      const objs = realm.objects(schema.name)
-
-      let res;
-      try {
-        res = {result: objs.filtered(query.query)}
-      } catch (err) {
-        res = {result: err.message}
-      }
-      
-      connection.send('executeQuery', res)
-    });
-    console.log('onConnect');
-  },
-  onDisconnect() {
-    console.log('onDisconnect');
-  },
-});
+    console.log(`created one task: ${car1.name} with id ${car1._id}`);
+  });
+}
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -143,6 +151,9 @@ const App: () => Node = () => {
             screen and then come back to see your edits.
           </Section>
           <Button title="create ToDo" onPress={createToDo}>
+            {' '}
+          </Button>
+          <Button title="create car" onPress={createCar}>
             {' '}
           </Button>
           <Section title="See Your Changes">
