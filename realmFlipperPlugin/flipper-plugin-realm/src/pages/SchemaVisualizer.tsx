@@ -7,7 +7,6 @@ import { useCallback } from 'react';
 import { SchemaPropertyValue, SchemaResponseObject, plugin } from '../index';
 import { renderValue, Value } from '../utils/TypeBasedValueRenderer';
 import Prettyjson from '../components/Prettyjson';
-import SchemaSelect from '../components/SchemaSelect';
 import ViewSelecter from '../components/ViewSelecter';
 export function createColumnConfig(columns: string[]) {
     const columnObjs: DataTableColumn<{[key: string]: Value}>[] = columns.map(
@@ -52,7 +51,6 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     );
     const rows = createRows(properties, primaryKey);
 
-
     function renderObjectView() {
       return schemas.map((obj) => {
         return (
@@ -62,6 +60,7 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
         );
       });
     }
+
     return (
        <Layout.Container height={800}>
         <Typography >{name}</Typography>

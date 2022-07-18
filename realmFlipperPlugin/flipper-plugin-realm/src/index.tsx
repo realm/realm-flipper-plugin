@@ -121,8 +121,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     },
   });
 
-  const getObjects = () => {
-    client.send("getObjects", ({schema: 'Task'}))
+  const getObjects = (event: {
+    schema: string;
+  }) => {
+    client.send("getObjects", ({schema: event.schema}))
   }
 
   const getSchemas = () => {
@@ -167,6 +169,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
      // state.error = null;
     });
   };
+
+
+  client.onConnect(() => {
+    getSchemas();
+  })
   return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode};
 }
 
@@ -183,8 +190,6 @@ export function Component() {
   );
 
   const onDataClicked = useCallback(() => {
-    instance.getObjects();
-    instance.getSchemas();
     instance.updateViewMode({viewMode: 'data'});
   }, [instance]);
 
@@ -215,6 +220,7 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
+      <SchemaSelect></SchemaSelect>
      {state.viewMode === 'data' ? (
       <DataVisualizer objects = {state.objects}> </DataVisualizer>
       ) : null} 

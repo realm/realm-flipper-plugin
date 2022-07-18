@@ -22,13 +22,13 @@ const BoldSpan = styled.span({
     const state = useValue(instance.state);
     const onSchemaSelected = useCallback(
         (selected: string) => {
+            instance.getObjects({schema: selected});
           instance.updateSelectedSchema({
             schema: selected,
           });
         },
         [instance],
     );
-    state.schemas.map(({name}) => console.log("task",name))
     const tableOptions = state.schemas.map(({name}) => (
         <Option key={name} value={name}>
             {name}
