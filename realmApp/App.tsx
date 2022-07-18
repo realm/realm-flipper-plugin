@@ -31,6 +31,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 let realmConnection = null;
+let count = 0;
 // Schema for Realm
 const TaskSchema = {
   name: 'Task',
@@ -65,7 +66,7 @@ function onObjectsChange(objects, changes) {
   changes.deletions.forEach((index) => {
     // You cannot directly access deleted objects,
     // but you can update a UI list, etc. based on the index.
-    console.log(`Looks like Dog #${index} has left the realm.`);
+    console.log(`small listener fires`);
     if (realmConnection) {
       realmConnection.send('liveObjectDeleted', {index: index});
     }
@@ -73,7 +74,7 @@ function onObjectsChange(objects, changes) {
   // Handle newly added Dog objects
   changes.insertions.forEach((index) => {
     const inserted = objects[index];
-    console.log(`Welcome our new friend, ${inserted._id}!`);
+    console.log(`small listener fires`);
     if (realmConnection) {
       realmConnection.send('liveObjectAdded', {newObject: inserted});
     }
@@ -81,43 +82,58 @@ function onObjectsChange(objects, changes) {
   // Handle Dog objects that were modified
   changes.modifications.forEach((index) => {
     const modified = objects[index];
-    console.log(`Hey ${modified.name}, you look different!`);
+    console.log(`small listener fires`);
     if (realmConnection) {
       realmConnection.send('liveObjectEdited', {newObject: modified, index: index});
     }
   });
 }
 
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    realmConnection = connection;
-    connection.receive('getObjects', obj => {
-      const schema = obj.schema;
-      const objects = realm.objects(schema);
-      try {
-        objects.addListener(onObjectsChange);
-      } catch (error) {
-        console.error(
-          `An exception was thrown within the change listener: ${error}`
-        );
-      }
-      connection.send('getObjects', {objects: objects});
-    });
-    connection.receive('getSchemas', () => {
-      const schema = realm.schema;
-      connection.send('getSchemas', {schemas: schema});
-    });
-    console.log('onConnect');
-  },
-  onDisconnect() {
-    console.log('onDisconnect');
-  },
-});
-
 const Section = ({children, title}): Node => {
+  const forceUpdate = useForceUpdate();
+
+  addPlugin({
+    getId() {
+      return 'realm';
+    },
+    onConnect(connection) {
+      realm.addListener("change", () => {
+        count++
+        console.log("big listener fires", count);
+        forceUpdate();
+      });
+      realmConnection = connection;
+      connection.receive('getObjects', obj => {
+        const schema = obj.schema;
+        const objects = realm.objects(schema);
+        try {
+          objects.addListener(onObjectsChange);
+        } catch (error) {
+          console.error(
+            `An exception was thrown within the change listener: ${error}`
+          );
+        }
+        connection.send('getObjects', {objects: objects});
+      });
+      connection.receive('getSchemas', () => {
+        const schema = realm.schema;
+        connection.send('getSchemas', {schemas: schema});
+      });
+      console.log('onConnect');
+    },
+    onDisconnect() {
+      console.log('onDisconnect');
+    },
+  });
+  
+  function useForceUpdate(){
+    const [value, setValue] = useState(0); // integer state
+    return () => setValue(value => value + 1); // update state to force render
+    // An function that increment 👆🏻 the previous state like here 
+    // is better than directly setting `value + 1`
+}
+
+
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
