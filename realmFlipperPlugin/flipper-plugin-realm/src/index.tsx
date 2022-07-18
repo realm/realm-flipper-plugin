@@ -14,7 +14,8 @@ import DataVisualizer from './pages/DataVisualizer';
 import ViewSelecter from './components/ViewSelecter';
 
 export type RealmPluginState = {
-  database: Number, 
+  realms: string[],
+  selectedRealm: string, 
   objects: Array<Object>,
   schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
@@ -43,16 +44,21 @@ export type SchemaPropertyValue = {
 }
 
 type Events = {
-  // newData: Data;
   getObjects: ObjectsMessage
   getSchemas: SchemaMessage
+  getRealms: RealmsMessage;
   executeQuery: QueryResult
 };
 
 type Methods = {
   executeQuery: (query: QueryObject) => Promise<Object[]>
   getObjects: (data: SchemaRequest) => Promise<Object[]>
-  getSchemas: () => Promise<SchemaResponseObject[]>
+  getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
+  getRealms: () => Promise<string[]>
+}
+
+type RealmsMessage = {
+  realms: string[];
 }
 
 type ObjectsMessage = {
@@ -63,8 +69,13 @@ type SchemaMessage = {
   schemas: Array<SchemaResponseObject>
 }
 
+type RealmRequest = {
+  realm: string;
+}
+
 type SchemaRequest = {
-  schema: String;
+  schema: string;
+  realm: string;
 }
 
 type QueryObject = {
@@ -79,7 +90,8 @@ type QueryResult = {
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
 export function plugin(client: PluginClient<Events, Methods>) {
   const pluginState = createState<RealmPluginState>({
-    database: 0,
+    realms: [],
+    selectedRealm: '',
     objects: [],
     schemas: [],
     viewMode: 'data',
@@ -89,6 +101,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedSchema: '',
     selectedDataView: 'object',
   });
+
+  client.onMessage("getRealms", (data: RealmsMessage) => {
+    const state = pluginState.get();
+    pluginState.set({...state, realms: data.realms})
+  })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
     console.log("received objects",data.objects)
@@ -121,14 +138,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
     },
   });
 
-  const getObjects = (event: {
-    schema: string;
-  }) => {
-    client.send("getObjects", ({schema: event.schema}))
+  const getRealms = () => {
+    client.send("getRealms", undefined);
   }
 
-  const getSchemas = () => {
-    client.send("getSchemas", undefined);
+  const getObjects = (event: {
+    schema: string;
+    realm: string;
+  }) => {
+    console.log("myRealm",event);
+    client.send("getObjects", ({schema: event.schema, realm: event.realm}))
+  }
+
+  const getSchemas = (realm: string) => {
+    client.send("getSchemas", {realm: realm});
   }
 
   const updateViewMode = (event: {
@@ -161,6 +184,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const updateSelectedRealm = (event: {realm: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedRealm: event.realm,
+    });
+  };
+
   const updateDataViewMode = (event: {
     viewMode: 'object' | 'table';
   }) => {
@@ -171,10 +202,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
 
-  client.onConnect(() => {
-    getSchemas();
-  })
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode};
+  client.onConnect( () => {
+    getRealms();
+  });
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
 }
 
 export function Component() {

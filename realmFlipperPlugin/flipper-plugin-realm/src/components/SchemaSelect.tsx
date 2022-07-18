@@ -20,23 +20,47 @@ const BoldSpan = styled.span({
   export default () => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state);
-    const onSchemaSelected = useCallback(
+    
+    
+    const onSchemaSelected = 
         (selected: string) => {
-            instance.getObjects({schema: selected});
+            instance.getObjects({realm: state.selectedRealm,schema: selected});
           instance.updateSelectedSchema({
             schema: selected,
-          });
-        },
-        [instance],
-    );
-    const tableOptions = state.schemas.map(({name}) => (
+          });    
+    };
+    const schemaOptions = state.schemas.map(({name}) => (
         <Option key={name} value={name}>
             {name}
         </Option>
     ))
     
+    const onRealmSelected = useCallback(
+        (selected: string) => {
+            instance.getSchemas(selected);
+          instance.updateSelectedRealm({
+            realm: selected,
+          });
+        },
+        [instance],
+    );
+    const realmOptions = state.realms.map((name) => (
+        <Option key={name} value={name}>
+            {name}
+        </Option>
+    ))
+
     return(
 <Toolbar position="top">
+    <BoldSpan>Realm</BoldSpan>
+        <Select
+        showSearch
+        value={state.selectedRealm}
+        onChange={onRealmSelected}
+        style={{flex: 1}}
+        dropdownMatchSelectWidth={false}>
+        {realmOptions}
+        </Select>
     <BoldSpan>Schema</BoldSpan>
     <Select
         showSearch
@@ -44,7 +68,7 @@ const BoldSpan = styled.span({
         onChange={onSchemaSelected}
         style={{flex: 1}}
         dropdownMatchSelectWidth={false}>
-        {tableOptions}
+        {schemaOptions}
     </Select>
     <Button onClick={() => console.log("REFRESH clicked!")} type="default">
         Refresh

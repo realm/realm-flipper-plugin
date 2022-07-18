@@ -21,6 +21,11 @@ export class RealmPlugin {
   }
 
   connectPlugin() {
+    this.connection.receive('getRealms', () => {
+      this.connection.send('getRealms', {
+        realms: Array.from(this.realmsMap.keys()),
+      });
+    });
     this.connection.receive('getObjects', obj => {
       const realm = this.realmsMap.get(obj.realm);
       const schema = obj.schema;
