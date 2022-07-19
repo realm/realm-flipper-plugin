@@ -81,6 +81,7 @@ type SchemaRequest = {
 };
 
 type QueryObject = {
+  schema: string;
   query: String;
 };
 
@@ -149,9 +150,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const executeQuery = () => {
     const history = pluginState.get().queryHistory;
+    const query = pluginState.get().query
     if (
-      history.length == 0 ||
-      history[history.length - 1] != pluginState.get().query
+      query !== '' && (history.length == 0 ||
+      history[history.length - 1] != query)
     ) {
       pluginState.update((st) => {
         if (history.length + 1 > 10) {
@@ -161,7 +163,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       });
     }
     const state = pluginState.get();
-    client.send("executeQuery", { query: state.query });
+    client.send("executeQuery", { schema: state.selectedSchema, query: state.query });
   };
   const updateSelectedSchema = (event: { schema: string }) => {
     const state = pluginState.get();
