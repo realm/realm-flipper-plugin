@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import ViewSelecter from './components/ViewSelecter';
 import DataVisualizer from './pages/DataVisualizer';
-import RealmQueryLanguage from "./pages/RealmQueryLanguage";
+import { RealmQueryLanguage, addToHistory } from "./pages/RealmQueryLanguage";
 import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
@@ -20,9 +20,7 @@ export type RealmPluginState = {
   schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
   query: String,
-  queryHistory: Array<String>,
   errorMsg?: String
-  queryFavourites: Array<String>,
   selectedSchema: string,
   selectedDataView: 'object' | 'table'
 }
@@ -98,8 +96,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemas: [],
     viewMode: "data",
     query: "",
-    queryHistory: [],
-    queryFavourites: [],
     selectedSchema: '',
     selectedDataView: 'object',
   });
@@ -163,22 +159,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const executeQuery = () => {
-    const history = pluginState.get().queryHistory;
-    const query = pluginState.get().query
-    if (
-      query !== '' && (history.length == 0 ||
-      history[history.length - 1] != query)
-    ) {
-      pluginState.update((st) => {
-        if (history.length + 1 > 10) {
-          st.queryHistory.shift();
-        }
-        st.queryHistory = [...st.queryHistory, st.query];
-      });
-    }
-    const state = pluginState.get()
+    const state = pluginState.get();
+    addToHistory(state.query);
+
     client.send('executeQuery', {query: state.query, realm: state.selectedRealm, schema: state.selectedSchema});
-  }
+  };
+
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
     pluginState.set({
