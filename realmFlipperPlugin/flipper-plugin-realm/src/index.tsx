@@ -7,7 +7,7 @@ import { Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
 import { useCallback } from 'react';
-import SchemaSelect from './components/RealmSchemaSelect';
+import RealmSchemaSelect from './components/RealmSchemaSelect';
 import ViewSelecter from './components/ViewSelecter';
 import DataVisualizer from './pages/DataVisualizer';
 import RealmQueryLanguage from "./pages/RealmQueryLanguage";
@@ -253,7 +253,7 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
-      <SchemaSelect></SchemaSelect>
+      <RealmSchemaSelect></RealmSchemaSelect>
       {state.viewMode === "data" ? (
         <DataVisualizer
           objects={state.objects}
