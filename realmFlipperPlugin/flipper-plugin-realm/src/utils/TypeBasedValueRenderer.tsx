@@ -87,15 +87,7 @@ export function renderValue(val: Value, wordWrap?: boolean) {
     case 'null':
       return <TextComponent>NULL</TextComponent>;
     case 'object':
-      console.log('VAAAL' + val.value)
       if (Array.isArray(val.value)) return <TextComponent>[{val.value.toString()}]</TextComponent>
-
-    
-
-
-
-
-        
     default: 
       return <TextComponent />;
   }
