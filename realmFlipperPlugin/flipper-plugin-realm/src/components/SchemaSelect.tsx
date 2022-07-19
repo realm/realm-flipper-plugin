@@ -25,6 +25,11 @@ const BoldSpan = styled.span({
           instance.updateSelectedSchema({
             schema: selected,
           });
+          instance.getObjects()
+
+
+
+
         },
         [instance],
     );

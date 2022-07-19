@@ -11,6 +11,7 @@ export default function DataVisualizer(props: {
   objects: Array<Object>;
   schemas: Array<SchemaResponseObject>;
   getObjects: Function;
+  selectedSchema: String;
 }) {
   // State to switch between views. true = objectView, false = tableView
   const [objectView, setView] = useState(true);
@@ -49,8 +50,11 @@ export default function DataVisualizer(props: {
 
   // Render TableView
   function TableView() {
-    // Take the keys of the schema in position 0 and put them into an array.
-    const columns = Object.keys(props.schemas[0].properties).map((x) => {
+    // Find the selected schema in the schemas array. Take the keys of the schema and put them into an array.
+    const columns = Object.keys(
+      props.schemas.find((schema) => schema.name === props.selectedSchema)
+        .properties
+    ).map((x) => {
       return x;
     });
 

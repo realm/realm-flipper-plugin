@@ -133,7 +133,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   const getObjects = () => {
-    client.send("getObjects", { schema: "Task" });
+    client.send("getObjects", { schema: pluginState.get().selectedSchema });
   };
 
   const getSchemas = () => {
@@ -231,6 +231,7 @@ export function Component() {
           objects={state.objects}
           schemas = {state.schemas}
           getObjects={instance.getObjects}
+          selectedSchema={state.selectedSchema}
         >
           {" "}
         </DataVisualizer>
