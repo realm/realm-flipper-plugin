@@ -220,9 +220,7 @@ export function Component() {
           schemas = {state.schemas}
           getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
-        >
-          {" "}
-        </DataVisualizer>
+         />
       ) : null}
       {state.viewMode === "schemas" ? (
         <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
