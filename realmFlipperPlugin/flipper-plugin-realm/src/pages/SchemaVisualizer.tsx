@@ -1,10 +1,14 @@
 import {
-  Typography
+  Typography, Button
 } from 'antd';
-import { DataTable, DataTableColumn, Layout, useMemoize } from 'flipper-plugin';
+import { DataTable, DataTableColumn, Layout, useMemoize, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
-import { SchemaPropertyValue, SchemaResponseObject } from '../index';
+import { useCallback } from 'react';
+import { SchemaPropertyValue, SchemaResponseObject, plugin } from '../index';
 import { renderValue, Value } from '../utils/TypeBasedValueRenderer';
+import Prettyjson from '../components/Prettyjson';
+import SchemaSelect from '../components/SchemaSelect';
+import ViewSelecter from '../components/ViewSelecter';
 export function createColumnConfig(columns: string[]) {
     const columnObjs: DataTableColumn<{[key: string]: Value}>[] = columns.map(
       (c) => ({
@@ -32,6 +36,9 @@ export function createColumnConfig(columns: string[]) {
     return newRows;
   }
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
+    const instance = usePlugin(plugin);
+    const state = useValue(instance.state)
+    let objectView = false;
     const {schemas} = props;
     const [schemaObjects] = schemas
     if (!schemaObjects) {
@@ -44,18 +51,28 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
         [columns],
     );
     const rows = createRows(properties, primaryKey);
-    
-    console.log("cols",columnObjs)
-    console.log("rows",rows)
+
+
+    function renderObjectView() {
+      return schemas.map((obj) => {
+        return (
+          <Prettyjson key={obj.name} json={schemas} />
+        );
+      });
+    }
     return (
-       <Layout.Container height={400}>
+       <Layout.Container height={800}>
         <Typography >{name}</Typography>
+        {state.selectedDataView==='object' ?
+         {renderObjectView}
+        :
         <DataTable<{[key: string]: Value}>
           data-testid = {name}
           records={rows}
           columns={columnObjs}
           enableSearchbar={false}
         />
+        }
     </Layout.Container>
     )
 })

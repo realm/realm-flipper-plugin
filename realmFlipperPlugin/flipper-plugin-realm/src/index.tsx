@@ -1,43 +1,29 @@
 import {
   ConsoleSqlOutlined,
   SettingOutlined,
-  TableOutlined,
+  TableOutlined
 } from "@ant-design/icons";
-
-import {
-  Button,
-  Radio,
-  Typography,
-  RadioChangeEvent,
-  AutoComplete,
-} from "antd";
-import {
-  createState,
-  Layout,
-  PluginClient,
-  Toolbar,
-  usePlugin,
-  useValue,
-} from "flipper-plugin";
-import React from "react";
-import { useCallback } from "react";
+import { Radio, RadioChangeEvent, Typography } from 'antd';
+import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+import React, { useCallback } from 'react';
+import SchemaSelect from './components/SchemaSelect';
+import ViewSelecter from './components/ViewSelecter';
+import DataVisualizer from './pages/DataVisualizer';
 import RealmQueryLanguage from "./pages/RealmQueryLanguage";
+import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
-  database: Number;
-  objects: Array<Object>;
-  schemas: Array<SchemaResponseObject>;
-  viewMode: "data" | "schemas" | "RQL";
-  query: String;
-  queryHistory: Array<String>;
-  errorMsg?: String;
-  queryFavourites: Array<String>;
-  selectedSchema: string;
-};
-import SchemaVisualizer from "./pages/SchemaVisualizer";
-import SchemaSelect from "./components/SchemaSelect";
-
-import DataVisualizer from "./pages/DataVisualizer";
+  database: Number, 
+  objects: Array<Object>,
+  schemas: Array<SchemaResponseObject>,
+  viewMode: 'data' | 'schemas' | 'RQL',
+  query: String,
+  queryHistory: Array<String>,
+  errorMsg?: String
+  queryFavourites: Array<String>,
+  selectedSchema: string,
+  selectedDataView: 'object' | 'table'
+}
 
 export type SchemaResponseObject = {
   name: string;
@@ -100,7 +86,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: "",
     queryHistory: [],
     queryFavourites: [],
-    selectedSchema: "",
+    selectedSchema: '',
+    selectedDataView: 'object',
   });
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
@@ -172,20 +159,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
       selectedSchema: event.schema,
     });
   };
-  return {
-    state: pluginState,
-    getObjects,
-    getSchemas,
-    updateViewMode,
-    executeQuery,
-    updateSelectedSchema,
+
+  const updateDataViewMode = (event: {
+    viewMode: 'object' | 'table';
+  }) => {
+    pluginState.update((state) => {
+      state.selectedDataView = event.viewMode;
+     // state.error = null;
+    });
   };
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode};
 }
 
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  // console.log(state.schemas)
 
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
@@ -195,9 +183,7 @@ export function Component() {
   );
 
   const onDataClicked = useCallback(() => {
-    instance.getObjects();
-    instance.getSchemas();
-    instance.updateViewMode({ viewMode: "data" });
+    instance.updateViewMode({viewMode: 'data'});
   }, [instance]);
 
   const onSchemasClicked = useCallback(() => {
@@ -207,11 +193,11 @@ export function Component() {
   const onRQLClicked = useCallback(() => {
     instance.updateViewMode({ viewMode: "RQL" });
   }, [instance]);
-  // console.log(state.viewMode)
 
   return (
-    <Layout.Container grow>
+    <Layout.ScrollContainer>
       <Toolbar position="top">
+        <ViewSelecter></ViewSelecter>
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
             <TableOutlined style={{ marginRight: 5 }} />
@@ -234,9 +220,7 @@ export function Component() {
           schemas = {state.schemas}
           getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
-        >
-          {" "}
-        </DataVisualizer>
+         />
       ) : null}
       {state.viewMode === "schemas" ? (
         <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
@@ -246,6 +230,6 @@ export function Component() {
           <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
         </>
       ) : null}
-    </Layout.Container>
+    </Layout.ScrollContainer>
   );
 }
