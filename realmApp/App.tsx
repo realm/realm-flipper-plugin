@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-
+import {RealmPlugin} from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -49,7 +49,7 @@ const BananaSchema = {
     name: 'string',
     color: 'string',
     length: 'int',
-    weight: 'int'
+    weight: 'int',
   },
   primaryKey: '_id',
 };
@@ -59,6 +59,24 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema],
 });
 
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, BananaSchema]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Disconnected');
+  },
+});
+
+//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -80,49 +98,11 @@ function createBanana() {
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: 500
+      weight: 500,
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
 }
-
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    connection.receive('getObjects', obj => {
-      const schema = obj.schema;
-      const objects = realm.objects(schema);
-      connection.send('getObjects', {objects: objects});
-    });
-    connection.receive('getSchemas', () => {
-      const schema = realm.schema;
-      connection.send('getSchemas', {schemas: schema});
-    });
-    connection.receive('executeQuery', obj => {
-      const objs = realm.objects(obj.schema)
-
-      if (obj.query === '') {
-        connection.send('executeQuery', {result: objs})
-        return;
-      }
-      
-      let res;
-      try {
-        res = {result: objs.filtered(obj.query)}
-      } catch (err) {
-        res = {result: err.message}
-      }
-      
-      connection.send('executeQuery', res)
-    });
-    console.log('onConnect');
-  },
-  onDisconnect() {
-    console.log('onDisconnect');
-  },
-});
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';

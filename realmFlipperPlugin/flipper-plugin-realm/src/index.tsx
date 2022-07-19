@@ -5,15 +5,17 @@ import {
 } from "@ant-design/icons";
 import { Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
-import React, { useCallback } from 'react';
-import SchemaSelect from './components/SchemaSelect';
+import React from "react";
+import { useCallback } from 'react';
+import SchemaSelect from './components/RealmSchemaSelect';
 import ViewSelecter from './components/ViewSelecter';
 import DataVisualizer from './pages/DataVisualizer';
 import RealmQueryLanguage from "./pages/RealmQueryLanguage";
 import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
-  database: Number, 
+  realms: string[],
+  selectedRealm: string, 
   objects: Array<Object>,
   schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
@@ -42,17 +44,22 @@ export type SchemaPropertyValue = {
 };
 
 type Events = {
-  // newData: Data;
-  getObjects: ObjectsMessage;
-  getSchemas: SchemaMessage;
-  executeQuery: QueryResult;
+  getObjects: ObjectsMessage
+  getSchemas: SchemaMessage
+  getRealms: RealmsMessage;
+  executeQuery: QueryResult
 };
 
 type Methods = {
-  executeQuery: (query: QueryObject) => Promise<Object[]>;
-  getObjects: (data: SchemaRequest) => Promise<Object[]>;
-  getSchemas: () => Promise<SchemaResponseObject[]>;
-};
+  executeQuery: (query: QueryObject) => Promise<Object[]>
+  getObjects: (data: SchemaRequest) => Promise<Object[]>
+  getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
+  getRealms: () => Promise<string[]>
+}
+
+type RealmsMessage = {
+  realms: string[];
+}
 
 type ObjectsMessage = {
   objects: Array<Object>;
@@ -62,14 +69,20 @@ type SchemaMessage = {
   schemas: Array<SchemaResponseObject>;
 };
 
+type RealmRequest = {
+  realm: string;
+}
+
 type SchemaRequest = {
-  schema: String;
-};
+  schema: string;
+  realm: string;
+}
 
 type QueryObject = {
   schema: string;
   query: String;
-};
+  realm: string;
+}
 
 type QueryResult = {
   result: Array<Object> | string;
@@ -79,7 +92,8 @@ type QueryResult = {
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
 export function plugin(client: PluginClient<Events, Methods>) {
   const pluginState = createState<RealmPluginState>({
-    database: 0,
+    realms: [],
+    selectedRealm: '',
     objects: [],
     schemas: [],
     viewMode: "data",
@@ -89,6 +103,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedSchema: '',
     selectedDataView: 'object',
   });
+
+  client.onMessage("getRealms", (data: RealmsMessage) => {
+    const state = pluginState.get();
+    pluginState.set({...state, realms: data.realms})
+  })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
     console.log("received objects", data.objects);
@@ -120,13 +139,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
     },
   });
 
-  const getObjects = () => {
-    client.send("getObjects", { schema: pluginState.get().selectedSchema });
-  };
+  const getRealms = () => {
+    client.send("getRealms", undefined);
+  }
 
-  const getSchemas = () => {
-    client.send("getSchemas", undefined);
-  };
+  const getObjects = (event: {
+    schema: string;
+    realm: string;
+  }) => {
+    console.log("myRealm",event);
+    client.send("getObjects", ({schema: event.schema, realm: event.realm}))
+  }
+
+  const getSchemas = (realm: string) => {
+    client.send("getSchemas", {realm: realm});
+  }
 
   const updateViewMode = (event: { viewMode: "data" | "schemas" | "RQL" }) => {
     pluginState.update((state) => {
@@ -149,14 +176,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
         st.queryHistory = [...st.queryHistory, st.query];
       });
     }
-    const state = pluginState.get();
-    client.send("executeQuery", { schema: state.selectedSchema, query: state.query });
-  };
-  const updateSelectedSchema = (event: { schema: string }) => {
+    const state = pluginState.get()
+    client.send('executeQuery', {query: state.query, realm: state.selectedRealm, schema: state.selectedSchema});
+  }
+  const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
+    });
+  };
+
+  const updateSelectedRealm = (event: {realm: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedRealm: event.realm,
     });
   };
 
@@ -168,7 +203,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
      // state.error = null;
     });
   };
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode};
+
+
+  client.onConnect( () => {
+    getRealms();
+  });
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
 }
 
 export function Component() {
