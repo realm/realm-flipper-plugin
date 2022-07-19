@@ -100,13 +100,17 @@ addPlugin({
       const schema = realm.schema;
       connection.send('getSchemas', {schemas: schema});
     });
-    connection.receive('executeQuery', query => {
-      const schema = realm.schema[0]
-      const objs = realm.objects(schema.name)
+    connection.receive('executeQuery', obj => {
+      const objs = realm.objects(obj.schema)
 
+      if (obj.query === '') {
+        connection.send('executeQuery', {result: objs})
+        return;
+      }
+      
       let res;
       try {
-        res = {result: objs.filtered(query.query)}
+        res = {result: objs.filtered(obj.query)}
       } catch (err) {
         res = {result: err.message}
       }
