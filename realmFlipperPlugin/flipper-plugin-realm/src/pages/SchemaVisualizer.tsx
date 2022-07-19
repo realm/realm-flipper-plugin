@@ -54,9 +54,7 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     function renderObjectView() {
       return schemas.map((obj) => {
         return (
-          <Prettyjson key={obj.name} json={obj}>
-            {" "}
-          </Prettyjson>
+          <Prettyjson key={obj.name} json={schemas} />
         );
       });
     }
@@ -65,7 +63,7 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
        <Layout.Container height={800}>
         <Typography >{name}</Typography>
         {state.selectedDataView==='object' ?
-        <div>{renderObjectView()}</div>
+         {renderObjectView}
         :
         <DataTable<{[key: string]: Value}>
           data-testid = {name}

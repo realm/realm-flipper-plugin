@@ -43,20 +43,24 @@ export class RealmPlugin {
       const schema = realm.schema;
       this.connection.send('getSchemas', {schemas: schema});
     });
-    this.connection.receive('executeQuery', query => {
-      const realm = this.realmsMap.get(query.realm);
+    this.connection.receive('executeQuery', obj => {
+      const realm = this.realmsMap.get(obj.realm);
       if (!realm) {
         return;
       }
-      const schema = realm.schema[0];
-      const objs = realm.objects(schema.name);
+      const objs = realm.objects(obj.schema);
+      if (obj.query === '') {
+        this.connection.send('executeQuery', {result: objs});
+        return;
+      }
 
       let res;
       try {
-        res = {result: objs.filtered(query.query)};
+        res = {result: objs.filtered(obj.query)};
       } catch (err) {
         res = {result: err.message};
       }
+
       this.connection.send('executeQuery', res);
     });
   }

@@ -1,17 +1,17 @@
 import {
   ConsoleSqlOutlined,
-  SettingOutlined, TableOutlined
-} from '@ant-design/icons';
-
-import { Button, Radio, Typography, RadioChangeEvent, AutoComplete } from 'antd';
+  SettingOutlined,
+  TableOutlined
+} from "@ant-design/icons";
+import { Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
-import React, { useEffect } from 'react';
-import {useCallback} from 'react';
-import RealmQueryLanguage from "./pages/RealmQueryLanguage"
-import SchemaVisualizer from './pages/SchemaVisualizer';
-import SchemaSelect from './components/RealmSchemaSelect'
-import DataVisualizer from './pages/DataVisualizer';
+import React from "react";
+import { useCallback } from 'react';
+import SchemaSelect from './components/RealmSchemaSelect';
 import ViewSelecter from './components/ViewSelecter';
+import DataVisualizer from './pages/DataVisualizer';
+import RealmQueryLanguage from "./pages/RealmQueryLanguage";
+import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
   realms: string[],
@@ -28,20 +28,20 @@ export type RealmPluginState = {
 }
 
 export type SchemaResponseObject = {
-  name: string,
-  embedded: boolean,
-  asymmetric: boolean,
-  primaryKey: String,
-  properties: {[key: string]: SchemaPropertyValue}
-}
+  name: string;
+  embedded: boolean;
+  asymmetric: boolean;
+  primaryKey: String;
+  properties: { [key: string]: SchemaPropertyValue };
+};
 
 export type SchemaPropertyValue = {
-  name: string,
-  indexed: boolean,
-  optional: boolean,
-  type:string,
-  mapTo: string
-}
+  name: string;
+  indexed: boolean;
+  optional: boolean;
+  type: string;
+  mapTo: string;
+};
 
 type Events = {
   getObjects: ObjectsMessage
@@ -62,12 +62,12 @@ type RealmsMessage = {
 }
 
 type ObjectsMessage = {
-  objects: Array<Object>
-}
+  objects: Array<Object>;
+};
 
 type SchemaMessage = {
-  schemas: Array<SchemaResponseObject>
-}
+  schemas: Array<SchemaResponseObject>;
+};
 
 type RealmRequest = {
   realm: string;
@@ -79,13 +79,14 @@ type SchemaRequest = {
 }
 
 type QueryObject = {
+  schema: string;
   query: String;
   realm: string;
 }
 
 type QueryResult = {
-  result: Array<Object> | string
-}
+  result: Array<Object> | string;
+};
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -95,8 +96,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedRealm: '',
     objects: [],
     schemas: [],
-    viewMode: 'data',
-    query: '',
+    viewMode: "data",
+    query: "",
     queryHistory: [],
     queryFavourites: [],
     selectedSchema: '',
@@ -109,33 +110,32 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
-    console.log("received objects",data.objects)
-    const state = pluginState.get()
-    pluginState.set({...state, objects: data.objects})
-  })
+    console.log("received objects", data.objects);
+    const state = pluginState.get();
+    pluginState.set({ ...state, objects: data.objects });
+  });
 
-  client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log("received schemas",data.schemas)
-    const state = pluginState.get()
-    pluginState.set({...state, schemas: data.schemas})
-  })
+  client.onMessage("getSchemas", (data: SchemaMessage) => {
+    console.log("received schemas", data.schemas);
+    const state = pluginState.get();
+    pluginState.set({ ...state, schemas: data.schemas });
+  });
 
-  client.onMessage('executeQuery', (data: QueryResult) => {
-    const state = pluginState.get()
-    if (typeof data.result === 'string') {
-      console.log("query failed", data.result)
-      pluginState.set({...state, errorMsg: data.result})
+  client.onMessage("executeQuery", (data: QueryResult) => {
+    const state = pluginState.get();
+    if (typeof data.result === "string") {
+      console.log("query failed", data.result);
+      pluginState.set({ ...state, errorMsg: data.result });
+    } else {
+      console.log("query succeeded", data.result);
+      pluginState.set({ ...state, objects: data.result, errorMsg: undefined });
     }
-    else {
-      console.log("query succeeded", data.result)
-      pluginState.set({...state, objects: data.result, errorMsg: undefined})
-    }
-  })
+  });
 
   client.addMenuEntry({
-    action: 'clear',
+    action: "clear",
     handler: async () => {
-     // pluginState.set({});
+      // pluginState.set({});
     },
   });
 
@@ -155,27 +155,29 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send("getSchemas", {realm: realm});
   }
 
-  const updateViewMode = (event: {
-    viewMode: 'data' | 'schemas' | 'RQL';
-  }) => {
+  const updateViewMode = (event: { viewMode: "data" | "schemas" | "RQL" }) => {
     pluginState.update((state) => {
       state.viewMode = event.viewMode;
-     // state.error = null;
+      // state.error = null;
     });
   };
 
   const executeQuery = () => {
-    const history = pluginState.get().queryHistory
-    if (history.length == 0 || history[history.length - 1] != pluginState.get().query) {
-      pluginState.update(st => {
+    const history = pluginState.get().queryHistory;
+    const query = pluginState.get().query
+    if (
+      query !== '' && (history.length == 0 ||
+      history[history.length - 1] != query)
+    ) {
+      pluginState.update((st) => {
         if (history.length + 1 > 10) {
-          st.queryHistory.shift()
+          st.queryHistory.shift();
         }
-        st.queryHistory = [...st.queryHistory, st.query]
-      })
+        st.queryHistory = [...st.queryHistory, st.query];
+      });
     }
     const state = pluginState.get()
-    client.send('executeQuery', {query: state.query, realm: state.selectedRealm})
+    client.send('executeQuery', {query: state.query, realm: state.selectedRealm, schema: state.selectedSchema});
   }
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
@@ -213,12 +215,11 @@ export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
-      instance.updateViewMode({viewMode: evt.target.value ?? 'data'});
+      instance.updateViewMode({ viewMode: evt.target.value ?? "data" });
     },
-    [instance],
+    [instance]
   );
 
   const onDataClicked = useCallback(() => {
@@ -226,11 +227,11 @@ export function Component() {
   }, [instance]);
 
   const onSchemasClicked = useCallback(() => {
-    instance.updateViewMode({viewMode: 'schemas'});
+    instance.updateViewMode({ viewMode: "schemas" });
   }, [instance]);
 
   const onRQLClicked = useCallback(() => {
-    instance.updateViewMode({viewMode: 'RQL'});
+    instance.updateViewMode({ viewMode: "RQL" });
   }, [instance]);
 
   return (
@@ -239,31 +240,36 @@ export function Component() {
         <ViewSelecter></ViewSelecter>
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
-            <TableOutlined style={{marginRight: 5}} />
+            <TableOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Data</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onSchemasClicked} value="schemas">
-            <SettingOutlined style={{marginRight: 5}} />
+            <SettingOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Schemas</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onRQLClicked} value="RQL">
-            <ConsoleSqlOutlined style={{marginRight: 5}} />
+            <ConsoleSqlOutlined style={{ marginRight: 5 }} />
             <Typography.Text>RQL</Typography.Text>
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
       <SchemaSelect></SchemaSelect>
-     {state.viewMode === 'data' ? (
-      <DataVisualizer objects = {state.objects}> </DataVisualizer>
-      ) : null} 
-      {state.viewMode === 'schemas' ?
-      <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
-      : null} 
-      {state.viewMode === 'RQL' ? (<>
-        <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
-      </>
+      {state.viewMode === "data" ? (
+        <DataVisualizer
+          objects={state.objects}
+          schemas = {state.schemas}
+          getObjects={instance.getObjects}
+          selectedSchema={state.selectedSchema}
+         />
+      ) : null}
+      {state.viewMode === "schemas" ? (
+        <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
+      ) : null}
+      {state.viewMode === "RQL" ? (
+        <>
+          <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
+        </>
       ) : null}
     </Layout.ScrollContainer>
-    
   );
 }

@@ -42,20 +42,21 @@ const TaskSchema = {
   primaryKey: '_id',
 };
 
-const CarSchema = {
-  name: 'Car',
+const BananaSchema = {
+  name: 'Banana',
   properties: {
     _id: 'int',
     name: 'string',
-    speed: 'string?',
-    ferrari: 'string?',
+    color: 'string',
+    length: 'int',
+    weight: 'int',
   },
   primaryKey: '_id',
 };
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, CarSchema],
+  schema: [TaskSchema, BananaSchema],
 });
 
 addPlugin({
@@ -64,14 +65,14 @@ addPlugin({
   },
   onConnect(connection) {
     const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, CarSchema]},
+      {schema: [TaskSchema, BananaSchema]},
       [realm],
       connection,
     );
     realmPlugin.connectPlugin();
   },
   onDisconnect() {
-    console.log('Hello');
+    console.log('Disconnected');
   },
 });
 
@@ -89,16 +90,17 @@ function createToDo() {
   });
 }
 
-function createCar() {
-  let car1;
+function createBanana() {
+  let banana1;
   realm.write(() => {
-    car1 = realm.create('Car', {
+    banana1 = realm.create('Banana', {
       _id: Math.floor(Math.random() * 100000),
-      name: 'toyota',
-      speed: '193',
-      ferrari: 'false',
+      name: 'Jack',
+      color: 'yellow',
+      length: 40,
+      weight: 500,
     });
-    console.log(`created one task: ${car1.name} with id ${car1._id}`);
+    console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
 }
 
@@ -153,7 +155,7 @@ const App: () => Node = () => {
           <Button title="create ToDo" onPress={createToDo}>
             {' '}
           </Button>
-          <Button title="create car" onPress={createCar}>
+          <Button title="create Banana" onPress={createBanana}>
             {' '}
           </Button>
           <Section title="See Your Changes">
