@@ -1,0 +1,79 @@
+import {
+    Button, Select
+} from 'antd';
+import {
+    Toolbar,styled, usePlugin, useValue, useMemoize
+} from 'flipper-plugin';
+import React from 'react';
+import { useCallback } from 'react';
+import {plugin} from '../index';
+import { realmPathToName } from '../utils/realmPathToName';
+
+const {Option} = Select;
+
+const BoldSpan = styled.span({
+    fontSize: 12,
+    color: '#90949c',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  });
+
+  export default () => {
+    const instance = usePlugin(plugin);
+    const state = useValue(instance.state);
+    
+    
+    const onSchemaSelected = 
+        (selected: string) => {
+            instance.getObjects({realm: state.selectedRealm,schema: selected});
+          instance.updateSelectedSchema({
+            schema: selected,
+          });    
+    };
+    const schemaOptions = state.schemas.map(({name}) => (
+        <Option key={name} value={name}>
+            {name}
+        </Option>
+    ))
+    
+    const onRealmSelected = useCallback(
+        (selected: string) => {
+            instance.getSchemas(selected);
+          instance.updateSelectedRealm({
+            realm: selected,
+          });
+        },
+        [instance],
+    );
+    const realmOptions = state.realms.map((name) => (
+        <Option key={name} value={name}>
+            {name}
+        </Option>
+    ))
+
+    return(
+<Toolbar position="top">
+    <BoldSpan>Realm</BoldSpan>
+        <Select
+        showSearch
+        value={state.selectedRealm}
+        onChange={onRealmSelected}
+        style={{flex: 1}}
+        dropdownMatchSelectWidth={false}>
+        {realmOptions}
+        </Select>
+    <BoldSpan>Schema</BoldSpan>
+    <Select
+        showSearch
+        value={state.selectedSchema}
+        onChange={onSchemaSelected}
+        style={{flex: 1}}
+        dropdownMatchSelectWidth={false}>
+        {schemaOptions}
+    </Select>
+    <Button onClick={() => console.log("REFRESH clicked!")} type="default">
+        Refresh
+    </Button>
+</Toolbar>
+    )
+}

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import {useCallback} from 'react';
 import RealmQueryLanguage from "./pages/RealmQueryLanguage"
 import SchemaVisualizer from './pages/SchemaVisualizer';
-import SchemaSelect from './components/SchemaSelect'
+import SchemaSelect from './components/RealmSchemaSelect'
 import DataVisualizer from './pages/DataVisualizer';
 import ViewSelecter from './components/ViewSelecter';
 
@@ -80,6 +80,7 @@ type SchemaRequest = {
 
 type QueryObject = {
   query: String;
+  realm: string;
 }
 
 type QueryResult = {
@@ -174,7 +175,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       })
     }
     const state = pluginState.get()
-    client.send('executeQuery', {query: state.query})
+    client.send('executeQuery', {query: state.query, realm: state.selectedRealm})
   }
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
