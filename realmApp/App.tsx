@@ -42,9 +42,21 @@ const TaskSchema = {
   primaryKey: '_id',
 };
 
+const BananaSchema = {
+  name: 'Banana',
+  properties: {
+    _id: 'int',
+    name: 'string',
+    color: 'string',
+    length: 'int',
+    weight: 'int'
+  },
+  primaryKey: '_id',
+};
+
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema],
+  schema: [TaskSchema, BananaSchema],
 });
 
 // Write a ToDo with random ID to database
@@ -57,6 +69,20 @@ function createToDo() {
       status: 'Open',
     });
     console.log(`created one task: ${task1.name} with id ${task1._id}`);
+  });
+}
+
+function createBanana() {
+  let banana1;
+  realm.write(() => {
+    banana1 = realm.create('Banana', {
+      _id: Math.floor(Math.random() * 100000),
+      name: 'Jack',
+      color: 'yellow',
+      length: 40,
+      weight: 500
+    });
+    console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
 }
 
@@ -143,6 +169,9 @@ const App: () => Node = () => {
             screen and then come back to see your edits.
           </Section>
           <Button title="create ToDo" onPress={createToDo}>
+            {' '}
+          </Button>
+          <Button title="create Banana" onPress={createBanana}>
             {' '}
           </Button>
           <Section title="See Your Changes">
