@@ -1,9 +1,11 @@
 import React from "react";
 import { Layout, styled } from "flipper-plugin";
 
-export default function Prettyjson(props) {
-  //console.log(JSON.stringify(props.json, undefined, 4));
+type Property = {
+  json: Array<Object>;
+};
 
+export default function Prettyjson(props: Property) {
   return (
     <Container>
       <pre>{JSON.stringify(props.json, null, 2)}</pre>
