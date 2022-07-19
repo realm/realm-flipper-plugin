@@ -7,7 +7,6 @@ import {
 import React from 'react';
 import { useCallback } from 'react';
 import {plugin} from '../index';
-import { realmPathToName } from '../utils/realmPathToName';
 
 const {Option} = Select;
 
