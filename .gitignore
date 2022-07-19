@@ -297,3 +297,6 @@ google-services.json
 */.watchmanconfig
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,reactnative,react
+
+realmFlipperPlugin/flipper-plugin-realm/yarn.lock
+realmFlipperPlugin/flipper-plugin-realm/package-lock.json

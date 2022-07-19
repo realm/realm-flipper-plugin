@@ -27,12 +27,24 @@ const BoldSpan = styled.span({
             instance.getObjects({realm: state.selectedRealm,schema: selected});
           instance.updateSelectedSchema({
             schema: selected,
+          });    
+    };
+    const schemaOptions = state.schemas.map(({name}) => (
+        <Option key={name} value={name}>
+            {name}
+        </Option>
+    ))
+    
+    const onRealmSelected = useCallback(
+        (selected: string) => {
+            instance.getSchemas(selected);
+          instance.updateSelectedRealm({
+            realm: selected,
           });
         },
         [instance],
     );
-    state.schemas.map(({name}) => console.log("task",name))
-    const tableOptions = state.schemas.map(({name}) => (
+    const realmOptions = state.realms.map((name) => (
         <Option key={name} value={name}>
             {name}
         </Option>

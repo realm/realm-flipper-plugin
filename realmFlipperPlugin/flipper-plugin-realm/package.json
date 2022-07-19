@@ -35,9 +35,10 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "antd": "latest",
+    "css-loader": "^6.7.1",
     "flipper-pkg": "latest",
     "flipper-plugin": "latest",
-    "jest": "^28.1.3",
+    "jest": "latest",
     "jest-mock-console": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -54,6 +55,7 @@
     ]
   },
   "dependencies": {
-    "jest-environment-jsdom": "^28.1.3"
+    "jest-environment-jsdom": "^28.1.3",
+    "pretty-print-json": "^1.2.5"
   }
 }
