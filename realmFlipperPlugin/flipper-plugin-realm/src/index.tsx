@@ -53,6 +53,13 @@ type Methods = {
   getObjects: (data: SchemaRequest) => Promise<Object[]>
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
   getRealms: () => Promise<string[]>
+  addObject: (object: AddObject) => Promise<any>; 
+}
+
+type AddObject = {
+  schema: string;
+  realm: string;
+  object: Object
 }
 
 type RealmsMessage = {
@@ -165,6 +172,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('executeQuery', {query: state.query, realm: state.selectedRealm, schema: state.selectedSchema});
   };
 
+  const addObject = (object: Object) => {
+    const state = pluginState.get();
+    console.log('addObject in index', object)
+    client.send('addObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
+  }
+
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
     pluginState.set({
@@ -190,11 +203,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-
   client.onConnect( () => {
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
 }
 
 export function Component() {
@@ -246,6 +258,7 @@ export function Component() {
           schemas = {state.schemas}
           getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
+          addObject={instance.addObject}
          />
       ) : null}
       {state.viewMode === "schemas" ? (

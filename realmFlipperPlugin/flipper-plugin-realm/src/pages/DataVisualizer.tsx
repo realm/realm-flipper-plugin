@@ -14,6 +14,7 @@ export default function DataVisualizer(props: {
   schemas: Array<SchemaResponseObject>;
   getObjects: Function;
   selectedSchema: String;
+  addObject: Function;
 }) {
 
   const getCurrentSchema = () => {
@@ -29,7 +30,7 @@ export default function DataVisualizer(props: {
         <Radio.Group>
           <Radio.Button onClick={() => setView(true)}>Object View</Radio.Button>
           <Radio.Button onClick={() => setView(false)}>Table View</Radio.Button>
-          {<ObjectAdder schema={getCurrentSchema()}/>}
+          {<ObjectAdder schema={getCurrentSchema()} addObject={props.addObject}/>}
         </Radio.Group>
       </Layout.Container>
       <Layout.Container>
@@ -93,7 +94,4 @@ export default function DataVisualizer(props: {
     );
   }
 
-  function addObject() {
-
-  }
 }
