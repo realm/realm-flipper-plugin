@@ -30,8 +30,6 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-let realmConnection = null;
-let count = 0;
 // Schema for Realm
 const TaskSchema = {
   name: 'Task',
@@ -65,11 +63,11 @@ addPlugin({
     return 'realm';
   },
   onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema]},
-      [realm],
-      connection,
-    );
+    const realmPlugin = new RealmPlugin({
+      schema: [TaskSchema, BananaSchema],
+      realms: [realm],
+      connection: connection,
+    });
     realmPlugin.connectPlugin();
   },
   onDisconnect() {
@@ -91,37 +89,6 @@ function createToDo() {
   });
 }
 
-function onObjectsChange(objects, changes) {
-  // Handle deleted Dog objects
-  changes.deletions.forEach(index => {
-    // You cannot directly access deleted objects,
-    // but you can update a UI list, etc. based on the index.
-    console.log(`small listener fires`);
-    if (realmConnection) {
-      realmConnection.send('liveObjectDeleted', {index: index});
-    }
-  });
-  // Handle newly added Dog objects
-  changes.insertions.forEach(index => {
-    const inserted = objects[index];
-    console.log(`small listener fires`);
-    if (realmConnection) {
-      realmConnection.send('liveObjectAdded', {newObject: inserted});
-    }
-  });
-  // Handle Dog objects that were modified
-  changes.modifications.forEach(index => {
-    const modified = objects[index];
-    console.log(`small listener fires`);
-    if (realmConnection) {
-      realmConnection.send('liveObjectEdited', {
-        newObject: modified,
-        index: index,
-      });
-    }
-  });
-}
-
 function createBanana() {
   let banana1;
   realm.write(() => {
@@ -136,49 +103,54 @@ function createBanana() {
   });
 }
 
-const Section = ({children, title}): Node => {
-  const forceUpdate = useForceUpdate();
-
-  addPlugin({
-    getId() {
-      return 'realm';
-    },
-    onConnect(connection) {
-      realm.addListener('change', () => {
-        count++;
-        console.log('big listener fires', count);
-        forceUpdate();
-      });
-      realmConnection = connection;
-      connection.receive('getObjects', obj => {
-        const schema = obj.schema;
-        const objects = realm.objects(schema);
-        try {
-          objects.addListener(onObjectsChange);
-        } catch (error) {
-          console.error(
-            `An exception was thrown within the change listener: ${error}`,
-          );
-        }
-        connection.send('getObjects', {objects: objects});
-      });
-      connection.receive('getSchemas', () => {
-        const schema = realm.schema;
-        connection.send('getSchemas', {schemas: schema});
-      });
-      console.log('onConnect');
-    },
-    onDisconnect() {
-      console.log('onDisconnect');
-    },
+function deleteBanana() {
+  realm.write(() => {
+    realm.delete(realm.objects('Banana')[0]);
   });
+}
 
-  function useForceUpdate() {
-    const [value, setValue] = useState(0); // integer state
-    return () => setValue(value => value + 1); // update state to force render
-    // An function that increment 👆🏻 the previous state like here
-    // is better than directly setting `value + 1`
-  }
+function editBanana() {
+  realm.write(() => {
+    realm.objects('Banana')[0].name = 'Maximillian';
+  });
+}
+
+const Section = ({children, title}): Node => {
+  //const forceUpdate = useForceUpdate();
+
+  // addPlugin({
+  //   getId() {
+  //     return 'realm';
+  //   },
+  //   onConnect(connection) {
+  //     realm.addListener('change', () => {
+  //       count++;
+  //       console.log('big listener fires', count);
+  //       forceUpdate();
+  //     });
+  //     realmConnection = connection;
+  //     connection.receive('getObjects', obj => {
+  //       const schema = obj.schema;
+  //       const objects = realm.objects(schema);
+  //       try {
+  //         objects.addListener(onObjectsChange);
+  //       } catch (error) {
+  //         console.error(
+  //           `An exception was thrown within the change listener: ${error}`,
+  //         );
+  //       }
+  //       connection.send('getObjects', {objects: objects});
+  //     });
+  //     connection.receive('getSchemas', () => {
+  //       const schema = realm.schema;
+  //       connection.send('getSchemas', {schemas: schema});
+  //     });
+  //     console.log('onConnect');
+  //   },
+  //   onDisconnect() {
+  //     console.log('onDisconnect');
+  //   },
+  // });
 
   const isDarkMode = useColorScheme() === 'dark';
   return (
@@ -214,6 +186,11 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
+      <RealmPlugin props={{
+      schema: [TaskSchema, BananaSchema],
+      realms: [realm],
+      connection: connection,
+    }}/>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -231,6 +208,12 @@ const App: () => Node = () => {
             {' '}
           </Button>
           <Button title="create Banana" onPress={createBanana}>
+            {' '}
+          </Button>
+          <Button title="delete Banana" onPress={deleteBanana}>
+            {' '}
+          </Button>
+          <Button title="edit Banana" onPress={editBanana}>
             {' '}
           </Button>
           <Section title="See Your Changes">
