@@ -54,9 +54,20 @@ const BananaSchema = {
   primaryKey: '_id',
 };
 
+const LaptopSchema = {
+  name: 'Laptop',
+  properties: {
+    _id: 'int',
+    isLaptop: 'bool',
+    list: 'int[]',
+    set: 'int<>'
+  },
+  primaryKey: '_id',
+};
+
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema],
+  schema: [TaskSchema, BananaSchema, LaptopSchema],
 });
 
 // Write a ToDo with random ID to database
@@ -83,6 +94,21 @@ function createBanana() {
       weight: 500
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
+  });
+}
+
+function createLaptop() {
+  let laptop;
+  realm.write(() => {
+    laptop = realm.create('Laptop', {
+      _id: Math.floor(Math.random() * 100000),
+      isLaptop: true,
+      list: new Array(1,2,2,2,2,2,2,2,2,2),
+      set: [1,2,3,4]
+    });
+    console.log('type list: ' + typeof laptop.list)
+    console.log('type set: ' + typeof laptop.set)
+    console.log(`created one laptop: ${laptop.name} with id ${laptop._id}`);
   });
 }
 
@@ -172,6 +198,9 @@ const App: () => Node = () => {
             {' '}
           </Button>
           <Button title="create Banana" onPress={createBanana}>
+            {' '}
+          </Button>
+          <Button title="create Laptop" onPress={createLaptop}>
             {' '}
           </Button>
           <Section title="See Your Changes">

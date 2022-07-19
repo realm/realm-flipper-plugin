@@ -29,7 +29,14 @@ export type Value =
   | {
       type: 'null';
       value: null;
-    };
+    }
+    | {
+      type: 'object';
+      value: Object;
+    }  
+    
+    ;
+  
 
 const WrappingText = styled(Text)({
   wordWrap: 'break-word',
@@ -62,6 +69,8 @@ BooleanValue.displayName = 'TypeBasedValueRenderer:BooleanValue';
 
 export function renderValue(val: Value, wordWrap?: boolean) {
   const TextComponent = wordWrap ? WrappingText : NonWrappingText;
+  console.log('val')
+  console.log(val)
   switch (val.type) {
     case 'boolean':
       return (
@@ -77,7 +86,17 @@ export function renderValue(val: Value, wordWrap?: boolean) {
       return <TextComponent>{val.value}</TextComponent>;
     case 'null':
       return <TextComponent>NULL</TextComponent>;
-    default:
+    case 'object':
+      console.log('VAAAL' + val.value)
+      if (Array.isArray(val.value)) return <TextComponent>[{val.value.toString()}]</TextComponent>
+
+    
+
+
+
+
+        
+    default: 
       return <TextComponent />;
   }
 }
