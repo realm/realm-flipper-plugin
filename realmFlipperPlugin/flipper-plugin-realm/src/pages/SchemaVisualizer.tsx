@@ -37,7 +37,6 @@ export function createColumnConfig(columns: string[]) {
 export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state)
-    let objectView = false;
     const {schemas} = props;
     const [schemaObjects] = schemas
     if (!schemaObjects) {
@@ -54,7 +53,8 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
     function renderObjectView() {
       return schemas.map((obj) => {
         return (
-          <Prettyjson key={obj.name} json={schemas} />
+          //@ts-ignore
+          <Prettyjson key={obj.name} json={obj} />
         );
       });
     }
@@ -63,7 +63,12 @@ export default React.memo((props: {schemas: Array<SchemaResponseObject>}) => {
        <Layout.Container height={800}>
         <Typography >{name}</Typography>
         {state.selectedDataView==='object' ?
-         {renderObjectView}
+         schemas.map((obj) => {
+          return (
+            //@ts-ignore
+            <Prettyjson key={obj.name} json={obj} />
+          );
+        })
         :
         <DataTable<{[key: string]: Value}>
           data-testid = {name}
