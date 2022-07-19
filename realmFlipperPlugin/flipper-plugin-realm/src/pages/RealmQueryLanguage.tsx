@@ -19,18 +19,43 @@ const wrapItem = (query: String, id: number) => (
         key: id
     }
 );
+let queryFavourites: Array<String>, queryHistory: Array<String>;
 
-const onStar = () => {
+const addToFavorites = () => {
     const state = instance.state.get()
-    if (!state.queryFavourites.includes(state.query) && state.query !== '') {
-      instance.state.update(st => {
-        st.queryFavourites = [...st.queryFavourites, st.query]
-      })
+    console.log("includes: ", queryFavourites.includes(state.query), state.query)
+    if (!queryFavourites.includes(state.query) && state.query !== '') {
+      queryFavourites = [...queryFavourites, state.query]
     }
+    console.log("after:", queryFavourites)
+    localStorage.setItem('favourites', JSON.stringify({ favourites: queryFavourites }))
 }
-export default (props: { instance: ReturnType<typeof plugin> }) => {
+
+export const addToHistory = (query: String) => {
+  // const historyObj = JSON.parse(localStorage.getItem('history') || "{ history: [] }");
+  let history = queryHistory
+
+  if (
+    query !== '' && (history.length == 0 ||
+    history[history.length - 1] != query)
+  ) {
+    if (history.length + 1 > 10) {
+      history.shift();
+    }
+    history = [...history, query]
+  }
+  
+  localStorage.setItem('history', JSON.stringify({ history: history }))
+};
+
+export const RealmQueryLanguage = (props: { instance: ReturnType<typeof plugin> }) => {
+  console.log('fav:', localStorage.getItem('favourites'))
+    queryFavourites = JSON.parse(localStorage.getItem('favourites') || '{"favourites":[]}').favourites;
+    queryHistory = JSON.parse(localStorage.getItem('history') || '{ "history": [] }').history;
+    
     instance = props.instance
     const state: RealmPluginState = useValue(instance.state);
+
     return (<>
         {state.errorMsg ? (
             <Alert
@@ -53,17 +78,17 @@ export default (props: { instance: ReturnType<typeof plugin> }) => {
             showSearch
             options={[{
               label: 'History',
-              options: state.queryHistory.map((val, id) => wrapItem(val, 2 * id)).reverse()
+              options: queryHistory.map((val, id) => wrapItem(val, 2 * id)).reverse()
             },
             {
               label: 'Favourites',
-              options: state.queryFavourites.map((val, id) => wrapItem(val, 2 * id + 1)).reverse()
+              options: queryFavourites.map((val, id) => wrapItem(val, 2 * id + 1)).reverse()
             }]}
             backfill={true}
             >
           </AutoComplete>
           <Button type="primary" onClick={instance.executeQuery} title="executeButton">Execute</Button>
-          <Button icon={<StarOutlined />} onClick={onStar}></Button>
+          <Button icon={<StarOutlined />} onClick={addToFavorites}></Button>
         </Input.Group>
       <DataVisualizer objects = {state.objects} schemas = {state.schemas} getObjects={instance.getObjects} selectedSchema={state.selectedSchema}/>
       </>
