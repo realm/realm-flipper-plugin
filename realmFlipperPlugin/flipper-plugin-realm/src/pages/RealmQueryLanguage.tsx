@@ -21,6 +21,7 @@ const wrapItem = (query: String, id: number) => (
 );
 let queryFavourites: Array<String>, queryHistory: Array<String>;
 
+
 const addToFavorites = () => {
     const state = instance.state.get()
     console.log("includes: ", queryFavourites.includes(state.query), state.query)
@@ -52,10 +53,9 @@ export const RealmQueryLanguage = (props: { instance: ReturnType<typeof plugin> 
   console.log('fav:', localStorage.getItem('favourites'))
     queryFavourites = JSON.parse(localStorage.getItem('favourites') || '{"favourites":[]}').favourites;
     queryHistory = JSON.parse(localStorage.getItem('history') || '{ "history": [] }').history;
-    
+
     instance = props.instance
     const state: RealmPluginState = useValue(instance.state);
-
     return (<>
         {state.errorMsg ? (
             <Alert
