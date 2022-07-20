@@ -63,5 +63,18 @@ export class RealmPlugin {
 
       this.connection.send('executeQuery', res);
     });
+    this.connection.receive('addObject', obj => {
+      const realm = this.realmsMap.get(obj.realm);
+      if (!realm) {
+        return;
+      }
+      realm.write(() => {
+        let t = realm.create(obj.schema, obj.object)
+        console.log('created', t)
+      });
+
+      const objects = realm.objects(obj.schema);
+      this.connection.send('getObjects', {objects: objects});
+    });
   }
 }
