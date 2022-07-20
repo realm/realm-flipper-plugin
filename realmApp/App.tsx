@@ -54,9 +54,18 @@ const BananaSchema = {
   primaryKey: '_id',
 };
 
+const MaybeSchema = {
+  name: 'Maybe',
+  properties: {
+    _id: 'int',
+    name: 'string?'
+  },
+  primaryKey: '_id',
+}
+
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema],
+  schema: [TaskSchema, BananaSchema, MaybeSchema],
 });
 
 addPlugin({
@@ -65,7 +74,7 @@ addPlugin({
   },
   onConnect(connection) {
     const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema]},
+      {schema: [TaskSchema, BananaSchema, MaybeSchema]},
       [realm],
       connection,
     );

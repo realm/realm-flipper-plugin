@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { SchemaPropertyValue, SchemaResponseObject } from "..";
-import { Modal, Radio, InputNumber, Input, Layout } from "antd";
+import { Modal, Radio, InputNumber, Input, Layout, Tag, Button } from "antd";
+import { CopyOutlined } from '@ant-design/icons';
+
 import React from "react";
 
 const forEachProp = (props: {
@@ -13,20 +15,23 @@ let values: {
     [prop: string]: any;
 } = {};
 
+
 export default (props: {schema: SchemaResponseObject | undefined, addObject: Function}) => {
     const schema = props.schema;
     if (!schema) {
         return <></>;
     }
-    console.log('inside')
     const [visible, setVisible] = useState(false);
+    const [inputReset, setInputReset] = useState(0);
 
     const showModal = () => {
+        values = {};
         setVisible(true);
     };
 
     const hideModal = () => {
         values = {};
+        setInputReset(inputReset + 1);
         setVisible(false);
     };
 
@@ -51,32 +56,57 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
             return null
         }
     }
-    const renderProperty = (property: SchemaPropertyValue) => {
+    const renderProperty = (property: SchemaPropertyValue, isPrimary: boolean) => {
+
         // setObject(obj => {
         //     obj[property.name] = getDefault(property.type)
         // })
-        values[property.name] = getDefault(property.type)
+        if (!property.optional)
+            values[property.name] = getDefault(property.type)
+        else
+            values[property.name] = null
 
         const renderInput = () => {
-            return <Input onChange={(v) => { values[property.name] = v.target.value } }/>
+            console.log('property', property.name, 'value: ', values[property.name])
+            return (
+                <Input
+                key={inputReset}
+                placeholder={property.optional ? "null" : undefined}
+                defaultValue={values[property.name]}
+                onChange={(v) => { values[property.name] = v.target.value } }
+                allowClear={property.optional}
+                />
+            )
         }
 
         const renderIntInput = () => {
-            return <InputNumber defaultValue={0} style={{width: '100%'}} onChange={(v) => { values[property.name] = v }}/>
+            return (
+                <InputNumber
+                key={inputReset} defaultValue={values[property.name]}
+                style={{width: '100%'}}
+                onChange={(v) => { values[property.name] = v }}
+                placeholder={property.optional ? "null" : undefined}
+                />
+            )
         }
 
         return (
             <Layout>
-                <Layout.Header >{property.name} <div style={{ float: 'right'}}>.</div></Layout.Header>
-            <Layout.Content>
-
-            {property.type === 'int' ? renderIntInput() : renderInput()}
-            </Layout.Content>
+                <Layout.Header style={{ paddingLeft: 0, paddingRight: 0}}>
+                    {property.name}
+                    <span style={{ float: 'right'}}>
+                    <Tag color='default'>{property.type}</Tag>
+                    {!property.optional ? <Tag color='blue'>required</Tag> : null}
+                    {isPrimary ? <Tag color='blue'>primary key</Tag> : null}
+                    </span>
+                </Layout.Header>
+                <Layout.Content>
+                {property.type === 'int' ? renderIntInput() : renderInput()}
+                </Layout.Content>
             </Layout>
         )
     }
 
-    console.log(schema)
     return (
         <Layout.Content>
         <Radio.Button type="primary" onClick={showModal} style={{ float: 'right' }}>
@@ -90,7 +120,7 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
             okText="Create"
             cancelText="Cancel"
         >
-            {forEachProp(schema.properties, property => <div key={property.name}>{renderProperty(property)}</div>)}
+            {forEachProp(schema.properties, property => <div key={property.name}>{renderProperty(property, property.name === schema.primaryKey)}</div>)}
         </Modal>
         </Layout.Content>
     );
