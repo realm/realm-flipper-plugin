@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { Layout, DataTable,DataTableColumn, useMemoize } from "flipper-plugin";
+import { Layout, DataTable, DataTableColumn, useMemoize } from "flipper-plugin";
 import { Radio } from "antd";
 import Prettyjson from "../components/Prettyjson";
 import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
@@ -58,8 +58,6 @@ export default function DataVisualizer(props: {
     const currentSchema = props.schemas.find(
       (schema) => schema.name === props.selectedSchema
     );
-    console.log("columnObjs:");
-    columnObjs.forEach((x) => console.log(x));
 
     if (currentSchema != undefined) {
       // Genereate a list of column objects.
