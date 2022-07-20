@@ -10,6 +10,7 @@
 import {theme, styled} from 'flipper-plugin';
 import {Typography} from 'antd';
 import React from 'react';
+import Prettyjson from "../components/Prettyjson";
 
 const {Text} = Typography;
 
@@ -78,16 +79,17 @@ export function renderValue(val: Value, wordWrap?: boolean) {
       );
     case 'blob':
     case 'string':
-      return <TextComponent>{val.value}</TextComponent>;
+      return val.value;
     case 'integer':
     case 'float':
     case 'double':
     case 'number':
-      return <TextComponent>{val.value}</TextComponent>;
+      return val.value;
     case 'null':
       return <TextComponent>NULL</TextComponent>;
     case 'object':
       if (Array.isArray(val.value)) return <TextComponent>[{val.value.toString()}]</TextComponent>
+      else return <TextComponent>{JSON.stringify(val.value)}</TextComponent>
     default: 
       return <TextComponent />;
   }

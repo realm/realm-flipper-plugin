@@ -38,7 +38,6 @@ export default function DataVisualizer(props: {
       // Map over all objects and genereate a Prettyjson component for each.
       return (
         <Layout.Container>
-          {"<" + props.selectedSchema + ">"}
           {props.objects.map((obj) => {
             return (
               //@ts-ignore
@@ -49,6 +48,8 @@ export default function DataVisualizer(props: {
           })}
         </Layout.Container>
       );
+    } else {
+      return <Layout.Container>Please select schema.</Layout.Container>;
     }
   }
 
@@ -91,18 +92,20 @@ export default function DataVisualizer(props: {
       return <Layout.Container>Please select schema.</Layout.Container>;
     }
 
-    function createColumnConfigFromSchema(
-      schema: SchemaResponseObject
-    ): Array<DataTableColumn> {
-      const columnObjs: DataTableColumn<{ [key: string]: Value }>[] =
-        Object.keys(schema.properties).map((c) => ({
-          key: c,
-          title: c + " [" + schema.properties[c].type + "]",
-          onRender(row) {
-            return renderValue(row[c]);
-          },
-        }));
-      return columnObjs;
-    }
+    
   }
+}
+
+function createColumnConfigFromSchema(
+  schema: SchemaResponseObject
+): Array<DataTableColumn> {
+  const columnObjs: DataTableColumn<{ [key: string]: Value }>[] =
+    Object.keys(schema.properties).map((c) => ({
+      key: c,
+      title: c + " [" + schema.properties[c].type + "]",
+      onRender(row) {
+        return renderValue(row[c]);
+      },
+    }));
+  return columnObjs;
 }
