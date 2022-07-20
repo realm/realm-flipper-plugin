@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { Layout, DataTable,DataTableColumn, useMemoize } from "flipper-plugin";
+import { Layout, DataTable, DataTableColumn, useMemoize } from "flipper-plugin";
 import { Radio } from "antd";
 import Prettyjson from "../components/Prettyjson";
 import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
@@ -34,19 +34,22 @@ export default function DataVisualizer(props: {
 
   // Render objectView
   function ObjectView() {
-    // Map over all objects and genereate a Prettyjson component for each.
-    return (
-      <Layout.Container>
-        {props.objects.map((obj) => {
-          return (
-            //@ts-ignore
-            <Prettyjson key={obj._id} json={obj}>
-              {" "}
-            </Prettyjson>
-          );
-        })}
-      </Layout.Container>
-    );
+    if (props.selectedSchema !== "") {
+      // Map over all objects and genereate a Prettyjson component for each.
+      return (
+        <Layout.Container>
+          {"<" + props.selectedSchema + ">"}
+          {props.objects.map((obj) => {
+            return (
+              //@ts-ignore
+              <Prettyjson key={obj._id} json={obj}>
+                {" "}
+              </Prettyjson>
+            );
+          })}
+        </Layout.Container>
+      );
+    }
   }
 
   // Render TableView
@@ -55,68 +58,50 @@ export default function DataVisualizer(props: {
     const currentSchema = props.schemas.find(
       (schema) => schema.name === props.selectedSchema
     );
-    const columnsMap = new Map(
-      Object.keys(currentSchema.properties).map((x) => {
-        return [x, "[" + currentSchema.properties[x].type + "]"];
-      })
-    );
 
-    console.log("columnsMap: " + columnsMap);
-    columnsMap.forEach((value, key) => console.log(key + " " + value));
-
-    //const columnStrings = Array.from (columnsMap.keys())
-    //const columnStrings = Map.entries(columnsMap).map(([key, value]) => {return (key + ' ' + columnsMap.get(key))})
-    var columnStrings: string[] = [];
-    columnsMap.forEach((value, key) => columnStrings.push(key + " " + value));
-
-    console.log("columnStrings: " + columnStrings);
-
-    columnStrings.forEach((x) => console.log(x));
-
-    // Genereate a list of column objects.
-    const columnObjs: Array<Object> = useMemoize(
-      (columnStrings: string[]) => createColumnConfig(columnStrings),
-      [columnStrings]
-    );
-    console.log("columnObjs:");
-    columnObjs.forEach((x) => console.log(x));
-
-    // Instantiate an array with row objects and fill it with data.
-    const rows: Array<Object> = [];
-    props.objects.forEach(function (obj: Object) {
-      let rowObj: { [key: string]: Value } = {};
-      columnsMap.forEach(function (value, key) {
-        rowObj[key] = { type: typeof obj[key], value: obj[key] };
-      });
-      rows.push(rowObj);
-    });
-
-    console.log("rows:");
-    rows.forEach((x) => console.log(x));
-
-
-    // Render a data table and return it.
-    return (
-      <Layout.Container height={800}>
-        <DataTable<{ [key: string]: Value }>
-          records={rows}
-          columns={columnObjs}
-          enableSearchbar={false}
-        />
-      </Layout.Container>
-    );
-
-    function createColumnConfig(columns: string[]) {
-      const columnObjs: DataTableColumn<{[key: string]: Value}>[] = columns.map(
-        (c) => ({
-          key: c,
-          title: c,
-          onRender(row) {
-            // ToDo: super hacky solution. Refine late.
-            return renderValue(row[c.substring(0, c.indexOf(" "))]);
-          },
-        }),
+    if (currentSchema != undefined) {
+      // Genereate a list of column objects.
+      const columnObjs = useMemoize(
+        (currentSchema: SchemaResponseObject) =>
+          createColumnConfigFromSchema(currentSchema),
+        [currentSchema]
       );
+
+      // Instantiate an array with row objects and fill it with data.
+      const rows: Array<Object> = [];
+      props.objects.forEach(function (obj: Object) {
+        let rowObj: { [key: string]: Value } = {};
+        columnObjs.forEach(function (c) {
+          rowObj[c.key] = { type: typeof obj[c.key], value: obj[c.key] };
+        });
+        rows.push(rowObj);
+      });
+
+      // Render a data table and return it.
+      return (
+        <Layout.Container height={800}>
+          <DataTable<{ [key: string]: Value }>
+            records={rows}
+            columns={columnObjs}
+            enableSearchbar={false}
+          />
+        </Layout.Container>
+      );
+    } else {
+      return <Layout.Container>Please select schema.</Layout.Container>;
+    }
+
+    function createColumnConfigFromSchema(
+      schema: SchemaResponseObject
+    ): Array<DataTableColumn> {
+      const columnObjs: DataTableColumn<{ [key: string]: Value }>[] =
+        Object.keys(schema.properties).map((c) => ({
+          key: c,
+          title: c + " [" + schema.properties[c].type + "]",
+          onRender(row) {
+            return renderValue(row[c]);
+          },
+        }));
       return columnObjs;
     }
   }
