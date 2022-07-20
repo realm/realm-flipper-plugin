@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-
+import {RealmPlugin} from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -49,7 +49,7 @@ const BananaSchema = {
     name: 'string',
     color: 'string',
     length: 'int',
-    weight: 'int'
+    weight: 'int',
   },
   primaryKey: '_id',
 };
@@ -70,6 +70,24 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema, LaptopSchema],
 });
 
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, BananaSchema]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Disconnected');
+  },
+});
+
+//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -91,7 +109,7 @@ function createBanana() {
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: 500
+      weight: 500,
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
@@ -149,6 +167,8 @@ addPlugin({
     console.log('onDisconnect');
   },
 });
+
+
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
