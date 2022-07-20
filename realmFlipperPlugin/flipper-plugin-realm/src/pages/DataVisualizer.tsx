@@ -1,11 +1,12 @@
 import React from "react";
 import { useState } from "react";
-import { Layout, DataTable, useMemoize } from "flipper-plugin";
+import { Layout, DataTable, DataTableColumn, useMemoize } from "flipper-plugin";
 import { Radio } from "antd";
 import Prettyjson from "../components/Prettyjson";
-import { Value } from "../utils/TypeBasedValueRenderer";
+import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
 import { SchemaResponseObject } from "../index";
 import { createColumnConfig } from "../pages/SchemaVisualizer";
+import SchemaSelect from "../components/SchemaSelect";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -33,56 +34,75 @@ export default function DataVisualizer(props: {
 
   // Render objectView
   function ObjectView() {
-    // Map over all objects and genereate a Prettyjson component for each.
-    return (
-      <Layout.Container>
-        {props.objects.map((obj) => {
-          return (
-            //@ts-ignore
-            <Prettyjson key={obj._id} json={obj}>
-              {" "}
-            </Prettyjson>
-          );
-        })}
-      </Layout.Container>
-    );
+    if (props.selectedSchema !== "") {
+      // Map over all objects and genereate a Prettyjson component for each.
+      return (
+        <Layout.Container>
+          {"<" + props.selectedSchema + ">"}
+          {props.objects.map((obj) => {
+            return (
+              //@ts-ignore
+              <Prettyjson key={obj._id} json={obj}>
+                {" "}
+              </Prettyjson>
+            );
+          })}
+        </Layout.Container>
+      );
+    }
   }
 
   // Render TableView
   function TableView() {
     // Find the selected schema in the schemas array. Take the keys of the schema and put them into an array.
-    const columns = Object.keys(
-      props.schemas.find((schema) => schema.name === props.selectedSchema)
-        .properties
-    ).map((x) => {
-      return x;
-    });
-
-    // Genereate a list of column objects.
-    const columnObjs: Array<Object> = useMemoize(
-      (columns: string[]) => createColumnConfig(columns),
-      [columns]
+    const currentSchema = props.schemas.find(
+      (schema) => schema.name === props.selectedSchema
     );
 
-    // Instantiate an array with row objects and fill it with data.
-    const rows: Array<Object> = [];
-    props.objects.forEach(function (obj: Object) {
-      let rowObj: { [key: string]: Value } = {};
-      columns.forEach(function (key) {
-        rowObj[key] = { type: typeof obj[key], value: obj[key] };
+    if (currentSchema != undefined) {
+      // Genereate a list of column objects.
+      const columnObjs = useMemoize(
+        (currentSchema: SchemaResponseObject) =>
+          createColumnConfigFromSchema(currentSchema),
+        [currentSchema]
+      );
+
+      // Instantiate an array with row objects and fill it with data.
+      const rows: Array<Object> = [];
+      props.objects.forEach(function (obj: Object) {
+        let rowObj: { [key: string]: Value } = {};
+        columnObjs.forEach(function (c) {
+          rowObj[c.key] = { type: typeof obj[c.key], value: obj[c.key] };
+        });
+        rows.push(rowObj);
       });
-      rows.push(rowObj);
-    });
 
-    // Render a data table and return it.
-    return (
-      <Layout.Container height={800}>
-        <DataTable<{ [key: string]: Value }>
-          records={rows}
-          columns={columnObjs}
-          enableSearchbar={false}
-        />
-      </Layout.Container>
-    );
+      // Render a data table and return it.
+      return (
+        <Layout.Container height={800}>
+          <DataTable<{ [key: string]: Value }>
+            records={rows}
+            columns={columnObjs}
+            enableSearchbar={false}
+          />
+        </Layout.Container>
+      );
+    } else {
+      return <Layout.Container>Please select schema.</Layout.Container>;
+    }
+
+    function createColumnConfigFromSchema(
+      schema: SchemaResponseObject
+    ): Array<DataTableColumn> {
+      const columnObjs: DataTableColumn<{ [key: string]: Value }>[] =
+        Object.keys(schema.properties).map((c) => ({
+          key: c,
+          title: c + " [" + schema.properties[c].type + "]",
+          onRender(row) {
+            return renderValue(row[c]);
+          },
+        }));
+      return columnObjs;
+    }
   }
 }
