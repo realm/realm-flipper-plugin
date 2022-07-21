@@ -148,6 +148,30 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
   });
 
+  client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const {newObject} = data;
+    pluginState.set({...state, objects: [...state.objects, newObject]});
+  })
+
+  client.onMessage("liveObjectDeleted", (data: DeleteLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const newObjects = [...state.objects];
+    newObjects.splice(data.index, 1);
+    pluginState.set({...state, objects: newObjects});
+  })
+
+  client.onMessage("liveObjectEdited", (data: EditLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const {newObject} = data;
+    const newObjects = [...state.objects];
+    newObjects.splice(data.index, 1, newObject);
+    pluginState.set({...state, objects: newObjects});
+  })
+
   client.addMenuEntry({
     action: "clear",
     handler: async () => {
@@ -221,7 +245,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
 
-  client.onConnect( () => {
+  client.onConnect( async () => {
+    await setTimeout(() => {}, 4000)
     getRealms();
   });
   return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};

@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-import {RealmPlugin} from './RealmPlugin';
+import RealmPlugin from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -58,24 +58,6 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema],
 });
 
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin({
-      schema: [TaskSchema, BananaSchema],
-      realms: [realm],
-      connection: connection,
-    });
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
-});
-
-//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -186,11 +168,7 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <RealmPlugin props={{
-      schema: [TaskSchema, BananaSchema],
-      realms: [realm],
-      connection: connection,
-    }}/>
+      <RealmPlugin realms={[realm]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
