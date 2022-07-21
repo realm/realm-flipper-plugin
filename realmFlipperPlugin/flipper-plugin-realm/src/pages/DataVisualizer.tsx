@@ -1,13 +1,15 @@
 import React from "react";
-import { useState } from "react";
-import { Layout, DataTable, DataTableColumn, useMemoize } from "flipper-plugin";
-import { Radio, Table } from "antd";
+import { Layout} from "flipper-plugin";
+import { Radio, Table, Tooltip } from "antd";
 import Prettyjson from "../components/Prettyjson";
-import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
 import { SchemaResponseObject } from "../index";
+<<<<<<< HEAD
 import { createColumnConfig } from "../pages/SchemaVisualizer";
 import ObjectAdder from "../components/ObjectAdder";
 import SchemaSelect from "../components/SchemaSelect";
+=======
+import ObjectAdder from "../components/ObjectAdder";
+>>>>>>> bf88fd7 (ellipsis in data table)
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -22,6 +24,10 @@ export default function DataVisualizer(props: {
   }
   // State to switch between views. true = objectView, false = tableView
   const [objectView, setView] = useState(true);
+  const getCurrentSchema = () => {
+    return props.schemas.find((schema) => schema.name === props.selectedSchema);
+  };
+
 
   // Return buttons + objectView or tableView
   return (
@@ -30,11 +36,20 @@ export default function DataVisualizer(props: {
         <Radio.Group>
           <Radio.Button onClick={() => setView(true)}>Object View</Radio.Button>
           <Radio.Button onClick={() => setView(false)}>Table View</Radio.Button>
+<<<<<<< HEAD
           {<ObjectAdder schema={getCurrentSchema()} addObject={props.addObject}/>}
+=======
+          {
+            <ObjectAdder
+              schema={getCurrentSchema()}
+              addObject={props.addObject}
+            />
+          }
+>>>>>>> bf88fd7 (ellipsis in data table)
         </Radio.Group>
       </Layout.Container>
       <Layout.Container>
-        {objectView ? <ObjectView /> : <TableView />}
+        <TableView />
       </Layout.Container>
     </Layout.ScrollContainer>
   );
@@ -75,34 +90,55 @@ export default function DataVisualizer(props: {
         title: property.name + " [" + property.type + "]",
         key: property.name,
         dataIndex: property.name,
+        width: 150,     
+        ellipsis: {
+          showTitle: false,
+        },
+
+        render: (text) => {
+          console.log("Tooltip: " + text);
+          console.log(typeof text === "object" ? JSON.stringify(text) : text);
+
+          return (
+            <Tooltip
+              placement="topLeft"
+              title={JSON.stringify(text)}
+              key={Math.floor(Math.random() * 10000000)}
+            >
+              {typeof text === "object" ? JSON.stringify(text) : text.toString()}
+            </Tooltip>
+          );
+        },
         sorter: (a, b) => {
           if (a[propName] > b[propName]) {
             return 1;
-          }
-          else if (a[propName] < b[propName]) {
+          } else if (a[propName] < b[propName]) {
             return -1;
-          }
-          else {
+          } else {
             return 0;
           }
         },
-        onFilter: (value: string, record: any) => record[propName].startsWith(value),
+        onFilter: (value: string, record: any) =>
+          record[propName].startsWith(value),
         filterSearch: true,
-
       };
     });
 
     const rowObjs = props.objects.map((obj, id) => {
       return {
         ...obj,
-        key: id
-      }
-    })
+        key: id,
+      };
+    });
 
     return (
       <Layout.Container height={800}>
-      <Table dataSource={rowObjs} columns={columnObjs} />;
+        <Table
+          dataSource={rowObjs}
+          columns={columnObjs}
+          pagination={{ position: ["topLeft", "bottomLeft"] }}
+        />
       </Layout.Container>
-    )
+    );
   }
 }
