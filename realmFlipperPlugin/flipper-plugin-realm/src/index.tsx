@@ -243,7 +243,7 @@ export function Component() {
           </Radio.Button>
           <Radio.Button onClick={onSchemasClicked} value="schemas">
             <SettingOutlined style={{ marginRight: 5 }} />
-            <Typography.Text>Schemas</Typography.Text>
+            <Typography.Text>Schema</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onRQLClicked} value="RQL">
             <ConsoleSqlOutlined style={{ marginRight: 5 }} />

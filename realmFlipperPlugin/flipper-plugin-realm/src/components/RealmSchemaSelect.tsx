@@ -61,7 +61,7 @@ const BoldSpan = styled.span({
         dropdownMatchSelectWidth={false}>
         {realmOptions}
         </Select>
-    <BoldSpan>Schema</BoldSpan>
+    <BoldSpan>Object type</BoldSpan>
     <Select
         showSearch
         value={state.selectedSchema}
