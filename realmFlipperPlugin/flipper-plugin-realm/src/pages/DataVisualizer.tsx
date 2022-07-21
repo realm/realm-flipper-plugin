@@ -8,6 +8,7 @@ import { SchemaResponseObject } from "../index";
 import { createColumnConfig } from "../pages/SchemaVisualizer";
 import ObjectAdder from "../components/ObjectAdder";
 import SchemaSelect from "../components/SchemaSelect";
+import EditableTable from "../components/EditableTable";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -88,7 +89,7 @@ export default function DataVisualizer(props: {
         },
         onFilter: (value: string, record: any) => record[propName].startsWith(value),
         filterSearch: true,
-
+        property: property
       };
     });
 
@@ -101,7 +102,8 @@ export default function DataVisualizer(props: {
 
     return (
       <Layout.Container height={800}>
-      <Table dataSource={rowObjs} columns={columnObjs} />;
+      {/* <Table dataSource={rowObjs} columns={columns}/> */}
+      {<EditableTable data={rowObjs} columns={columnObjs}></EditableTable>}
       </Layout.Container>
     )
   }
