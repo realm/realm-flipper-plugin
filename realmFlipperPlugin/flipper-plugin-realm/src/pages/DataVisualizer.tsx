@@ -110,6 +110,7 @@ export default function DataVisualizer(props: {
             defaultPageSize: 20,
             showSizeChanger: true,
             pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+            showQuickJumper: true
           }}
           size="small"
         />
