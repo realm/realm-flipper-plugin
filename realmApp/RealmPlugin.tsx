@@ -47,6 +47,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           const objects = realm.objects(schema);
           try {
             console.log(connection);
+            objects.removeAllListeners;
             objects.addListener(onObjectsChange);
           } catch (error) {
             console.error(
@@ -93,7 +94,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('executeQuery', res);
         });
         const onObjectsChange = (objects, changes) => {
-          console.log('this is', this);
           changes.deletions.forEach(index => {
             console.log(`small listener fires`, connection);
             if (connection) {
@@ -126,7 +126,6 @@ export default React.memo((props: {realms: Realm[]}) => {
       },
     });
   });
-
 
   function useForceUpdate() {
     const [value, setValue] = useState(0); // integer state

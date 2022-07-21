@@ -98,42 +98,6 @@ function editBanana() {
 }
 
 const Section = ({children, title}): Node => {
-  //const forceUpdate = useForceUpdate();
-
-  // addPlugin({
-  //   getId() {
-  //     return 'realm';
-  //   },
-  //   onConnect(connection) {
-  //     realm.addListener('change', () => {
-  //       count++;
-  //       console.log('big listener fires', count);
-  //       forceUpdate();
-  //     });
-  //     realmConnection = connection;
-  //     connection.receive('getObjects', obj => {
-  //       const schema = obj.schema;
-  //       const objects = realm.objects(schema);
-  //       try {
-  //         objects.addListener(onObjectsChange);
-  //       } catch (error) {
-  //         console.error(
-  //           `An exception was thrown within the change listener: ${error}`,
-  //         );
-  //       }
-  //       connection.send('getObjects', {objects: objects});
-  //     });
-  //     connection.receive('getSchemas', () => {
-  //       const schema = realm.schema;
-  //       connection.send('getSchemas', {schemas: schema});
-  //     });
-  //     console.log('onConnect');
-  //   },
-  //   onDisconnect() {
-  //     console.log('onDisconnect');
-  //   },
-  // });
-
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
