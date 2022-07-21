@@ -5,13 +5,21 @@ import { Radio, Table } from "antd";
 import Prettyjson from "../components/Prettyjson";
 import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
 import { SchemaResponseObject } from "../index";
+import { createColumnConfig } from "../pages/SchemaVisualizer";
+import ObjectAdder from "../components/ObjectAdder";
+import SchemaSelect from "../components/SchemaSelect";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
   schemas: Array<SchemaResponseObject>;
   getObjects: Function;
   selectedSchema: String;
+  addObject: Function;
 }) {
+
+  const getCurrentSchema = () => {
+    return props.schemas.find(schema => schema.name === props.selectedSchema);
+  }
   // State to switch between views. true = objectView, false = tableView
   const [objectView, setView] = useState(true);
 
@@ -22,6 +30,7 @@ export default function DataVisualizer(props: {
         <Radio.Group>
           <Radio.Button onClick={() => setView(true)}>Object View</Radio.Button>
           <Radio.Button onClick={() => setView(false)}>Table View</Radio.Button>
+          {<ObjectAdder schema={getCurrentSchema()} addObject={props.addObject}/>}
         </Radio.Group>
       </Layout.Container>
       <Layout.Container>

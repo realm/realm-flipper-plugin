@@ -57,6 +57,7 @@ const BananaSchema = {
   primaryKey: '_id',
 };
 
+
 const AllTypes = {
   name: 'AllTypes',
   properties: {
@@ -80,9 +81,18 @@ const AllTypes = {
   primaryKey: '_id',
 };
 
+const MaybeSchema = {
+  name: 'Maybe',
+  properties: {
+    _id: 'int',
+    name: 'string?'
+  },
+  primaryKey: '_id',
+}
+
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, AllTypes],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes],
 });
 
 addPlugin({
@@ -91,7 +101,7 @@ addPlugin({
   },
   onConnect(connection) {
     const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, AllTypes]},
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes]},
       [realm],
       connection,
     );
