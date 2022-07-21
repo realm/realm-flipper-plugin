@@ -105,6 +105,7 @@ export default function DataVisualizer(props: {
         <Table
           dataSource={rowObjs}
           columns={columnObjs}
+          sticky = {true}
           pagination={{
             position: ["topLeft", "bottomLeft"],
             defaultPageSize: 20,
