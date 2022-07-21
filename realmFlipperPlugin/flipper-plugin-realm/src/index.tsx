@@ -46,6 +46,9 @@ export type SchemaPropertyValue = {
 type Events = {
   getObjects: ObjectsMessage
   getSchemas: SchemaMessage
+  liveObjectAdded: AddLiveObjectRequest
+  liveObjectDeleted: DeleteLiveObjectRequest
+  liveObjectEdited: EditLiveObjectRequest
   getRealms: RealmsMessage;
   executeQuery: QueryResult
 };
@@ -76,6 +79,19 @@ type RealmRequest = {
 type SchemaRequest = {
   schema: string;
   realm: string;
+}
+
+type AddLiveObjectRequest = {
+  newObject: Object
+}
+
+type DeleteLiveObjectRequest = {
+  index: number
+}
+
+type EditLiveObjectRequest = {
+  newObject: Object
+  index: number
 }
 
 type QueryObject = {
@@ -131,6 +147,30 @@ export function plugin(client: PluginClient<Events, Methods>) {
       pluginState.set({ ...state, objects: data.result, errorMsg: undefined });
     }
   });
+
+  client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const {newObject} = data;
+    pluginState.set({...state, objects: [...state.objects, newObject]});
+  })
+
+  client.onMessage("liveObjectDeleted", (data: DeleteLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const newObjects = [...state.objects];
+    newObjects.splice(data.index, 1);
+    pluginState.set({...state, objects: newObjects});
+  })
+
+  client.onMessage("liveObjectEdited", (data: EditLiveObjectRequest) => {
+    console.log("live", data)
+    const state = pluginState.get();
+    const {newObject} = data;
+    const newObjects = [...state.objects];
+    newObjects.splice(data.index, 1, newObject);
+    pluginState.set({...state, objects: newObjects});
+  })
 
   client.addMenuEntry({
     action: "clear",
@@ -205,7 +245,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
 
-  client.onConnect( () => {
+  client.onConnect( async () => {
+    await setTimeout(() => {}, 4000)
     getRealms();
   });
   return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};

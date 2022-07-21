@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import Realm from 'realm';
 import type {Node} from 'react';
 import {
@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-import {RealmPlugin} from './RealmPlugin';
+import RealmPlugin from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -30,7 +30,6 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-
 // Schema for Realm
 const TaskSchema = {
   name: 'Task',
@@ -59,24 +58,6 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema],
 });
 
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema]},
-      [realm],
-      connection,
-    );
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
-});
-
-//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -104,7 +85,55 @@ function createBanana() {
   });
 }
 
+function deleteBanana() {
+  realm.write(() => {
+    realm.delete(realm.objects('Banana')[0]);
+  });
+}
+
+function editBanana() {
+  realm.write(() => {
+    realm.objects('Banana')[0].name = 'Maximillian';
+  });
+}
+
 const Section = ({children, title}): Node => {
+  //const forceUpdate = useForceUpdate();
+
+  // addPlugin({
+  //   getId() {
+  //     return 'realm';
+  //   },
+  //   onConnect(connection) {
+  //     realm.addListener('change', () => {
+  //       count++;
+  //       console.log('big listener fires', count);
+  //       forceUpdate();
+  //     });
+  //     realmConnection = connection;
+  //     connection.receive('getObjects', obj => {
+  //       const schema = obj.schema;
+  //       const objects = realm.objects(schema);
+  //       try {
+  //         objects.addListener(onObjectsChange);
+  //       } catch (error) {
+  //         console.error(
+  //           `An exception was thrown within the change listener: ${error}`,
+  //         );
+  //       }
+  //       connection.send('getObjects', {objects: objects});
+  //     });
+  //     connection.receive('getSchemas', () => {
+  //       const schema = realm.schema;
+  //       connection.send('getSchemas', {schemas: schema});
+  //     });
+  //     console.log('onConnect');
+  //   },
+  //   onDisconnect() {
+  //     console.log('onDisconnect');
+  //   },
+  // });
+
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -139,6 +168,7 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
+      <RealmPlugin realms={[realm]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -156,6 +186,12 @@ const App: () => Node = () => {
             {' '}
           </Button>
           <Button title="create Banana" onPress={createBanana}>
+            {' '}
+          </Button>
+          <Button title="delete Banana" onPress={deleteBanana}>
+            {' '}
+          </Button>
+          <Button title="edit Banana" onPress={editBanana}>
             {' '}
           </Button>
           <Section title="See Your Changes">
