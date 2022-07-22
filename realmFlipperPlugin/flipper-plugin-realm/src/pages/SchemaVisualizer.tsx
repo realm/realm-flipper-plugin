@@ -3,6 +3,7 @@ import { DataTableColumn, Layout, styled, theme, useMemoize, usePlugin, useValue
 import React from "react";
 import { plugin, SchemaPropertyValue, SchemaResponseObject } from '../index';
 import { Value } from '../utils/TypeBasedValueRenderer';
+import { isPropertyLinked } from '../utils/linkedObject';
 const {Text} = Typography;
 const {Link} = Typography;
 
@@ -64,14 +65,15 @@ function createColumnConfig(columns: string[]) {
         }
       },
       onFilter: (value: string, record: any) => record[col].startsWith(value),
-      render: (text) => renderTableCells(text, typeof text, col),
+      render: (text, record) => renderTableCells(text, typeof text, col, record),
       filterSearch: true,
     }),
   );
   return columnObjs;
 }
-    function renderTableCells(value: string, type: string, column: string) {
-      if (column === 'objectType' && value ) {
+    function renderTableCells(value: string, type: string, column: string, record) {
+      console.log("RECORD",record);
+      if (column === "objectType" && isPropertyLinked(record)) {
         return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>
       }
       switch (type) {
