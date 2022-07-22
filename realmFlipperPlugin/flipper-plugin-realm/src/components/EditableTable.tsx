@@ -77,13 +77,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
   let childNode = children;
 
   if (editable) {
-    if (record.color === '') {
-        // console.log(record)
-        console.log(children)
-    }
-    else {
-        console.log('else:', children)
-    }
+    // if (record.color === '') {
+    //     // console.log(record)
+    //     console.log(children)
+    // }
+    // else {
+    //     console.log('else:', children)
+    // }
     childNode = editing ? (
       <Form.Item
         style={{ margin: 0 }}
@@ -115,13 +115,14 @@ type EditableTableProps = Parameters<typeof Table>[0];
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
-export default (props: { columns: ColumnTypes, data: Object[] }) => {
+export default (props: { columns: ColumnTypes, data: Object[], primaryKey: String, modifyObject: Function }) => {
     const dataSource = props.data
 
     
     //   const [count, setCount] = useState(2);
-      const handleSave = (row: DataType) => {
-        console.log('handleSave:', row);
+      const handleSave = row => {
+        // console.log('handleSave:', row);
+        props.modifyObject(row)
         // const newData = [...dataSource];
         // const index = newData.findIndex(item => row.key === item.key);
         // const item = newData[index];
@@ -135,7 +136,7 @@ export default (props: { columns: ColumnTypes, data: Object[] }) => {
   const defaultColumns = props.columns.map(col => {
     return {
       ...col,
-      editable: true,
+      editable: col.property.type !== 'data' && col.property.name != props.primaryKey,
       width: ((1/props.columns.length) * 100).toFixed(2) + '%'
   } });
 

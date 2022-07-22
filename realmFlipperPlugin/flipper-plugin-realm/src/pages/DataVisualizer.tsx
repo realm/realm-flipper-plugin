@@ -16,6 +16,7 @@ export default function DataVisualizer(props: {
   getObjects: Function;
   selectedSchema: String;
   addObject: Function;
+  modifyObject: Function;
 }) {
 
   const getCurrentSchema = () => {
@@ -103,7 +104,7 @@ export default function DataVisualizer(props: {
     return (
       <Layout.Container height={800}>
       {/* <Table dataSource={rowObjs} columns={columns}/> */}
-      {<EditableTable data={rowObjs} columns={columnObjs}></EditableTable>}
+      {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject}></EditableTable>}
       </Layout.Container>
     )
   }

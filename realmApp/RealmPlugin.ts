@@ -76,5 +76,18 @@ export class RealmPlugin {
       const objects = realm.objects(obj.schema);
       this.connection.send('getObjects', {objects: objects});
     });
+    this.connection.receive('modifyObject', obj => {
+    const realm = this.realmsMap.get(obj.realm);
+    if (!realm) {
+      return;
+    };
+    realm.write(() => {
+      realm.create(obj.schema, obj.object, "modified")
+    });
+
+    const objects = realm.objects(obj.schema);
+    console.log('objects', objects)
+    this.connection.send('getObjects', {objects: objects});
+  })
   }
 }
