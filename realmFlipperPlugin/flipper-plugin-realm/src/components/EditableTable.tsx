@@ -1,8 +1,14 @@
-// import "./styles"
-import { InputNumber, InputRef } from 'antd';
-import { Button, Form, Input, Popconfirm, Table } from 'antd';
-import type { FormInstance } from 'antd/es/form';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import {
+  InputNumber,
+  InputRef,
+  Menu,
+  Dropdown,
+  Form,
+  Input,
+  Table,
+} from "antd";
+import type { FormInstance } from "antd/es/form";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -70,40 +76,46 @@ const EditableCell: React.FC<EditableCellProps> = ({
       toggleEdit();
       handleSave({ ...record, ...values });
     } catch (errInfo) {
-      console.log('Save failed:', errInfo);
+      console.log("Save failed:", errInfo);
     }
   };
 
   let childNode = children;
 
   if (editable) {
-    // if (record.color === '') {
-    //     // console.log(record)
-    //     console.log(children)
-    // }
-    // else {
-    //     console.log('else:', children)
-    // }
+    // console.log(children.map(v => '"'+v+'"'))
+    // console.log(children)
     childNode = editing ? (
       <Form.Item
         style={{ margin: 0 }}
         name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
+        // rules={[
+        //   {
+        //     required: true,
+        //     message: `${title} is required.`,
+        //   },
+        // ]}
       >
-        {!numeric ? <Input style={{width: '100%'}} ref={inputRef} onPressEnter={save} onBlur={save} placeholder={'aaaaaaaa'}/> : <InputNumber style={{width: '100%'}} ref={inputRef} onPressEnter={save} onBlur={save} />}
+        {!numeric ? (
+          <Input
+            style={{ width: "100%" }}
+            ref={inputRef}
+            onPressEnter={save}
+            onBlur={save}
+          />
+        ) : (
+          <InputNumber
+            style={{ width: "100%" }}
+            ref={inputRef}
+            onPressEnter={save}
+            onBlur={save}
+          />
+        )}
       </Form.Item>
     ) : (
       <div className="editable-cell-value-wrap" onClick={toggleEdit}>
         {children}
       </div>
-    // <div>
-    //     {children}
-    // </div>
     );
   }
 
@@ -112,35 +124,63 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 type EditableTableProps = Parameters<typeof Table>[0];
 
+type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
-type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
+export default (props: {
+  columns: ColumnTypes;
+  data: Object[];
+  primaryKey: String;
+  modifyObject: Function;
+  schemaName: String;
+  removeObject: Function;
+}) => {
+  const dataSource = props.data;
 
-export default (props: { columns: ColumnTypes, data: Object[], primaryKey: String, modifyObject: Function }) => {
-    const dataSource = props.data
+  const handleSave = (row) => {
+    props.modifyObject(row);
+    // for now do not handle errors
+  };
 
-    
-    //   const [count, setCount] = useState(2);
-      const handleSave = row => {
-        // console.log('handleSave:', row);
-        props.modifyObject(row)
-        // const newData = [...dataSource];
-        // const index = newData.findIndex(item => row.key === item.key);
-        // const item = newData[index];
-        // newData.splice(index, 1, {
-        //   ...item,
-        //   ...row,
-        // });
-        // setDataSource(newData);
-      };
-
-  const defaultColumns = props.columns.map(col => {
+  const defaultColumns = props.columns.map((col) => {
     return {
       ...col,
-      editable: col.property.type !== 'data' && col.property.name != props.primaryKey,
-      width: ((1/props.columns.length) * 100).toFixed(2) + '%'
-  } });
+      editable:
+        col.property.type !== "data" && col.property.name != props.primaryKey,
+      width: ((1 / props.columns.length) * 100).toFixed(2) + "%",
+    };
+  });
 
-  const columns = defaultColumns.map(col => {
+  const deleteRow = (row) => {
+    props.removeObject(row);
+  };
+
+  const dropDown = (row) => (
+    <Menu>
+      <Menu.Item key={1} onClick={() => deleteRow(row)}>
+        Delete selected {props.schemaName}{" "}
+      </Menu.Item>
+    </Menu>
+  );
+
+  const renderValue = (value, property, row) => {
+    return (
+      <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+        <div>
+          {property.optional && value === null
+            ? "null"
+            : property.type === "string"
+            ? '"' + value + '"'
+            : value}
+        </div>
+      </Dropdown>
+    );
+  };
+
+  const columns = defaultColumns.map((col) => {
+    col = {
+      ...col,
+      render: (val, row) => renderValue(val, col.property, row),
+    };
     if (!col.editable) {
       return col;
     }
@@ -152,7 +192,7 @@ export default (props: { columns: ColumnTypes, data: Object[], primaryKey: Strin
         dataIndex: col.dataIndex,
         title: col.title,
         handleSave,
-        numeric: col.property.type === 'int'
+        numeric: col.property.type === "int",
       }),
     };
   });
@@ -167,9 +207,16 @@ export default (props: { columns: ColumnTypes, data: Object[], primaryKey: Strin
   return (
     <div>
       <Table
-        locale={{ emptyText: "Empty" }} 
+        onRow={(record, rowIndex) => {
+          return {
+            onContextMenu: (event) => {
+              console.log(event);
+            },
+          };
+        }}
+        locale={{ emptyText: "Empty" }}
         components={components}
-        rowClassName={() => 'editable-row'}
+        rowClassName={() => "editable-row"}
         bordered
         dataSource={dataSource}
         columns={columns as ColumnTypes}
