@@ -8,6 +8,7 @@ import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 
 import React from "react";
 import { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
+import SchemaHistoryActions from "./components/SchemaHistoryActions";
 import DataVisualizer from './pages/DataVisualizer';
 import { RealmQueryLanguage, addToHistory } from "./pages/RealmQueryLanguage";
 import SchemaVisualizer from './pages/SchemaVisualizer';
@@ -21,6 +22,8 @@ export type RealmPluginState = {
   query: String,
   errorMsg?: String
   selectedSchema: string,
+  schemaHistory: Array<string>,
+  schemaHistoryIndex: number
 }
 
 export type SchemaResponseObject = {
@@ -104,6 +107,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     viewMode: "data",
     query: "",
     selectedSchema: '',
+    schemaHistory: [],
+    schemaHistoryIndex: 0
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -179,9 +184,34 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
+    let newHistory = Array.from(state.schemaHistory);
+    let index = state.schemaHistoryIndex;
+    newHistory.splice(index)
+    newHistory.push(event.schema)
+    let length = newHistory.length-1
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
+      schemaHistory: [...newHistory],
+      schemaHistoryIndex: length
+    });
+  };
+
+  const goBackSchemaHistory = (event: {schema: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedSchema: event.schema,
+      schemaHistoryIndex: state.schemaHistoryIndex-1
+    });
+  };
+
+  const goForwardSchemaHistory = (event: {schema: string}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedSchema: event.schema,
+      schemaHistoryIndex: state.schemaHistoryIndex+1
     });
   };
 
@@ -212,7 +242,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onConnect( () => {
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory};
 }
 
 export function Component() {
@@ -255,6 +285,7 @@ export function Component() {
           </Radio.Button>
         </Radio.Group>
       </Toolbar>
+      <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
       {state.viewMode === "data" ? (
         <DataVisualizer
