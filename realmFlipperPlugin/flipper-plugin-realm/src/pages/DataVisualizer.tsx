@@ -3,6 +3,7 @@ import { Layout } from "flipper-plugin";
 import { Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
+import {renderText} from '../utils/Renderer'
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -57,24 +58,14 @@ export default function DataVisualizer(props: {
           showTitle: false,
         },
 
-        render: (text) => {
+        render: (text: any) => {
           return (
             <Tooltip
               placement="topLeft"
-              title={
-                typeof text === "object"
-                  ? JSON.stringify(text)
-                  : typeof text === "boolean"
-                  ? text.toString()
-                  : text
-              }
+              title={renderText(text)}
               key={Math.floor(Math.random() * 10000000)}
             >
-              {typeof text === "object"
-                ? JSON.stringify(text)
-                : typeof text === "boolean"
-                ? text.toString()
-                : text}
+              {renderText(text)}
             </Tooltip>
           );
         },
@@ -87,9 +78,6 @@ export default function DataVisualizer(props: {
             return 0;
           }
         },
-        onFilter: (value: string, record: any) =>
-          record[propName].startsWith(value),
-        filterSearch: true,
       };
     });
 
@@ -105,13 +93,13 @@ export default function DataVisualizer(props: {
         <Table
           dataSource={rowObjs}
           columns={columnObjs}
-          sticky = {true}
+          sticky={true}
           pagination={{
             position: ["topLeft", "bottomLeft"],
             defaultPageSize: 20,
             showSizeChanger: true,
             pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
-            showQuickJumper: true
+            showQuickJumper: true,
           }}
           size="small"
         />

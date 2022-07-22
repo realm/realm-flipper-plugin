@@ -9,9 +9,13 @@
 import React from 'react';
 import {useEffect} from 'react';
 import Realm from 'realm';
+import BSON from 'realm';
+
 import type {Node} from 'react';
-const {UUID} = Realm.BSON;
-import bigDecimal from 'js-big-decimal';
+const {UUID, Decimal128} = Realm.BSON;
+// import bigDecimal from 'js-big-decimal';
+// var bigDecimal = require('js-big-decimal');
+import bigdecimal from 'bigdecimal';
 
 import {
   SafeAreaView,
@@ -57,17 +61,16 @@ const BananaSchema = {
   primaryKey: '_id',
 };
 
-
 const AllTypes = {
   name: 'AllTypes',
   properties: {
-    _id: 'int',
+    _id: 'uuid',
     bool: 'bool',
     int: 'int',
     float: 'float',
     double: 'double',
-    string: 'string',
-    //decimal128: 'decimal128',
+    string: 'string?',
+    decimal128: 'decimal128',
     //objectId: 'objectId',
     data: 'data',
     date: 'date',
@@ -85,10 +88,10 @@ const MaybeSchema = {
   name: 'Maybe',
   properties: {
     _id: 'int',
-    name: 'string?'
+    name: 'string?',
   },
   primaryKey: '_id',
-}
+};
 
 // Open a Realm
 const realm = new Realm({
@@ -144,13 +147,16 @@ function createAllTypes() {
   let allTypes;
   realm.write(() => {
     allTypes = realm.create('AllTypes', {
-      _id: Math.floor(Math.random() * 100000),
+      _id: new UUID(),
       bool: true,
       int: 888,
       float: 3.1415,
-      double: 3.1415,
+      double: 3.1415, 
       string: 'string',
-      //decimal128: new bigDecimal("9823.1297"),
+      // decimal128: new bigDecimal(3.2342342353454),
+       decimal128: Decimal128.fromString(
+        '123456.123456789012345678901234567890',
+      ),
       //objectId: 'objectId',
       data: new ArrayBuffer(6),
       date: new Date('1995-12-17T03:24:00'),
@@ -167,7 +173,7 @@ function createAllTypes() {
       mixed: new Date('August 17, 2020'),
       uuid: new UUID(),
     });
-    console.log(allTypes.data)
+    console.log(allTypes.data);
     console.log(`created one banana: ${allTypes.name} with id ${allTypes._id}`);
   });
 }
