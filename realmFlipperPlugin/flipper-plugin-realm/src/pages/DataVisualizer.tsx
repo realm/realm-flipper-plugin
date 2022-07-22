@@ -3,6 +3,7 @@ import { Layout } from "flipper-plugin";
 import { Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
+
 import { renderText } from "../utils/Renderer";
 
 export default function DataVisualizer(props: {
@@ -62,12 +63,12 @@ export default function DataVisualizer(props: {
           return (
             <Tooltip
               placement="topLeft"
-              title={renderText(text)}
-              /**title={text}*/
+              /**title={renderText(text)}*/
+              title={text}
               key={Math.floor(Math.random() * 10000000)}
             >
-              {renderText(text)}
-              {/**text*/}
+              {/**renderText(text)*/}
+              {text}
             </Tooltip>
           );
         },
@@ -83,17 +84,17 @@ export default function DataVisualizer(props: {
       };
     });
 
-    const rowObjs = props.objects.map((obj, id) => {
-      Object.keys(obj).forEach((x) =>
-        console.log(x + ": " + obj[x] + " key: " + id)
-      );
-      return {
-        ...obj,
-        key: id,
-      };
-    });
+    // const rowObjs = props.objects.map((obj, id) => {
+    //   Object.keys(obj).forEach((x) =>
+    //     console.log(x + ": " + obj[x] + " key: " + id)
+    //   );
+    //   return {
+    //     ...obj,
+    //     key: id,
+    //   };
+    // });
 
-    // const rowObjs = renderRows(props.objects, currentSchema);
+    const rowObjs = renderRows(props.objects, currentSchema, props.schemas);
 
     return (
       <Layout.Container height={800}>
@@ -115,18 +116,71 @@ export default function DataVisualizer(props: {
   }
 }
 
-// function renderRows(objects: Object[], schema: SchemaResponseObject) {
-//   const primaryKey = schema.primaryKey;
-//   const name = schema.name;
+function renderRows(
+  objects: Object[],
+  schema: SchemaResponseObject,
+  schemas: Array<SchemaResponseObject>
+) {
+  const primaryKey = schema.primaryKey;
+  const name = schema.name;
 
-//   objects.map((obj) =>
-//     Object.keys(schema.properties).forEach((propKey) => {
-//       const currentField = schema.properties[propKey];
+  let rows = objects.map((obj: any, index: number) => {
+    let returnObj = { key: index };
 
-//       switch (currentField) {
-//         case "double" | "double?":
-//           return currentField;
-//       }
-//     })
-//   );
-// }
+    Object.keys(schema.properties).forEach((propKey: string) => {
+      const currentRealmPropType = schema.properties[propKey].type;
+      const currentFieldValue = obj[propKey];
+
+      if (currentFieldValue != null) {
+        let stringForPrint: string = "";
+
+        switch (currentRealmPropType) {
+          case "string":
+          case "double":
+          case "int":
+          case "float":
+          case "double":
+          case "objectId":
+          case "date":
+          case "uuid":
+            stringForPrint = currentFieldValue;
+            break;
+          case "list":
+          case "set":
+            stringForPrint = "[" + currentFieldValue + "]";
+            break;
+          case "data":
+          case "dictionary":
+            stringForPrint = JSON.stringify(currentFieldValue);
+            break;
+          case "bool":
+            stringForPrint = currentFieldValue.toString();
+            break;
+          case "decimal128":
+            stringForPrint = currentFieldValue.$numberDecimal;
+            break;
+          case "object":
+            let childSchema = schemas.find(
+              (s) => s.name === schema.properties[propKey].objectType
+            );
+            if (childSchema === undefined) {
+              break;
+            }
+            stringForPrint =
+              "[" +
+              childSchema.name +
+              "]" +
+              "." +
+              childSchema.primaryKey +
+              " : " +
+              currentFieldValue[childSchema.primaryKey];
+            break;
+          case "mixed":
+        }
+        returnObj[propKey] = stringForPrint;
+      }
+    });
+    return returnObj;
+  });
+  return rows;
+}
