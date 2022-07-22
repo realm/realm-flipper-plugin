@@ -53,7 +53,9 @@ type Methods = {
   getObjects: (data: SchemaRequest) => Promise<Object[]>
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
   getRealms: () => Promise<string[]>
-  addObject: (object: AddObject) => Promise<any>; 
+  addObject: (object: AddObject) => Promise<any>;
+  modifyObject: (newObject: AddObject) => Promise<any>;
+  removeObject: (object: AddObject) => Promise<any>;
 }
 
 type AddObject = {
@@ -174,7 +176,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Object) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    // console.log('addObject in index', object)
     client.send('addObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
   }
 
@@ -203,10 +205,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const modifyObject = (newObject: Object) => {
+    const state = pluginState.get();
+    // console.log('addObject in index', object)
+    client.send('modifyObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: newObject})
+  }
+
+  const removeObject = (object: Object) => {
+    const state = pluginState.get();
+
+    client.send('removeObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
+  }
+
   client.onConnect( () => {
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateDataViewMode, updateSelectedRealm, modifyObject, removeObject};
 }
 
 export function Component() {
@@ -259,6 +273,8 @@ export function Component() {
           getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
           addObject={instance.addObject}
+          modifyObject={instance.modifyObject}
+          removeObject={instance.removeObject}
          />
       ) : null}
       {state.viewMode === "schemas" ? (

@@ -11,7 +11,6 @@ import {useEffect} from 'react';
 import Realm from 'realm';
 import type {Node} from 'react';
 const {UUID} = Realm.BSON;
-import bigDecimal from 'js-big-decimal';
 
 import {
   SafeAreaView,
