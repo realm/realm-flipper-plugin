@@ -88,20 +88,28 @@ export class RealmPlugin {
       const objects = realm.objects(obj.schema);
       this.connection.send('getObjects', {objects: objects});
     });
-    this.connection.receive('removeObject', obj => {
+    this.connection.receive('removeObject', (obj, responder) => {
       const realm = this.realmsMap.get(obj.realm);
       if (!realm) {
         return;
       };
+
       const schema = realm.schema.find(schema => schema.name === obj.schema)
-      if (!schema || !schema.primaryKey) {
+      const primaryKey = schema?.primaryKey
+      if (!schema || !primaryKey) {
         return;
       }
 
-      realm.write(() => {
-        const realmObj = realm.objectForPrimaryKey(schema.name, obj.object[schema.primaryKey])
-        realm.delete(realmObj)
-      });
+      try {
+        realm.write(() => {
+          const realmObj = realm.objectForPrimaryKey(schema.name, obj.object[primaryKey]);
+          realm.delete(realmObj);
+        });
+      }
+      catch (err) {
+        responder.error(err.message);
+      }
+
 
       const objects = realm.objects(obj.schema);
       this.connection.send('getObjects', {objects: objects});

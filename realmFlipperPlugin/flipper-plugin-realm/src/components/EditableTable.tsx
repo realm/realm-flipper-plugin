@@ -79,8 +79,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
   let childNode = children;
 
   if (editable) {
-    // console.log(children.map(v => '"'+v+'"'))
-    // console.log(children)
     childNode = editing ? (
       <Form.Item
         style={{ margin: 0 }}
@@ -94,7 +92,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onBlur={save}
           />
         ) : (
-            // React.Ref<HTMLInputElement>
           <InputNumber
             style={{ width: "100%" }}
             ref={inputRef as unknown as React.Ref<HTMLInputElement>}
@@ -205,14 +202,6 @@ export default (props: {
   return (
     <div>
       <Table
-        onRow={(record, rowIndex) => {
-          return {
-            onContextMenu: (event) => {
-              console.log(event);
-            },
-          };
-        }}
-        locale={{ emptyText: "Empty" }}
         components={components}
         rowClassName={() => "editable-row"}
         bordered
