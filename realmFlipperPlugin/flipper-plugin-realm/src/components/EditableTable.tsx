@@ -9,15 +9,11 @@ import {
 } from "antd";
 import type { FormInstance } from "antd/es/form";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { SchemaPropertyValue } from "..";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-interface Item {
-  key: string;
-  name: string;
-  age: string;
-  address: string;
-}
+type Item = Object
 
 interface EditableRowProps {
   index: number;
@@ -89,12 +85,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
       <Form.Item
         style={{ margin: 0 }}
         name={dataIndex}
-        // rules={[
-        //   {
-        //     required: true,
-        //     message: `${title} is required.`,
-        //   },
-        // ]}
       >
         {!numeric ? (
           <Input
@@ -104,9 +94,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
             onBlur={save}
           />
         ) : (
+            // React.Ref<HTMLInputElement>
           <InputNumber
             style={{ width: "100%" }}
-            ref={inputRef}
+            ref={inputRef as unknown as React.Ref<HTMLInputElement>}
             onPressEnter={save}
             onBlur={save}
           />
@@ -126,8 +117,15 @@ type EditableTableProps = Parameters<typeof Table>[0];
 
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
+type GenericColumn = {
+    title: string;
+    key: string;
+    dataIndex: string;
+    property: SchemaPropertyValue;
+}
+
 export default (props: {
-  columns: ColumnTypes;
+  columns: GenericColumn[];
   data: Object[];
   primaryKey: String;
   modifyObject: Function;
@@ -136,7 +134,7 @@ export default (props: {
 }) => {
   const dataSource = props.data;
 
-  const handleSave = (row) => {
+  const handleSave = (row: Item) => {
     props.modifyObject(row);
     // for now do not handle errors
   };
@@ -150,11 +148,11 @@ export default (props: {
     };
   });
 
-  const deleteRow = (row) => {
+  const deleteRow = (row: Item) => {
     props.removeObject(row);
   };
 
-  const dropDown = (row) => (
+  const dropDown = (row: Item) => (
     <Menu>
       <Menu.Item key={1} onClick={() => deleteRow(row)}>
         Delete selected {props.schemaName}{" "}
@@ -162,7 +160,7 @@ export default (props: {
     </Menu>
   );
 
-  const renderValue = (value, property, row) => {
+  const renderValue = (value: any, property: SchemaPropertyValue, row: Item) => {
     return (
       <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
         <div>
@@ -176,17 +174,17 @@ export default (props: {
     );
   };
 
-  const columns = defaultColumns.map((col) => {
-    col = {
-      ...col,
-      render: (val, row) => renderValue(val, col.property, row),
+  const columns = defaultColumns.map((oldCol) => {
+    let col = {
+      ...oldCol,
+      render: (val: any, row: Item) => renderValue(val, col.property, row),
     };
     if (!col.editable) {
       return col;
     }
     return {
       ...col,
-      onCell: (record) => ({
+      onCell: (record: Item) => ({
         record,
         editable: col.editable,
         dataIndex: col.dataIndex,
