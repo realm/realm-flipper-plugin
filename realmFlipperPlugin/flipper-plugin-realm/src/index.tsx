@@ -8,7 +8,6 @@ import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 
 import React from "react";
 import { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
-import ViewSelecter from './components/ViewSelecter';
 import DataVisualizer from './pages/DataVisualizer';
 import { RealmQueryLanguage, addToHistory } from "./pages/RealmQueryLanguage";
 import SchemaVisualizer from './pages/SchemaVisualizer';
@@ -22,7 +21,6 @@ export type RealmPluginState = {
   query: String,
   errorMsg?: String
   selectedSchema: string,
-  selectedDataView: 'object' | 'table'
 }
 
 export type SchemaResponseObject = {
@@ -104,7 +102,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     viewMode: "data",
     query: "",
     selectedSchema: '',
-    selectedDataView: 'object',
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -194,25 +191,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateDataViewMode = (event: {
-    viewMode: 'object' | 'table';
-  }) => {
-    pluginState.update((state) => {
-      state.selectedDataView = event.viewMode;
-     // state.error = null;
-    });
-  };
-
   client.onConnect( () => {
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm};
 }
 
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
       instance.updateViewMode({ viewMode: evt.target.value ?? "data" });
@@ -235,7 +222,6 @@ export function Component() {
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
-        <ViewSelecter></ViewSelecter>
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
             <TableOutlined style={{ marginRight: 5 }} />
@@ -262,7 +248,7 @@ export function Component() {
          />
       ) : null}
       {state.viewMode === "schemas" ? (
-        <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
+        <SchemaVisualizer schemas={state.schemas} selectedSchema = {state.selectedSchema}></SchemaVisualizer>
       ) : null}
       {state.viewMode === "RQL" ? (
         <>

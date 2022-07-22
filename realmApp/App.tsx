@@ -53,10 +53,10 @@ const BananaSchema = {
     color: 'string',
     length: 'int',
     weight: 'int',
+    task: 'Task?',
   },
   primaryKey: '_id',
 };
-
 
 const AllTypes = {
   name: 'AllTypes',
@@ -85,14 +85,15 @@ const MaybeSchema = {
   name: 'Maybe',
   properties: {
     _id: 'int',
-    name: 'string?'
+    name: 'string?',
   },
   primaryKey: '_id',
-}
+};
 
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes],
+  schemaVersion: 2,
 });
 
 addPlugin({
@@ -128,6 +129,7 @@ function createToDo() {
 
 function createBanana() {
   let banana1;
+  console.log(realm.objects('Task').slice(0, 1));
   realm.write(() => {
     banana1 = realm.create('Banana', {
       _id: Math.floor(Math.random() * 100000),
@@ -135,6 +137,7 @@ function createBanana() {
       color: 'yellow',
       length: 40,
       weight: 500,
+      task: realm.objects('Task').slice(0, 1),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
@@ -167,7 +170,7 @@ function createAllTypes() {
       mixed: new Date('August 17, 2020'),
       uuid: new UUID(),
     });
-    console.log(allTypes.data)
+    console.log(allTypes.data);
     console.log(`created one banana: ${allTypes.name} with id ${allTypes._id}`);
   });
 }
