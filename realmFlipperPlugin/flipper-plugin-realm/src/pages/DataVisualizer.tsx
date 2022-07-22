@@ -3,7 +3,7 @@ import { Layout } from "flipper-plugin";
 import { Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
-import {renderText} from '../utils/Renderer'
+import { renderText } from "../utils/Renderer";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -16,7 +16,7 @@ export default function DataVisualizer(props: {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
   };
 
-  // Return buttons + objectView or tableView
+  // Return buttons + tableView
   return (
     <Layout.ScrollContainer>
       <Layout.Container>
@@ -63,9 +63,11 @@ export default function DataVisualizer(props: {
             <Tooltip
               placement="topLeft"
               title={renderText(text)}
+              /**title={text}*/
               key={Math.floor(Math.random() * 10000000)}
             >
               {renderText(text)}
+              {/**text*/}
             </Tooltip>
           );
         },
@@ -82,11 +84,16 @@ export default function DataVisualizer(props: {
     });
 
     const rowObjs = props.objects.map((obj, id) => {
+      Object.keys(obj).forEach((x) =>
+        console.log(x + ": " + obj[x] + " key: " + id)
+      );
       return {
         ...obj,
         key: id,
       };
     });
+
+    // const rowObjs = renderRows(props.objects, currentSchema);
 
     return (
       <Layout.Container height={800}>
@@ -107,3 +114,19 @@ export default function DataVisualizer(props: {
     );
   }
 }
+
+// function renderRows(objects: Object[], schema: SchemaResponseObject) {
+//   const primaryKey = schema.primaryKey;
+//   const name = schema.name;
+
+//   objects.map((obj) =>
+//     Object.keys(schema.properties).forEach((propKey) => {
+//       const currentField = schema.properties[propKey];
+
+//       switch (currentField) {
+//         case "double" | "double?":
+//           return currentField;
+//       }
+//     })
+//   );
+// }

@@ -7,15 +7,17 @@
  */
 
 import React from 'react';
-import {useEffect} from 'react';
 import Realm from 'realm';
-import BSON from 'realm';
 
 import type {Node} from 'react';
-const {UUID, Decimal128} = Realm.BSON;
-// import bigDecimal from 'js-big-decimal';
-// var bigDecimal = require('js-big-decimal');
-import bigdecimal from 'bigdecimal';
+import {createAllTypesTestData} from './TestData/createAllTypesTestData';
+
+import {
+  BananaSchema,
+  AllTypesSchema,
+  TaskSchema,
+  MaybeSchema,
+} from './TestData/Schemas';
 
 import {
   SafeAreaView,
@@ -38,64 +40,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-// Schema for Realm
-const TaskSchema = {
-  name: 'Task',
-  properties: {
-    _id: 'int',
-    name: 'string',
-    status: 'string?',
-  },
-  primaryKey: '_id',
-};
-
-const BananaSchema = {
-  name: 'Banana',
-  properties: {
-    _id: 'int',
-    name: 'string',
-    color: 'string',
-    length: 'int',
-    weight: 'int',
-  },
-  primaryKey: '_id',
-};
-
-const AllTypes = {
-  name: 'AllTypes',
-  properties: {
-    _id: 'uuid',
-    bool: 'bool',
-    int: 'int',
-    float: 'float',
-    double: 'double',
-    string: 'string?',
-    decimal128: 'decimal128',
-    //objectId: 'objectId',
-    data: 'data',
-    date: 'date',
-    list: 'int[]',
-    //linkingObjects: 'linkingObjects',
-    dictionary: '{}',
-    set: 'int<>',
-    mixed: 'mixed',
-    uuid: 'uuid',
-  },
-  primaryKey: '_id',
-};
-
-const MaybeSchema = {
-  name: 'Maybe',
-  properties: {
-    _id: 'int',
-    name: 'string?',
-  },
-  primaryKey: '_id',
-};
-
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
 });
 
 addPlugin({
@@ -104,7 +51,7 @@ addPlugin({
   },
   onConnect(connection) {
     const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes]},
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
       [realm],
       connection,
     );
@@ -140,41 +87,6 @@ function createBanana() {
       weight: 500,
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
-  });
-}
-
-function createAllTypes() {
-  let allTypes;
-  realm.write(() => {
-    allTypes = realm.create('AllTypes', {
-      _id: new UUID(),
-      bool: true,
-      int: 888,
-      float: 3.1415,
-      double: 3.1415, 
-      string: 'string',
-      // decimal128: new bigDecimal(3.2342342353454),
-       decimal128: Decimal128.fromString(
-        '123456.123456789012345678901234567890',
-      ),
-      //objectId: 'objectId',
-      data: new ArrayBuffer(6),
-      date: new Date('1995-12-17T03:24:00'),
-      list: [1, 1, 2, 3, 5, 8, 13],
-      //linkingObjects: 'linkingObjects',
-      dictionary: {
-        windows: 5,
-        doors: 3,
-        color: 'red',
-        address: 'Summerhill St.',
-        price: 400123,
-      },
-      set: [1, 2, 3, 4],
-      mixed: new Date('August 17, 2020'),
-      uuid: new UUID(),
-    });
-    console.log(allTypes.data);
-    console.log(`created one banana: ${allTypes.name} with id ${allTypes._id}`);
   });
 }
 
@@ -232,7 +144,9 @@ const App: () => Node = () => {
           <Button title="create Banana" onPress={createBanana}>
             {' '}
           </Button>
-          <Button title="create AllTypes" onPress={createAllTypes}>
+          <Button
+            title="Delete + create AllTypes Testdata"
+            onPress={() => createAllTypesTestData(realm)}>
             {' '}
           </Button>
           <Section title="See Your Changes">
