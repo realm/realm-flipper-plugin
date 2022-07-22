@@ -1,10 +1,14 @@
 export function renderText(text: any): string {
-    let returnText;
-
-    typeof text === "object"
-      ? (returnText = JSON.stringify(text))
-      : typeof text === "boolean"
-      ? (returnText = text.toString())
-      : (returnText = text);
-    return returnText;
+  if (text.hasOwnProperty("$numberDecimal")) {
+    return text.$numberDecimal;
   }
+
+  switch (typeof text) {
+    case "object":
+      return JSON.stringify(text);
+    case "boolean":
+      return text.toString();
+    default:
+      return text;
+  }
+}
