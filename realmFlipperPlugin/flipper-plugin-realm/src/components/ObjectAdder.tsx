@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { SchemaPropertyValue, SchemaResponseObject } from "..";
-import { Modal, Radio, InputNumber, Input, Layout, Tag, Button } from "antd";
+import { Modal, Radio, InputNumber, Input, Layout, Tag, Button, RadioChangeEvent } from "antd";
 import { CopyOutlined } from '@ant-design/icons';
 
 import React from "react";
+import { TypeInput } from "./types/CommonInput";
 
 const forEachProp = (props: {
     [key: string]: SchemaPropertyValue;
@@ -57,44 +58,21 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
         }
     }
     const renderProperty = (property: SchemaPropertyValue, isPrimary: boolean) => {
-
-        // setObject(obj => {
-        //     obj[property.name] = getDefault(property.type)
-        // })
         if (!property.optional)
             values[property.name] = getDefault(property.type)
         else
             values[property.name] = null
 
-        const renderInput = () => {
-            console.log('property', property.name, 'value: ', values[property.name])
-            return (
-                <Input
-                key={inputReset}
-                placeholder={property.optional ? "null" : undefined}
-                defaultValue={values[property.name]}
-                onChange={(v) => {
-                    // user change
-                    if (v.type == 'change')
-                        values[property.name] = v.target.value 
-                    else
-                        values[property.name] = null
-                    }}
-                allowClear={property.optional}
-                />
-            )
-        }
-
-        const renderIntInput = () => {
-            return (
-                <InputNumber
-                key={inputReset} defaultValue={values[property.name]}
-                style={{width: '100%'}}
-                onChange={(v) => { values[property.name] = v }}
-                placeholder={property.optional ? "null" : undefined}
-                />
-            )
-        }
+        // const renderInput = (type: String) => {
+        //     switch (type) {
+        //         case 'int':
+        //             return renderIntInput();
+        //         case 'string':
+        //             return renderStringInput();
+        //         case 'bool':
+        //             return renderBoolInput();
+        //     }
+        // }
 
         return (
             <Layout>
@@ -107,7 +85,7 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
                     </span>
                 </Layout.Header>
                 <Layout.Content>
-                {property.type === 'int' ? renderIntInput() : renderInput()}
+                {<TypeInput property={property} values={values} inputReset={inputReset} />}
                 </Layout.Content>
             </Layout>
         )
