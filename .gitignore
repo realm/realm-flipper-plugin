@@ -300,3 +300,6 @@ google-services.json
 
 realmFlipperPlugin/flipper-plugin-realm/yarn.lock
 realmFlipperPlugin/flipper-plugin-realm/package-lock.json
+realmApp/yarn.lock
+realmApp/package-lock.json
+realmApp/yarn.lock

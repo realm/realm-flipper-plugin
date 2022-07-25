@@ -1,87 +1,129 @@
 import React from "react";
-import { useState } from "react";
-import { Layout, DataTable, useMemoize } from "flipper-plugin";
-import { Radio } from "antd";
-import Prettyjson from "../components/Prettyjson";
-import { Value } from "../utils/TypeBasedValueRenderer";
+import { Layout } from "flipper-plugin";
+import { Dropdown, Menu, Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
-import { createColumnConfig } from "../pages/SchemaVisualizer";
+import ObjectAdder from "../components/ObjectAdder";
+import { parseRows } from "../utils/Parser";
+import EditableTable from "../components/EditableTable";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
   schemas: Array<SchemaResponseObject>;
   getObjects: Function;
   selectedSchema: String;
+  addObject: Function;
+  modifyObject: Function;
+  removeObject: Function;
 }) {
-  // State to switch between views. true = objectView, false = tableView
-  const [objectView, setView] = useState(true);
+  const getCurrentSchema = () => {
+    return props.schemas.find((schema) => schema.name === props.selectedSchema);
+  };
 
-  // Return buttons + objectView or tableView
+  // Return buttons + tableView
   return (
     <Layout.ScrollContainer>
       <Layout.Container>
         <Radio.Group>
-          <Radio.Button onClick={() => setView(true)}>Object View</Radio.Button>
-          <Radio.Button onClick={() => setView(false)}>Table View</Radio.Button>
+          {
+            <ObjectAdder
+              schema={getCurrentSchema()}
+              addObject={props.addObject}
+            />
+          }
         </Radio.Group>
       </Layout.Container>
       <Layout.Container>
-        {objectView ? <ObjectView /> : <TableView />}
+        <TableView />
       </Layout.Container>
     </Layout.ScrollContainer>
   );
 
-  // Render objectView
-  function ObjectView() {
-    // Map over all objects and genereate a Prettyjson component for each.
-    return (
-      <Layout.Container>
-        {props.objects.map((obj) => {
-          return (
-            //@ts-ignore
-            <Prettyjson key={obj._id} json={obj}>
-              {" "}
-            </Prettyjson>
-          );
-        })}
-      </Layout.Container>
-    );
-  }
-
-  // Render TableView
   function TableView() {
-    // Find the selected schema in the schemas array. Take the keys of the schema and put them into an array.
-    const columns = Object.keys(
-      props.schemas.find((schema) => schema.name === props.selectedSchema)
-        .properties
-    ).map((x) => {
-      return x;
-    });
-
-    // Genereate a list of column objects.
-    const columnObjs: Array<Object> = useMemoize(
-      (columns: string[]) => createColumnConfig(columns),
-      [columns]
+    const currentSchema = props.schemas.find(
+      (schema) => schema.name === props.selectedSchema
     );
 
-    // Instantiate an array with row objects and fill it with data.
-    const rows: Array<Object> = [];
-    props.objects.forEach(function (obj: Object) {
-      let rowObj: { [key: string]: Value } = {};
-      columns.forEach(function (key) {
-        rowObj[key] = { type: typeof obj[key], value: obj[key] };
-      });
-      rows.push(rowObj);
+    if (currentSchema === undefined) {
+      return <Layout.Container>Please select schema.</Layout.Container>;
+    }
+
+    const deleteRow = (row: Object) => {
+      props.removeObject(row);
+    };
+  
+    const dropDown = (row: Object) => (
+      <Menu>
+        <Menu.Item key={1} onClick={() => deleteRow(row)}>
+          Delete selected {currentSchema.name}{" "}
+        </Menu.Item>
+      </Menu>
+    );
+
+    const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
+      const property = currentSchema.properties[propName];
+
+      return {
+        title: property.optional
+          ? property.name + " [" + property.type + "?]"
+          : property.name + " [" + property.type + "]",
+        key: property.name,
+        dataIndex: property.name,
+        width: 150,
+        ellipsis: {
+          showTitle: false,
+        },
+        property,
+        render: (text: any, row: Object) => {
+          return (
+            <>
+
+            <Tooltip
+              placement="topLeft"
+              title={text}
+              key={Math.floor(Math.random() * 10000000)}
+            >
+              <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+              {text}
+              </Dropdown>
+
+            </Tooltip>
+            </>
+          );
+        },
+        sorter: (a: any, b: any) => {
+          if (a[propName] > b[propName]) {
+            return 1;
+          } else if (a[propName] < b[propName]) {
+            return -1;
+          } else {
+            return 0;
+          }
+        },
+      };
     });
 
-    // Render a data table and return it.
+    const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
+
+// Table properties need to be merged with EditableTable.
+    //        <Table
+//          dataSource={rowObjs}
+//          columns={columnObjs}
+//          sticky={true}
+//          pagination={{
+//            position: ["topLeft", "bottomLeft"],
+//            defaultPageSize: 20,
+//            showSizeChanger: true,
+//            pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+//            showQuickJumper: true,
+//          }}
+//          size="small"
+//        />
     return (
       <Layout.Container height={800}>
-        <DataTable<{ [key: string]: Value }>
-          records={rows}
-          columns={columnObjs}
-          enableSearchbar={false}
-        />
+
+      {/* <Table dataSource={rowObjs} columns={columns}/> */}
+      {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject} schemaName={props.selectedSchema} removeObject={props.removeObject}></EditableTable>}
+
       </Layout.Container>
     );
   }

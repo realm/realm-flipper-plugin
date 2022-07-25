@@ -7,9 +7,21 @@
  */
 
 import React from 'react';
-import {useEffect, useState} from 'react';
 import Realm from 'realm';
+
 import type {Node} from 'react';
+
+import {createAllTypesTestData} from './TestData/createAllTypesTestData';
+
+const {UUID} = Realm.BSON;
+
+import {
+  BananaSchema,
+  AllTypesSchema,
+  TaskSchema,
+  MaybeSchema,
+} from './TestData/Schemas';
+
 import {
   SafeAreaView,
   ScrollView,
@@ -30,34 +42,32 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-// Schema for Realm
-const TaskSchema = {
-  name: 'Task',
-  properties: {
-    _id: 'int',
-    name: 'string',
-    status: 'string?',
-  },
-  primaryKey: '_id',
-};
 
-const BananaSchema = {
-  name: 'Banana',
-  properties: {
-    _id: 'int',
-    name: 'string',
-    color: 'string',
-    length: 'int',
-    weight: 'int',
-  },
-  primaryKey: '_id',
-};
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
+  path: "main"
 });
 
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Disconnected');
+  },
+});
+
+//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -80,6 +90,7 @@ function createBanana() {
       color: 'yellow',
       length: 40,
       weight: 500,
+      task: realm.objects('Task').slice(0, 1),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
@@ -152,10 +163,9 @@ const App: () => Node = () => {
           <Button title="create Banana" onPress={createBanana}>
             {' '}
           </Button>
-          <Button title="delete Banana" onPress={deleteBanana}>
-            {' '}
-          </Button>
-          <Button title="edit Banana" onPress={editBanana}>
+          <Button
+            title="Delete + create AllTypes Testdata"
+            onPress={() => createAllTypesTestData(realm)}>
             {' '}
           </Button>
           <Section title="See Your Changes">
