@@ -93,8 +93,8 @@ export default React.memo((props: {realms: Realm[]}) => {
 
           connection.send('executeQuery', res);
         });
-        this.connection.receive('addObject', obj => {
-          const realm = this.realmsMap.get(obj.realm);
+        connection.receive('addObject', obj => {
+          const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
@@ -104,10 +104,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
 
           const objects = realm.objects(obj.schema);
-          this.connection.send('getObjects', {objects: objects});
+          connection.send('getObjects', {objects: objects});
         });
-        this.connection.receive('modifyObject', obj => {
-          const realm = this.realmsMap.get(obj.realm);
+        connection.receive('modifyObject', obj => {
+          const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
@@ -116,10 +116,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
 
           const objects = realm.objects(obj.schema);
-          this.connection.send('getObjects', {objects: objects});
+          connection.send('getObjects', {objects: objects});
         });
-        this.connection.receive('removeObject', (obj, responder) => {
-          const realm = this.realmsMap.get(obj.realm);
+        connection.receive('removeObject', (obj, responder) => {
+          const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
@@ -145,7 +145,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
 
           const objects = realm.objects(obj.schema);
-          this.connection.send('getObjects', {objects: objects});
+          connection.send('getObjects', {objects: objects});
         });
 
         const onObjectsChange = (objects, changes) => {
