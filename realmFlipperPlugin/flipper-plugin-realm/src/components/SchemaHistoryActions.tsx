@@ -25,10 +25,10 @@ export default () => {
       }, [state.selectedSchema]);
     return(
         <span style={{position: "absolute", top: 10, right: 10, zIndex: 1}}>
-            <Button disabled={state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
+            <Button disabled={!state.realms.length || !state.schemas.length || state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
                 <ArrowLeftOutlined style={{marginRight: 5}} />
             </Button>
-            <Button disabled={state.schemaHistoryIndex===state.schemaHistory.length-1} onClick={goForward} value="object">
+            <Button disabled={!state.realms.length || !state.schemas.length || state.schemaHistoryIndex===state.schemaHistory.length-1} onClick={goForward} value="object">
                 <ArrowRightOutlined style={{marginRight: 5}} />
             </Button>
         </span>
