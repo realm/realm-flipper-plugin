@@ -16,6 +16,7 @@ export const TaskSchema = {
       color: 'string',
       length: 'int',
       weight: 'int',
+      task: 'Task?',
     },
     primaryKey: '_id',
   };
