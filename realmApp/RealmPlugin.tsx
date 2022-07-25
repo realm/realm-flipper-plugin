@@ -15,6 +15,7 @@ export default React.memo((props: {realms: Realm[]}) => {
   const forceUpdate = useForceUpdate();
   let realmsMap = new Map<string, Realm>();
   let currentCollection: Realm.Results<Realm.Object>;
+  let currentRealm: Realm | undefined;
   const {realms} = props;
   useEffect(() => {
     realms.forEach(realm => {
@@ -34,12 +35,21 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         connection.receive('getObjects', obj => {
+          if (currentRealm) {
+            currentRealm.removeAllListeners();
+          }
           const realm = realmsMap.get(obj.realm);
-          realm?.removeAllListeners();
-          realm?.addListener('change', () => {
-            console.log('big listener fires');
-            forceUpdate();
-          });
+          try {
+            realm?.addListener('change', () => {
+              console.log('big listener fires');
+              forceUpdate();
+            });
+            currentRealm = realm;
+          } catch (error) {
+            console.error(
+              `An exception was thrown within the change listener: ${error}`,
+            );
+          }
           const schema = obj.schema;
           if (!realm) {
             return;
@@ -73,10 +83,13 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
+          if (currentCollection) {
+            currentCollection.removeAllListeners();
+          }
           const objs = realm.objects(obj.schema);
           try {
-            objs.removeAllListeners();
-            //objs.addListener(onObjectsChange);
+            objs.addListener(onObjectsChange);
+            currentCollection = objs;
           } catch (error) {
             console.error(
               `An exception was thrown within the change listener: ${error}`,
