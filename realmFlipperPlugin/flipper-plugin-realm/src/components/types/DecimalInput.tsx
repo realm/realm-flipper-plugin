@@ -5,16 +5,17 @@ import { TypeInputProps } from "./CommonInput";
 
 export const DecimalInput = ({
   property,
-  values,
+  setter,
+  value,
   inputReset,
 }: TypeInputProps) => {
   const onChange = (value: string) => {
-    values[property.name] = new bigDecimal(value);
+    setter(new bigDecimal(value));
   };
   return (
     <InputNumber
       key={inputReset}
-      defaultValue={values[property.name]}
+      defaultValue={value}
       style={{ width: "100%" }}
       onChange={onChange}
       placeholder={property.optional ? "null" : undefined}

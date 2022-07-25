@@ -5,15 +5,15 @@ import uuid from 'react-native-uuid';
 
 export const UUIDInput = ({
   property,
-  values,
+  value,
+  setter,
   inputReset,
 }: TypeInputProps) => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(value);
   const onChange = (value: string) => {
     console.log('onchange', value);
-    setContent(value)
-    // content = value;
-    values[property.name] = value;
+    setContent(value);
+    setter(value);
   };
   // TODO handling invalid uuids?
   return (
@@ -28,9 +28,7 @@ export const UUIDInput = ({
     />
     <Button onClick={() => { 
         setContent(uuid.v4().toString())
-        // content = '12345'
-        values[property.name] = content;
-        console.log(content)
+        setter(content);
         } }>
         refresh
     </Button>

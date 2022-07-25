@@ -4,7 +4,7 @@ import { Modal, Radio, InputNumber, Input, Layout, Tag, Button, RadioChangeEvent
 import { CopyOutlined } from '@ant-design/icons';
 
 import React from "react";
-import { TypeInput } from "./types/CommonInput";
+import { getDefault, TypeInput } from "./types/CommonInput";
 
 const forEachProp = (props: {
     [key: string]: SchemaPropertyValue;
@@ -24,6 +24,7 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
     }
     const [visible, setVisible] = useState(false);
     const [inputReset, setInputReset] = useState(0);
+    let toClear = [];
 
     const showModal = () => {
         values = {};
@@ -31,6 +32,7 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
     };
 
     const hideModal = () => {
+        // toClear = toClear.forEach()
         values = {};
         setInputReset(inputReset + 1);
         setVisible(false);
@@ -46,38 +48,33 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
 
         hideModal();
     }
-    const getDefault = (type: String) => {
-        if (type === 'string') {
-            return ''
-        }
-        else if (type === 'int') {
-            return 0
-        }
-        else {
-            return null
-        }
-    }
-    const renderProperty = (property: SchemaPropertyValue, isPrimary: boolean) => {
-        if (!property.optional)
-            values[property.name] = getDefault(property.type)
-        else
-            values[property.name] = null
 
-        // const renderInput = (type: String) => {
-        //     switch (type) {
-        //         case 'int':
-        //             return renderIntInput();
-        //         case 'string':
-        //             return renderStringInput();
-        //         case 'bool':
-        //             return renderBoolInput();
-        //     }
-        // }
+    const renderProperty = (property: SchemaPropertyValue, isPrimary: boolean) => {
+        values[property.name] = getDefault(property)
+
+        let name; 
+        switch (property.type) {
+            case 'list':
+                name = property.objectType + '[]';
+                break;
+            case 'set':
+                name = property.objectType + '<>';
+                break;
+            default:
+                name = property.type;
+                break;
+        }
+        
+        const setter = (val: any) => {
+            values[property.name] = val;
+        }
+
+        const value = getDefault(property)
 
         return (
             <Layout>
                 <Layout.Header style={{ paddingLeft: 0, paddingRight: 0}}>
-                    {property.name}
+                    {name}
                     <span style={{ float: 'right'}}>
                     <Tag color='default'>{property.type}</Tag>
                     {!property.optional ? <Tag color='blue'>required</Tag> : null}
@@ -85,11 +82,12 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
                     </span>
                 </Layout.Header>
                 <Layout.Content>
-                {<TypeInput property={property} values={values} inputReset={inputReset} />}
+                <TypeInput property={property} setter={setter} value={value} inputReset={inputReset} />
                 </Layout.Content>
             </Layout>
         )
     }
+    console.log('here')
 
     return (
         <Layout.Content>
@@ -99,7 +97,7 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
         <Modal
             title={'Create '+schema.name}
             visible={visible}
-            onOk={addObject}
+            onOk={() => addObject()}
             onCancel={hideModal}
             okText="Create"
             cancelText="Cancel"

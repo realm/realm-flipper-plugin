@@ -39,6 +39,7 @@ export type SchemaPropertyValue = {
   optional: boolean;
   type: string;
   mapTo: string;
+  objectType?: string;
 };
 
 type Events = {

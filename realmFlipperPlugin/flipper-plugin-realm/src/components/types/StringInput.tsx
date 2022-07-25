@@ -4,20 +4,21 @@ import { TypeInputProps } from './CommonInput';
 
 export const StringInput = ({
     property,
-    values,
+    setter,
+    value,
     inputReset
 }: TypeInputProps) => {
     return (
         <Input
         key={inputReset}
         placeholder={property.optional ? "null" : undefined}
-        defaultValue={values[property.name]}
+        defaultValue={value}
         onChange={(v) => {
             // user change vs clear button
             if (v.type == 'change')
-                values[property.name] = v.target.value 
+                setter(v.target.value)
             else
-                values[property.name] = null
+                setter(null)
             }}
         allowClear={property.optional}
         />
