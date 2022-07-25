@@ -8,8 +8,10 @@ export const ListInput = ({
   value,
   inputReset,
 }: TypeInputProps) => {
+  const array = value;
+  const setArray = setter;
   // TODO: handle non primitive
-  const [array, setArray] = useState(value);
+  //   const [array, setArray] = useState(value);
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -26,7 +28,8 @@ export const ListInput = ({
     <Input.Group key={inputReset}>
       {array.map((value: any, index: number) => {
         return (
-          <TypeInput key={index}
+          <TypeInput
+            key={index}
             property={innerProp}
             setter={(val) => {
               let arr = array;

@@ -9,10 +9,9 @@ export const UUIDInput = ({
   setter,
   inputReset,
 }: TypeInputProps) => {
-  const [content, setContent] = useState(value);
   const onChange = (value: string) => {
     console.log('onchange', value);
-    setContent(value);
+    // setContent(value);
     setter(value);
   };
   // TODO handling invalid uuids?
@@ -20,15 +19,15 @@ export const UUIDInput = ({
     <Input.Group>
     <Input
       key={inputReset}
-      value={content}
+      value={value}
       onChange={v => onChange(v.target.value)}
       placeholder={property.optional ? "null" : undefined}
       allowClear={property.optional}
-      status={uuid.validate(content) ? "" : "error"}
+      status={uuid.validate(value) ? "" : "error"}
     />
     <Button onClick={() => { 
-        setContent(uuid.v4().toString())
-        setter(content);
+        setter(uuid.v4().toString())
+        // setter(content);
         } }>
         refresh
     </Button>
