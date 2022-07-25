@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout } from "flipper-plugin";
-import { Radio, Table, Tooltip } from "antd";
+import { Dropdown, Menu, Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
@@ -47,6 +47,18 @@ export default function DataVisualizer(props: {
       return <Layout.Container>Please select schema.</Layout.Container>;
     }
 
+    const deleteRow = (row: Object) => {
+      props.removeObject(row);
+    };
+  
+    const dropDown = (row: Object) => (
+      <Menu>
+        <Menu.Item key={1} onClick={() => deleteRow(row)}>
+          Delete selected {currentSchema.name}{" "}
+        </Menu.Item>
+      </Menu>
+    );
+
     const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
       const property = currentSchema.properties[propName];
 
@@ -60,16 +72,22 @@ export default function DataVisualizer(props: {
         ellipsis: {
           showTitle: false,
         },
-
-        render: (text: any) => {
+        property,
+        render: (text: any, row: Object) => {
           return (
+            <>
+
             <Tooltip
               placement="topLeft"
               title={text}
               key={Math.floor(Math.random() * 10000000)}
             >
+              <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
               {text}
+              </Dropdown>
+
             </Tooltip>
+            </>
           );
         },
         sorter: (a: any, b: any) => {
@@ -87,10 +105,7 @@ export default function DataVisualizer(props: {
     const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
 
 // Table properties need to be merged with EditableTable.
-
-    return (
-      <Layout.Container height={800}>
-//        <Table
+    //        <Table
 //          dataSource={rowObjs}
 //          columns={columnObjs}
 //          sticky={true}
@@ -103,6 +118,9 @@ export default function DataVisualizer(props: {
 //          }}
 //          size="small"
 //        />
+    return (
+      <Layout.Container height={800}>
+
       {/* <Table dataSource={rowObjs} columns={columns}/> */}
       {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject} schemaName={props.selectedSchema} removeObject={props.removeObject}></EditableTable>}
 
