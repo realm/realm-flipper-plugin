@@ -10,9 +10,6 @@ export default () => {
     const state = useValue(instance.state);
       const goBack = useCallback(() => {
         const newSelectedSchema = state.schemaHistory[state.schemaHistoryIndex-1]
-        console.log(state.schemaHistory)
-        console.log(state.schemaHistoryIndex)
-        console.log(newSelectedSchema)
         if (!newSelectedSchema) {
             return;
         }
@@ -21,9 +18,6 @@ export default () => {
     
       const goForward = useCallback(() => {
         const newSelectedSchema = state.schemaHistory[state.schemaHistoryIndex+1]
-        console.log(state.schemaHistory)
-        console.log(state.schemaHistoryIndex)
-        console.log(newSelectedSchema)
         if (!newSelectedSchema) {
             return;
         }
@@ -34,7 +28,7 @@ export default () => {
             <Button disabled={state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
                 <ArrowLeftOutlined style={{marginRight: 5}} />
             </Button>
-            <Button disabled={state.schemaHistoryIndex===state.schemaHistory.length} onClick={goForward} value="object">
+            <Button disabled={state.schemaHistoryIndex===state.schemaHistory.length-1} onClick={goForward} value="object">
                 <ArrowRightOutlined style={{marginRight: 5}} />
             </Button>
         </span>

@@ -108,7 +108,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: "",
     selectedSchema: '',
     schemaHistory: [],
-    schemaHistoryIndex: 0
+    schemaHistoryIndex: 1
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -186,7 +186,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     let newHistory = Array.from(state.schemaHistory);
     let index = state.schemaHistoryIndex;
-    newHistory.splice(index)
+    newHistory.splice(index+1)
     newHistory.push(event.schema)
     let length = newHistory.length-1
     pluginState.set({
