@@ -13,7 +13,9 @@ export function parseRows(
       const currentPropObject = schema.properties[propKey]
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
-
+      if (currentFieldValue === undefined) {
+        return;
+      }
       if (currentFieldValue === null) {
         returnObj[propKey] = "null";
         return;
