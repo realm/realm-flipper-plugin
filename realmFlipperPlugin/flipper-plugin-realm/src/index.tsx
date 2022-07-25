@@ -157,14 +157,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
-    console.log("live", data)
     const state = pluginState.get();
     const {newObject} = data;
     pluginState.set({...state, objects: [...state.objects, newObject]});
   })
 
   client.onMessage("liveObjectDeleted", (data: DeleteLiveObjectRequest) => {
-    console.log("live", data)
     const state = pluginState.get();
     const newObjects = [...state.objects];
     newObjects.splice(data.index, 1);
@@ -172,7 +170,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.onMessage("liveObjectEdited", (data: EditLiveObjectRequest) => {
-    console.log("live", data)
     const state = pluginState.get();
     const {newObject} = data;
     const newObjects = [...state.objects];
@@ -226,10 +223,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const updateSelectedSchema = (event: {schema: string}) => {
     const state = pluginState.get();
     let newHistory = Array.from(state.schemaHistory);
-    let index = state.schemaHistoryIndex;
+    const index = state.schemaHistoryIndex;
     newHistory.splice(index+1)
     newHistory.push(event.schema)
-    let length = newHistory.length-1
+    const length = newHistory.length-1
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
