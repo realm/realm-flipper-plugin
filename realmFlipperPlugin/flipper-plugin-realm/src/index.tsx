@@ -27,7 +27,7 @@ export type SchemaResponseObject = {
   name: string;
   embedded: boolean;
   asymmetric: boolean;
-  primaryKey: String;
+  primaryKey: string;
   properties: { [key: string]: SchemaPropertyValue };
 };
 
@@ -37,6 +37,7 @@ export type SchemaPropertyValue = {
   optional: boolean;
   type: string;
   mapTo: string;
+  objectType?: string;
 };
 
 type Events = {

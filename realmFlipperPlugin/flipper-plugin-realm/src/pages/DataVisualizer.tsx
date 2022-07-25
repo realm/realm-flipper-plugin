@@ -1,11 +1,9 @@
 import React from "react";
-import { useState } from "react";
-import { Layout, DataTable, DataTableColumn, useMemoize } from "flipper-plugin";
-import { Radio, Table } from "antd";
-import Prettyjson from "../components/Prettyjson";
-import { Value, renderValue } from "../utils/TypeBasedValueRenderer";
+import { Layout } from "flipper-plugin";
+import { Radio, Table, Tooltip } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
+import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
 
 export default function DataVisualizer(props: {
@@ -17,39 +15,28 @@ export default function DataVisualizer(props: {
   modifyObject: Function;
   removeObject: Function;
 }) {
-
   const getCurrentSchema = () => {
-    return props.schemas.find(schema => schema.name === props.selectedSchema);
-  }
-  // Return buttons + objectView or tableView
+    return props.schemas.find((schema) => schema.name === props.selectedSchema);
+  };
+
+  // Return buttons + tableView
   return (
     <Layout.ScrollContainer>
       <Layout.Container>
-        { <TableView />}
+        <Radio.Group>
+          {
+            <ObjectAdder
+              schema={getCurrentSchema()}
+              addObject={props.addObject}
+            />
+          }
+        </Radio.Group>
+      </Layout.Container>
+      <Layout.Container>
+        <TableView />
       </Layout.Container>
     </Layout.ScrollContainer>
   );
-
-  // Render objectView
-  function ObjectView() {
-    if (props.selectedSchema !== "") {
-      // Map over all objects and genereate a Prettyjson component for each.
-      return (
-        <Layout.Container>
-          {props.objects.map((obj) => {
-            return (
-              //@ts-ignore
-              <Prettyjson key={obj._id} json={obj}>
-                {" "}
-              </Prettyjson>
-            );
-          })}
-        </Layout.Container>
-      );
-    } else {
-      return <Layout.Container>Please select schema.</Layout.Container>;
-    }
-  }
 
   function TableView() {
     const currentSchema = props.schemas.find(
@@ -62,39 +49,64 @@ export default function DataVisualizer(props: {
 
     const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
       const property = currentSchema.properties[propName];
+
       return {
-        title: property.name + " [" + property.type + "]",
+        title: property.optional
+          ? property.name + " [" + property.type + "?]"
+          : property.name + " [" + property.type + "]",
         key: property.name,
         dataIndex: property.name,
-        sorter: (a, b) => {
+        width: 150,
+        ellipsis: {
+          showTitle: false,
+        },
+
+        render: (text: any) => {
+          return (
+            <Tooltip
+              placement="topLeft"
+              title={text}
+              key={Math.floor(Math.random() * 10000000)}
+            >
+              {text}
+            </Tooltip>
+          );
+        },
+        sorter: (a: any, b: any) => {
           if (a[propName] > b[propName]) {
             return 1;
-          }
-          else if (a[propName] < b[propName]) {
+          } else if (a[propName] < b[propName]) {
             return -1;
-          }
-          else {
+          } else {
             return 0;
           }
         },
-        onFilter: (value: string, record: any) => record[propName].startsWith(value),
-        filterSearch: true,
-        property: property
       };
     });
 
-    const rowObjs = props.objects.map((obj, id) => {
-      return {
-        ...obj,
-        key: id
-      }
-    })
+    const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
+
+// Table properties need to be merged with EditableTable.
 
     return (
       <Layout.Container height={800}>
+//        <Table
+//          dataSource={rowObjs}
+//          columns={columnObjs}
+//          sticky={true}
+//          pagination={{
+//            position: ["topLeft", "bottomLeft"],
+//            defaultPageSize: 20,
+//            showSizeChanger: true,
+//            pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+//            showQuickJumper: true,
+//          }}
+//          size="small"
+//        />
       {/* <Table dataSource={rowObjs} columns={columns}/> */}
       {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject} schemaName={props.selectedSchema} removeObject={props.removeObject}></EditableTable>}
+
       </Layout.Container>
-    )
+    );
   }
 }
