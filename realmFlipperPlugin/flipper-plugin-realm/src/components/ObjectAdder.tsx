@@ -67,7 +67,6 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
             values[property.name] = null
 
         const renderInput = () => {
-            console.log('property', property.name, 'value: ', values[property.name])
             return (
                 <Input
                 key={inputReset}

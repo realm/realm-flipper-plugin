@@ -9,10 +9,13 @@ export default () => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state);
       const goBack = useCallback(() => {
+        console.log(state.selectedSchema);
+        console.log("history",state.schemaHistory);
         const newSelectedSchema = state.schemaHistory[state.schemaHistoryIndex-1]
         if (!newSelectedSchema) {
             return;
         }
+        instance.getObjects({realm: state.selectedRealm,schema: newSelectedSchema});
         instance.goBackSchemaHistory({schema: newSelectedSchema});
       }, [state.selectedSchema]);
     
@@ -21,14 +24,15 @@ export default () => {
         if (!newSelectedSchema) {
             return;
         }
+        instance.getObjects({realm: state.selectedRealm,schema: newSelectedSchema});
         instance.goForwardSchemaHistory({schema: newSelectedSchema});
       }, [state.selectedSchema]);
     return(
         <span style={{position: "absolute", top: 10, right: 10, zIndex: 1}}>
-            <Button disabled={!state.realms.length || !state.schemas.length || state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
+            <Button disabled={!state.realms.length || !state.schemas.length || state.selectedSchema==="" || state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
                 <ArrowLeftOutlined style={{marginRight: 5}} />
             </Button>
-            <Button disabled={!state.realms.length || !state.schemas.length || state.schemaHistoryIndex===state.schemaHistory.length-1} onClick={goForward} value="object">
+            <Button disabled={!state.realms.length || !state.schemas.length || state.selectedSchema==="" || state.schemaHistoryIndex===state.schemaHistory.length-1} onClick={goForward} value="object">
                 <ArrowRightOutlined style={{marginRight: 5}} />
             </Button>
         </span>
