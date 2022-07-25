@@ -47,24 +47,8 @@ import {
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
-  path: "main"
-});
-
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
-      [realm],
-      connection,
-    );
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
+  path: "main",
+  schemaVersion: 12,
 });
 
 //realmPlugin.newfunc();
@@ -90,7 +74,6 @@ function createBanana() {
       color: 'yellow',
       length: 40,
       weight: 500,
-      task: realm.objects('Task').slice(0, 1),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
@@ -161,6 +144,12 @@ const App: () => Node = () => {
             {' '}
           </Button>
           <Button title="create Banana" onPress={createBanana}>
+            {' '}
+          </Button>
+          <Button title="edit Banana" onPress={editBanana}>
+            {' '}
+          </Button>
+          <Button title="delete Banana" onPress={deleteBanana}>
             {' '}
           </Button>
           <Button
