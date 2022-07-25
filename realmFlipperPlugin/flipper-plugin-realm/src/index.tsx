@@ -8,7 +8,6 @@ import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 
 import React from "react";
 import { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
-import ViewSelecter from './components/ViewSelecter';
 import DataVisualizer from './pages/DataVisualizer';
 import { RealmQueryLanguage, addToHistory } from "./pages/RealmQueryLanguage";
 import SchemaVisualizer from './pages/SchemaVisualizer';
@@ -22,7 +21,6 @@ export type RealmPluginState = {
   query: String,
   errorMsg?: String
   selectedSchema: string,
-  selectedDataView: 'object' | 'table'
 }
 
 export type SchemaResponseObject = {
@@ -54,7 +52,9 @@ type Methods = {
   getObjects: (data: SchemaRequest) => Promise<Object[]>
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
   getRealms: () => Promise<string[]>
-  addObject: (object: AddObject) => Promise<any>; 
+  addObject: (object: AddObject) => Promise<any>;
+  modifyObject: (newObject: AddObject) => Promise<any>;
+  removeObject: (object: AddObject) => Promise<any>;
 }
 
 type AddObject = {
@@ -105,7 +105,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     viewMode: "data",
     query: "",
     selectedSchema: '',
-    selectedDataView: 'object',
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -175,7 +174,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Object) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    // console.log('addObject in index', object)
     client.send('addObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
   }
 
@@ -195,25 +194,31 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateDataViewMode = (event: {
-    viewMode: 'object' | 'table';
-  }) => {
-    pluginState.update((state) => {
-      state.selectedDataView = event.viewMode;
-     // state.error = null;
-    });
-  };
+  client.onConnect( () => {
+    getRealms();
+  });
+
+  const modifyObject = (newObject: Object) => {
+    const state = pluginState.get();
+    // console.log('addObject in index', object)
+    client.send('modifyObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: newObject})
+  }
+
+  const removeObject = (object: Object) => {
+    const state = pluginState.get();
+
+    client.send('removeObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
+  }
 
   client.onConnect( () => {
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateDataViewMode, updateSelectedRealm};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject};
 }
 
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
       instance.updateViewMode({ viewMode: evt.target.value ?? "data" });
@@ -236,7 +241,6 @@ export function Component() {
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
-        <ViewSelecter></ViewSelecter>
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
             <TableOutlined style={{ marginRight: 5 }} />
@@ -244,7 +248,7 @@ export function Component() {
           </Radio.Button>
           <Radio.Button onClick={onSchemasClicked} value="schemas">
             <SettingOutlined style={{ marginRight: 5 }} />
-            <Typography.Text>Schemas</Typography.Text>
+            <Typography.Text>Schema</Typography.Text>
           </Radio.Button>
           <Radio.Button onClick={onRQLClicked} value="RQL">
             <ConsoleSqlOutlined style={{ marginRight: 5 }} />
@@ -260,10 +264,12 @@ export function Component() {
           getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
           addObject={instance.addObject}
+          modifyObject={instance.modifyObject}
+          removeObject={instance.removeObject}
          />
       ) : null}
       {state.viewMode === "schemas" ? (
-        <SchemaVisualizer schemas={state.schemas}></SchemaVisualizer>
+        <SchemaVisualizer schemas={state.schemas} selectedSchema = {state.selectedSchema}></SchemaVisualizer>
       ) : null}
       {state.viewMode === "RQL" ? (
         <>

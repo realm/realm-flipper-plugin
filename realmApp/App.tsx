@@ -10,7 +10,10 @@ import React from 'react';
 import Realm from 'realm';
 
 import type {Node} from 'react';
+
 import {createAllTypesTestData} from './TestData/createAllTypesTestData';
+
+const {UUID} = Realm.BSON;
 
 import {
   BananaSchema,
@@ -39,6 +42,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
 
 // Open a Realm
 const realm = new Realm({
@@ -78,6 +82,7 @@ function createToDo() {
 
 function createBanana() {
   let banana1;
+  console.log(realm.objects('Task').slice(0, 1));
   realm.write(() => {
     banana1 = realm.create('Banana', {
       _id: Math.floor(Math.random() * 100000),
@@ -85,6 +90,7 @@ function createBanana() {
       color: 'yellow',
       length: 40,
       weight: 500,
+      task: realm.objects('Task').slice(0, 1),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });

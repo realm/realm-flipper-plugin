@@ -1,12 +1,9 @@
 import {
     Button, Select
 } from 'antd';
-import {
-    Toolbar,styled, usePlugin, useValue, useMemoize
-} from 'flipper-plugin';
-import React from 'react';
-import { useCallback } from 'react';
-import {plugin} from '../index';
+import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+import React, { useCallback } from 'react';
+import { plugin } from '../index';
 
 const {Option} = Select;
 
@@ -61,7 +58,7 @@ const BoldSpan = styled.span({
         dropdownMatchSelectWidth={false}>
         {realmOptions}
         </Select>
-    <BoldSpan>Schema</BoldSpan>
+    <BoldSpan>Object type</BoldSpan>
     <Select
         showSearch
         value={state.selectedSchema}

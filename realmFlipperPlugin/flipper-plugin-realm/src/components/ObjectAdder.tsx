@@ -73,7 +73,13 @@ export default (props: {schema: SchemaResponseObject | undefined, addObject: Fun
                 key={inputReset}
                 placeholder={property.optional ? "null" : undefined}
                 defaultValue={values[property.name]}
-                onChange={(v) => { values[property.name] = v.target.value } }
+                onChange={(v) => {
+                    // user change
+                    if (v.type == 'change')
+                        values[property.name] = v.target.value 
+                    else
+                        values[property.name] = null
+                    }}
                 allowClear={property.optional}
                 />
             )
