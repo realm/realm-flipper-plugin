@@ -72,7 +72,6 @@ function createColumnConfig(columns: string[]) {
   return columnObjs;
 }
     function renderTableCells(value: string, type: string, column: string, record) {
-      console.log("RECORD",record);
       if (column === "objectType" && isPropertyLinked(record)) {
         return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>
       }
