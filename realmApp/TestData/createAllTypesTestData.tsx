@@ -58,7 +58,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: new Date('August 17, 2020'),
+    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
