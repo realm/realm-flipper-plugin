@@ -24,7 +24,7 @@ export default () => {
         instance.goForwardSchemaHistory({schema: newSelectedSchema});
       }, [state.selectedSchema]);
     return(
-        <span style={{position: "absolute", top: 80, right: 0, zIndex: 1}}>
+        <span style={{position: "absolute", top: 10, right: 10, zIndex: 1}}>
             <Button disabled={state.schemaHistoryIndex===0}  value="table" onClick={goBack}>
                 <ArrowLeftOutlined style={{marginRight: 5}} />
             </Button>
