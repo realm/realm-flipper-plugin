@@ -14,9 +14,8 @@ type PluginConfig = {
 export default React.memo((props: {realms: Realm[]}) => {
   const forceUpdate = useForceUpdate();
   let realmsMap = new Map<string, Realm>();
+  let currentCollection: Realm.Results<Realm.Object>;
   const {realms} = props;
-  console.log(props);
-  console.log(realms);
   useEffect(() => {
     realms.forEach(realm => {
       realmsMap.set(realm.path, realm);
@@ -36,6 +35,7 @@ export default React.memo((props: {realms: Realm[]}) => {
 
         connection.receive('getObjects', obj => {
           const realm = realmsMap.get(obj.realm);
+          realm?.removeAllListeners();
           realm?.addListener('change', () => {
             console.log('big listener fires');
             forceUpdate();
@@ -44,11 +44,13 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
+          if (currentCollection) {
+            currentCollection.removeAllListeners();
+          }
           const objects = realm.objects(schema);
           try {
-            console.log(connection);
-            objects.removeAllListeners;
             objects.addListener(onObjectsChange);
+            currentCollection = objects;
           } catch (error) {
             console.error(
               `An exception was thrown within the change listener: ${error}`,
@@ -73,7 +75,8 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           const objs = realm.objects(obj.schema);
           try {
-            objs.addListener(onObjectsChange);
+            objs.removeAllListeners();
+            //objs.addListener(onObjectsChange);
           } catch (error) {
             console.error(
               `An exception was thrown within the change listener: ${error}`,
@@ -149,8 +152,8 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
+          console.log('small listener fires');
           changes.deletions.forEach(index => {
-            console.log(`small listener fires`, connection);
             if (connection) {
               connection.send('liveObjectDeleted', {index: index});
             }
@@ -158,7 +161,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           // Handle newly added Dog objects
           changes.insertions.forEach(index => {
             const inserted = objects[index];
-            console.log(`small listener fires`);
             if (connection) {
               connection.send('liveObjectAdded', {newObject: inserted});
             }
@@ -166,7 +168,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           // Handle Dog objects that were modified
           changes.modifications.forEach(index => {
             const modified = objects[index];
-            console.log(`small listener fires`, connection);
             if (connection) {
               connection.send('liveObjectEdited', {
                 newObject: modified,
