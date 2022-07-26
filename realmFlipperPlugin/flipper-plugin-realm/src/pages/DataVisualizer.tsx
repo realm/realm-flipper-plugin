@@ -5,6 +5,7 @@ import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
+import { ColumnTitle } from "../components/ColumnTitle";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -62,20 +63,20 @@ export default function DataVisualizer(props: {
     const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
       const property = currentSchema.properties[propName];
 
+      const objectType: string | undefined = property.objectType;
+      const isPrimaryKey = currentSchema.primaryKey === property.name;
+
       return {
         title: () => {
-          if (currentSchema.primaryKey === property.name) {
-            return (
-              <div>
-                {property.name + " [" + property.type + "] "}
-                <Tag color="green">Primary Key</Tag>
-              </div>
-            );
-          } else if (property.optional) {
-            return property.name + " [" + property.type + "?]";
-          } else {
-            return property.name + " [" + property.type + "]";
-          }
+          return (
+            <ColumnTitle
+              isOptional={property.optional}
+              name={property.name}
+              objectType={objectType}
+              propertyType={property.type}
+              isPrimaryKey={isPrimaryKey}
+            />
+          );
         },
         key: property.name,
         dataIndex: property.name,
