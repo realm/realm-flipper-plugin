@@ -16,6 +16,7 @@ export const TaskSchema = {
       color: 'string',
       length: 'int',
       weight: 'int',
+      task: 'Task?',
     },
     primaryKey: '_id',
   };
@@ -35,7 +36,6 @@ export const TaskSchema = {
       date: 'date',
       list: 'int[]',
       linkingObjects: 'AllTypes?',
-      linkedBanana: 'Banana?',
       dictionary: '{}',
       set: 'int<>',
       mixed: 'mixed',

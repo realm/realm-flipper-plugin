@@ -153,24 +153,6 @@ export default (props: {
     </Menu>
   );
 
-  const renderValue = (
-    value: any,
-    property: SchemaPropertyValue,
-    row: Item
-  ) => {
-    return (
-      <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
-        <div>
-          {property.optional && value === null
-            ? "null"
-            : property.type === "string"
-            ? '"' + value + '"'
-            : value}
-        </div>
-      </Dropdown>
-    );
-  };
-
   const columns = defaultColumns.map((col) => {
     if (!col.editable) {
       return col;

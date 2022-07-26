@@ -4,12 +4,12 @@ export function parseRows(
   objects: Object[],
   schema: SchemaResponseObject,
   schemas: Array<SchemaResponseObject>
-): {}[] {
+) {
   let rows = objects.map((obj: any, index: number) => {
     let returnObj = { key: index };
-    console.log(obj);
 
     Object.keys(schema.properties).forEach((propKey: string) => {
+
       const currentPropObject = schema.properties[propKey];
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
@@ -19,7 +19,6 @@ export function parseRows(
       }
 
       if (currentFieldValue === null) {
-        //@ts-ignore
         returnObj[propKey] = "null";
         return;
       }
@@ -28,7 +27,7 @@ export function parseRows(
 
       switch (currentRealmPropType) {
         case "string":
-          stringForPrint = parseString(currentFieldValue);
+          stringForPrint = '"' + currentFieldValue + '"';
           break;
         case "double":
         case "int":
@@ -36,29 +35,37 @@ export function parseRows(
         case "objectId":
         case "date":
         case "uuid":
-          stringForPrint = parseSimpleData(currentFieldValue);
+          stringForPrint = currentFieldValue;
           break;
         case "list":
         case "set":
-          stringForPrint = parseSetOrList(currentFieldValue);
+          stringForPrint = "[" + currentFieldValue + "]";
           break;
         case "data":
         case "dictionary":
-          stringForPrint = parseDataOrDictionary(currentFieldValue);
+          stringForPrint = JSON.stringify(currentFieldValue);
           break;
         case "bool":
-          stringForPrint = parseBoolean(currentFieldValue);
+          stringForPrint = currentFieldValue.toString();
           break;
         case "decimal128":
-          stringForPrint = parseDecimal128(currentFieldValue);
+          stringForPrint = currentFieldValue.$numberDecimal;
           break;
         case "object":
-          stringForPrint = parseLinkedObject(
-            schema,
-            schemas,
-            currentFieldValue,
-            propKey
+          let childSchema = schemas.find(
+            (s) => s.name === schema.properties[propKey].objectType
           );
+          if (childSchema === undefined) {
+            break;
+          }
+          stringForPrint =
+            "[" +
+            childSchema.name +
+            "]" +
+            "." +
+            childSchema.primaryKey +
+            " : " +
+            currentFieldValue[childSchema.primaryKey];
           break;
         case "mixed":
           stringForPrint = JSON.stringify(currentFieldValue);
@@ -70,6 +77,7 @@ export function parseRows(
     return returnObj;
   });
   return rows;
+
 }
 
 function parseString(input: string): string {
