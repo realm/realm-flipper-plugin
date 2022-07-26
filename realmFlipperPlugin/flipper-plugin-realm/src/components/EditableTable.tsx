@@ -142,7 +142,7 @@ export default (props: {
       ...col,
       editable:
         col.property.type !== "data" && col.property.name != props.primaryKey,
-      width: ((1 / props.columns.length) * 100).toFixed(2) + "%",
+      width: 250,
     };
   });
 
@@ -158,25 +158,9 @@ export default (props: {
     </Menu>
   );
 
-  const renderValue = (value: any, property: SchemaPropertyValue, row: Item) => {
-    return (
-      <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
-        <div>
-          {property.optional && value === null
-            ? "null"
-            : property.type === "string"
-            ? '"' + value + '"'
-            : value}
-        </div>
-      </Dropdown>
-    );
-  };
 
-  const columns = defaultColumns.map((oldCol) => {
-    let col = {
-      ...oldCol,
-      render: (val: any, row: Item) => renderValue(val, col.property, row),
-    };
+  const columns = defaultColumns.map((col) => {
+
     if (!col.editable) {
       return col;
     }
@@ -208,7 +192,17 @@ export default (props: {
         bordered
         dataSource={dataSource}
         columns={columns as ColumnTypes}
-      />
+        pagination={{
+          position: ["topLeft", "bottomLeft"],
+          defaultPageSize: 20,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+          showQuickJumper: true,
+        }}
+        size="small"
+        scroll={{ x: '600' }}      />
     </div>
   );
 };
+
+
