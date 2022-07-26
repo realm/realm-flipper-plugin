@@ -34,7 +34,7 @@ import {
 } from 'react-native';
 
 import {addPlugin} from 'react-native-flipper';
-import {RealmPlugin} from './RealmPlugin';
+import RealmPlugin from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -66,6 +66,7 @@ addPlugin({
   onDisconnect() {
     console.log('Disconnected');
   },
+  schemaVersion: 12,
 });
 
 //realmPlugin.newfunc();
@@ -84,7 +85,6 @@ function createToDo() {
 
 function createBanana() {
   let banana1;
-  console.log(realm.objects('Task').slice(0, 1));
   realm.write(() => {
     banana1 = realm.create('Banana', {
       _id: Math.floor(Math.random() * 100000),
@@ -92,9 +92,20 @@ function createBanana() {
       color: 'yellow',
       length: 40,
       weight: 500,
-      task: realm.objects('Task').slice(0, 1),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
+  });
+}
+
+function deleteBanana() {
+  realm.write(() => {
+    realm.delete(realm.objects('Banana')[0]);
+  });
+}
+
+function editBanana() {
+  realm.write(() => {
+    realm.objects('Banana')[0].name = 'Maximillian';
   });
 }
 
@@ -133,6 +144,7 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
+      <RealmPlugin realms={[realm]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -150,6 +162,12 @@ const App: () => Node = () => {
             {' '}
           </Button>
           <Button title="create Banana" onPress={createBanana}>
+            {' '}
+          </Button>
+          <Button title="edit Banana" onPress={editBanana}>
+            {' '}
+          </Button>
+          <Button title="delete Banana" onPress={deleteBanana}>
             {' '}
           </Button>
           <Button

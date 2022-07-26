@@ -132,8 +132,9 @@ export default (props: {
   const dataSource = props.data;
 
   const handleSave = (row: Item) => {
-    props.modifyObject(row);
-    // for now do not handle errors
+    // dont update for now
+    // props.modifyObject(row);
+
   };
 
   const defaultColumns = props.columns.map((col) => {

@@ -101,6 +101,19 @@ export default function DataVisualizer(props: {
                 {text}
               </Tooltip>
             </Dropdown>
+            <>
+
+            <Tooltip
+              placement="topLeft"
+              title={text}
+              key={Math.floor(Math.random() * 10000000)}
+            >
+              <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+              {text}
+              </Dropdown>
+
+            </Tooltip>
+            </>
           );
         },
         sorter: (a: any, b: any) => {
