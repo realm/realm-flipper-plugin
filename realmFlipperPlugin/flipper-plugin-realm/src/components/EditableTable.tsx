@@ -13,7 +13,7 @@ import { SchemaPropertyValue } from "..";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-type Item = Object
+type Item = Object;
 
 interface EditableRowProps {
   index: number;
@@ -80,10 +80,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   if (editable) {
     childNode = editing ? (
-      <Form.Item
-        style={{ margin: 0 }}
-        name={dataIndex}
-      >
+      <Form.Item style={{ margin: 0 }} name={dataIndex}>
         {!numeric ? (
           <Input
             style={{ width: "100%" }}
@@ -115,11 +112,11 @@ type EditableTableProps = Parameters<typeof Table>[0];
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
 type GenericColumn = {
-    title: string;
-    key: string;
-    dataIndex: string;
-    property: SchemaPropertyValue;
-}
+  title: string;
+  key: string;
+  dataIndex: string;
+  property: SchemaPropertyValue;
+};
 
 export default (props: {
   columns: GenericColumn[];
@@ -132,8 +129,8 @@ export default (props: {
   const dataSource = props.data;
 
   const handleSave = (row: Item) => {
-    props.modifyObject(row);
-    // for now do not handle errors
+    // dont update for now
+    // props.modifyObject(row);
   };
 
   const defaultColumns = props.columns.map((col) => {
@@ -141,7 +138,6 @@ export default (props: {
       ...col,
       editable:
         col.property.type !== "data" && col.property.name != props.primaryKey,
-      width: 250,
     };
   });
 
@@ -157,9 +153,25 @@ export default (props: {
     </Menu>
   );
 
+  const renderValue = (
+    value: any,
+    property: SchemaPropertyValue,
+    row: Item
+  ) => {
+    return (
+      <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+        <div>
+          {property.optional && value === null
+            ? "null"
+            : property.type === "string"
+            ? '"' + value + '"'
+            : value}
+        </div>
+      </Dropdown>
+    );
+  };
 
   const columns = defaultColumns.map((col) => {
-
     if (!col.editable) {
       return col;
     }
@@ -191,6 +203,7 @@ export default (props: {
         bordered
         dataSource={dataSource}
         columns={columns as ColumnTypes}
+        sticky={true}
         pagination={{
           position: ["topLeft", "bottomLeft"],
           defaultPageSize: 20,
@@ -199,9 +212,7 @@ export default (props: {
           showQuickJumper: true,
         }}
         size="small"
-        scroll={{ x: '600' }}      />
+      />
     </div>
   );
 };
-
-

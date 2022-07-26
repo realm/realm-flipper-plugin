@@ -63,18 +63,12 @@ export default function DataVisualizer(props: {
       const property = currentSchema.properties[propName];
 
       return {
-        // title: property.optional
-        //   ? property.name + " [" + property.type + "?]"
-        //   : property.name + " [" + property.type + "]",
-
         title: () => {
-          if (currentSchema.primaryKey === propName) {
+          if (currentSchema.primaryKey === property.name) {
             return (
               <div>
                 {property.name + " [" + property.type + "] "}
-                <Tag color="green" key="1">
-                  Primary Key
-                </Tag>
+                <Tag color="green">Primary Key</Tag>
               </div>
             );
           } else if (property.optional) {
@@ -83,9 +77,9 @@ export default function DataVisualizer(props: {
             return property.name + " [" + property.type + "]";
           }
         },
-
         key: property.name,
         dataIndex: property.name,
+        width: 300,
         ellipsis: {
           showTitle: false,
         },
@@ -117,26 +111,13 @@ export default function DataVisualizer(props: {
 
     const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
 
-    // Table properties need to be merged with EditableTable.
-    //        <Table
-    //          dataSource={rowObjs}
-    //          columns={columnObjs}
-    //          sticky={true}
-    //          pagination={{
-    //            position: ["topLeft", "bottomLeft"],
-    //            defaultPageSize: 20,
-    //            showSizeChanger: true,
-    //            pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
-    //            showQuickJumper: true,
-    //          }}
-    //          size="small"
-    //        />
     return (
       <Layout.Container height={800}>
         {/* <Table dataSource={rowObjs} columns={columns}/> */}
         {
           <EditableTable
             data={rowObjs}
+            //@ts-ignore
             columns={columnObjs}
             primaryKey={currentSchema.primaryKey}
             modifyObject={props.modifyObject}
