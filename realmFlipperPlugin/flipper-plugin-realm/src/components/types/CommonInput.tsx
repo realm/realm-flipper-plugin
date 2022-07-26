@@ -8,12 +8,15 @@ import { IntInput } from "./IntInput";
 import { StringInput } from "./StringInput";
 import { UUIDInput } from "./UUIDInput";
 import { ListInput } from "./ListInput";
+import moment from "moment";
+// import {Date} from "moment";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
   setter: (val: any) => void;
   value: any;
   inputReset: number;
+  style?: Object;
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {
@@ -28,7 +31,7 @@ export const getDefault = (property: SchemaPropertyValue) => {
     case "bool":
       return false;
     case "date":
-      return new Date();
+      return moment(new Date());
     case "uuid":
       return uuid.v4();
     case "decimal128":
@@ -50,6 +53,7 @@ export const TypeInput = (props: TypeInputProps) => {
     setter: props.setter,
     value: props.value,
     inputReset: props.inputReset,
+    style: props.style
   };
 
   switch (props.property.type) {

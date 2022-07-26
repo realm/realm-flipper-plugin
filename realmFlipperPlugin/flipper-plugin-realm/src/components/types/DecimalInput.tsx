@@ -8,15 +8,16 @@ export const DecimalInput = ({
   setter,
   value,
   inputReset,
+  style
 }: TypeInputProps) => {
   const onChange = (value: string) => {
     setter(new bigDecimal(value));
   };
   return (
     <InputNumber
+    style={style}
       key={inputReset}
       defaultValue={value}
-      style={{ width: "100%" }}
       onChange={onChange}
       placeholder={property.optional ? "null" : undefined}
       stringMode

@@ -4,13 +4,13 @@ import React from "react";
 import { TypeInputProps } from "./CommonInput";
 
 
-export const DateInput =  ({ property, setter, value, inputReset }: TypeInputProps) =>{
+export const DateInput =  ({ property, setter, value, inputReset, style }: TypeInputProps) =>{
     const onChange = (value: moment.Moment | null, dateString: string) => {
         setter(value?.toDate());
     }
-    return <></>
     return (
         <DatePicker
+        style={style}
         key={inputReset}
         defaultValue={value}
         format="DD-MM-YYYY HH:mm:ss.SSS"

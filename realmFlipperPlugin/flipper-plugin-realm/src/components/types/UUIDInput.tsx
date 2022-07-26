@@ -8,6 +8,7 @@ export const UUIDInput = ({
   value,
   setter,
   inputReset,
+  style
 }: TypeInputProps) => {
   const onChange = (value: string) => {
     console.log('onchange', value);
@@ -20,13 +21,14 @@ export const UUIDInput = ({
     <Input
       key={inputReset}
       value={value}
+      style={style}
       onChange={v => onChange(v.target.value)}
       placeholder={property.optional ? "null" : undefined}
       allowClear={property.optional}
       status={uuid.validate(value) ? "" : "error"}
     />
     <Button onClick={() => { 
-        setter(uuid.v4().toString())
+        setter(uuid.v4())
         // setter(content);
         } }>
         refresh

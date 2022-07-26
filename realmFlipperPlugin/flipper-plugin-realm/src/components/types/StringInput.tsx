@@ -6,13 +6,15 @@ export const StringInput = ({
     property,
     setter,
     value,
-    inputReset
+    inputReset,
+    style
 }: TypeInputProps) => {
     return (
         <Input
         key={inputReset}
         placeholder={property.optional ? "null" : undefined}
         defaultValue={value}
+        style={style}
         onChange={(v) => {
             // user change vs clear button
             if (v.type == 'change')
