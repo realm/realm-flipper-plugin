@@ -49,7 +49,7 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
   path: "main",
 
-  schemaVersion: 13
+  schemaVersion: 14
 });
 
 addPlugin({
