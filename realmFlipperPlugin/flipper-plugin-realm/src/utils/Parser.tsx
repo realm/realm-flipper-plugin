@@ -9,12 +9,15 @@ export function parseRows(
     let returnObj = { key: index };
 
     Object.keys(schema.properties).forEach((propKey: string) => {
-      const currentPropObject = schema.properties[propKey]
+
+      const currentPropObject = schema.properties[propKey];
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
+
       if (currentFieldValue === undefined) {
         return;
       }
+
       if (currentFieldValue === null) {
         returnObj[propKey] = "null";
         return;
@@ -70,9 +73,58 @@ export function parseRows(
       }
       // @ts-ignore
       returnObj[propKey] = stringForPrint;
-      
     });
     return returnObj;
   });
   return rows;
+
+}
+
+function parseString(input: string): string {
+  return input;
+}
+
+function parseSimpleData(input: string): string {
+  return input;
+}
+
+function parseSetOrList(input: []): string {
+  return "[" + input + "]";
+}
+
+function parseDataOrDictionary(input: {}): string {
+  return JSON.stringify(input);
+}
+
+function parseBoolean(input: boolean): string {
+  return input.toString();
+}
+
+function parseDecimal128(input: { $numberDecimal: string }): string {
+  return input.$numberDecimal;
+}
+
+function parseLinkedObject(
+  schema: SchemaResponseObject,
+  schemas: Array<SchemaResponseObject>,
+  linkedObj: {},
+  key: string
+): string {
+  let stringForPrint = "";
+  let childSchema: SchemaResponseObject | undefined = schemas.find(
+    (s) => s.name === schema.properties[key].objectType
+  );
+  if (childSchema !== undefined) {
+    stringForPrint =
+      "[" +
+      childSchema.name +
+      "]" +
+      "." +
+      childSchema.primaryKey +
+      ": " +
+      //@ts-ignore
+      linkedObj[childSchema.primaryKey];
+  }
+
+  return stringForPrint;
 }

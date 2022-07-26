@@ -48,7 +48,28 @@ import {
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
   path: "main",
-  schemaVersion: 12,
+
+  schemaVersion: 13
+});
+
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Disconnected');
+  },
+
+
+
 });
 
 //realmPlugin.newfunc();
