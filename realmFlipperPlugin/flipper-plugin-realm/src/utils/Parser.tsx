@@ -4,23 +4,18 @@ export function parseRows(
   objects: Object[],
   schema: SchemaResponseObject,
   schemas: Array<SchemaResponseObject>
-): {}[] {
+) {
   let rows = objects.map((obj: any, index: number) => {
     let returnObj = { key: index };
 
     Object.keys(schema.properties).forEach((propKey: string) => {
-
       const currentPropObject = schema.properties[propKey]
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
-
-      console.log(schema.properties[propKey]);
-if (currentFieldValue === undefined) {
-    return;
-}
-
+      if (currentFieldValue === undefined) {
+        return;
+      }
       if (currentFieldValue === null) {
-        //@ts-ignore
         returnObj[propKey] = "null";
         return;
       }
@@ -29,7 +24,7 @@ if (currentFieldValue === undefined) {
 
       switch (currentRealmPropType) {
         case "string":
-          stringForPrint = parseString(currentFieldValue);
+          stringForPrint = '"' + currentFieldValue + '"';
           break;
         case "double":
         case "int":
@@ -37,29 +32,37 @@ if (currentFieldValue === undefined) {
         case "objectId":
         case "date":
         case "uuid":
-          stringForPrint = parseSimpleData(currentFieldValue);
+          stringForPrint = currentFieldValue;
           break;
         case "list":
         case "set":
-          stringForPrint = parseSetOrList(currentFieldValue);
+          stringForPrint = "[" + currentFieldValue + "]";
           break;
         case "data":
         case "dictionary":
-          stringForPrint = parseDataOrDictionary(currentFieldValue);
+          stringForPrint = JSON.stringify(currentFieldValue);
           break;
         case "bool":
-          stringForPrint = parseBoolean(currentFieldValue);
+          stringForPrint = currentFieldValue.toString();
           break;
         case "decimal128":
-          stringForPrint = parseDecimal128(currentFieldValue);
+          stringForPrint = currentFieldValue.$numberDecimal;
           break;
         case "object":
-          stringForPrint = parseLinkedObject(
-            schema,
-            schemas,
-            currentFieldValue,
-            propKey
+          let childSchema = schemas.find(
+            (s) => s.name === schema.properties[propKey].objectType
           );
+          if (childSchema === undefined) {
+            break;
+          }
+          stringForPrint =
+            "[" +
+            childSchema.name +
+            "]" +
+            "." +
+            childSchema.primaryKey +
+            " : " +
+            currentFieldValue[childSchema.primaryKey];
           break;
         case "mixed":
           stringForPrint = JSON.stringify(currentFieldValue);
@@ -67,57 +70,9 @@ if (currentFieldValue === undefined) {
       }
       // @ts-ignore
       returnObj[propKey] = stringForPrint;
+      
     });
     return returnObj;
   });
-  return rows
-}
-
-function parseString(input: string): string {
-  return input;
-}
-
-function parseSimpleData(input: string): string {
-  return input;
-}
-
-function parseSetOrList(input: []): string {
-  return "[" + input + "]";
-}
-
-function parseDataOrDictionary(input: {}): string {
-  return JSON.stringify(input);
-}
-
-function parseBoolean(input: boolean): string {
-  return input.toString();
-}
-
-function parseDecimal128(input: { $numberDecimal: string }): string {
-  return input.$numberDecimal;
-}
-
-function parseLinkedObject(
-  schema: SchemaResponseObject,
-  schemas: Array<SchemaResponseObject>,
-  linkedObj: {},
-  key: string
-): string {
-  let stringForPrint = "";
-  let childSchema: SchemaResponseObject | undefined = schemas.find(
-    (s) => s.name === schema.properties[key].objectType
-  );
-  if (childSchema !== undefined) {
-    stringForPrint =
-      "[" +
-      childSchema.name +
-      "]" +
-      "." +
-      childSchema.primaryKey +
-      ": " +
-      //@ts-ignore
-      linkedObj[childSchema.primaryKey];
-  }
-
-  return stringForPrint;
+  return rows;
 }
