@@ -65,8 +65,6 @@ export function createAllTypesTestData(realm: Realm) {
   realm.write(() => {
     realm.create('AllTypes', AllTypes2);
   });
-<<<<<<< HEAD
-=======
 
   let banana1id = Math.floor(Math.random() * 100000);
 
@@ -148,5 +146,4 @@ export function createAllTypesTestData(realm: Realm) {
   realm.write(() => {
     realm.create('AllTypes', AllTypes3);
   });
->>>>>>> d2e32ad (Test data for lists, sets and objects.)
 }

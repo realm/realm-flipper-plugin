@@ -5,12 +5,9 @@ export function parseRows(
   schema: SchemaResponseObject,
   schemas: Array<SchemaResponseObject>
 ) {
-<<<<<<< HEAD
-=======
   console.log("SCHEMA");
   console.log(schema);
 
->>>>>>> f765a13 (Improved Parser for printing lists and sets.)
   let rows = objects.map((obj: any, index: number) => {
     let returnObj = { key: index };
 
@@ -130,8 +127,6 @@ function parseLinkedObject(
 function parseMixed(input: any): string {
   return JSON.stringify(input);
 }
-<<<<<<< HEAD
-=======
 
 function parseJavaScriptTypes(input: any): string {
   const type = typeof input;
@@ -158,4 +153,3 @@ function parseJavaScriptTypes(input: any): string {
       return input;
   }
 }
->>>>>>> f765a13 (Improved Parser for printing lists and sets.)
