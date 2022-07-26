@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { SchemaPropertyValue, SchemaResponseObject } from "..";
-import {
-  Modal,
-  Radio,
-  Layout,
-  Tag,
-} from "antd";
+import { Modal, Radio, Layout, Tag } from "antd";
 
 import React from "react";
 import { getDefault, TypeInput } from "./types/TypeInput";
@@ -21,36 +16,36 @@ const forEachProp = (
   });
 };
 
-let values: {
-  [prop: string]: any;
-} = {};
-
 const getDefaultState = (prop: SchemaPropertyValue) => {
-    return useState(getDefault(prop));
-}
+  return useState(getDefault(prop));
+};
 
 export default (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
 }) => {
+  const empty:  { [prop: string]: any}  = {};
+
   const schema = props.schema;
   if (!schema) {
     return <></>;
   }
+  
+  const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
   const [inputReset, setInputReset] = useState(0);
   let toClear: any[] = [];
 
   const showModal = () => {
-    values = {};
+    setValues({});
     setVisible(true);
   };
 
   const hideModal = () => {
-    toClear.forEach(f => f());
+    // toClear.forEach((f) => f());
     toClear = [];
-    values = {};
-    setInputReset(v => v + 1);
+    // values = {};
+    setInputReset((v) => v + 1);
     setVisible(false);
   };
 
@@ -62,15 +57,15 @@ export default (props: {
     hideModal();
   };
 
-  const stateGetter = (v: any) => {
-    
-  }
+  const stateGetter = (v: any) => {};
 
   const renderProperty = (
     property: SchemaPropertyValue,
     isPrimary: boolean
   ) => {
-    values[property.name] = getDefault(property);
+    console.log('renderProperty')
+    if (values[property.name] === undefined)
+      values[property.name] = getDefault(property);
 
     let name;
     switch (property.type) {
@@ -85,13 +80,14 @@ export default (props: {
         break;
     }
 
-
     const [value, setValue] = getDefaultState(property);
-    toClear = [...toClear, () => setValue(getDefault(property))]
+    toClear = [...toClear, () => setValue(getDefault(property))];
 
     const setter = (val: any) => {
-        values[property.name] = val;
-        setValue(val);
+      // console.log("setter", val, property.name);
+      values[property.name] = val;
+      setValue(val);
+      // console.log("after:", values[property.name]);
     };
 
     return (
@@ -129,7 +125,7 @@ export default (props: {
       <Modal
         title={"Create " + schema.name}
         visible={visible}
-        onOk={() => addObject()}
+        onOk={addObject}
         onCancel={hideModal}
         okText="Create"
         cancelText="Cancel"

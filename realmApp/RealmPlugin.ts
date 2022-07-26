@@ -64,6 +64,7 @@ export class RealmPlugin {
       this.connection.send('executeQuery', res);
     });
     this.connection.receive('addObject', obj => {
+      console.log('addObject', obj.object)
       const realm = this.realmsMap.get(obj.realm);
       if (!realm) {
         return;
