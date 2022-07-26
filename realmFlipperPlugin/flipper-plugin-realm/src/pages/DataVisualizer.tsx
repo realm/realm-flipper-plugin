@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout } from "flipper-plugin";
-import { Dropdown, Menu, Radio, Table, Tooltip } from "antd";
+import { Dropdown, Menu, Radio, Table, Tooltip, Tag } from "antd";
 import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
@@ -50,7 +50,7 @@ export default function DataVisualizer(props: {
     const deleteRow = (row: Object) => {
       props.removeObject(row);
     };
-  
+
     const dropDown = (row: Object) => (
       <Menu>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>
@@ -86,19 +86,15 @@ export default function DataVisualizer(props: {
         property,
         render: (text: any, row: Object) => {
           return (
-            <>
-
-            <Tooltip
-              placement="topLeft"
-              title={text}
-              key={Math.floor(Math.random() * 10000000)}
-            >
-              <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
-              {text}
-              </Dropdown>
-
-            </Tooltip>
-            </>
+            <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+              <Tooltip
+                placement="topLeft"
+                title={text}
+                key={Math.floor(Math.random() * 10000000)}
+              >
+                {text}
+              </Tooltip>
+            </Dropdown>
           );
         },
         sorter: (a: any, b: any) => {
