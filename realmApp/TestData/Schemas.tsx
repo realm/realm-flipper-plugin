@@ -36,7 +36,6 @@ export const TaskSchema = {
       date: 'date',
       list: 'int[]',
       linkingObjects: 'AllTypes?',
-      linkedBanana: 'Banana?',
       dictionary: '{}',
       set: 'int<>',
       mixed: 'mixed',
