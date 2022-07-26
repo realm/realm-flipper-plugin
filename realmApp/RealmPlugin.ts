@@ -109,8 +109,6 @@ export class RealmPlugin {
       catch (err) {
         responder.error(err.message);
       }
-
-
       const objects = realm.objects(obj.schema);
       this.connection.send('getObjects', {objects: objects});
     });

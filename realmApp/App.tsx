@@ -66,12 +66,12 @@ const AllTypes = {
     float: 'float',
     double: 'double',
     string: 'string',
-    //decimal128: 'decimal128',
-    //objectId: 'objectId',
+    decimal128: 'decimal128?',
+    objectId: 'objectId?',
     data: 'data',
     date: 'date',
     list: 'int[]',
-    //linkingObjects: 'linkingObjects',
+    // linkingObjects: 'linkingObjects?',
     dictionary: '{}',
     set: 'int<>',
     mixed: 'mixed',
@@ -92,6 +92,7 @@ const MaybeSchema = {
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes],
+  schemaVersion: 5
 });
 
 addPlugin({

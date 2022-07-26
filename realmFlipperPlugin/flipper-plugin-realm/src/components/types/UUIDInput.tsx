@@ -1,6 +1,6 @@
 import { Button, Input } from "antd";
 import React, { useState } from "react";
-import { TypeInputProps } from "./CommonInput";
+import { TypeInputProps } from "./TypeInput";
 import uuid from 'react-native-uuid';
 
 export const UUIDInput = ({

@@ -1,6 +1,6 @@
 import { InputNumber } from "antd";
 import React from "react";
-import { TypeInputProps } from "./CommonInput";
+import { TypeInputProps } from "./TypeInput";
 
 
 export const IntInput =  ({ property, setter, value, inputReset, style }: TypeInputProps) => {

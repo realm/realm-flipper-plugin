@@ -10,7 +10,7 @@ import { UUIDInput } from "./UUIDInput";
 import { ListInput } from "./ListInput";
 import moment from "moment";
 import { MixedInput } from "./MixedInput";
-// import {Date} from "moment";
+import { DecimalInput } from "./DecimalInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
@@ -49,33 +49,27 @@ export const getDefault = (property: SchemaPropertyValue) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
-  const properties = {
-    property: props.property,
-    setter: props.setter,
-    value: props.value,
-    inputReset: props.inputReset,
-    style: props.style
-  };
-
   switch (props.property.type) {
     case "int":
     case "float":
     case "double":
-      return <IntInput {...properties} />;
+      return <IntInput {...props} />;
     case "string":
-      return <StringInput {...properties} />;
+      return <StringInput {...props} />;
     case "bool":
-      return <BoolInput {...properties} />;
+      return <BoolInput {...props} />;
     case "date":
-      return <DateInput {...properties} />;
+      return <DateInput {...props} />;
     case "uuid":
-      return <UUIDInput {...properties} />;
+      return <UUIDInput {...props} />;
     // case "set":
     case "list":
-      return <ListInput {...properties} />;
+      return <ListInput {...props} />;
     case "mixed":
-      return <MixedInput {...properties} />;
+      return <MixedInput {...props}/>;
+    case 'decimal128':
+      return <DecimalInput {...props} />;
     default:
-      return <></>;
+      return <>Input for {props.property.type} not implemented!</>;
   }
 };

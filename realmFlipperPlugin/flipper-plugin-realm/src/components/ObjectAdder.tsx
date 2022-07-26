@@ -8,7 +8,7 @@ import {
 } from "antd";
 
 import React from "react";
-import { getDefault, TypeInput } from "./types/CommonInput";
+import { getDefault, TypeInput } from "./types/TypeInput";
 
 const forEachProp = (
   props: {
@@ -50,7 +50,7 @@ export default (props: {
     toClear.forEach(f => f());
     toClear = [];
     values = {};
-    setInputReset(inputReset + 1);
+    setInputReset(v => v + 1);
     setVisible(false);
   };
 
@@ -61,6 +61,10 @@ export default (props: {
 
     hideModal();
   };
+
+  const stateGetter = (v: any) => {
+    
+  }
 
   const renderProperty = (
     property: SchemaPropertyValue,

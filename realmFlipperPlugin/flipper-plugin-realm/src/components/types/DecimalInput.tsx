@@ -1,7 +1,7 @@
 import bigDecimal from 'js-big-decimal';
 import { InputNumber } from "antd";
 import React from "react";
-import { TypeInputProps } from "./CommonInput";
+import { TypeInputProps } from "./TypeInput";
 
 export const DecimalInput = ({
   property,
@@ -11,6 +11,7 @@ export const DecimalInput = ({
   style
 }: TypeInputProps) => {
   const onChange = (value: string) => {
+    // console.log('onchange', value);
     setter(new bigDecimal(value));
   };
   return (

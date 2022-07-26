@@ -1,7 +1,7 @@
 import { DatePicker, InputNumber } from "antd";
 import moment from "moment";
 import React from "react";
-import { TypeInputProps } from "./CommonInput";
+import { TypeInputProps } from "./TypeInput";
 
 
 export const DateInput =  ({ property, setter, value, inputReset, style }: TypeInputProps) =>{

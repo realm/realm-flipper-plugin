@@ -1,7 +1,7 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "antd";
 import React, { useState } from "react";
-import { getDefault, TypeInput, TypeInputProps } from "./CommonInput";
+import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
 export const ListInput = ({
   property,

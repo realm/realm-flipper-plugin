@@ -1,6 +1,6 @@
-import { Button, Select, Modal, Layout } from "antd";
+import { Button, Select, Modal, Layout, Tag, Input } from "antd";
 import React, { useState } from "react";
-import { getDefault, TypeInput, TypeInputProps } from "./CommonInput";
+import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
 export const MixedInput = ({
   property,
@@ -9,16 +9,19 @@ export const MixedInput = ({
   inputReset,
   style,
 }: TypeInputProps) => {
+  const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  const onChange = () => {
-    setVisible(true);
+  const addObject = () => {
+    console.log("addObject", value);
+    setChosen(true);
+    hideModal();
   };
 
-  const addObject = () => {};
   const hideModal = () => {
     setVisible(false);
   };
+
   const typeList = [
     "objectId",
     "uuid",
@@ -36,51 +39,84 @@ export const MixedInput = ({
 
   const onChangeSelect = (v: string) => {
     setChosenType(v);
-    setter(getDefault({
+    setter(
+      getDefault({
         type: v,
         optional: false,
         name: "",
         indexed: false,
         mapTo: "",
-    }));
-  }
-  
+      })
+    );
+  };
+
   return (
     <>
-      <Button onClick={onChange}>Add mixed</Button>
-      <Modal
-        title={"Create mixed"}
-        visible={visible}
-        onOk={addObject}
-        onCancel={hideModal}
-        okText="Create"
-        cancelText="Cancel"
-      >
+      {chosen ? (
         <Layout>
-          {"Select a type: "}
-          <Select defaultValue={"string"} onChange={onChangeSelect}>
-            {typeList.map((item, index) => {
-              return (
-                <Select.Option value={item} key={index}>
-                  {item}
-                </Select.Option>
-              );
-            })}
-          </Select>
-          <TypeInput
-            property={{
-              type: chosenType,
-              optional: false,
-              name: "",
-              indexed: false,
-              mapTo: "",
-            }}
-            setter={setter}
-            value={value}
-            inputReset={inputReset}
-          ></TypeInput>
+          <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
+            <div
+              style={{
+                borderRadius: "5px",
+                padding: "10px",
+                backgroundColor: "#6D6B6A",
+                height: "50px",
+              }}
+            >
+              <div key={2} style={{ marginBottom: "10px", marginTop: -15 }}>
+                {value}
+              </div>
+                <Tag style={{ float: "right", marginBottom: "10px", marginTop: -50 }} color="success">{chosenType}</Tag>
+            </div>
+          </Layout.Header>
         </Layout>
-      </Modal>
+      ) : (
+        <Layout>
+          <Button
+            onClick={() => {
+              setVisible(true);
+              setChosenType("string");
+              //   setChosen(false);
+            }}
+          >
+            Set mixed
+          </Button>
+          <Modal
+            // key={chosenType}
+            title={"Set mixed"}
+            visible={visible}
+            onOk={addObject}
+            onCancel={hideModal}
+            okText="Create"
+            cancelText="Cancel"
+          >
+            <Layout>
+              {"Select a type: "}
+              <Select defaultValue={"string"} onChange={onChangeSelect}>
+                {typeList.map((item, index) => {
+                  return (
+                    <Select.Option value={item} key={index}>
+                      {item}
+                    </Select.Option>
+                  );
+                })}
+              </Select>
+              <TypeInput
+                property={{
+                  type: chosenType,
+                  optional: false,
+                  name: "",
+                  indexed: false,
+                  mapTo: "",
+                }}
+                setter={setter}
+                value={value}
+                inputReset={inputReset}
+              ></TypeInput>
+            </Layout>
+          </Modal>{" "}
+        </Layout>
+      )}
     </>
   );
 };

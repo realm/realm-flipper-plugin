@@ -1,5 +1,5 @@
 import { Radio, RadioChangeEvent } from "antd";
-import { TypeInputProps } from "./CommonInput";
+import { TypeInputProps } from "./TypeInput";
 import React from "react";
 
 export const BoolInput = ({ property, setter, value, inputReset }: TypeInputProps) => {

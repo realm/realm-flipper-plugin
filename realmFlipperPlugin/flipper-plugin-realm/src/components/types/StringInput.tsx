@@ -1,6 +1,6 @@
 import { Input } from 'antd';
 import React from 'react';
-import { TypeInputProps } from './CommonInput';
+import { TypeInputProps } from './TypeInput';
 
 export const StringInput = ({
     property,
