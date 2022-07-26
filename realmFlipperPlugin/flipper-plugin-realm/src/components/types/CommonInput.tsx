@@ -9,6 +9,7 @@ import { StringInput } from "./StringInput";
 import { UUIDInput } from "./UUIDInput";
 import { ListInput } from "./ListInput";
 import moment from "moment";
+import { MixedInput } from "./MixedInput";
 // import {Date} from "moment";
 
 export type TypeInputProps = {
@@ -69,8 +70,11 @@ export const TypeInput = (props: TypeInputProps) => {
       return <DateInput {...properties} />;
     case "uuid":
       return <UUIDInput {...properties} />;
+    // case "set":
     case "list":
       return <ListInput {...properties} />;
+    case "mixed":
+      return <MixedInput {...properties} />;
     default:
       return <></>;
   }
