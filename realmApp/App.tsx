@@ -48,8 +48,12 @@ import {
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
   path: "main",
+<<<<<<< HEAD
 
   schemaVersion: 14
+=======
+  schemaVersion: 19
+>>>>>>> 40973fd (Updated Schema version for testing.)
 });
 
 addPlugin({
