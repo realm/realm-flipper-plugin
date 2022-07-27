@@ -50,7 +50,13 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          const objects = realm.objects(schema);
+          let objects = realm.objects(schema);
+          console.log("amount of objects is ",objects.length);
+          objects = objects
+            .sorted('_id')
+            .filtered('_id > $0 LIMIT(11)', obj.cursor); //cursor based pagination
+          console.log("obj",obj);
+          console.log(objects);
           connection.send('getObjects', {objects: objects});
         });
 

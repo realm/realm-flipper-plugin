@@ -3,7 +3,7 @@ import {
   SettingOutlined,
   TableOutlined
 } from "@ant-design/icons";
-import { Radio, RadioChangeEvent, Typography } from 'antd';
+import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
 import { useCallback } from 'react';
@@ -23,7 +23,8 @@ export type RealmPluginState = {
   errorMsg?: String
   selectedSchema: string,
   schemaHistory: Array<string>,
-  schemaHistoryIndex: number
+  schemaHistoryIndex: number,
+  cursor: 0 | null;
 }
 
 export type SchemaResponseObject = {
@@ -88,6 +89,7 @@ type RealmRequest = {
 type SchemaRequest = {
   schema: string;
   realm: string;
+  cursor: string
 }
 
 type AddLiveObjectRequest = {
@@ -125,7 +127,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: "",
     selectedSchema: '',
     schemaHistory: [],
-    schemaHistoryIndex: 1
+    schemaHistoryIndex: 1,
+    cursor: 0
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -136,7 +139,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage("getObjects", (data: ObjectsMessage) => {
     console.log("received objects", data.objects);
     const state = pluginState.get();
-    pluginState.set({ ...state, objects: data.objects });
+    let result = data.objects.filter((val, index) => index<data.objects.length-1)
+    console.log("cursor", data.objects[data.objects.length-1]._id);
+    pluginState.set({ ...state, objects: result, cursor: data.objects[data.objects.length-1]._id });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -192,8 +197,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema: string;
     realm: string;
   }) => {
+    console.log("new", pluginState.get().cursor);
     console.log("myRealm",event);
-    client.send("getObjects", ({schema: event.schema, realm: event.realm}))
+    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursor: pluginState.get().cursor}))
   }
 
   const getSchemas = (realm: string) => {
@@ -306,6 +312,10 @@ export function Component() {
     instance.updateViewMode({ viewMode: "RQL" });
   }, [instance]);
 
+  const getMore = () => {
+    instance.getObjects({schema: state.selectedSchema, realm: state.selectedRealm})
+  }
+
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
@@ -345,6 +355,7 @@ export function Component() {
           <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
         </>
       ) : null}
+      <Button onClick={() => getMore()}>get more</Button>
     </Layout.ScrollContainer>
   );
 }
