@@ -3,17 +3,11 @@ import { Button, Input } from "antd";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
-export const ListInput = ({
-  property,
-  set,
-  value,
-}: TypeInputProps) => {
-  const [_, setReset] = useState(0);
+export const ListInput = ({ property, set, value }: TypeInputProps) => {
+  const [reset, setReset] = useState(0);
 
   const array: any[] = value;
   const setArray = set;
-  // TODO: handle non primitive
-  //   const [array, setArray] = useState(value);
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -25,11 +19,11 @@ export const ListInput = ({
     mapTo: "",
     optional: false,
   };
-//   console.log(array)
+  //   console.log(array)
   return (
     <Input.Group>
       {array.map((value: any, index: number) => {
-        let keyo = 2 * index;
+        let keyo = reset + 2 * index;
         return (
           <Input.Group key={index}>
             <TypeInput
@@ -37,10 +31,10 @@ export const ListInput = ({
               key={keyo}
               property={innerProp}
               set={(val) => {
-                setReset(v => v + 1);
                 let arr = array;
                 arr[index] = val;
                 setArray(arr);
+                setReset((v) => v + array.length + 1);
               }}
               value={value}
             ></TypeInput>
@@ -50,7 +44,10 @@ export const ListInput = ({
               icon={<DeleteOutlined />}
               size={"small"}
               // remove ith element
-              onClick={() => { console.log('before', array); setArray(array.filter((_, i) => i !== index )); }}
+              onClick={() => {
+                setArray(array.filter((_, i) => i !== index));
+                setReset(v => v + array.length + 2)
+              }}
             />
           </Input.Group>
         );
