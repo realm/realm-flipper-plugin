@@ -42,7 +42,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           console.log('i got', obj, obj.filterCursor, obj.cursorId);
-          let objects = realm.objects(schema);
+          let objects = realm.objects(schema); //optimize by just getting objects once
           let limit = obj.length || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           console.log("limit", limit)
