@@ -123,7 +123,6 @@ export default function DataVisualizer(props: {
 
       {/* <Table dataSource={rowObjs} columns={columns}/> */}
       {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject} schemaName={props.selectedSchema} removeObject={props.removeObject}></EditableTable>}
-
       </Layout.Container>
     );
   }
