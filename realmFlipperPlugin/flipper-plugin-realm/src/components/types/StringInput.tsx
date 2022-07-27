@@ -1,28 +1,43 @@
-import { Input } from 'antd';
-import React from 'react';
-import { TypeInputProps } from './TypeInput';
+import { Button, Input } from "antd";
+import React, { useState } from "react";
+import { TypeInputProps } from "./TypeInput";
 
 export const StringInput = ({
-    property,
-    setter,
-    value,
-    inputReset,
-    style
+  property,
+  setter,
+  value,
+  inputReset,
+  style,
+  refresh,
 }: TypeInputProps) => {
-    return (
-        <Input
+  //   const [reseter, setReseter] = useState(0);
+  return (
+    <Input.Group>
+      <Input
         key={inputReset}
         placeholder={property.optional ? "null" : undefined}
         defaultValue={value}
         style={style}
+        // value={value}
         onChange={(v) => {
-            // user change vs clear button
-            if (v.type == 'change')
-                setter(v.target.value)
-            else
-                setter(null)
-            }}
-        allowClear={property.optional}
-        />
-    )
-}
+          // console.log()
+          // user change vs clear button
+          if (v.type == "change") setter(v.target.value);
+          else setter(null);
+        }}
+        // allowClear={property.optional}
+      />
+      {property.optional ? (
+        <Button
+          size="small"
+          onClick={() => {
+            refresh();
+            setter(null)
+          }}
+        >
+          clear
+        </Button>
+      ) : null}
+    </Input.Group>
+  );
+};

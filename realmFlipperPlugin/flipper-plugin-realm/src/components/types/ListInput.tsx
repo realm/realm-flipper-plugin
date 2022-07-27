@@ -8,6 +8,7 @@ export const ListInput = ({
   setter,
   value,
   inputReset,
+  refresh
 }: TypeInputProps) => {
   const array: any[] = value;
   const setArray = setter;
@@ -33,7 +34,7 @@ export const ListInput = ({
           <Input.Group key={index}>
             <TypeInput
               style={{ width: "calc(100% - 26px)" }}
-              key={index + 1}
+              key={2 * index}
               property={innerProp}
               setter={(val) => {
                 array[index] = val;
@@ -41,9 +42,10 @@ export const ListInput = ({
               }}
               value={value}
               inputReset={inputReset}
+              refresh={refresh}
             ></TypeInput>
             <Button
-              key={inputReset}
+              key={2 * index + 1}
               type="primary"
               icon={<DeleteOutlined />}
               size={"small"}

@@ -8,6 +8,7 @@ export const MixedInput = ({
   value,
   inputReset,
   style,
+  refresh
 }: TypeInputProps) => {
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -21,6 +22,12 @@ export const MixedInput = ({
   const hideModal = () => {
     setVisible(false);
   };
+
+  const cancelWindow = () => {
+    setter(null);
+    setChosenType('string')
+    hideModal();
+  }
 
   const typeList = [
     "objectId",
@@ -64,9 +71,21 @@ export const MixedInput = ({
               }}
             >
               <div key={2} style={{ marginBottom: "10px", marginTop: -15 }}>
-                {value}
+                {value.toString()}
               </div>
-                <Tag style={{ float: "right", marginBottom: "10px", marginTop: -50 }} color="success">{chosenType}</Tag>
+              <Tag
+                style={{ float: "right", marginBottom: "10px", marginTop: -50 }}
+                color="success"
+              >
+                {chosenType}
+              </Tag>
+
+              <Button size="small" onClick={() => {
+                setter(null);
+                setChosen(false)
+              }}>
+                clear
+              </Button>
             </div>
           </Layout.Header>
         </Layout>
@@ -86,7 +105,7 @@ export const MixedInput = ({
             title={"Set mixed"}
             visible={visible}
             onOk={addObject}
-            onCancel={hideModal}
+            onCancel={cancelWindow}
             okText="Create"
             cancelText="Cancel"
           >
@@ -112,6 +131,7 @@ export const MixedInput = ({
                 setter={setter}
                 value={value}
                 inputReset={inputReset}
+                refresh={refresh}
               ></TypeInput>
             </Layout>
           </Modal>{" "}

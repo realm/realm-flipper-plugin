@@ -30,21 +30,21 @@ export default (props: {
   if (!schema) {
     return <></>;
   }
-  
+
   const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
   const [inputReset, setInputReset] = useState(0);
   let toClear: any[] = [];
 
   const showModal = () => {
-    setValues({});
+    setInputReset((v) => v + 1);
+    setValues({ });
     setVisible(true);
   };
 
   const hideModal = () => {
-    // toClear.forEach((f) => f());
+    toClear.forEach((f) => f());
     toClear = [];
-    // values = {};
     setInputReset((v) => v + 1);
     setVisible(false);
   };
@@ -56,8 +56,6 @@ export default (props: {
 
     hideModal();
   };
-
-  const stateGetter = (v: any) => {};
 
   const renderProperty = (
     property: SchemaPropertyValue,
@@ -106,6 +104,7 @@ export default (props: {
             setter={setter}
             value={value}
             inputReset={inputReset}
+            refresh={() => setInputReset(v => v + 1)}
           />
         </Layout.Content>
       </Layout>

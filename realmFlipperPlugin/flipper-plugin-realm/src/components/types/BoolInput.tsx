@@ -1,4 +1,4 @@
-import { Radio, RadioChangeEvent } from "antd";
+import { Radio, RadioChangeEvent, Input, Button } from "antd";
 import { TypeInputProps } from "./TypeInput";
 import React from "react";
 
@@ -17,13 +17,21 @@ export const BoolInput = ({ property, setter, value, inputReset }: TypeInputProp
     setter(value === 'True')
   };
   return (
-    <Radio.Group
-      key={inputReset}
-      defaultValue={value}
-      style={{ width: "100%" }}
-      options={options}
-      onChange={onChange}
-      optionType="button"
-    />
+    <Input.Group>
+        <Radio.Group
+        key={inputReset}
+        defaultValue={value ? "True" : "False"}
+        style={{ width: "100%" }}
+        options={options}
+        onChange={onChange}
+        optionType="button"
+      />
+      {property.optional ? (
+        <Button size="small" onClick={() => setter(null)}>
+          clear
+        </Button>
+      ) : null}
+    </Input.Group>
+
   );
 };

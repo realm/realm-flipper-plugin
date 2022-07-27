@@ -1,5 +1,5 @@
 import bigDecimal from 'js-big-decimal';
-import { InputNumber } from "antd";
+import { Input, InputNumber, Button } from "antd";
 import React from "react";
 import { TypeInputProps } from "./TypeInput";
 
@@ -15,7 +15,8 @@ export const DecimalInput = ({
     setter(new bigDecimal(value));
   };
   return (
-    <InputNumber
+    <Input.Group>
+        <InputNumber
     style={style}
       key={inputReset}
       defaultValue={value}
@@ -23,5 +24,12 @@ export const DecimalInput = ({
       placeholder={property.optional ? "null" : undefined}
       stringMode
     />
+    {property.optional ? (
+        <Button size="small" onChange={() => setter(null)}>
+        clear
+        </Button>
+    ) : null}
+    </Input.Group>
+
   );
 };

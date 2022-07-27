@@ -18,6 +18,7 @@ export type TypeInputProps = {
   value: any;
   inputReset: number;
   style?: Object;
+  refresh: () => void;
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {
@@ -49,6 +50,7 @@ export const getDefault = (property: SchemaPropertyValue) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
+  // const clearButton = 
   switch (props.property.type) {
     case "int":
     case "float":

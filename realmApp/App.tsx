@@ -84,7 +84,11 @@ const MaybeSchema = {
   name: 'Maybe',
   properties: {
     _id: 'int',
-    name: 'string?'
+    name: 'string?',
+    into: 'int?',
+    mixed: 'mixed?',
+    date: 'date?',
+    lis: 'uuid[]'
   },
   primaryKey: '_id',
 }
@@ -92,7 +96,7 @@ const MaybeSchema = {
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypes],
-  schemaVersion: 5
+  schemaVersion: 6
 });
 
 addPlugin({
