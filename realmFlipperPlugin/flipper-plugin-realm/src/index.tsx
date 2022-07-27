@@ -24,7 +24,8 @@ export type RealmPluginState = {
   selectedSchema: string,
   schemaHistory: Array<string>,
   schemaHistoryIndex: number,
-  cursor: 0 | null;
+  cursorId: 0 | null,
+  filterCursor: 0 | null;
 }
 
 export type SchemaResponseObject = {
@@ -89,7 +90,8 @@ type RealmRequest = {
 type SchemaRequest = {
   schema: string;
   realm: string;
-  cursor: string
+  cursor: string;
+  filterCursor: string | number;
 }
 
 type AddLiveObjectRequest = {
@@ -128,7 +130,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
-    cursor: 0
+    cursorId: 0,
+    filterCursor: 0,
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -137,11 +140,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
-    console.log("received objects", data.objects);
+    console.log("received objects and cursors", data);
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
     console.log("cursor", data.objects[data.objects.length-1]._id);
-    pluginState.set({ ...state, objects: result, cursor: data.objects[data.objects.length-1]._id });
+    pluginState.set({ ...state, objects: result, filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -199,7 +202,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   }) => {
     console.log("new", pluginState.get().cursor);
     console.log("myRealm",event);
-    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursor: pluginState.get().cursor}))
+    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: pluginState.get().cursorId, filterCursor: pluginState.get().filterCursor}))
   }
 
   const getSchemas = (realm: string) => {

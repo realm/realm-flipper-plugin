@@ -12,6 +12,7 @@ type PluginConfig = {
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
+  const DEFAULT_PAGE_SIZE = 100; //research right size for 0.5 second load time or possibly use a different variable.
   const forceUpdate = useForceUpdate();
   let realmsMap = new Map<string, Realm>();
   let currentCollection: Realm.Results<Realm.Object>;
@@ -35,29 +36,41 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         connection.receive('getObjects', obj => {
-          if (currentRealm) {
-            currentRealm.removeAllListeners();
-          }
           const realm = realmsMap.get(obj.realm);
-          try {
-            currentRealm = realm;
-          } catch (error) {
-            console.error(
-              `An exception was thrown within the change listener: ${error}`,
-            );
-          }
           const schema = obj.schema;
           if (!realm) {
             return;
           }
+          console.log('i got', obj, obj.filterCursor, obj.cursorId);
           let objects = realm.objects(schema);
-          console.log("amount of objects is ",objects.length);
+          let limit = obj.length || DEFAULT_PAGE_SIZE;
+          limit < 1 ? (limit = 20) : {};
+          console.log("limit", limit)
+          const objectsLength = objects.length;
+          let hasNext, hasPrev, lastItem, firstItem;
           objects = objects
-            .sorted('_id')
-            .filtered('_id > $0 LIMIT(11)', obj.cursor); //cursor based pagination
-          console.log("obj",obj);
+            .sorted(['weight', '_id'])
+            .filtered(
+              'weight > $0 || (weight == $0 && _id >= $1) LIMIT(11)',
+              obj.filterCursor,
+              obj.cursorId,
+              limit+1,
+            ); //cursor based pagination
+          console.log('obj', obj);
           console.log(objects);
-          connection.send('getObjects', {objects: objects});
+          console.log('amount of objects is ', objectsLength);
+          if (objects.length) {
+            lastItem = objects[objects.length-1]; //if this is null this is the last page
+            firstItem = objects[0]; //TODO: not sure about this
+          }
+          // pageAmount: Math.ceil(objectsLength/obj.pageSize)
+          //base64 the next and prev cursors
+          connection.send('getObjects', {
+            objects: objects,
+            total: objectsLength,
+            next_cursor: lastItem,
+            prev_cursor: firstItem,
+          });
         });
 
         connection.receive('getSchemas', obj => {
