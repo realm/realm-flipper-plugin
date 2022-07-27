@@ -4,6 +4,7 @@ import { Modal, Radio, Layout, Tag } from "antd";
 
 import React from "react";
 import { getDefault, TypeInput } from "./types/TypeInput";
+import { PropertyRender } from "./PropertyRender";
 
 const forEachProp = (
   props: {
@@ -14,10 +15,6 @@ const forEachProp = (
   return Object.keys(props).map((property) => {
     return f(props[property]);
   });
-};
-
-const getDefaultState = (prop: SchemaPropertyValue) => {
-  return useState(getDefault(prop));
 };
 
 export default (props: {
@@ -57,59 +54,6 @@ export default (props: {
     hideModal();
   };
 
-  const renderProperty = (
-    property: SchemaPropertyValue,
-    isPrimary: boolean
-  ) => {
-    console.log('renderProperty')
-    if (values[property.name] === undefined)
-      values[property.name] = getDefault(property);
-
-    let name;
-    switch (property.type) {
-      case "list":
-        name = property.objectType + "[]";
-        break;
-      case "set":
-        name = property.objectType + "<>";
-        break;
-      default:
-        name = property.type;
-        break;
-    }
-
-    const [value, setValue] = getDefaultState(property);
-    toClear = [...toClear, () => setValue(getDefault(property))];
-
-    const setter = (val: any) => {
-      // console.log("setter", val, property.name);
-      values[property.name] = val;
-      setValue(val);
-      // console.log("after:", values[property.name]);
-    };
-
-    return (
-      <Layout>
-        <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-          {name}
-          <span style={{ float: "right" }}>
-            <Tag color="default">{property.type}</Tag>
-            {!property.optional ? <Tag color="blue">required</Tag> : null}
-            {isPrimary ? <Tag color="blue">primary key</Tag> : null}
-          </span>
-        </Layout.Header>
-        <Layout.Content>
-          <TypeInput
-            property={property}
-            setter={setter}
-            value={value}
-            inputReset={inputReset}
-            refresh={() => setInputReset(v => v + 1)}
-          />
-        </Layout.Content>
-      </Layout>
-    );
-  };
   console.log("here");
 
   return (
@@ -130,9 +74,7 @@ export default (props: {
         cancelText="Cancel"
       >
         {forEachProp(schema.properties, (property) => (
-          <div key={property.name}>
-            {renderProperty(property, property.name === schema.primaryKey)}
-          </div>
+          <PropertyRender values={values} property={property} toClear={toClear} isPrimary={property.name == schema.primaryKey} inputReset={inputReset} refresh={() => setInputReset(v => v + 1)} key={property.name} />
         ))}
       </Modal>
     </Layout.Content>

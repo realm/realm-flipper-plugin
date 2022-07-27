@@ -12,6 +12,7 @@ export const MixedInput = ({
 }: TypeInputProps) => {
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [chosenType, setChosenType] = useState("string");
 
   const addObject = () => {
     console.log("addObject", value);
@@ -42,7 +43,6 @@ export const MixedInput = ({
     "date",
   ];
   // TODO: make it a list?
-  const [chosenType, setChosenType] = useState("string");
 
   const onChangeSelect = (v: string) => {
     setChosenType(v);
@@ -95,7 +95,6 @@ export const MixedInput = ({
             onClick={() => {
               setVisible(true);
               setChosenType("string");
-              //   setChosen(false);
             }}
           >
             Set mixed
