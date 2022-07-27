@@ -8,8 +8,11 @@ export const UUIDInput = ({
   value,
   setter,
   inputReset,
-  style
+  style,
+  refresh
 }: TypeInputProps) => {
+  console.log('key:', inputReset)
+
   const onChange = (value: string) => {
     console.log('onchange', value);
     // setContent(value);
@@ -29,7 +32,7 @@ export const UUIDInput = ({
     />
     <Button onClick={() => { 
         setter(uuid.v4())
-        // setter(content);
+        refresh();
         } }>
         refresh
     </Button>

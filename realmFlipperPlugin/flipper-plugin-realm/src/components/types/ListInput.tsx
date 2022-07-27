@@ -30,11 +30,12 @@ export const ListInput = ({
   return (
     <Input.Group key={key}>
       {array.map((value: any, index: number) => {
+        let keyo = 2 * index;
         return (
           <Input.Group key={index}>
             <TypeInput
               style={{ width: "calc(100% - 26px)" }}
-              key={2 * index}
+              key={keyo}
               property={innerProp}
               setter={(val) => {
                 array[index] = val;

@@ -10,10 +10,10 @@ const forEachProp = (
   props: {
     [key: string]: SchemaPropertyValue;
   },
-  f: (prop: SchemaPropertyValue) => any
+  f: (prop: SchemaPropertyValue, index: number) => any
 ) => {
-  return Object.keys(props).map((property) => {
-    return f(props[property]);
+  return Object.keys(props).map((property, index) => {
+    return f(props[property], index);
   });
 };
 
@@ -21,7 +21,7 @@ export default (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
 }) => {
-  const empty:  { [prop: string]: any}  = {};
+  const empty: { [prop: string]: any } = {};
 
   const schema = props.schema;
   if (!schema) {
@@ -33,16 +33,20 @@ export default (props: {
   const [inputReset, setInputReset] = useState(0);
   let toClear: any[] = [];
 
+  const refresh = () => setInputReset(v => v + 1);
+
   const showModal = () => {
-    setInputReset((v) => v + 1);
-    setValues({ });
+    refresh();
+    setValues({});
     setVisible(true);
   };
 
   const hideModal = () => {
-    toClear.forEach((f) => f());
+    console.log('hidemodal')
+    toClear.forEach(f => f());
     toClear = [];
-    setInputReset((v) => v + 1);
+    setValues({});
+    refresh();
     setVisible(false);
   };
 
@@ -73,8 +77,16 @@ export default (props: {
         okText="Create"
         cancelText="Cancel"
       >
-        {forEachProp(schema.properties, (property) => (
-          <PropertyRender values={values} property={property} toClear={toClear} isPrimary={property.name == schema.primaryKey} inputReset={inputReset} refresh={() => setInputReset(v => v + 1)} key={property.name} />
+        {forEachProp(schema.properties, (property, index) => (
+          <PropertyRender
+            values={values}
+            property={property}
+            toClear={toClear}
+            isPrimary={property.name == schema.primaryKey}
+            inputReset={inputReset}
+            refresh={refresh}
+            key={inputReset + index}
+          />
         ))}
       </Modal>
     </Layout.Content>

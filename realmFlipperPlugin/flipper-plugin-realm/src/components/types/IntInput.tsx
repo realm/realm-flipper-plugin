@@ -8,6 +8,7 @@ export const IntInput = ({
   value,
   inputReset,
   style,
+  refresh
 }: TypeInputProps) => {
   const onChange = (value: number) => {
     if (property.type === "int" && !Number.isInteger(value)) {
@@ -15,9 +16,11 @@ export const IntInput = ({
     }
     setter(value);
   };
+  console.log('key', inputReset)
   return (
     <Input.Group>
       <InputNumber
+        // value={value}
         style={style}
         key={inputReset}
         defaultValue={value}
@@ -25,7 +28,7 @@ export const IntInput = ({
         placeholder={property.optional ? "null" : undefined}
       />
       {property.optional ? (
-        <Button size="small" onChange={() => setter(null)}>
+        <Button size="small" onChange={() => { setter(null); refresh()}}>
           clear
         </Button>
       ) : null}

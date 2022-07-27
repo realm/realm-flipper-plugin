@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { SchemaPropertyValue } from "..";
 import { getDefault, TypeInput } from "./types/TypeInput";
 
-type inputType = {
+type InputType = {
   values: { [keys: string]: any };
   property: SchemaPropertyValue;
   toClear: (() => void)[];
@@ -19,23 +19,23 @@ export const PropertyRender = ({
   isPrimary,
   inputReset,
   refresh,
-}: inputType) => {
+}: InputType) => {
   const [value, setValue] = useState(getDefault(property));
 
   console.log("renderProperty");
   if (values[property.name] === undefined)
     values[property.name] = getDefault(property);
 
-  let name;
+  let typeName;
   switch (property.type) {
     case "list":
-      name = property.objectType + "[]";
+      typeName = property.objectType + "[]";
       break;
     case "set":
-      name = property.objectType + "<>";
+      typeName = property.objectType + "<>";
       break;
     default:
-      name = property.type;
+      typeName = property.type;
       break;
   }
 
@@ -49,9 +49,9 @@ export const PropertyRender = ({
   return (
     <Layout>
       <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-        {name}
+        {property.name}
         <span style={{ float: "right" }}>
-          <Tag color="default">{property.type}</Tag>
+          <Tag color="default">{typeName}</Tag>
           {!property.optional ? <Tag color="blue">required</Tag> : null}
           {isPrimary ? <Tag color="blue">primary key</Tag> : null}
         </span>

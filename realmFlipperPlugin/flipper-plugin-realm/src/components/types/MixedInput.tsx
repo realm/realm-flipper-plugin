@@ -14,6 +14,8 @@ export const MixedInput = ({
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState("string");
 
+  console.log('key:', inputReset)
+
   const addObject = () => {
     console.log("addObject", value);
     setChosen(true);
