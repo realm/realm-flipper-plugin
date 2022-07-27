@@ -40,10 +40,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           const realm = realmsMap.get(obj.realm);
           try {
-            realm?.addListener('change', () => {
-              console.log('big listener fires');
-              forceUpdate();
-            });
             currentRealm = realm;
           } catch (error) {
             console.error(
@@ -54,18 +50,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          if (currentCollection) {
-            currentCollection.removeAllListeners();
-          }
           const objects = realm.objects(schema);
-          try {
-            objects.addListener(onObjectsChange);
-            currentCollection = objects;
-          } catch (error) {
-            console.error(
-              `An exception was thrown within the change listener: ${error}`,
-            );
-          }
           connection.send('getObjects', {objects: objects});
         });
 
@@ -74,8 +59,11 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          const schema = realm.schema;
-          connection.send('getSchemas', {schemas: schema});
+          const schemas = realm.schema;
+          for (let schema of realm.schema) {
+            realm.objects(schema.name).addListener(onObjectsChange);
+          }
+          connection.send('getSchemas', {schemas: schemas});
         });
 
         connection.receive('executeQuery', obj => {
@@ -83,18 +71,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          if (currentCollection) {
-            currentCollection.removeAllListeners();
-          }
           const objs = realm.objects(obj.schema);
-          try {
-            objs.addListener(onObjectsChange);
-            currentCollection = objs;
-          } catch (error) {
-            console.error(
-              `An exception was thrown within the change listener: ${error}`,
-            );
-          }
           if (obj.query === '') {
             connection.send('executeQuery', {result: objs});
             return;
