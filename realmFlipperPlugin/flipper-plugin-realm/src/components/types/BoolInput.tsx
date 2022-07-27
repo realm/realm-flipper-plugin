@@ -1,8 +1,10 @@
 import { Radio, RadioChangeEvent, Input, Button } from "antd";
 import { TypeInputProps } from "./TypeInput";
-import React from "react";
+import React, { useState } from "react";
 
-export const BoolInput = ({ property, setter, value, inputReset }: TypeInputProps) => {
+export const BoolInput = ({ property, set, value }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
+
   const options = [
     {
       label: "True",
@@ -14,12 +16,11 @@ export const BoolInput = ({ property, setter, value, inputReset }: TypeInputProp
     },
   ];
   const onChange = ({ target: { value } }: RadioChangeEvent) => {
-    setter(value === 'True')
+    set(value === "True");
   };
   return (
     <Input.Group>
-        <Radio.Group
-        key={inputReset}
+      <Radio.Group
         defaultValue={value ? "True" : "False"}
         style={{ width: "100%" }}
         options={options}
@@ -27,11 +28,16 @@ export const BoolInput = ({ property, setter, value, inputReset }: TypeInputProp
         optionType="button"
       />
       {property.optional ? (
-        <Button size="small" onClick={() => setter(null)}>
+        <Button
+          size="small"
+          onClick={() => {
+            set(null);
+            setReset((v) => v + 1);
+          }}
+        >
           clear
         </Button>
       ) : null}
     </Input.Group>
-
   );
 };

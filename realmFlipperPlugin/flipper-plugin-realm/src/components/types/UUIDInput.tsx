@@ -1,43 +1,33 @@
 import { Button, Input } from "antd";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
-import uuid from 'react-native-uuid';
+import uuid from "react-native-uuid";
 
-export const UUIDInput = ({
-  property,
-  value,
-  setter,
-  inputReset,
-  style,
-  refresh
-}: TypeInputProps) => {
-  console.log('key:', inputReset)
+export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
 
   const onChange = (value: string) => {
-    console.log('onchange', value);
-    // setContent(value);
-    setter(value);
+    set(value);
   };
   // TODO handling invalid uuids?
   return (
     <Input.Group>
-    <Input
-      key={inputReset}
-      value={value}
-      style={style}
-      onChange={v => onChange(v.target.value)}
-      placeholder={property.optional ? "null" : undefined}
-      allowClear={property.optional}
-      status={uuid.validate(value) ? "" : "error"}
-    />
-    <Button onClick={() => { 
-        setter(uuid.v4())
-        refresh();
-        } }>
+      <Input
+        value={value}
+        style={style}
+        onChange={(v) => onChange(v.target.value)}
+        placeholder={property.optional ? "null" : undefined}
+        allowClear={property.optional}
+        status={uuid.validate(value) ? "" : "error"}
+      />
+      <Button
+        onClick={() => {
+          set(uuid.v4());
+          setReset(v => v + 1)
+        }}
+      >
         refresh
-    </Button>
-    
+      </Button>
     </Input.Group>
-
   );
 };

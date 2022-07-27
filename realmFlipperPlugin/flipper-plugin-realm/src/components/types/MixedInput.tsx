@@ -2,22 +2,15 @@ import { Button, Select, Modal, Layout, Tag, Input } from "antd";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
-export const MixedInput = ({
-  property,
-  setter,
-  value,
-  inputReset,
-  style,
-  refresh
-}: TypeInputProps) => {
+export const MixedInput = ({ property, value, set, style }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState("string");
 
-  console.log('key:', inputReset)
-
   const addObject = () => {
-    console.log("addObject", value);
+    // console.log("addObject", );
+    setReset((v) => v + 1);
     setChosen(true);
     hideModal();
   };
@@ -27,10 +20,10 @@ export const MixedInput = ({
   };
 
   const cancelWindow = () => {
-    setter(null);
-    setChosenType('string')
+    set(null);
+    setChosenType("string");
     hideModal();
-  }
+  };
 
   const typeList = [
     "objectId",
@@ -48,7 +41,7 @@ export const MixedInput = ({
 
   const onChangeSelect = (v: string) => {
     setChosenType(v);
-    setter(
+    set(
       getDefault({
         type: v,
         optional: false,
@@ -82,10 +75,13 @@ export const MixedInput = ({
                 {chosenType}
               </Tag>
 
-              <Button size="small" onClick={() => {
-                setter(null);
-                setChosen(false)
-              }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  set(null);
+                  setChosen(false);
+                }}
+              >
                 clear
               </Button>
             </div>
@@ -129,10 +125,8 @@ export const MixedInput = ({
                   indexed: false,
                   mapTo: "",
                 }}
-                setter={setter}
+                set={set}
                 value={value}
-                inputReset={inputReset}
-                refresh={refresh}
               ></TypeInput>
             </Layout>
           </Modal>{" "}

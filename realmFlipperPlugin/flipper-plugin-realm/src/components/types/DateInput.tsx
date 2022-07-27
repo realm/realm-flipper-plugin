@@ -1,25 +1,25 @@
 import { Button, DatePicker, Input, InputNumber } from "antd";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
 export const DateInput = ({
   property,
-  setter,
   value,
-  inputReset,
+  set,
   style,
-  refresh,
 }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
+
   const onChange = (value: moment.Moment | null, dateString: string) => {
-    setter(value ? value?.toDate() : null);
+    set(value ? value?.toDate() : null);
   };
-  console.log('key:', inputReset)
+//   console.log('key:', inputReset)
   return (
     <Input.Group>
       <DatePicker
         style={style}
-        key={inputReset}
+        // key={inputReset}
         defaultValue={value}
         format="DD-MM-YYYY HH:mm:ss.SSS"
         showTime={{ defaultValue: property.optional ? undefined : moment() }}
@@ -28,8 +28,8 @@ export const DateInput = ({
       />
       {property.optional ? (
         <Button size="small" onClick={() => {
-            setter(null);
-            refresh();
+            set(null);
+            setReset(v => v + 1)
         }}>
           clear
         </Button>

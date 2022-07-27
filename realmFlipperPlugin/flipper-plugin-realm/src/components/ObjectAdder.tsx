@@ -58,7 +58,7 @@ export default (props: {
     hideModal();
   };
 
-  console.log("here");
+  console.log("here, values:", values);
 
   return (
     <Layout.Content>
@@ -83,9 +83,7 @@ export default (props: {
             property={property}
             toClear={toClear}
             isPrimary={property.name == schema.primaryKey}
-            inputReset={inputReset}
-            refresh={refresh}
-            key={inputReset + index}
+            key={inputReset * Object.keys(schema.properties).length + index}
           />
         ))}
       </Modal>

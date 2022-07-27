@@ -1,34 +1,34 @@
 import { InputNumber, Input, Button } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
-export const IntInput = ({
-  property,
-  setter,
-  value,
-  inputReset,
-  style,
-  refresh
-}: TypeInputProps) => {
+export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
+
   const onChange = (value: number) => {
     if (property.type === "int" && !Number.isInteger(value)) {
       return;
     }
-    setter(value);
+    set(value);
   };
-  console.log('key', inputReset)
   return (
     <Input.Group>
       <InputNumber
         // value={value}
         style={style}
-        key={inputReset}
+        // key={inputReset}
         defaultValue={value}
         onChange={onChange}
         placeholder={property.optional ? "null" : undefined}
       />
       {property.optional ? (
-        <Button size="small" onChange={() => { setter(null); refresh()}}>
+        <Button
+          size="small"
+          onChange={() => {
+            set(null);
+            setReset((v) => v + 1);
+          }}
+        >
           clear
         </Button>
       ) : null}

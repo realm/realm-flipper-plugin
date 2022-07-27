@@ -14,11 +14,9 @@ import { DecimalInput } from "./DecimalInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
-  setter: (val: any) => void;
   value: any;
-  inputReset: number;
+  set: (val: any) => void;
   style?: Object;
-  refresh: () => void;
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {

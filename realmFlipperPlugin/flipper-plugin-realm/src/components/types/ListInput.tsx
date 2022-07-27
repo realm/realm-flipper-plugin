@@ -5,13 +5,13 @@ import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
 export const ListInput = ({
   property,
-  setter,
+  set,
   value,
-  inputReset,
-  refresh
 }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
+
   const array: any[] = value;
-  const setArray = setter;
+  const setArray = set;
   // TODO: handle non primitive
   //   const [array, setArray] = useState(value);
   const typePointed = property.objectType;
@@ -25,10 +25,9 @@ export const ListInput = ({
     mapTo: "",
     optional: false,
   };
-  const [key, setKey] = useState(0);
-
+//   console.log(array)
   return (
-    <Input.Group key={key}>
+    <Input.Group>
       {array.map((value: any, index: number) => {
         let keyo = 2 * index;
         return (
@@ -37,13 +36,13 @@ export const ListInput = ({
               style={{ width: "calc(100% - 26px)" }}
               key={keyo}
               property={innerProp}
-              setter={(val) => {
-                array[index] = val;
-                setArray(array);
+              set={(val) => {
+                setReset(v => v + 1);
+                let arr = array;
+                arr[index] = val;
+                setArray(arr);
               }}
               value={value}
-              inputReset={inputReset}
-              refresh={refresh}
             ></TypeInput>
             <Button
               key={2 * index + 1}
@@ -51,7 +50,7 @@ export const ListInput = ({
               icon={<DeleteOutlined />}
               size={"small"}
               // remove ith element
-              onClick={() => { console.log('before', array); setArray(array.filter((_, i) => i !== index )); setKey(key => key + 1) }}
+              onClick={() => { console.log('before', array); setArray(array.filter((_, i) => i !== index )); }}
             />
           </Input.Group>
         );

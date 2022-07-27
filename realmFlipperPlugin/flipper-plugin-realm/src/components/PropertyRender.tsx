@@ -8,8 +8,6 @@ type InputType = {
   property: SchemaPropertyValue;
   toClear: (() => void)[];
   isPrimary: boolean;
-  inputReset: number;
-  refresh: () => void;
 };
 
 export const PropertyRender = ({
@@ -17,8 +15,6 @@ export const PropertyRender = ({
   property,
   toClear,
   isPrimary,
-  inputReset,
-  refresh,
 }: InputType) => {
   const [value, setValue] = useState(getDefault(property));
 
@@ -59,10 +55,8 @@ export const PropertyRender = ({
       <Layout.Content>
         <TypeInput
           property={property}
-          setter={setter}
+          set={setter}
           value={value}
-          inputReset={inputReset}
-          refresh={refresh}
         />
       </Layout.Content>
     </Layout>

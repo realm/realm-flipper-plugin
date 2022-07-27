@@ -4,26 +4,22 @@ import { TypeInputProps } from "./TypeInput";
 
 export const StringInput = ({
   property,
-  setter,
   value,
-  inputReset,
+  set,
   style,
-  refresh,
 }: TypeInputProps) => {
-  //   const [reseter, setReseter] = useState(0);
+  const [_, setReset] = useState(0);
+
   return (
     <Input.Group>
       <Input
-        key={inputReset}
         placeholder={property.optional ? "null" : undefined}
         defaultValue={value}
         style={style}
-        // value={value}
         onChange={(v) => {
-          // console.log()
           // user change vs clear button
-          if (v.type == "change") setter(v.target.value);
-          else setter(null);
+          if (v.type == "change") set(v.target.value);
+          else set(null);
         }}
         // allowClear={property.optional}
       />
@@ -31,8 +27,9 @@ export const StringInput = ({
         <Button
           size="small"
           onClick={() => {
-            refresh();
-            setter(null)
+            // refresh();
+            set(null);
+            setReset((v) => v + 1);
           }}
         >
           clear
