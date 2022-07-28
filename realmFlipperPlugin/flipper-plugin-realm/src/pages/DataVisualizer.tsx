@@ -5,6 +5,8 @@ import { SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
+import PageSizeSelect from "../components/PageSizeSelect";
+import DataPagination from "../components/DataPagination";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -123,6 +125,8 @@ export default function DataVisualizer(props: {
 
       {/* <Table dataSource={rowObjs} columns={columns}/> */}
       {<EditableTable data={rowObjs} columns={columnObjs} primaryKey={currentSchema.primaryKey} modifyObject={props.modifyObject} schemaName={props.selectedSchema} removeObject={props.removeObject}></EditableTable>}
+      <PageSizeSelect></PageSizeSelect>
+      <DataPagination data={rowObjs}></DataPagination>
       </Layout.Container>
     );
   }

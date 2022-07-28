@@ -24,8 +24,9 @@ export type RealmPluginState = {
   selectedSchema: string,
   schemaHistory: Array<string>,
   schemaHistoryIndex: number,
-  cursorId: 0 | null,
-  filterCursor: 0 | null;
+  cursorId: 0 | null,
+  filterCursor: 0 | null,
+  selectedPageSize: 10 | 100 | 1000 | 2500 
 }
 
 export type SchemaResponseObject = {
@@ -132,6 +133,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemaHistoryIndex: 1,
     cursorId: 0,
     filterCursor: 0,
+    selectedPageSize: 100,
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -144,7 +146,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
     console.log("cursor", data.objects[data.objects.length-1]._id);
-    pluginState.set({ ...state, objects: result, filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id });
+    pluginState.set({ ...state, objects: [...state.objects, ...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -200,9 +202,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema: string;
     realm: string;
   }) => {
-    console.log("new", pluginState.get().cursor);
+    const state = pluginState.get();
+    console.log("new", pluginState.get().cursorId);
     console.log("myRealm",event);
-    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: pluginState.get().cursorId, filterCursor: pluginState.get().filterCursor}))
+    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: state.cursorId, filterCursor: state.filterCursor, limit: state.selectedPageSize}))
   }
 
   const getSchemas = (realm: string) => {
@@ -270,6 +273,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const updateSelectedPageSize = (event: {pageSize: 10 | 100 | 1000 | 2500}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedPageSize: event.pageSize
+    });
+  };
+
   client.onConnect( () => {
     getRealms();
   });
@@ -290,7 +301,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     await setTimeout(() => {}, 4000)
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize};
 }
 
 export function Component() {

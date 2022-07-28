@@ -6,8 +6,11 @@ import {
   Form,
   Input,
   Table,
+  Pagination,
 } from "antd";
 import type { FormInstance } from "antd/es/form";
+import { plugin } from '../index';
+import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { SchemaPropertyValue } from "..";
 
@@ -200,12 +203,15 @@ export default (props: {
     },
   };
 
+
+
   return (
     <div>
       <Table
         components={components}
         rowClassName={() => "editable-row"}
         bordered
+        pagination={false}
         dataSource={dataSource}
         columns={columns as ColumnTypes}
       />
