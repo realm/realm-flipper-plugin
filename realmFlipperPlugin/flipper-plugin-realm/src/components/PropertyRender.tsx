@@ -45,18 +45,22 @@ export const PropertyRender = ({
   return (
     <Layout>
       <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
+        <div style={{ backgroundColor: 'white' }}>
         {property.name}
         <span style={{ float: "right" }}>
           <Tag color="default">{typeName}</Tag>
           {!property.optional ? <Tag color="blue">required</Tag> : null}
           {isPrimary ? <Tag color="blue">primary key</Tag> : null}
         </span>
+        </div>
+
       </Layout.Header>
       <Layout.Content>
         <TypeInput
           property={property}
           set={setter}
           value={value}
+          style={{ width: "100%" }}
         />
       </Layout.Content>
     </Layout>
