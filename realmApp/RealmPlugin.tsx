@@ -69,6 +69,22 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getObjects', {objects: objects});
         });
 
+        connection.receive('getOneObject', (obj: { realm: string, schema: string, primaryKey: string}) => {
+         
+          const realm = realmsMap.get(obj.realm);
+        
+            currentRealm = realm;
+         
+          const schema = obj.schema;
+          if (!realm) {
+            return;
+          }
+          
+          const object = realm.objectForPrimaryKey(schema, obj.primaryKey);
+          
+          connection.send('getOneObject', {object: object});
+        });
+
         connection.receive('getSchemas', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
