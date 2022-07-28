@@ -70,8 +70,6 @@ BooleanValue.displayName = 'TypeBasedValueRenderer:BooleanValue';
 
 export function renderValue(val: Value, wordWrap?: boolean) {
   const TextComponent = wordWrap ? WrappingText : NonWrappingText;
-  console.log('val')
-  console.log(val)
   switch (val.type) {
     case 'boolean':
       return (
