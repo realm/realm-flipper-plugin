@@ -1,23 +1,31 @@
 import React from "react";
-import { Layout } from "flipper-plugin";
+
+import { Layout, DataInspector, DetailSidebar } from "flipper-plugin";
 import { Dropdown, Menu, Radio, Table, Tooltip, Tag } from "antd";
-import { SchemaResponseObject } from "../index";
+import { SchemaPropertyValue, SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
+import { ColumnTitle } from "../components/ColumnTitle";
+import { useState } from "react";
+import { RealmDataInspector } from "../components/RealmDataInspector";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
+  singleObject: Object;
   schemas: Array<SchemaResponseObject>;
-  getObjects: Function;
   selectedSchema: String;
   addObject: Function;
   modifyObject: Function;
   removeObject: Function;
+  getOneObject: Function;
 }) {
   const getCurrentSchema = () => {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
   };
+
+  const [inspectData, setInspectData] = useState({});
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // Return buttons + tableView
   return (
@@ -34,6 +42,26 @@ export default function DataVisualizer(props: {
       </Layout.Container>
       <Layout.Container>
         <TableView />
+        {showSidebar ? (
+          <DetailSidebar>
+            <div>Inspector</div>
+            <Radio.Group>
+              <Radio.Button onClick={() => setShowSidebar(false)}>
+                {" "}
+                Close{" "}
+              </Radio.Button>
+            </Radio.Group>
+            <DataInspector
+              data={inspectData}
+              expandRoot={true}
+
+            />
+            {/* <RealmDataInspector inspectData={inspectData} /> */}
+            {/*<Layout.Container>
+            <DataInspector data={[inspectData]} expandRoot={true} />
+          </Layout.Container>{" "} */}
+          </DetailSidebar>
+        ) : null}
       </Layout.Container>
     </Layout.ScrollContainer>
   );
@@ -51,31 +79,79 @@ export default function DataVisualizer(props: {
       props.removeObject(row);
     };
 
-    const dropDown = (row: Object) => (
+
+    const dropDown = (
+      row: Object,
+      schemaProperty: SchemaPropertyValue,
+      schema: SchemaResponseObject
+    ) => (
       <Menu>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>
           Delete selected {currentSchema.name}{" "}
+        </Menu.Item>
+        <Menu.Item
+          key={2}
+          onClick={() => {
+            setInspectData({ schema });
+            setShowSidebar(true);
+          }}
+        >
+          Inspect Schema
+        </Menu.Item>
+        <Menu.Item
+          key={3}
+          onClick={() => {
+            setInspectData({ schemaProperty });
+            setShowSidebar(true);
+          }}
+        >
+          Inspect Schema Property
+        </Menu.Item>
+        <Menu.Item
+          key={4}
+          onClick={() => {
+            // const linkedObjectSchema: SchemaResponseObject | undefined = props.schemas.find(schema => schema.name === schemaProperty.objectType)
+
+            // linkedObjectSchema === undefined ?  {setInspectData({ [schemaProperty.name]: row[schemaProperty.name] })
+            // setShowSidebar(true)}
+            // :
+            // null
+
+            setInspectData({ [schemaProperty.name]: row[schemaProperty.name] });
+            setShowSidebar(true);
+          }}
+        >
+          Inspect Cell
+        </Menu.Item>
+        <Menu.Item
+          key={5}
+          onClick={() => {
+            setInspectData({ row });
+            setShowSidebar(true);
+          }}
+        >
+          Inspect Row
         </Menu.Item>
       </Menu>
     );
 
     const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
-      const property = currentSchema.properties[propName];
+      const property: SchemaPropertyValue = currentSchema.properties[propName];
+
+      const objectType: string | undefined = property.objectType;
+      const isPrimaryKey: boolean = currentSchema.primaryKey === property.name;
 
       return {
         title: () => {
-          if (currentSchema.primaryKey === property.name) {
-            return (
-              <div>
-                {property.name + " [" + property.type + "] "}
-                <Tag color="green">Primary Key</Tag>
-              </div>
-            );
-          } else if (property.optional) {
-            return property.name + " [" + property.type + "?]";
-          } else {
-            return property.name + " [" + property.type + "]";
-          }
+          return (
+            <ColumnTitle
+              isOptional={property.optional}
+              name={property.name}
+              objectType={objectType}
+              propertyType={property.type}
+              isPrimaryKey={isPrimaryKey}
+            />
+          );
         },
         key: property.name,
         dataIndex: property.name,
@@ -86,7 +162,10 @@ export default function DataVisualizer(props: {
         property,
         render: (text: any, row: Object) => {
           return (
-            <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
+            <Dropdown
+              overlay={() => dropDown(row, property, currentSchema)}
+              trigger={[`contextMenu`]}
+            >
               <Tooltip
                 placement="topLeft"
                 title={text}
@@ -115,15 +194,17 @@ export default function DataVisualizer(props: {
       <Layout.Container height={800}>
         {/* <Table dataSource={rowObjs} columns={columns}/> */}
         {
-          <EditableTable
-            data={rowObjs}
-            //@ts-ignore
-            columns={columnObjs}
-            primaryKey={currentSchema.primaryKey}
-            modifyObject={props.modifyObject}
-            schemaName={props.selectedSchema}
-            removeObject={props.removeObject}
-          ></EditableTable>
+          <div>
+            <EditableTable
+              data={rowObjs}
+              //@ts-ignore
+              columns={columnObjs}
+              primaryKey={currentSchema.primaryKey}
+              modifyObject={props.modifyObject}
+              schemaName={props.selectedSchema}
+              removeObject={props.removeObject}
+            ></EditableTable>
+          </div>
         }
       </Layout.Container>
     );

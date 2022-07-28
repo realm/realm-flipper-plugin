@@ -5,6 +5,9 @@ export function parseRows(
   schema: SchemaResponseObject,
   schemas: Array<SchemaResponseObject>
 ) {
+  console.log("SCHEMA");
+  console.log(schema);
+
   let rows = objects.map((obj: any, index: number) => {
     let returnObj = { key: index };
 
@@ -27,8 +30,6 @@ export function parseRows(
 
       switch (currentRealmPropType) {
         case "string":
-          stringForPrint = parseString(currentFieldValue);
-          break;
         case "double":
         case "int":
         case "float":
@@ -37,6 +38,9 @@ export function parseRows(
         case "uuid":
           stringForPrint = parseSimpleData(currentFieldValue);
           break;
+        case "bool":
+          stringForPrint = parseBoolean(currentFieldValue);
+          break;
         case "list":
         case "set":
           stringForPrint = parseSetOrList(currentFieldValue);
@@ -44,9 +48,6 @@ export function parseRows(
         case "data":
         case "dictionary":
           stringForPrint = parseDataOrDictionary(currentFieldValue);
-          break;
-        case "bool":
-          stringForPrint = parseBoolean(currentFieldValue);
           break;
         case "decimal128":
           stringForPrint = parseDecimal128(currentFieldValue);
@@ -71,16 +72,16 @@ export function parseRows(
   return rows;
 }
 
-function parseString(input: string): string {
-  return input;
-}
-
 function parseSimpleData(input: string): string {
   return input;
 }
 
-function parseSetOrList(input: []): string {
-  return "[" + input + "]";
+function parseSetOrList(input: any[]): string {
+  let output = input.map((value) => {
+    return parseJavaScriptTypes(value);
+  });
+
+  return "[" + output + "]";
 }
 
 function parseDataOrDictionary(input: {}): string {
@@ -122,4 +123,30 @@ function parseLinkedObject(
 
 function parseMixed(input: any): string {
   return JSON.stringify(input);
+}
+
+function parseJavaScriptTypes(input: any): string {
+  const type = typeof input;
+
+  switch (type) {
+    case "string":
+    case "number":
+    case "symbol":
+      return parseSimpleData(input);
+    case "boolean":
+      return parseBoolean(input);
+    case "object":
+      if (Array.isArray(input)) {
+        return parseSetOrList(input);
+      } else if ("$numberDecimal" in input) {
+        return input.$numberDecimal;
+      } else {
+        return parseMixed(input);
+      }
+    case "undefined":
+    case "bigint":
+    case "function":
+    default:
+      return input;
+  }
 }

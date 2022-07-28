@@ -43,13 +43,11 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-
 // Open a Realm
 const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
-  path: "main",
-
-  schemaVersion: 14
+  path: 'main',
+  schemaVersion: 21,
 });
 
 addPlugin({
@@ -67,9 +65,6 @@ addPlugin({
   onDisconnect() {
     console.log('Disconnected');
   },
-
-
-
 });
 
 //realmPlugin.newfunc();

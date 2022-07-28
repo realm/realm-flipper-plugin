@@ -1,6 +1,6 @@
 {
   "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
-  "name": "flipper-plugin-realm",
+  "name": "realm-flipper-plugin",
   "id": "realm",
   "version": "1.0.0",
   "pluginType": "client",
