@@ -26,7 +26,9 @@ export type RealmPluginState = {
   schemaHistoryIndex: number,
   cursorId: 0 | null,
   filterCursor: 0 | null,
-  selectedPageSize: 10 | 100 | 1000 | 2500 
+  selectedPageSize: 10 | 100 | 1000 | 2500 ,
+  totalPageAmount: number,
+  currentPage: number,
 }
 
 export type SchemaResponseObject = {
@@ -134,6 +136,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     cursorId: 0,
     filterCursor: 0,
     selectedPageSize: 100,
+    totalPageAmount: 0,
+    currentPage: 1
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -146,7 +150,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
     console.log("cursor", data.objects[data.objects.length-1]._id);
-    pluginState.set({ ...state, objects: [...state.objects, ...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id });
+    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id, totalPageAmount: data.pageAmount });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -297,11 +301,19 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('removeObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
   }
 
+  const setCurrentPage = (event: {currentPage: number}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      currentPage: event.currentPage,
+    });
+  };
+
   client.onConnect( async () => {
     await setTimeout(() => {}, 4000)
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage};
 }
 
 export function Component() {
@@ -325,10 +337,6 @@ export function Component() {
   const onRQLClicked = useCallback(() => {
     instance.updateViewMode({ viewMode: "RQL" });
   }, [instance]);
-
-  const getMore = () => {
-    instance.getObjects({schema: state.selectedSchema, realm: state.selectedRealm})
-  }
 
   return (
     <Layout.ScrollContainer>

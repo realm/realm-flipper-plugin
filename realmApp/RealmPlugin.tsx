@@ -51,11 +51,11 @@ export default React.memo((props: {realms: Realm[]}) => {
           objects = objects
             .sorted(['weight', '_id'])
             .filtered(
-              'weight > $0 || (weight == $0 && _id >= $1) LIMIT(11)',
+              'weight > $0 || (weight == $0 && _id >= $1)',
               obj.filterCursor,
               obj.cursorId,
-              limit+1,
-            ); //cursor based pagination
+            )
+            .slice(0, limit + 1); //cursor based pagination //TODO: use limit
           console.log('obj', obj);
           console.log(objects);
           console.log('amount of objects is ', objectsLength);
@@ -63,13 +63,13 @@ export default React.memo((props: {realms: Realm[]}) => {
             lastItem = objects[objects.length-1]; //if this is null this is the last page
             firstItem = objects[0]; //TODO: not sure about this
           }
-          // pageAmount: Math.ceil(objectsLength/obj.pageSize)
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
             next_cursor: lastItem,
             prev_cursor: firstItem,
+            pageAmount: Math.ceil(objectsLength / obj.limit),
           });
         });
 

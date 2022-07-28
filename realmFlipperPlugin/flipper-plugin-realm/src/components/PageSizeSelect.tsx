@@ -22,6 +22,7 @@ export default () => {
           width: 120,
         }}
         onChange={onPageSizeSelect}
+        value = {state.selectedPageSize}
       >
         <Option value={10}>10</Option>
         <Option value={100}>100</Option>
