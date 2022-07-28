@@ -16,7 +16,7 @@ const forEachProp = (
     return f(props[property], index);
   });
 };
-
+let maxId = 0;
 export default (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
@@ -83,7 +83,7 @@ export default (props: {
             property={property}
             toClear={toClear}
             isPrimary={property.name == schema.primaryKey}
-            key={inputReset * Object.keys(schema.properties).length + index}
+            key={inputReset * Object.keys(schema.properties).length * Object.keys(schema.properties).length + index}
           />
         ))}
       </Modal>

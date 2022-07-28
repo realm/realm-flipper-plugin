@@ -9,7 +9,7 @@ export const DecimalInput = ({
   set,
   style,
 }: TypeInputProps) => {
-  const [_, setReset] = useState(0);
+  const [reset, setReset] = useState(0);
 
   const onChange = (value: string) => {
     set(new bigDecimal(value));
@@ -18,8 +18,8 @@ export const DecimalInput = ({
   return (
     <Input.Group>
       <InputNumber
+        key={reset}
         style={style}
-        // key={inputReset}
         defaultValue={value}
         onChange={onChange}
         placeholder={property.optional ? "null" : undefined}

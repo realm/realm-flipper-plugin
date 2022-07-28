@@ -19,11 +19,11 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
     mapTo: "",
     optional: false,
   };
-  //   console.log(array)
+    console.log(array)
   return (
     <Input.Group>
       {array.map((value: any, index: number) => {
-        let keyo = reset + 2 * index;
+        let keyo = reset + index + 1;
         return (
           <Input.Group key={index}>
             <TypeInput
@@ -39,7 +39,7 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
               value={value}
             ></TypeInput>
             <Button
-              key={2 * index + 1}
+              key={-index - 1}
               type="primary"
               icon={<DeleteOutlined />}
               size={"small"}
