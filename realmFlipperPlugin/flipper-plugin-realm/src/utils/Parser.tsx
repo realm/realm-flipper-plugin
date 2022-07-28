@@ -11,9 +11,6 @@ export function parseRows(
   let rows = objects.map((obj: any, index: number) => {
     let returnObj = { key: index };
 
-    console.log("Object Parser");
-    console.log(obj);
-
     Object.keys(schema.properties).forEach((propKey: string) => {
       const currentPropObject = schema.properties[propKey];
       const currentRealmPropType = currentPropObject.type;

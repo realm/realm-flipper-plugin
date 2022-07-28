@@ -111,6 +111,9 @@ export const RealmQueryLanguage = (props: {
         schemas={state.schemas}
         getObjects={instance.getObjects}
         selectedSchema={state.selectedSchema}
+        addObject={() => {}}
+        removeObject={() => {}}
+        modifyObject={() => {}}
       />
     </>
   );

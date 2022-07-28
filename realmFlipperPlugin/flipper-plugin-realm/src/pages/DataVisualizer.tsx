@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Layout, DataInspector, DetailSidebar } from "flipper-plugin";
 import { Dropdown, Menu, Radio, Table, Tooltip, Tag } from "antd";
 import { SchemaPropertyValue, SchemaResponseObject } from "../index";
@@ -77,6 +78,7 @@ export default function DataVisualizer(props: {
     const deleteRow = (row: Object) => {
       props.removeObject(row);
     };
+
 
     const dropDown = (
       row: Object,
