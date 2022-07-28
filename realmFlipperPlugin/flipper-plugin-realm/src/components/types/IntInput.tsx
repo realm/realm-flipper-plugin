@@ -2,7 +2,7 @@ import { InputNumber, Input, Button } from "antd";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
-export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
+export const IntInput = ({ property, value, set, extraProps }: TypeInputProps) => {
   const [_, setReset] = useState(0);
 
   const onChange = (value: number) => {
@@ -15,7 +15,7 @@ export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
     <Input.Group>
       <InputNumber
         // value={value}
-        style={style}
+        {...extraProps}
         // key={inputReset}
         defaultValue={value}
         onChange={onChange}

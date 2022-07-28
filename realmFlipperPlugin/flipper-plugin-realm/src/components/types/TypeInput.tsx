@@ -11,12 +11,13 @@ import { ListInput } from "./ListInput";
 import moment from "moment";
 import { MixedInput } from "./MixedInput";
 import { DecimalInput } from "./DecimalInput";
+import { SetInput } from "./SetInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
   value: any;
   set: (val: any) => void;
-  style?: Object;
+  extraProps?: Object;
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {
@@ -62,7 +63,8 @@ export const TypeInput = (props: TypeInputProps) => {
       return <DateInput {...props} />;
     case "uuid":
       return <UUIDInput {...props} />;
-    // case "set":
+    case "set":
+      return <SetInput {...props} />;
     case "list":
       return <ListInput {...props} />;
     case "mixed":
