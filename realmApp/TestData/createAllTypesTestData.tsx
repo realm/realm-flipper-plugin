@@ -104,21 +104,21 @@ export function createAllTypesTestData(realm: Realm) {
       Decimal128.fromString('1'),
       Decimal128.fromString('2'),
     ],
-    ObjectList: [
-      {
-        name: 'Jonas',
-        surname: 'Vingegaard',
-        age: 26,
-        tourWins: [2022, 2023, 2024, 2025],
-      },
-      {
-        name: 'Jonas',
-        surname: 'Vingegaard',
-        age: 26,
-        tourWins: [2022, 2023, 2024, 2025],
-      },
-      {name: 'Tadej', surname: 'Pogacar', age: 27, tourWins: [2019, 2020]},
-    ],
+    // ObjectList: [
+    //   {
+    //     name: 'Jonas',
+    //     surname: 'Vingegaard',
+    //     age: 26,
+    //     tourWins: [2022, 2023, 2024, 2025],
+    //   },
+    //   {
+    //     name: 'Jonas',
+    //     surname: 'Vingegaard',
+    //     age: 26,
+    //     tourWins: [2022, 2023, 2024, 2025],
+    //   },
+    //   {name: 'Tadej', surname: 'Pogacar', age: 27, tourWins: [2019, 2020]},
+    // ],
 
     // ObjectSet: [
     //   {
