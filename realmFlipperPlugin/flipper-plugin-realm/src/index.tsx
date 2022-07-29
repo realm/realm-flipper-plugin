@@ -377,7 +377,6 @@ export function Component() {
           <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
         </>
       ) : null}
-      <Button onClick={() => getMore()}>get more</Button>
     </Layout.ScrollContainer>
   );
 }
