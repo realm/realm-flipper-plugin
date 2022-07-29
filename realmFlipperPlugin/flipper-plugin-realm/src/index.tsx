@@ -151,7 +151,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
-    console.log("received objects and cursors", data);
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
     pluginState.set({ 
