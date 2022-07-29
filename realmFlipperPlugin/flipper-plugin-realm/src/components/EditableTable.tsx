@@ -18,7 +18,7 @@ import { Key, RowSelectionType, SorterResult } from "antd/lib/table/interface";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-type Item = Object
+type Item = Object;
 
 interface EditableRowProps {
   index: number;
@@ -85,10 +85,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   if (editable) {
     childNode = editing ? (
-      <Form.Item
-        style={{ margin: 0 }}
-        name={dataIndex}
-      >
+      <Form.Item style={{ margin: 0 }} name={dataIndex}>
         {!numeric ? (
           <Input
             style={{ width: "100%" }}
@@ -120,11 +117,11 @@ type EditableTableProps = Parameters<typeof Table>[0];
 type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
 
 type GenericColumn = {
-    title: string;
-    key: string;
-    dataIndex: string;
-    property: SchemaPropertyValue;
-}
+  title: string;
+  key: string;
+  dataIndex: string;
+  property: SchemaPropertyValue;
+};
 
 export default (props: {
   columns: GenericColumn[];
@@ -140,7 +137,6 @@ export default (props: {
   const handleSave = (row: Item) => {
     // dont update for now
     // props.modifyObject(row);
-
   };
 
   const defaultColumns = props.columns.map((col) => {
@@ -148,7 +144,6 @@ export default (props: {
       ...col,
       editable:
         col.property.type !== "data" && col.property.name != props.primaryKey,
-      width: ((1 / props.columns.length) * 100).toFixed(2) + "%",
     };
   });
 
@@ -164,25 +159,7 @@ export default (props: {
     </Menu>
   );
 
-  const renderValue = (value: any, property: SchemaPropertyValue, row: Item) => {
-    return (
-      <Dropdown overlay={() => dropDown(row)} trigger={[`contextMenu`]}>
-        <div>
-          {property.optional && value === null
-            ? "null"
-            : property.type === "string"
-            ? '"' + value + '"'
-            : value}
-        </div>
-      </Dropdown>
-    );
-  };
-
-  const columns = defaultColumns.map((oldCol) => {
-    let col = {
-      ...oldCol,
-      render: (val: any, row: Item) => renderValue(val, col.property, row),
-    };
+  const columns = defaultColumns.map((col) => {
     if (!col.editable) {
       return col;
     }
@@ -223,6 +200,15 @@ export default (props: {
         pagination={false}
         dataSource={dataSource}
         columns={columns as ColumnTypes}
+        sticky={true}
+        pagination={{
+          position: ["topLeft", "bottomLeft"],
+          defaultPageSize: 20,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+          showQuickJumper: true,
+        }}
+        size="small"
         onChange = {handleOnChange}
       />
     </div>

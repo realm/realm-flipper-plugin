@@ -17,6 +17,7 @@ export type RealmPluginState = {
   realms: string[],
   selectedRealm: string, 
   objects: Array<Object>,
+  singleObject: Object,
   schemas: Array<SchemaResponseObject>,
   viewMode: 'data' | 'schemas' | 'RQL',
   query: String,
@@ -51,6 +52,7 @@ export type SchemaPropertyValue = {
 
 type Events = {
   getObjects: ObjectsMessage
+  getOneObject: ObjectMessage
   getSchemas: SchemaMessage
   liveObjectAdded: AddLiveObjectRequest
   liveObjectDeleted: DeleteLiveObjectRequest
@@ -62,6 +64,7 @@ type Events = {
 type Methods = {
   executeQuery: (query: QueryObject) => Promise<Object[]>
   getObjects: (data: SchemaRequest) => Promise<Object[]>
+  getOneObject: (data: ObjectRequest) => Promise<Object[]>
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>
   getRealms: () => Promise<string[]>
   addObject: (object: AddObject) => Promise<any>;
@@ -84,6 +87,10 @@ type ObjectsMessage = {
   total: number;
 };
 
+type ObjectMessage = {
+  object: Object;
+};
+
 type SchemaMessage = {
   schemas: Array<SchemaResponseObject>;
 };
@@ -99,6 +106,12 @@ type SchemaRequest = {
   cursorId: number;
   limit: number;
   sortingColumn: string | null;
+}
+
+type ObjectRequest = {
+  schema: string;
+  realm: string;
+  primaryKey: string
 }
 
 type AddLiveObjectRequest = {
@@ -131,6 +144,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realms: [],
     selectedRealm: '',
     objects: [],
+    singleObject: {},
     schemas: [],
     viewMode: "data",
     query: "",
@@ -160,6 +174,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: data.objects[data.objects.length-1]._id, 
       totalObjects: data.total 
     });
+  });
+
+  client.onMessage("getOneObject", (data: ObjectMessage) => {
+    console.log("received object", data.object);
+    const state = pluginState.get();
+    pluginState.set({ ...state, singleObject: data.object });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -226,6 +246,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize, 
       sortingColumn: state.sortingColumn
     }))
+  }
+
+  const getOneObject = (event: {
+    schema: string;
+    primaryKey: string;
+  }) => {
+    const state = pluginState.get();
+    console.log("myRealm",event);
+    client.send("getOneObject", ({schema: event.schema, realm: state.selectedRealm, primaryKey: event.primaryKey}))
   }
 
   const getSchemas = (realm: string) => {
@@ -337,7 +366,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     await setTimeout(() => {}, 4000)
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage, setSortingColumn};
+  return {state: pluginState, getObjects, getOneObject, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage, setSortingColumn};
 }
 
 export function Component() {
@@ -385,12 +414,13 @@ export function Component() {
       {state.viewMode === "data" ? (
         <DataVisualizer
           objects={state.objects}
+          singleObject={state.singleObject}
           schemas = {state.schemas}
-          getObjects={instance.getObjects}
           selectedSchema={state.selectedSchema}
           addObject={instance.addObject}
           modifyObject={instance.modifyObject}
           removeObject={instance.removeObject}
+          getOneObject={instance.getOneObject}
          />
       ) : null}
       {state.viewMode === "schemas" ? (

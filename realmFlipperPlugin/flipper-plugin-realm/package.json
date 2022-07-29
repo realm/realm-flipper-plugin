@@ -1,6 +1,6 @@
 {
   "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
-  "name": "flipper-plugin-realm",
+  "name": "realm-flipper-plugin",
   "id": "realm",
   "version": "1.0.0",
   "pluginType": "client",
@@ -55,7 +55,11 @@
     ]
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "jest-environment-jsdom": "^28.1.3",
-    "pretty-print-json": "^1.2.5"
+    "js-big-decimal": "^1.3.5",
+    "moment": "^2.29.4",
+    "pretty-print-json": "^1.2.5",
+    "react-native-uuid": "^2.0.1"
   }
 }
