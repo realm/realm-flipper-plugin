@@ -4,6 +4,7 @@ import Realm from 'realm';
 export function createAllTypesTestData(realm: Realm) {
   realm.write(() => {
     realm.delete(realm.objects('AllTypes'));
+    realm.delete(realm.objects('NoPrimaryKey'));
   });
 
   let uuid = new UUID('aa79b9ed-fbc0-4038-8f16-31f4da3efb9e');
@@ -145,5 +146,30 @@ export function createAllTypesTestData(realm: Realm) {
 
   realm.write(() => {
     realm.create('AllTypes', AllTypes3);
+  });
+
+  let NoPrimaryKey1 = {
+    _id: 789,
+    name: 'CocaCola',
+  };
+
+  let NoPrimaryKey2 = {
+    _id: 345,
+    name: 'Fanta',
+  };
+
+
+  let NoPrimaryKey3 = {
+    _id: 25234,
+    name: 'Sprite',
+  };
+
+  realm.objects("Banana").filter
+
+  realm.write(() => {
+    realm.create('NoPrimaryKey', NoPrimaryKey1);
+    realm.create('NoPrimaryKey', NoPrimaryKey2);
+    realm.create('NoPrimaryKey', NoPrimaryKey3);
+
   });
 }
