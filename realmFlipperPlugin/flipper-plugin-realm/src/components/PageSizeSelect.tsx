@@ -12,7 +12,8 @@ export default () => {
     const onPageSizeSelect =  (selected: 10 | 100 | 1000 | 2500) => {
       instance.updateSelectedPageSize({
         pageSize: selected,
-      });    
+      });
+      instance.getObjects({schema: state.selectedSchema, realm: state.selectedRealm})    
     }
 
     return (
@@ -20,6 +21,7 @@ export default () => {
         defaultValue={100}
         style={{
           width: 120,
+          marginLeft: 20,
         }}
         onChange={onPageSizeSelect}
         value = {state.selectedPageSize}

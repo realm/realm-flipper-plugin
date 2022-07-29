@@ -27,8 +27,8 @@ export type RealmPluginState = {
   cursorId: 0 | null,
   filterCursor: 0 | null,
   selectedPageSize: 10 | 100 | 1000 | 2500 ,
-  totalPageAmount: number,
   currentPage: number,
+  totalObjects: number
 }
 
 export type SchemaResponseObject = {
@@ -136,7 +136,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     cursorId: 0,
     filterCursor: 0,
     selectedPageSize: 100,
-    totalPageAmount: 0,
+    totalObjects: 0,
     currentPage: 1
   });
 
@@ -150,7 +150,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
     console.log("cursor", data.objects[data.objects.length-1]._id);
-    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id, totalPageAmount: data.pageAmount });
+    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id, totalObjects: data.total });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
