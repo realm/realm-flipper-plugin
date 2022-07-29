@@ -7,12 +7,14 @@ import {
   Input,
   Table,
   Pagination,
+  TablePaginationConfig,
 } from "antd";
 import type { FormInstance } from "antd/es/form";
 import { plugin } from '../index';
 import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { SchemaPropertyValue } from "..";
+import { Key, RowSelectionType, SorterResult } from "antd/lib/table/interface";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -204,7 +206,7 @@ export default (props: {
     },
   };
 
-  const handleOnChange = (pagination, filters, sorter, extra) => {
+  const handleOnChange = (pagination: TablePaginationConfig, filters: Record<string, Key[] | null>, sorter: SorterResult<any> | SorterResult<any>[], extra: any) => { //TODO: make type of a field
     if (extra.action === 'sort') {
       instance.setSortingColumn({sortingColumn: sorter.field})
     }

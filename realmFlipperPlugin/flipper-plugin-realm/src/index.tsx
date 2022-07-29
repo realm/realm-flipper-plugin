@@ -24,8 +24,8 @@ export type RealmPluginState = {
   selectedSchema: string,
   schemaHistory: Array<string>,
   schemaHistoryIndex: number,
-  cursorId: 0 | null,
-  filterCursor: 0 | null,
+  cursorId: number,
+  filterCursor: number | null,
   selectedPageSize: 10 | 100 | 1000 | 2500 ,
   currentPage: number,
   totalObjects: number,
@@ -81,6 +81,7 @@ type RealmsMessage = {
 
 type ObjectsMessage = {
   objects: Array<Object>;
+  total: number;
 };
 
 type SchemaMessage = {
@@ -94,8 +95,10 @@ type RealmRequest = {
 type SchemaRequest = {
   schema: string;
   realm: string;
-  cursor: string;
-  filterCursor: string | number;
+  filterCursor: string | number | null;
+  cursorId: number;
+  limit: number;
+  sortingColumn: string | null;
 }
 
 type AddLiveObjectRequest = {
@@ -151,8 +154,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log("received objects and cursors", data);
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
-    console.log("cursor", data.objects[data.objects.length-1]);
-    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1][state.sortingColumn], cursorId: data.objects[data.objects.length-1]._id, totalObjects: data.total });
+    pluginState.set({ 
+      ...state, 
+      objects: [...result], 
+      filterCursor: data.objects[data.objects.length-1][state.sortingColumn], 
+      cursorId: data.objects[data.objects.length-1]._id, 
+      totalObjects: data.total 
+    });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
@@ -209,11 +217,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realm: string | null;
   }) => {
     const state = pluginState.get();
-    console.log("new", pluginState.get().cursorId);
-    console.log("myRealm",event);
     event.schema = event.schema ?? state.selectedSchema
     event.realm = event.realm ?? state.selectedRealm
-    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: state.cursorId, filterCursor: state.filterCursor, limit: state.selectedPageSize, sortingColumn: state.sortingColumn}))
+    client.send("getObjects", ({
+      schema: event.schema, 
+      realm: event.realm, 
+      cursorId: state.cursorId, 
+      filterCursor: state.filterCursor, 
+      limit: state.selectedPageSize, 
+      sortingColumn: state.sortingColumn
+    }))
   }
 
   const getSchemas = (realm: string) => {
