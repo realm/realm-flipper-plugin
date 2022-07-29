@@ -11,7 +11,6 @@ export default () => {
     instance.setCurrentPage({currentPage: state.currentPage+1});
     instance.getObjects({schema: state.selectedSchema, realm: state.selectedRealm})
   }
-  console.log(state.totalObjects)
     return (
       <Pagination
         onChange={getMore}

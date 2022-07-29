@@ -209,6 +209,7 @@ export default (props: {
       instance.setSortingColumn({sortingColumn: sorter.field})
     }
     instance.getObjects({realm: null, schema: null});
+    instance.setCurrentPage({currentPage: 1}); 
   };
 
   return (
