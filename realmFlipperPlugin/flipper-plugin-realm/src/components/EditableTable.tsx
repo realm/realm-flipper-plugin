@@ -201,13 +201,13 @@ export default (props: {
         dataSource={dataSource}
         columns={columns as ColumnTypes}
         sticky={true}
-        pagination={{
-          position: ["topLeft", "bottomLeft"],
-          defaultPageSize: 20,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
-          showQuickJumper: true,
-        }}
+        // pagination={{
+        //   position: ["topLeft", "bottomLeft"],
+        //   defaultPageSize: 20,
+        //   showSizeChanger: true,
+        //   pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+        //   showQuickJumper: true,
+        // }}
         size="small"
         onChange = {handleOnChange}
       />
