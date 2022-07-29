@@ -85,19 +85,20 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: Math.floor(Math.random() * 100000),
+      _id: Math.floor(Math.random() * 100000000000000),
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: 500,
+      weight: Math.floor(Math.random()*1000),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
 }
 
+
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objects('Banana')[0]);
+    realm.delete(realm.objects('Banana'));
   });
 }
 

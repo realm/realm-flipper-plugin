@@ -98,7 +98,6 @@ function createColumnConfig(columns: string[]) {
       }
     }
     const {schemas, selectedSchema} = props;
-    console.log(schemas)
     if (!schemas || !schemas.length) {
       return (<div>No schemas found</div>);
     }

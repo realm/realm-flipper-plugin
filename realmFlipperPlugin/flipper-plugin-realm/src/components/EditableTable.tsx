@@ -6,10 +6,15 @@ import {
   Form,
   Input,
   Table,
+  Pagination,
+  TablePaginationConfig,
 } from "antd";
 import type { FormInstance } from "antd/es/form";
+import { plugin } from '../index';
+import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { SchemaPropertyValue } from "..";
+import { Key, RowSelectionType, SorterResult } from "antd/lib/table/interface";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -126,6 +131,7 @@ export default (props: {
   schemaName: String;
   removeObject: Function;
 }) => {
+  const instance = usePlugin(plugin);
   const dataSource = props.data;
 
   const handleSave = (row: Item) => {
@@ -177,23 +183,33 @@ export default (props: {
     },
   };
 
+  const handleOnChange = (pagination: TablePaginationConfig, filters: Record<string, Key[] | null>, sorter: SorterResult<any> | SorterResult<any>[], extra: any) => { //TODO: make type of a field
+    if (extra.action === 'sort') {
+      instance.setSortingColumn({sortingColumn: sorter.field})
+    }
+    instance.getObjects({realm: null, schema: null});
+    instance.setCurrentPage({currentPage: 1}); 
+  };
+
   return (
     <div>
       <Table
         components={components}
         rowClassName={() => "editable-row"}
         bordered
+        pagination={false}
         dataSource={dataSource}
         columns={columns as ColumnTypes}
         sticky={true}
-        pagination={{
-          position: ["topLeft", "bottomLeft"],
-          defaultPageSize: 20,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
-          showQuickJumper: true,
-        }}
+        // pagination={{
+        //   position: ["topLeft", "bottomLeft"],
+        //   defaultPageSize: 20,
+        //   showSizeChanger: true,
+        //   pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
+        //   showQuickJumper: true,
+        // }}
         size="small"
+        onChange = {handleOnChange}
       />
     </div>
   );

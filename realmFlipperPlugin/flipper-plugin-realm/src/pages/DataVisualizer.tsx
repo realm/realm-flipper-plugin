@@ -9,6 +9,8 @@ import EditableTable from "../components/EditableTable";
 import { ColumnTitle } from "../components/ColumnTitle";
 import { useState } from "react";
 import { RealmDataInspector } from "../components/RealmDataInspector";
+import PageSizeSelect from "../components/PageSizeSelect";
+import DataPagination from "../components/DataPagination";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -205,7 +207,13 @@ export default function DataVisualizer(props: {
               removeObject={props.removeObject}
             ></EditableTable>
           </div>
-        }
+        }      <Layout.Horizontal style={{
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}>
+        <DataPagination></DataPagination>
+        <PageSizeSelect></PageSizeSelect>
+      </Layout.Horizontal>
       </Layout.Container>
     );
   }

@@ -3,7 +3,7 @@ import {
   SettingOutlined,
   TableOutlined
 } from "@ant-design/icons";
-import { Radio, RadioChangeEvent, Typography } from 'antd';
+import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
 import { useCallback } from 'react';
@@ -24,7 +24,13 @@ export type RealmPluginState = {
   errorMsg?: String
   selectedSchema: string,
   schemaHistory: Array<string>,
-  schemaHistoryIndex: number
+  schemaHistoryIndex: number,
+  cursorId: number,
+  filterCursor: number | null,
+  selectedPageSize: 10 | 100 | 1000 | 2500 ,
+  currentPage: number,
+  totalObjects: number,
+  sortingColumn: string | null,
 }
 
 export type SchemaResponseObject = {
@@ -78,6 +84,7 @@ type RealmsMessage = {
 
 type ObjectsMessage = {
   objects: Array<Object>;
+  total: number;
 };
 
 type ObjectMessage = {
@@ -95,6 +102,10 @@ type RealmRequest = {
 type SchemaRequest = {
   schema: string;
   realm: string;
+  filterCursor: string | number | null;
+  cursorId: number;
+  limit: number;
+  sortingColumn: string | null;
 }
 
 type ObjectRequest = {
@@ -139,7 +150,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: "",
     selectedSchema: '',
     schemaHistory: [],
-    schemaHistoryIndex: 1
+    schemaHistoryIndex: 1,
+    cursorId: 0,
+    filterCursor: 0,
+    selectedPageSize: 100,
+    totalObjects: 0,
+    currentPage: 1,
+    sortingColumn: null,
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -148,9 +165,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
   })
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
-    console.log("received objects", data.objects);
     const state = pluginState.get();
-    pluginState.set({ ...state, objects: data.objects });
+    let result = data.objects.filter((val, index) => index<data.objects.length-1)
+    pluginState.set({ 
+      ...state, 
+      objects: [...result], 
+      filterCursor: data.objects[data.objects.length-1][state.sortingColumn], 
+      cursorId: data.objects[data.objects.length-1]._id, 
+      totalObjects: data.total 
+    });
   });
 
   client.onMessage("getOneObject", (data: ObjectMessage) => {
@@ -209,11 +232,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
   }
 
   const getObjects = (event: {
-    schema: string;
-    realm: string;
+    schema: string | null;
+    realm: string | null;
   }) => {
-    console.log("myRealm",event);
-    client.send("getObjects", ({schema: event.schema, realm: event.realm}))
+    const state = pluginState.get();
+    event.schema = event.schema ?? state.selectedSchema
+    event.realm = event.realm ?? state.selectedRealm
+    client.send("getObjects", ({
+      schema: event.schema, 
+      realm: event.realm, 
+      cursorId: state.cursorId, 
+      filterCursor: state.filterCursor, 
+      limit: state.selectedPageSize, 
+      sortingColumn: state.sortingColumn
+    }))
   }
 
   const getOneObject = (event: {
@@ -290,6 +322,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const updateSelectedPageSize = (event: {pageSize: 10 | 100 | 1000 | 2500}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      selectedPageSize: event.pageSize
+    });
+  };
+
   client.onConnect( () => {
     getRealms();
   });
@@ -306,11 +346,27 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('removeObject', { realm: state.selectedRealm, schema: state.selectedSchema, object: object})
   }
 
+  const setCurrentPage = (event: {currentPage: number}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      currentPage: event.currentPage,
+    });
+  };
+  
+  const setSortingColumn = (event: {sortingColumn: string | null}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      sortingColumn: event.sortingColumn,
+    });
+  };
+
   client.onConnect( async () => {
     await setTimeout(() => {}, 4000)
     getRealms();
   });
-  return {state: pluginState, getObjects, getOneObject, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory};
+  return {state: pluginState, getObjects, getOneObject, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage, setSortingColumn};
 }
 
 export function Component() {
