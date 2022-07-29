@@ -47,19 +47,25 @@ export default React.memo((props: {realms: Realm[]}) => {
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
           let hasNext, hasPrev, lastItem, firstItem;
-          objects = objects
-            .sorted(['weight', '_id'])
-            .filtered(
-              'weight > $0 || (weight == $0 && _id >= $1)',
+          console.log("sorting by",obj.sortingColumn);
+          if (obj.sortingColumn) {
+            objects = objects.sorted([`${obj.sortingColumn}`, '_id']).filtered(
+              `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id >= $1) LIMIT(${limit + 1})`, //TODO: security risk, dangerous to use template strings in a query langauge maybe??
               obj.filterCursor,
               obj.cursorId,
-            )
-            .slice(0, limit + 1); //cursor based pagination //TODO: use limit
+            );
+            //cursor based pagination
+          } else {
+            objects = objects
+              .sorted('_id')
+              .filtered('_id > $0', obj.cursorId)
+              .slice(0, limit + 1);
+          }
           console.log('obj', obj);
           console.log(objects);
           console.log('amount of objects is ', objectsLength);
           if (objects.length) {
-            lastItem = objects[objects.length-1]; //if this is null this is the last page
+            lastItem = objects[objects.length - 1]; //if this is null this is the last page
             firstItem = objects[0]; //TODO: not sure about this
           }
           //base64 the next and prev cursors
@@ -68,7 +74,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             total: objectsLength,
             next_cursor: lastItem,
             prev_cursor: firstItem,
-            pageAmount: Math.ceil(objectsLength / obj.limit),
           });
         });
 

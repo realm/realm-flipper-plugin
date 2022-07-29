@@ -28,7 +28,8 @@ export type RealmPluginState = {
   filterCursor: 0 | null,
   selectedPageSize: 10 | 100 | 1000 | 2500 ,
   currentPage: number,
-  totalObjects: number
+  totalObjects: number,
+  sortingColumn: string | null,
 }
 
 export type SchemaResponseObject = {
@@ -137,7 +138,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     filterCursor: 0,
     selectedPageSize: 100,
     totalObjects: 0,
-    currentPage: 1
+    currentPage: 1,
+    sortingColumn: null,
   });
 
   client.onMessage("getRealms", (data: RealmsMessage) => {
@@ -203,13 +205,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
   }
 
   const getObjects = (event: {
-    schema: string;
-    realm: string;
+    schema: string | null;
+    realm: string | null;
   }) => {
     const state = pluginState.get();
     console.log("new", pluginState.get().cursorId);
     console.log("myRealm",event);
-    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: state.cursorId, filterCursor: state.filterCursor, limit: state.selectedPageSize}))
+    event.schema = event.schema ?? state.selectedSchema
+    event.realm = event.realm ?? state.selectedRealm
+    client.send("getObjects", ({schema: event.schema, realm: event.realm, cursorId: state.cursorId, filterCursor: state.filterCursor, limit: state.selectedPageSize, sortingColumn: state.sortingColumn}))
   }
 
   const getSchemas = (realm: string) => {
@@ -308,12 +312,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
       currentPage: event.currentPage,
     });
   };
+  
+  const setSortingColumn = (event: {sortingColumn: string | null}) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      sortingColumn: event.sortingColumn,
+    });
+  };
 
   client.onConnect( async () => {
     await setTimeout(() => {}, 4000)
     getRealms();
   });
-  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage};
+  return {state: pluginState, getObjects, getSchemas, updateViewMode, executeQuery, addObject, updateSelectedSchema, updateSelectedRealm, modifyObject, removeObject, goBackSchemaHistory, goForwardSchemaHistory, updateSelectedPageSize, setCurrentPage, setSortingColumn};
 }
 
 export function Component() {

@@ -132,6 +132,7 @@ export default (props: {
   schemaName: String;
   removeObject: Function;
 }) => {
+  const instance = usePlugin(plugin);
   const dataSource = props.data;
 
   const handleSave = (row: Item) => {
@@ -203,7 +204,12 @@ export default (props: {
     },
   };
 
-
+  const handleOnChange = (pagination, filters, sorter, extra) => {
+    if (extra.action === 'sort') {
+      instance.setSortingColumn({sortingColumn: sorter.field})
+    }
+    instance.getObjects({realm: null, schema: null});
+  };
 
   return (
     <div>
@@ -214,6 +220,7 @@ export default (props: {
         pagination={false}
         dataSource={dataSource}
         columns={columns as ColumnTypes}
+        onChange = {handleOnChange}
       />
     </div>
   );
