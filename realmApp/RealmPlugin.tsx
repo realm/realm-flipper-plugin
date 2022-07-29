@@ -47,27 +47,39 @@ export default React.memo((props: {realms: Realm[]}) => {
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
           let hasNext, hasPrev, lastItem, firstItem;
-          console.log("sorting by",obj.sortingColumn);
+          let cursorField = obj.sortingColumn ?? "_id";
           if (obj.sortingColumn) {
+            obj.filterCursor = obj.filterCursor ?? objects.sorted(`${obj.sortingColumn}`)[0][obj.sortingColumn];
+            console.log("filtercursor is ",obj.filterCursor);
             objects = objects.sorted([`${obj.sortingColumn}`, '_id']).filtered(
               `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id >= $1) LIMIT(${limit + 1})`, //TODO: security risk, dangerous to use template strings in a query langauge maybe??
               obj.filterCursor,
               obj.cursorId,
             );
-            //cursor based pagination
           } else {
             objects = objects
               .sorted('_id')
-              .filtered('_id > $0', obj.cursorId)
-              .slice(0, limit + 1);
+              .filtered(`_id > $0 LIMIT(${limit + 1})`, obj.cursorId);
           }
-          console.log('obj', obj);
+          let q = {};
+        //   if (objects.length) {
+        //     // Has next?
+        //     let cursorParam = objects[objects.length - 1][cursorField];
+        //     if (cursorField === '_id') {
+        //       hasNext = !!objects[objects.length - 1];
+        //       lastItem = objects[objects.length-1];
+        //     } else {
+        //      // If there is an item with id less than last item then there is a next page
+        //      lastItem = objects[objects.length-1];
+        //      const q = { _id: { $gt: lastItem } }
+
+        //   }
+        //   if (objects.length) {
+        //     lastItem = objects[objects.length - 1]; //if this is null this is the last page
+        //     firstItem = objects[0]; //TODO: not sure about this
+        //   }
+        // }
           console.log(objects);
-          console.log('amount of objects is ', objectsLength);
-          if (objects.length) {
-            lastItem = objects[objects.length - 1]; //if this is null this is the last page
-            firstItem = objects[0]; //TODO: not sure about this
-          }
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,

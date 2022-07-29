@@ -151,8 +151,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log("received objects and cursors", data);
     const state = pluginState.get();
     let result = data.objects.filter((val, index) => index<data.objects.length-1)
-    console.log("cursor", data.objects[data.objects.length-1]._id);
-    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1].weight, cursorId: data.objects[data.objects.length-1]._id, totalObjects: data.total });
+    console.log("cursor", data.objects[data.objects.length-1]);
+    pluginState.set({ ...state, objects: [...result], filterCursor: data.objects[data.objects.length-1][state.sortingColumn], cursorId: data.objects[data.objects.length-1]._id, totalObjects: data.total });
   });
 
   client.onMessage("getSchemas", (data: SchemaMessage) => {
