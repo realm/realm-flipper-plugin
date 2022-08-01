@@ -51,15 +51,7 @@ export default function DataVisualizer(props: {
                 Close{" "}
               </Radio.Button>
             </Radio.Group>
-            <DataInspector
-              data={inspectData}
-              expandRoot={true}
-
-            />
-            {/* <RealmDataInspector inspectData={inspectData} /> */}
-            {/*<Layout.Container>
-            <DataInspector data={[inspectData]} expandRoot={true} />
-          </Layout.Container>{" "} */}
+            <DataInspector data={inspectData} expandRoot={true} />
           </DetailSidebar>
         ) : null}
       </Layout.Container>
@@ -78,7 +70,6 @@ export default function DataVisualizer(props: {
     const deleteRow = (row: Object) => {
       props.removeObject(row);
     };
-
 
     const dropDown = (
       row: Object,
@@ -110,27 +101,32 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={4}
           onClick={() => {
-            // const linkedObjectSchema: SchemaResponseObject | undefined = props.schemas.find(schema => schema.name === schemaProperty.objectType)
+            let object = {};
+            Object.keys(row).forEach((key) => {
+              object[key] = row[key].value;
+            });
 
-            // linkedObjectSchema === undefined ?  {setInspectData({ [schemaProperty.name]: row[schemaProperty.name] })
-            // setShowSidebar(true)}
-            // :
-            // null
-
-            setInspectData({ [schemaProperty.name]: row[schemaProperty.name] });
-            setShowSidebar(true);
-          }}
-        >
-          Inspect Cell
-        </Menu.Item>
-        <Menu.Item
-          key={5}
-          onClick={() => {
-            setInspectData({ row });
+            setInspectData({ object });
             setShowSidebar(true);
           }}
         >
           Inspect Row
+        </Menu.Item>
+        <Menu.Item
+          key={5}
+          onClick={() => {
+            const linkedObjectSchema: SchemaResponseObject | undefined =
+              props.schemas.find(
+                (schema) => schema.name === schemaProperty.objectType
+              );
+
+              setInspectData({
+                [schemaProperty.name]: row[schemaProperty.name].value,
+              });
+              setShowSidebar(true);
+          }}
+        >
+          Inspect Cell
         </Menu.Item>
       </Menu>
     );
@@ -168,10 +164,10 @@ export default function DataVisualizer(props: {
             >
               <Tooltip
                 placement="topLeft"
-                title={text}
+                title={text.text}
                 key={Math.floor(Math.random() * 10000000)}
               >
-                {text}
+                {text.text}
               </Tooltip>
             </Dropdown>
           );
