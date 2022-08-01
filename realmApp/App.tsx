@@ -50,24 +50,6 @@ const realm = new Realm({
   schemaVersion: 21,
 });
 
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
-      [realm],
-      connection,
-    );
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
-});
-
-//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
@@ -93,7 +75,7 @@ function createBanana() {
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
-}
+};
 
 
 function deleteBanana() {

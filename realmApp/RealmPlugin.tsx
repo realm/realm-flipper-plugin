@@ -50,17 +50,17 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('i got', obj, obj.filterCursor, obj.cursorId);
           let objects = realm.objects(schema); //optimize by just getting objects once
+          console.log('initially got objects', objects[0]);
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
           objects = getObjectsByPagination(obj, objects, limit);
-
           let lastItem, firstItem;
           if (objects.length) {
             lastItem = objects[objects.length - 1]; //if this is null this is the last page
             firstItem = objects[0]; //TODO: not sure about this
           }
-          console.log(objects);
+          console.log('sending to client now',objects);
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
@@ -219,11 +219,11 @@ function getObjectsByPagination(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  obj.cursorId = obj.cursorId ?? objects.sorted('_id')[0]._id;
   if (obj.sortingColumn) {
     obj.filterCursor =
       obj.filterCursor ??
       objects.sorted(`${obj.sortingColumn}`)[0][obj.sortingColumn];
-    console.log('filtercursor is ', obj.filterCursor);
     objects = objects
       .sorted([`${obj.sortingColumn}`, '_id'])
       .filtered(
@@ -234,9 +234,11 @@ function getObjectsByPagination(
         obj.cursorId,
       );
   } else {
+    console.log('simple filtering')
     objects = objects
       .sorted('_id')
       .filtered(`_id > $0 LIMIT(${limit + 1})`, obj.cursorId);
   }
+  console.log('got objects', objects);
   return objects;
 }
