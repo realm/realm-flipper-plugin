@@ -166,6 +166,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
     const state = pluginState.get();
+    if (!data.objects.length) {
+      return;
+    }
     let result = data.objects.slice(0, Math.max(state.selectedPageSize, data.objects.length-1))
     console.log("fetched objects",data )
     pluginState.set({ 
