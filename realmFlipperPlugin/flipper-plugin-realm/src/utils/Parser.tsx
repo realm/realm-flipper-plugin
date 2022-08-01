@@ -1,5 +1,10 @@
 import { SchemaResponseObject } from "../index";
 
+type propertyRepresentation = {
+  value: any;
+  text: string | number | null;
+};
+
 export function parseRows(
   objects: Object[],
   schema: SchemaResponseObject,
@@ -8,7 +13,8 @@ export function parseRows(
   console.log("SCHEMA");
   console.log(schema);
 
-  let rows = objects.map((obj: any, index: number) => {
+  let rows: Array<Object> = objects.map((obj: any, index: number) => {
+    // let returnObj = { text: {}, object: obj, key: index };
     let returnObj = { key: index };
 
     Object.keys(schema.properties).forEach((propKey: string) => {
@@ -16,13 +22,20 @@ export function parseRows(
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
 
+      let propRep: propertyRepresentation = {
+        value: currentFieldValue,
+        text: null,
+      };
+      returnObj[propKey] = propRep;
+
       if (currentFieldValue === undefined) {
         return;
       }
 
       if (currentFieldValue === null) {
         // @ts-ignore
-        returnObj[propKey] = "null";
+        // returnObj.text[propKey] = "null";
+        returnObj[propKey].text = "null";
         return;
       }
 
@@ -65,10 +78,15 @@ export function parseRows(
           break;
       }
       // @ts-ignore
-      returnObj[propKey] = stringForPrint;
+      //returnObj.text[propKey] = stringForPrint;
+      returnObj[propKey].text = stringForPrint;
     });
     return returnObj;
   });
+
+  console.log("ROWS");
+  console.log(rows);
+
   return rows;
 }
 
