@@ -12,6 +12,7 @@ import moment from "moment";
 import { MixedInput } from "./MixedInput";
 import { DecimalInput } from "./DecimalInput";
 import { SetInput } from "./SetInput";
+import { DataInput } from "./DataInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
@@ -71,6 +72,8 @@ export const TypeInput = (props: TypeInputProps) => {
       return <MixedInput {...props}/>;
     case 'decimal128':
       return <DecimalInput {...props} />;
+    case "data":
+        return <DataInput {...props} />;
     default:
       return <>Input for {props.property.type} not implemented!</>;
   }
