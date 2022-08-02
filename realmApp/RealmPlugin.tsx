@@ -238,9 +238,9 @@ function getObjectsByPagination(
     objects = objects
       .sorted([`${obj.sortingColumn}`, '_id'])
       .filtered(
-        `${obj.sortingColumn} > $0 || (${
-          obj.sortingColumn
-        } == $0 && _id >= $1) LIMIT(${limit + 1})`,
+        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
+          obj.cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit + 1})`,
         obj.filterCursor,
         obj.cursorId,
       );
@@ -248,7 +248,10 @@ function getObjectsByPagination(
     console.log('simple filtering');
     objects = objects
       .sorted('_id')
-      .filtered(`_id > $0 LIMIT(${limit + 1})`, obj.cursorId);
+      .filtered(
+        `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
+        obj.cursorId,
+      );
   }
   console.log('got objects', objects);
   return objects;

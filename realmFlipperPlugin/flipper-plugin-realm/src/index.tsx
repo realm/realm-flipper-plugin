@@ -169,6 +169,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getObjects', (data: ObjectsMessage) => {
     const state = pluginState.get();
     if (!data.objects.length) {
+      setLoading({ loading: false });
       return;
     }
     const result = data.objects.slice(
