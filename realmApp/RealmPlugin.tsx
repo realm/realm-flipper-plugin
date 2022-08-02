@@ -230,28 +230,66 @@ function getObjectsByPagination(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  obj.cursorId = obj.cursorId ?? objects.sorted('_id')[0]._id;
-  if (obj.sortingColumn) {
-    obj.filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`)[0][obj.sortingColumn];
-    objects = objects
-      .sorted([`${obj.sortingColumn}`, '_id'])
-      .filtered(
-        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '>=' : '>'
-        } $1) LIMIT(${limit + 1})`,
-        obj.filterCursor,
-        obj.cursorId,
-      );
+  obj.cursorId =
+    obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
+  const shouldSortDescending = obj.sortDirection === 'descend';
+  if (shouldSortDescending) {
+    if (obj.sortingColumn) {
+      obj.filterCursor =
+        obj.filterCursor ??
+        objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+          obj.sortingColumn
+        ];
+      objects = objects
+        .sorted([
+          [`${obj.sortingColumn}`, shouldSortDescending],
+          ['_id', shouldSortDescending],
+        ])
+        .filtered(
+          `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
+            obj.cursorId ? '<=' : '<'
+          } $1) LIMIT(${limit + 1})`,
+          obj.filterCursor,
+          obj.cursorId,
+        );
+    } else {
+      console.log('simple filtering');
+      objects = objects
+        .sorted('_id', shouldSortDescending)
+        .filtered(
+          `_id ${obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
+          obj.cursorId,
+        );
+    }
   } else {
-    console.log('simple filtering');
-    objects = objects
-      .sorted('_id')
-      .filtered(
-        `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
-        obj.cursorId,
-      );
+    //ascend
+    if (obj.sortingColumn) {
+      obj.filterCursor =
+        obj.filterCursor ??
+        objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+          obj.sortingColumn
+        ];
+      objects = objects
+        .sorted([
+          [`${obj.sortingColumn}`, shouldSortDescending],
+          ['_id', shouldSortDescending],
+        ])
+        .filtered(
+          `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
+            obj.cursorId ? '>=' : '>'
+          } $1) LIMIT(${limit + 1})`,
+          obj.filterCursor,
+          obj.cursorId,
+        );
+    } else {
+      console.log('simple filtering');
+      objects = objects
+        .sorted('_id', shouldSortDescending)
+        .filtered(
+          `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
+          obj.cursorId,
+        );
+    }
   }
   console.log('got objects', objects);
   return objects;

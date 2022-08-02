@@ -32,6 +32,7 @@ export type RealmPluginState = {
   totalObjects: number;
   sortingColumn: string | null;
   loading: boolean;
+  sortDirection: 'ascend' | 'descend' | null;
 };
 
 export type SchemaResponseObject = {
@@ -107,6 +108,7 @@ type SchemaRequest = {
   cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
+  sortDirection: 'ascend' | 'descend';
 };
 
 type ObjectRequest = {
@@ -159,6 +161,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     currentPage: 1,
     sortingColumn: null,
     loading: false,
+    sortDirection: null,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -259,6 +262,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: state.filterCursor,
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
     });
   };
 
@@ -411,6 +415,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const toggleSortDirection = () => {
+    const state = pluginState.get();
+    let newSortingDirection: 'ascend' | 'descend' | null = null;
+    if (state.sortDirection === null) {
+      newSortingDirection = 'ascend';
+    } else if (state.sortDirection === 'ascend') {
+      newSortingDirection = 'descend';
+    } else {
+      newSortingDirection = null;
+    }
+    pluginState.set({
+      ...state,
+      sortDirection: newSortingDirection,
+    });
+  };
+
   client.onConnect(async () => {
     await setTimeout(() => {}, 4000);
     getRealms();
@@ -432,6 +452,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     updateSelectedPageSize,
     setCurrentPage,
     setSortingColumn,
+    toggleSortDirection,
   };
 }
 
@@ -496,6 +517,7 @@ export function Component() {
           schemas={state.schemas}
           loading={state.loading}
           selectedSchema={state.selectedSchema}
+          sortDirection={state.sortDirection}
           addObject={instance.addObject}
           modifyObject={instance.modifyObject}
           removeObject={instance.removeObject}

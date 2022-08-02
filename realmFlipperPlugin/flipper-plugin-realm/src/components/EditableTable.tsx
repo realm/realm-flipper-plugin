@@ -191,6 +191,7 @@ export default (props: {
   ) => {
     //TODO: make type of a field
     if (extra.action === 'sort') {
+      instance.toggleSortDirection();
       instance.setSortingColumn({ sortingColumn: sorter.field });
     }
     instance.getObjects({ realm: null, schema: null });

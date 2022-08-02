@@ -19,6 +19,7 @@ export default React.memo(
     schemas: Array<SchemaResponseObject>;
     selectedSchema: String;
     loading: boolean;
+    sortDirection: 'ascend' | 'descend' | null;
     addObject: Function;
     modifyObject: Function;
     removeObject: Function;
@@ -32,6 +33,7 @@ export default React.memo(
 
     const [inspectData, setInspectData] = useState({});
     const [showSidebar, setShowSidebar] = useState(false);
+    const typesNotSortable = new Set(['object', 'list', 'set']);
 
     console.log('props objects', props.objects);
 
@@ -183,15 +185,8 @@ export default React.memo(
                 </Dropdown>
               );
             },
-            sorter: (a: any, b: any) => {
-              if (a[propName] > b[propName]) {
-                return 1;
-              } else if (a[propName] < b[propName]) {
-                return -1;
-              } else {
-                return 0;
-              }
-            },
+            sorter: true, //TODO: false if object, list, set
+            sortOrder: props.sortDirection,
           };
         }
       );
