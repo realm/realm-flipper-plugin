@@ -21,11 +21,12 @@ export const BoolInput = ({ property, set, value }: TypeInputProps) => {
   return (
     <Input.Group>
       <Radio.Group
-        defaultValue={value ? "True" : "False"}
+        defaultValue={value === null ? undefined : value ? "True" : "False"}
         style={{ width: "100%" }}
         options={options}
         onChange={onChange}
         optionType="button"
+        value={value === null ? undefined : value ? "True" : "False"}
       />
       {property.optional ? (
         <Button

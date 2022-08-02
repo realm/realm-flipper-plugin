@@ -25,16 +25,16 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
       {array.map((value: any, index: number) => {
         let keyo = reset + index + 1;
         return (
-          <Input.Group key={index} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <Input.Group key={index}>
             <TypeInput
-              extraProps={{ style: { width: '100%' }}}
+              style={{ width: "calc(100% - 26px)" }}
               key={keyo}
               property={innerProp}
               set={(val) => {
                 let arr = array;
                 arr[index] = val;
                 setArray(arr);
-                // setReset((v) => v + array.length + 1);
+                setReset((v) => v + array.length + 1);
               }}
               value={value}
             ></TypeInput>

@@ -17,7 +17,7 @@ export type TypeInputProps = {
   property: SchemaPropertyValue;
   value: any;
   set: (val: any) => void;
-  extraProps?: Object;
+  style?: Object;
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {

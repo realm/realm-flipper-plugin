@@ -6,28 +6,28 @@ export const StringInput = ({
   property,
   value,
   set,
-  extraProps,
+  style,
 }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
 
   return (
     <Input.Group>
       <Input
-        key={reset}
-        placeholder={property.optional ? "null" : undefined}
+        placeholder={property.optional && value === null ? "null" : undefined}
         defaultValue={value}
-        {...extraProps}
+        style={style}
         onChange={(v) => {
           // user change vs clear button
           if (v.type == "change") set(v.target.value);
           else set(null);
         }}
+        key={reset}
       />
       {property.optional ? (
         <Button
           size="small"
           onClick={() => {
-            console.log('in clicker')
+            // refresh();
             set(null);
             setReset((v) => v + 1);
           }}
