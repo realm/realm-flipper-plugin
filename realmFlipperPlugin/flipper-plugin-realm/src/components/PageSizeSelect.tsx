@@ -13,7 +13,11 @@ export default () => {
       instance.updateSelectedPageSize({
         pageSize: selected,
       });
-      instance.getObjects({schema: state.selectedSchema, realm: state.selectedRealm});  
+      instance.getObjects({
+        schema: state.selectedSchema,
+        realm: state.selectedRealm,
+      });
+      instance.setCurrentPage({ currentPage: 1 });
     }
 
     return (

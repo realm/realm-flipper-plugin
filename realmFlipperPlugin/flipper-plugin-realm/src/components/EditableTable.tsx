@@ -129,6 +129,7 @@ export default (props: {
   modifyObject: Function;
   schemaName: String;
   removeObject: Function;
+  loading: boolean;
 }) => {
   const instance = usePlugin(plugin);
   const dataSource = props.data;
@@ -142,7 +143,7 @@ export default (props: {
     return {
       ...col,
       editable:
-        col.property.type !== "data" && col.property.name != props.primaryKey,
+        col.property.type !== 'data' && col.property.name != props.primaryKey,
     };
   });
 
@@ -153,7 +154,7 @@ export default (props: {
   const dropDown = (row: Item) => (
     <Menu>
       <Menu.Item key={1} onClick={() => deleteRow(row)}>
-        Delete selected {props.schemaName}{" "}
+        Delete selected {props.schemaName}{' '}
       </Menu.Item>
     </Menu>
   );
@@ -170,7 +171,7 @@ export default (props: {
         dataIndex: col.dataIndex,
         title: col.title,
         handleSave,
-        numeric: col.property.type === "int",
+        numeric: col.property.type === 'int',
       }),
     };
   });
@@ -182,33 +183,33 @@ export default (props: {
     },
   };
 
-  const handleOnChange = (pagination: TablePaginationConfig, filters: Record<string, Key[] | null>, sorter: SorterResult<any> | SorterResult<any>[], extra: any) => { //TODO: make type of a field
+  const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
+    sorter: SorterResult<any> | SorterResult<any>[],
+    extra: any
+  ) => {
+    //TODO: make type of a field
     if (extra.action === 'sort') {
-      instance.setSortingColumn({sortingColumn: sorter.field})
+      instance.setSortingColumn({ sortingColumn: sorter.field });
     }
-    instance.getObjects({realm: null, schema: null});
-    instance.setCurrentPage({currentPage: 1}); 
+    instance.getObjects({ realm: null, schema: null });
+    instance.setCurrentPage({ currentPage: 1 });
   };
 
   return (
     <div>
       <Table
         components={components}
-        rowClassName={() => "editable-row"}
+        rowClassName={() => 'editable-row'}
         bordered
         pagination={false}
         dataSource={dataSource}
         columns={columns as ColumnTypes}
         sticky={true}
-        // pagination={{
-        //   position: ["topLeft", "bottomLeft"],
-        //   defaultPageSize: 20,
-        //   showSizeChanger: true,
-        //   pageSizeOptions: ["10", "20", "30", "50", "100", "500"],
-        //   showQuickJumper: true,
-        // }}
         size="small"
-        onChange = {handleOnChange}
+        loading={props.loading}
+        onChange={handleOnChange}
       />
     </div>
   );

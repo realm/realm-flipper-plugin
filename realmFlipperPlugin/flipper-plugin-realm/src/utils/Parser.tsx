@@ -10,7 +10,6 @@ export function parseRows(
   schema: SchemaResponseObject,
   schemas: Array<SchemaResponseObject>
 ) {
-  console.log("SCHEMA");
   console.log(schema);
 
   let rows: Array<Object> = objects.map((obj: any, index: number) => {
@@ -35,37 +34,37 @@ export function parseRows(
       if (currentFieldValue === null) {
         // @ts-ignore
         // returnObj.text[propKey] = "null";
-        returnObj[propKey].text = "null";
+        returnObj[propKey].text = 'null';
         return;
       }
 
-      let stringForPrint: string = "";
+      let stringForPrint: string = '';
 
       switch (currentRealmPropType) {
-        case "string":
-        case "double":
-        case "int":
-        case "float":
-        case "objectId":
-        case "date":
-        case "uuid":
+        case 'string':
+        case 'double':
+        case 'int':
+        case 'float':
+        case 'objectId':
+        case 'date':
+        case 'uuid':
           stringForPrint = parseSimpleData(currentFieldValue);
           break;
-        case "bool":
+        case 'bool':
           stringForPrint = parseBoolean(currentFieldValue);
           break;
-        case "list":
-        case "set":
+        case 'list':
+        case 'set':
           stringForPrint = parseSetOrList(currentFieldValue);
           break;
-        case "data":
-        case "dictionary":
+        case 'data':
+        case 'dictionary':
           stringForPrint = parseDataOrDictionary(currentFieldValue);
           break;
-        case "decimal128":
+        case 'decimal128':
           stringForPrint = parseDecimal128(currentFieldValue);
           break;
-        case "object":
+        case 'object':
           stringForPrint = parseLinkedObject(
             schema,
             schemas,
@@ -73,7 +72,7 @@ export function parseRows(
             propKey
           );
           break;
-        case "mixed":
+        case 'mixed':
           stringForPrint = parseMixed(currentFieldValue);
           break;
       }
@@ -84,7 +83,6 @@ export function parseRows(
     return returnObj;
   });
 
-  console.log("ROWS");
   console.log(rows);
 
   return rows;

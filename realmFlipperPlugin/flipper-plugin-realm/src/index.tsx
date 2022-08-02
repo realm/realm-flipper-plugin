@@ -5,13 +5,13 @@ import {
 } from "@ant-design/icons";
 import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
-import React from "react";
-import { useCallback } from "react";
-import RealmSchemaSelect from "./components/RealmSchemaSelect";
-import SchemaHistoryActions from "./components/SchemaHistoryActions";
-import DataVisualizer from "./pages/DataVisualizer";
-import { RealmQueryLanguage, addToHistory } from "./pages/RealmQueryLanguage";
-import SchemaVisualizer from "./pages/SchemaVisualizer";
+import React, { useEffect } from 'react';
+import { useCallback } from 'react';
+import RealmSchemaSelect from './components/RealmSchemaSelect';
+import SchemaHistoryActions from './components/SchemaHistoryActions';
+import DataVisualizer from './pages/DataVisualizer';
+import { RealmQueryLanguage, addToHistory } from './pages/RealmQueryLanguage';
+import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
   realms: string[];
@@ -25,12 +25,13 @@ export type RealmPluginState = {
   selectedSchema: string;
   schemaHistory: Array<string>;
   schemaHistoryIndex: number;
-  cursorId?: number;
+  cursorId: number | null;
   filterCursor: number | null;
   selectedPageSize: 10 | 100 | 1000 | 2500;
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
+  loading: boolean;
 };
 
 export type SchemaResponseObject = {
@@ -157,6 +158,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     totalObjects: 0,
     currentPage: 1,
     sortingColumn: null,
+    loading: false,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -176,10 +178,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('fetched objects', data);
     pluginState.set({
       ...state,
-      objects: [...result],
+      objects: [...state.objects, ...result],
       filterCursor: data.objects[data.objects.length - 1][state.sortingColumn],
       cursorId: data.objects[data.objects.length - 1]._id,
       totalObjects: data.total,
+      loading: false,
     });
   });
 
@@ -245,6 +248,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     console.log(state);
     console.log(event);
+    setLoading({ loading: true });
     event.schema = event.schema ?? state.selectedSchema;
     event.realm = event.realm ?? state.selectedRealm;
     client.send('getObjects', {
@@ -391,7 +395,18 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     pluginState.set({
       ...state,
+      objects: [],
       sortingColumn: event.sortingColumn,
+      filterCursor: null,
+      cursorId: null,
+    });
+  };
+
+  const setLoading = (event: { loading: boolean }) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      loading: event.loading,
     });
   };
 
@@ -424,22 +439,31 @@ export function Component() {
   const state = useValue(instance.state);
   const onViewModeChanged = useCallback(
     (evt: RadioChangeEvent) => {
-      instance.updateViewMode({ viewMode: evt.target.value ?? "data" });
+      instance.updateViewMode({ viewMode: evt.target.value ?? 'data' });
     },
     [instance]
   );
 
   const onDataClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: "data" });
+    instance.updateViewMode({ viewMode: 'data' });
   }, [instance]);
 
   const onSchemasClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: "schemas" });
+    instance.updateViewMode({ viewMode: 'schemas' });
   }, [instance]);
 
   const onRQLClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: "RQL" });
+    instance.updateViewMode({ viewMode: 'RQL' });
   }, [instance]);
+
+  useEffect(() => {
+    console.log(
+      'STATE OBJECTS',
+      state.objects,
+      state.currentPage,
+      state.selectedPageSize
+    );
+  }, [state.objects, state.currentPage, state.selectedPageSize]);
 
   return (
     <Layout.ScrollContainer>
@@ -461,11 +485,15 @@ export function Component() {
       </Toolbar>
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
-      {state.viewMode === "data" ? (
+      {state.viewMode === 'data' ? (
         <DataVisualizer
-          objects={state.objects}
+          objects={state.objects.slice(
+            (state.currentPage - 1) * state.selectedPageSize,
+            state.currentPage * state.selectedPageSize
+          )}
           singleObject={state.singleObject}
           schemas={state.schemas}
+          loading={state.loading}
           selectedSchema={state.selectedSchema}
           addObject={instance.addObject}
           modifyObject={instance.modifyObject}
@@ -473,13 +501,13 @@ export function Component() {
           getOneObject={instance.getOneObject}
         />
       ) : null}
-      {state.viewMode === "schemas" ? (
+      {state.viewMode === 'schemas' ? (
         <SchemaVisualizer
           schemas={state.schemas}
           selectedSchema={state.selectedSchema}
         ></SchemaVisualizer>
       ) : null}
-      {state.viewMode === "RQL" ? (
+      {state.viewMode === 'RQL' ? (
         <>
           <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
         </>
