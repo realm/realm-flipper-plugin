@@ -20,6 +20,7 @@ import {
   AllTypesSchema,
   TaskSchema,
   MaybeSchema,
+  DictSchema,
 } from './TestData/Schemas';
 
 import {
@@ -46,10 +47,10 @@ import {
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, DictSchema],
   path: "main",
 
-  schemaVersion: 28
+  schemaVersion: 29
 });
 
 addPlugin({
@@ -58,7 +59,7 @@ addPlugin({
   },
   onConnect(connection) {
     const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema]},
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, DictSchema]},
       [realm],
       connection,
     );

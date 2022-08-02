@@ -61,6 +61,16 @@ export const TaskSchema = {
       mixed: 'mixed?',
       uuid: 'uuid?',
       string: 'string?',
+      dictionary: '{}'
     },
     primaryKey: '_id',
   };
+
+  export const DictSchema = {
+    name: 'Dict',
+    properties: {
+      _id: 'uuid',
+      dict: "{}"
+    },
+    primaryKey: '_id',
+  }
