@@ -42,13 +42,15 @@ export const getDefault = (property: SchemaPropertyValue) => {
       return [];
     case "set":
       return new Set();
+    // case "data":
+    //     return
     default:
       return null;
   }
 };
 
 export const TypeInput = (props: TypeInputProps) => {
-  // const clearButton = 
+  // const clearButton =
   switch (props.property.type) {
     case "int":
     case "float":
@@ -66,8 +68,8 @@ export const TypeInput = (props: TypeInputProps) => {
     case "list":
       return <ListInput {...props} />;
     case "mixed":
-      return <MixedInput {...props}/>;
-    case 'decimal128':
+      return <MixedInput {...props} />;
+    case "decimal128":
       return <DecimalInput {...props} />;
     default:
       return <>Input for {props.property.type} not implemented!</>;

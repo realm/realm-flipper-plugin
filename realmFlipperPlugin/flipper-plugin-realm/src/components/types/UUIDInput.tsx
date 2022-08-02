@@ -23,11 +23,22 @@ export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
       <Button
         onClick={() => {
           set(uuid.v4());
-          setReset(v => v + 1)
+          setReset((v) => v + 1);
         }}
       >
         refresh
       </Button>
+      {property.optional ? (
+        <Button
+          size="small"
+          onClick={() => {
+            set(null);
+            setReset((v) => v + 1);
+          }}
+        >
+          clear
+        </Button>
+      ) : null}
     </Input.Group>
   );
 };

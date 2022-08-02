@@ -8,12 +8,12 @@ export const StringInput = ({
   set,
   style,
 }: TypeInputProps) => {
-  const [_, setReset] = useState(0);
+  const [reset, setReset] = useState(0);
 
   return (
     <Input.Group>
       <Input
-        placeholder={property.optional ? "null" : undefined}
+        placeholder={property.optional && value === null ? "null" : undefined}
         defaultValue={value}
         style={style}
         onChange={(v) => {
@@ -21,7 +21,7 @@ export const StringInput = ({
           if (v.type == "change") set(v.target.value);
           else set(null);
         }}
-        // allowClear={property.optional}
+        key={reset}
       />
       {property.optional ? (
         <Button
