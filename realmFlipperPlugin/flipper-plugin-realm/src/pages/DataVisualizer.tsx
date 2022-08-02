@@ -8,7 +8,7 @@ import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
 import { ColumnTitle } from "../components/ColumnTitle";
 import { useState } from "react";
-import { RealmDataInspector } from "../components/RealmDataInspector";
+//import { RealmDataInspector } from "../components/RealmDataInspector";
 import PageSizeSelect from "../components/PageSizeSelect";
 import DataPagination from "../components/DataPagination";
 

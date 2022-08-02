@@ -25,7 +25,7 @@ export type RealmPluginState = {
   selectedSchema: string,
   schemaHistory: Array<string>,
   schemaHistoryIndex: number,
-  cursorId: number,
+  cursorId: number | null,
   filterCursor: number | null,
   selectedPageSize: 10 | 100 | 1000 | 2500 ,
   currentPage: number,
@@ -151,7 +151,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedSchema: "",
     schemaHistory: [],
     schemaHistoryIndex: 1,
-    cursorId: 0,
+    cursorId: null,
     filterCursor: 0,
     selectedPageSize: 100,
     totalObjects: 0,
@@ -166,9 +166,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage("getObjects", (data: ObjectsMessage) => {
     const state = pluginState.get();
-    let result = data.objects.filter((val, index) => index<data.objects.length-1)
+    if (!data.objects.length) {
+      return;
+    }
+    let result = data.objects.slice(0, Math.max(state.selectedPageSize, data.objects.length-1))
+    console.log("fetched objects",data )
     pluginState.set({ 
-      ...state, 
+      ...state,
       objects: [...result], 
       filterCursor: data.objects[data.objects.length-1][state.sortingColumn], 
       cursorId: data.objects[data.objects.length-1]._id, 
@@ -236,12 +240,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realm: string | null;
   }) => {
     const state = pluginState.get();
+    console.log(state);
+    console.log(event);
     event.schema = event.schema ?? state.selectedSchema
     event.realm = event.realm ?? state.selectedRealm
     client.send("getObjects", ({
       schema: event.schema, 
       realm: event.realm, 
-      cursorId: state.cursorId, 
+      cursorId: state.cursorId,
       filterCursor: state.filterCursor, 
       limit: state.selectedPageSize, 
       sortingColumn: state.sortingColumn
@@ -265,7 +271,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const updateViewMode = (event: { viewMode: "data" | "schemas" | "RQL" }) => {
     pluginState.update((state) => {
       state.viewMode = event.viewMode;
-      // state.error = null;
     });
   };
 
@@ -302,6 +307,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
       selectedSchema: event.schema,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
+      filterCursor: null,
+      cursorId: null,
     });
   };
 
@@ -310,7 +317,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
-      schemaHistoryIndex: state.schemaHistoryIndex - 1,
+      schemaHistoryIndex: state.schemaHistoryIndex - 1,,
+      filterCursor: null,
+      cursorId: null,
     });
   };
 
@@ -319,7 +328,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
-      schemaHistoryIndex: state.schemaHistoryIndex + 1,
+      schemaHistoryIndex: state.schemaHistoryIndex+1,
+      filterCursor: null,
+      cursorId: null,
     });
   };
 

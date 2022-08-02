@@ -17,10 +17,10 @@ export default () => {
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    instance.getObjects({ realm: state.selectedRealm, schema: selected });
     instance.updateSelectedSchema({
       schema: selected,
     });
+    instance.getObjects({ realm: state.selectedRealm, schema: selected });
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>
