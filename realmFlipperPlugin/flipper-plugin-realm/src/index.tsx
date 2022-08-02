@@ -103,10 +103,10 @@ type SchemaRequest = {
   schema: string;
   realm: string;
   filterCursor: string | number | null;
-  cursorId: number;
+  cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
-}
+};
 
 type ObjectRequest = {
   schema: string;
@@ -317,7 +317,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       selectedSchema: event.schema,
-      schemaHistoryIndex: state.schemaHistoryIndex - 1,,
+      schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
     });
