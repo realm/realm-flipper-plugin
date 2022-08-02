@@ -57,3 +57,11 @@ export const TaskSchema = {
     },
     primaryKey: '_id',
   };
+
+  export const NoPrimaryKey = {
+    name: 'NoPrimaryKey',
+    properties: {
+      _id: 'int',
+      name: 'string?',
+    }
+  };

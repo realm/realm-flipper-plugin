@@ -20,6 +20,7 @@ import {
   AllTypesSchema,
   TaskSchema,
   MaybeSchema,
+  NoPrimaryKey
 } from './TestData/Schemas';
 
 import {
@@ -45,11 +46,29 @@ import {
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey],
   path: 'main',
-  schemaVersion: 21,
+  schemaVersion: 23,
 });
 
+addPlugin({
+  getId() {
+    return 'realm';
+  },
+  onConnect(connection) {
+    const realmPlugin = new RealmPlugin(
+      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey]},
+      [realm],
+      connection,
+    );
+    realmPlugin.connectPlugin();
+  },
+  onDisconnect() {
+    console.log('Disconnected');
+  },
+});
+
+//realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
   let task1;
