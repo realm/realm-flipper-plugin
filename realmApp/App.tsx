@@ -34,7 +34,6 @@ import {
   Button,
 } from 'react-native';
 
-import {addPlugin} from 'react-native-flipper';
 import RealmPlugin from './RealmPlugin';
 import {
   Colors,
@@ -49,23 +48,6 @@ const realm = new Realm({
   schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey],
   path: 'main',
   schemaVersion: 23,
-});
-
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey]},
-      [realm],
-      connection,
-    );
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
 });
 
 //realmPlugin.newfunc();
