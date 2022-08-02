@@ -14,6 +14,8 @@ import { DecimalInput } from "./DecimalInput";
 import { SetInput } from "./SetInput";
 import { DataInput } from "./DataInput";
 import { DictionaryInput } from "./DictionaryInput";
+// import { ObjectIdInput } from "./ObjectIdInput";
+// import { ObjectInput } from "./ObjectInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
@@ -53,7 +55,6 @@ export const getDefault = (property: SchemaPropertyValue) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
-  // const clearButton = 
   switch (props.property.type) {
     case "int":
     case "float":
@@ -72,13 +73,17 @@ export const TypeInput = (props: TypeInputProps) => {
     case "list":
       return <ListInput {...props} />;
     case "mixed":
-      return <MixedInput {...props}/>;
-    case 'decimal128':
+      return <MixedInput {...props} />;
+    case "decimal128":
       return <DecimalInput {...props} />;
     case "data":
-        return <DataInput {...props} />;
+      return <DataInput {...props} />;
     case "dictionary":
-        return <DictionaryInput {...props} />;
+      return <DictionaryInput {...props} />;
+    // case "objectId":
+    //   return <ObjectIdInput {...props} />;
+    // case "object":
+    //   return <ObjectInput {...props} />;
     default:
       return <>Input for {props.property.type} not implemented!</>;
   }
