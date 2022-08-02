@@ -1,15 +1,15 @@
-import { Button, Select } from "antd";
-import { styled, Toolbar, usePlugin, useValue } from "flipper-plugin";
-import React, { useCallback } from "react";
-import { plugin } from "../index";
+import { Button, Select } from 'antd';
+import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+import React, { useCallback } from 'react';
+import { plugin } from '../index';
 
 const { Option } = Select;
 
 const BoldSpan = styled.span({
   fontSize: 12,
-  color: "#90949c",
-  fontWeight: "bold",
-  textTransform: "uppercase",
+  color: '#90949c',
+  fontWeight: 'bold',
+  textTransform: 'uppercase',
 });
 
 export default () => {
@@ -65,7 +65,7 @@ export default () => {
       >
         {schemaOptions}
       </Select>
-      <Button onClick={() => console.log("REFRESH clicked!")} type="default">
+      <Button onClick={() => console.log('REFRESH clicked!')} type="default">
         Refresh
       </Button>
     </Toolbar>
