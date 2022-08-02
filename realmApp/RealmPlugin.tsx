@@ -69,7 +69,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             lastItem = objects[objects.length - 1]; //if this is null this is the last page
             firstItem = objects[0]; //TODO: not sure about this
           }
-          console.log('sending to client now',objects);
+          console.log('sending to client now', objects);
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
@@ -79,21 +79,23 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive('getOneObject', (obj: { realm: string, schema: string, primaryKey: string}) => {
-         
-          const realm = realmsMap.get(obj.realm);
-        
+        connection.receive(
+          'getOneObject',
+          (obj: {realm: string; schema: string; primaryKey: string}) => {
+            const realm = realmsMap.get(obj.realm);
+
             currentRealm = realm;
-         
-          const schema = obj.schema;
-          if (!realm) {
-            return;
-          }
-          
-          const object = realm.objectForPrimaryKey(schema, obj.primaryKey);
-          
-          connection.send('getOneObject', {object: object});
-        });
+
+            const schema = obj.schema;
+            if (!realm) {
+              return;
+            }
+
+            const object = realm.objectForPrimaryKey(schema, obj.primaryKey);
+
+            connection.send('getOneObject', {object: object});
+          },
+        );
 
         connection.receive('getSchemas', obj => {
           const realm = realmsMap.get(obj.realm);
@@ -236,17 +238,20 @@ function getObjectsByPagination(
     objects = objects
       .sorted([`${obj.sortingColumn}`, '_id'])
       .filtered(
-        `${obj.sortingColumn} > $0 || (${
-          obj.sortingColumn
-        } == $0 && _id >= $1) LIMIT(${limit + 1})`,
+        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
+          obj.cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit + 1})`,
         obj.filterCursor,
         obj.cursorId,
       );
   } else {
-    console.log('simple filtering')
+    console.log('simple filtering');
     objects = objects
       .sorted('_id')
-      .filtered(`_id > $0 LIMIT(${limit + 1})`, obj.cursorId);
+      .filtered(
+        `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
+        obj.cursorId,
+      );
   }
   console.log('got objects', objects);
   return objects;
