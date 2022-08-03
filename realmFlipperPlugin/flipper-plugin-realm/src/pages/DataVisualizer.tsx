@@ -1,14 +1,22 @@
 import React from "react";
 
 import { Layout, DataInspector, DetailSidebar } from "flipper-plugin";
-import { Dropdown, Menu, Radio, Table, Tooltip, Tag } from "antd";
+import { Dropdown, Menu, Radio, Table, Tooltip, Tag, Button } from "antd";
 import { SchemaPropertyValue, SchemaResponseObject } from "../index";
 import ObjectAdder from "../components/ObjectAdder";
 import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
 import { ColumnTitle } from "../components/ColumnTitle";
 import { useState } from "react";
-import { RealmDataInspector } from "../components/RealmDataInspector";
+import {
+  SearchOutlined,
+  CloseCircleOutlined,
+  StepBackwardOutlined,
+  StepForwardOutlined,
+} from "@ant-design/icons";
+
+let goBackStack: Array<Object> = [];
+let goForwardStack: Array<Object> = [];
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -24,7 +32,12 @@ export default function DataVisualizer(props: {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
   };
 
-  const [inspectData, setInspectData] = useState({});
+  const currentSchema = props.schemas.find(
+    (schema) => schema.name === props.selectedSchema
+  );
+
+  const [inspectData, setInspectData] = useState();
+
   const [showSidebar, setShowSidebar] = useState(false);
 
   // Return buttons + tableView
@@ -46,12 +59,66 @@ export default function DataVisualizer(props: {
           <DetailSidebar>
             <div>Inspector</div>
             <Radio.Group>
-              <Radio.Button onClick={() => setShowSidebar(false)}>
-                {" "}
-                Close{" "}
-              </Radio.Button>
+              <Button
+                icon={<CloseCircleOutlined />}
+                onClick={() => setShowSidebar(false)}
+              />
+
+              <Button
+                icon={<StepBackwardOutlined />}
+                onClick={() => goBackInspector()}
+              />
+              <Button
+                icon={<StepForwardOutlined />}
+                onClick={() => goForwardInspector()}
+              />
             </Radio.Group>
-            <DataInspector data={inspectData} expandRoot={true} />
+            <DataInspector
+              data={inspectData}
+              expandRoot={true}
+              collapsed={true}
+              onRenderName={(path, name) => {
+                let linkedSchema = undefined;
+                if (
+                  currentSchema !== undefined &&
+                  currentSchema.properties[name] !== undefined &&
+                  "objectType" in currentSchema.properties[name]
+                ) {
+                  console.log(currentSchema?.properties[name].objectType);
+
+                  linkedSchema = props.schemas.find(
+                    (schema) =>
+                      schema.name === currentSchema?.properties[name].objectType
+                  );
+                }
+
+                if (linkedSchema !== undefined) {
+                  return (
+                    <>
+                      {name + " "}
+                      <Tooltip title="Explore" placement="topLeft">
+                        <Button
+                          shape="circle"
+                          type="primary"
+                          size="small"
+                          icon={<SearchOutlined />}
+                          ghost
+                          onClick={() => {
+                            let object = inspectData;
+                            path.forEach((key) => (object = object[key]));
+                            console.log(object);
+                            setNewInspectData({ object });
+                          }}
+                        />
+                      </Tooltip>
+                    </>
+                  );
+                }
+                {
+                  return <>{name}</>;
+                }
+              }}
+            />
           </DetailSidebar>
         ) : null}
       </Layout.Container>
@@ -83,8 +150,8 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={2}
           onClick={() => {
-            setInspectData({ schema });
-            setShowSidebar(true);
+            setNewInspectData({ schema });
+            showSidebar ? null : setShowSidebar(true);
           }}
         >
           Inspect Schema
@@ -92,8 +159,8 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={3}
           onClick={() => {
-            setInspectData({ schemaProperty });
-            setShowSidebar(true);
+            setNewInspectData({ schemaProperty });
+            showSidebar ? null : setShowSidebar(true);
           }}
         >
           Inspect Schema Property
@@ -106,8 +173,8 @@ export default function DataVisualizer(props: {
               object[key] = row[key].value;
             });
 
-            setInspectData({ object });
-            setShowSidebar(true);
+            setNewInspectData({ object });
+            showSidebar ? null : setShowSidebar(true);
           }}
         >
           Inspect Row
@@ -120,10 +187,10 @@ export default function DataVisualizer(props: {
                 (schema) => schema.name === schemaProperty.objectType
               );
 
-              setInspectData({
-                [schemaProperty.name]: row[schemaProperty.name].value,
-              });
-              setShowSidebar(true);
+            setNewInspectData({
+              [schemaProperty.name]: row[schemaProperty.name].value,
+            });
+            showSidebar ? null : setShowSidebar(true);
           }}
         >
           Inspect Cell
@@ -162,11 +229,7 @@ export default function DataVisualizer(props: {
               overlay={() => dropDown(row, property, currentSchema)}
               trigger={[`contextMenu`]}
             >
-              <Tooltip
-                placement="topLeft"
-                title={text.text}
-                key={Math.floor(Math.random() * 10000000)}
-              >
+              <Tooltip placement="topLeft" title={text.text}>
                 {text.text}
               </Tooltip>
             </Dropdown>
@@ -204,5 +267,29 @@ export default function DataVisualizer(props: {
         }
       </Layout.Container>
     );
+  }
+
+  function setNewInspectData(newInspectData: {}) {
+    if (inspectData !== undefined) {
+      goBackStack.push(inspectData);
+      goForwardStack = [];
+    }
+    setInspectData(newInspectData);
+  }
+
+  function goBackInspector() {
+    const data = goBackStack.pop();
+    if (data !== undefined) {
+      inspectData === undefined ? null : goForwardStack.push(inspectData);
+      setInspectData(data);
+    }
+  }
+
+  function goForwardInspector() {
+    const data = goForwardStack.pop();
+    if (data !== undefined) {
+      inspectData === undefined ? null : goBackStack.push(inspectData);
+      setInspectData(data);
+    }
   }
 }
