@@ -31,7 +31,7 @@ const DataVisualizer = (props: {
 
   const [inspectData, setInspectData] = useState({});
   const [showSidebar, setShowSidebar] = useState(false);
-  const typesNotSortable = new Set(['object', 'list', 'set']);
+  const sortableTypes = new Set(['string', 'int']);
 
   // Return buttons + tableView
   return (
@@ -177,7 +177,7 @@ const DataVisualizer = (props: {
             </Dropdown>
           );
         },
-        sorter: true, //TODO: false if object, list, set
+        sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
         sortOrder:
           props.sortingColumn === propName ? props.sortDirection : null,
       };
