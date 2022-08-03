@@ -34,6 +34,7 @@ export function parseRows(
       if (currentFieldValue === null) {
         // @ts-ignore
         // returnObj.text[propKey] = "null";
+        returnObj[propKey].text = "null";
         returnObj[propKey].text = 'null';
         return;
       }
@@ -82,8 +83,6 @@ export function parseRows(
     });
     return returnObj;
   });
-
-  console.log(rows);
 
   return rows;
 }

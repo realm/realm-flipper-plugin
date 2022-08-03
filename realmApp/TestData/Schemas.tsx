@@ -1,4 +1,5 @@
 export const TaskSchema = {
+
   name: 'Task',
   properties: {
     _id: 'int',
