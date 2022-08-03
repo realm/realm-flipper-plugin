@@ -20,11 +20,8 @@ import {
   AllTypesSchema,
   TaskSchema,
   MaybeSchema,
-<<<<<<< HEAD
   DictSchema,
-=======
   NoPrimaryKey
->>>>>>> main
 } from './TestData/Schemas';
 
 import {
@@ -49,36 +46,9 @@ import {
 
 // Open a Realm
 const realm = new Realm({
-<<<<<<< HEAD
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, DictSchema],
-  path: "main",
-
-  schemaVersion: 29
-});
-
-addPlugin({
-  getId() {
-    return 'realm';
-  },
-  onConnect(connection) {
-    const realmPlugin = new RealmPlugin(
-      {schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, DictSchema]},
-      [realm],
-      connection,
-    );
-    realmPlugin.connectPlugin();
-  },
-  onDisconnect() {
-    console.log('Disconnected');
-  },
-
-
-
-=======
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey, DictSchema],
   path: 'main',
   schemaVersion: 26,
->>>>>>> main
 });
 
 //realmPlugin.newfunc();
