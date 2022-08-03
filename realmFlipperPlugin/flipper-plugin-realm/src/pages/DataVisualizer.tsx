@@ -31,7 +31,7 @@ const DataVisualizer = (props: {
 
   const [inspectData, setInspectData] = useState({});
   const [showSidebar, setShowSidebar] = useState(false);
-  const sortableTypes = new Set(['string', 'int']);
+  const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   // Return buttons + tableView
   return (

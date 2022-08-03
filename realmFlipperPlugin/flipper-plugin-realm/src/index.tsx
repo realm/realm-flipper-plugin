@@ -319,6 +319,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: length,
       filterCursor: null,
       cursorId: null,
+      objects: [],
     });
   };
 

@@ -12,7 +12,7 @@ const BoldSpan = styled.span({
   textTransform: 'uppercase',
 });
 
-export default () => {
+const RealmSchemaSelect = () => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
@@ -71,3 +71,5 @@ export default () => {
     </Toolbar>
   );
 };
+
+export default React.memo(RealmSchemaSelect);
