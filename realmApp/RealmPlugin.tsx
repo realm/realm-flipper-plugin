@@ -18,6 +18,7 @@ type getObjectsQuery = {
   filterCursor: number | string;
   limit: number;
   sortingColumn: string;
+  prev_page_cursorId: number;
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
@@ -236,10 +237,31 @@ function getObjectsByPagination(
   if (shouldSortDescending) {
     objects = getObjectsDescending(shouldSortDescending, obj, objects, limit);
   } else {
-    objects = getObjectsAscending(obj, objects, shouldSortDescending, limit);
+    if (obj.prev_page_cursorId) {
+      objects = getPrevObjects(obj, objects, limit);
+    } else {
+      objects = getObjectsAscending(obj, objects, shouldSortDescending, limit);
+    }
   }
   return objects;
 }
+
+function getPrevObjects(
+  obj: getObjectsQuery,
+  objects: Realm.Results<Realm.Object>,
+  limit: number,
+) {
+  console.log('here');
+  objects = objects
+    .sorted('_id', true)
+    .filtered(
+      `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0  LIMIT(${limit + 1})`,
+      obj.prev_page_cursorId,
+    );
+
+  return objects.sorted('_id');
+}
+
 function getObjectsDescending(
   shouldSortDescending: boolean,
   obj: getObjectsQuery,
@@ -265,7 +287,6 @@ function getObjectsDescending(
         obj.cursorId,
       );
   } else {
-    console.log('simple filtering');
     objects = objects
       .sorted('_id', shouldSortDescending)
       .filtered(
@@ -301,7 +322,6 @@ function getObjectsAscending(
         obj.cursorId,
       );
   } else {
-    console.log('simple filtering');
     objects = objects
       .sorted('_id', shouldSortDescending)
       .filtered(

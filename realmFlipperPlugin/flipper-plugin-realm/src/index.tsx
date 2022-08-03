@@ -33,6 +33,7 @@ export type RealmPluginState = {
   sortingColumn: string | null;
   loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
+  prev_page_cursorId: number | null;
 };
 
 export type SchemaResponseObject = {
@@ -108,7 +109,7 @@ type SchemaRequest = {
   cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
-  sortDirection: 'ascend' | 'descend';
+  sortDirection: 'ascend' | 'descend' | null;
 };
 
 type ObjectRequest = {
@@ -162,6 +163,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     sortingColumn: null,
     loading: false,
     sortDirection: null,
+    prev_page_cursorId: null,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -182,11 +184,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('fetched objects', data);
     pluginState.set({
       ...state,
-      objects: [...state.objects, ...result],
+      objects: [...result],
       filterCursor: data.objects[data.objects.length - 1][state.sortingColumn],
       cursorId: data.objects[data.objects.length - 1]._id,
       totalObjects: data.total,
       loading: false,
+      prev_page_cursorId: data.prev_cursor._id,
     });
   });
 
@@ -248,6 +251,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjects = (event: {
     schema: string | null;
     realm: string | null;
+    goBack: boolean;
   }) => {
     const state = pluginState.get();
     setLoading({ loading: true });
@@ -261,6 +265,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
+      prev_page_cursorId: !event.goBack ? state.prev_page_cursorId : null,
     });
   };
 
@@ -320,6 +325,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       cursorId: null,
       objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -332,6 +338,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       cursorId: null,
       objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -344,6 +351,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       cursorId: null,
       objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -450,6 +458,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onConnect(async () => {
     getRealms();
   });
+
   return {
     state: pluginState,
     getObjects,
@@ -494,6 +503,10 @@ export function Component() {
     instance.updateViewMode({ viewMode: 'RQL' });
   }, [instance]);
 
+  console.log('objects in state', state.objects);
+  console.log('current next_cursor', state.cursorId);
+  console.log('current prev_cursor', state.prev_page_cursorId);
+
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
@@ -516,10 +529,11 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {state.viewMode === 'data' ? (
         <DataVisualizer
-          objects={state.objects.slice(
-            (state.currentPage - 1) * state.selectedPageSize,
-            state.currentPage * state.selectedPageSize
-          )}
+          // objects={state.objects.slice(
+          //   (state.currentPage - 1) * state.selectedPageSize,
+          //   state.currentPage * state.selectedPageSize
+          // )}
+          objects={state.objects}
           singleObject={state.singleObject}
           schemas={state.schemas}
           loading={state.loading}

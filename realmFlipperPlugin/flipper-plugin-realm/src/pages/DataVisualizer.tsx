@@ -190,6 +190,15 @@ const DataVisualizer = (props: {
         {/* <Table dataSource={rowObjs} columns={columns}/> */}
         {
           <div>
+            <Layout.Horizontal
+              style={{
+                paddingTop: 20,
+                paddingBottom: 20,
+              }}
+            >
+              <DataPagination></DataPagination>
+              <PageSizeSelect></PageSizeSelect>
+            </Layout.Horizontal>
             <EditableTable
               data={rowObjs}
               //@ts-ignore
