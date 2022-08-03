@@ -19,7 +19,7 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
     mapTo: "",
     optional: false,
   };
-    console.log(array)
+  // console.log(array);
   return (
     <Input.Group>
       {array.map((value: any, index: number) => {
@@ -46,7 +46,7 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
               // remove ith element
               onClick={() => {
                 setArray(array.filter((_, i) => i !== index));
-                setReset(v => v + array.length + 2)
+                setReset((v) => v + array.length + 2);
               }}
             />
           </Input.Group>

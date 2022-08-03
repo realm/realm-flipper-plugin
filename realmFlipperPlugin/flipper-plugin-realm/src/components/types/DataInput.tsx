@@ -1,24 +1,55 @@
-import { Radio, RadioChangeEvent, Input, Button } from "antd";
-import { TypeInputProps } from "./TypeInput";
+import { Button, DatePicker, Input, InputNumber, Upload } from "antd";
+import { UploadChangeParam, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
+import { TypeInputProps } from "./TypeInput";
 
-export const DataInput = ({ property, set, value }: TypeInputProps) => {
-  const [_, setReset] = useState(0);
+export const DataInput = ({ property, value, set, style }: TypeInputProps) => {
+  const [reset, setReset] = useState(0);
+  const emptyState: {
+    selectedFile?: UploadFile<any>;
+    selectedFileList: UploadFile<any>[];
+  } = {
+    selectedFileList: [],
+  };
+  const [state, setState] = useState(emptyState);
+
+  console.log('redraw')
+
+  const chooseFile = (file: UploadFile<any>) => {
+    set(file);
+  };
+
+  const onChange = (info: UploadChangeParam<UploadFile<any>>) => {
+    console.log('onCHange')
+    const nextState = emptyState;
+    switch (info.file.status) {
+      case "uploading":
+        nextState.selectedFileList = [info.file];
+        break;
+      case "done":
+        chooseFile(info.file);
+        nextState.selectedFile = info.file;
+        nextState.selectedFileList = [info.file];
+        break;
+
+      default:
+        // error or removed
+        nextState.selectedFile = undefined;
+        nextState.selectedFileList = [];
+    }
+    setState(nextState);
+    setReset(v => v + 1)
+  };
 
   return (
     <Input.Group>
-     
-      {property.optional ? (
-        <Button
-          size="small"
-          onClick={() => {
-            set(null);
-            setReset((v) => v + 1);
-          }}
-        >
-          clear
-        </Button>
-      ) : null}
+      <Upload
+        fileList={state.selectedFileList}
+        customRequest={(options) => options.onSuccess?.("ok")}
+        onChange={onChange}
+      >
+        <Button>Select a file</Button>
+      </Upload>
     </Input.Group>
   );
 };

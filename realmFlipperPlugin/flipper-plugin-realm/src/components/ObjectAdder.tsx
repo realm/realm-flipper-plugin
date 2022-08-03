@@ -3,7 +3,6 @@ import { SchemaPropertyValue, SchemaResponseObject } from "..";
 import { Modal, Radio, Layout, Tag } from "antd";
 
 import React from "react";
-import { getDefault, TypeInput } from "./types/TypeInput";
 import { PropertyRender } from "./PropertyRender";
 
 const forEachProp = (
@@ -33,7 +32,7 @@ export default React.memo((props: {
   const [inputReset, setInputReset] = useState(0);
   let toClear: any[] = [];
 
-  const refresh = () => setInputReset(v => v + 1);
+  const refresh = () => setInputReset((v) => v + 1);
 
   const showModal = () => {
     refresh();
@@ -42,8 +41,8 @@ export default React.memo((props: {
   };
 
   const hideModal = () => {
-    console.log('hidemodal')
-    toClear.forEach(f => f());
+    console.log("hidemodal");
+    toClear.forEach((f) => f());
     toClear = [];
     setValues({});
     refresh();
@@ -83,7 +82,12 @@ export default React.memo((props: {
             property={property}
             toClear={toClear}
             isPrimary={property.name == schema.primaryKey}
-            key={inputReset * Object.keys(schema.properties).length * Object.keys(schema.properties).length + index}
+            key={
+              inputReset *
+                Object.keys(schema.properties).length *
+                Object.keys(schema.properties).length +
+              index
+            }
           />
         ))}
       </Modal>
