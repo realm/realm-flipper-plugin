@@ -3,7 +3,6 @@ import { SchemaPropertyValue, SchemaResponseObject } from "..";
 import { Modal, Radio, Layout, Tag } from "antd";
 
 import React from "react";
-import { getDefault, TypeInput } from "./types/TypeInput";
 import { PropertyRender } from "./PropertyRender";
 
 const forEachProp = (
@@ -42,7 +41,7 @@ const ObjectAdder = (props: {
   };
 
   const hideModal = () => {
-    console.log('hidemodal');
+    console.log("hidemodal");
     toClear.forEach((f) => f());
     toClear = [];
     setValues({});

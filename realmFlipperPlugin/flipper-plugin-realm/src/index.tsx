@@ -5,6 +5,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
 import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+
 import React, { useEffect } from 'react';
 import { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
@@ -146,7 +147,7 @@ type QueryResult = {
 export function plugin(client: PluginClient<Events, Methods>) {
   const pluginState = createState<RealmPluginState>({
     realms: [],
-    selectedRealm: '',
+    selectedRealm: "",
     objects: [],
     singleObject: {},
     schemas: [],
@@ -216,7 +217,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
   });
 
-  client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+  client.onMessage("liveObjectAdded", (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
     const { newObject } = data;
     pluginState.set({ ...state, objects: [...state.objects, newObject] });

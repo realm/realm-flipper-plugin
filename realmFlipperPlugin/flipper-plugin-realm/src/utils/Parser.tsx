@@ -83,7 +83,6 @@ export function parseRows(
     return returnObj;
   });
 
-
   return rows;
 }
 
