@@ -16,7 +16,7 @@ const forEachProp = (
   });
 };
 let maxId = 0;
-export default React.memo((props: {
+const ObjectAdder = (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
 }) => {
@@ -50,26 +50,26 @@ export default React.memo((props: {
   };
 
   const addObject = () => {
-    console.log("addObject", values);
+    console.log('addObject', values);
     console.log(props.addObject);
     props.addObject(values);
 
     hideModal();
   };
 
-  console.log("here, values:", values);
+  console.log('here, values:', values);
 
   return (
     <Layout.Content>
       <Radio.Button
         type="primary"
         onClick={showModal}
-        style={{ float: "right" }}
+        style={{ float: 'right' }}
       >
         Create {schema.name}
       </Radio.Button>
       <Modal
-        title={"Create " + schema.name}
+        title={'Create ' + schema.name}
         visible={visible}
         onOk={addObject}
         onCancel={hideModal}
@@ -93,4 +93,6 @@ export default React.memo((props: {
       </Modal>
     </Layout.Content>
   );
-})
+};
+
+export default React.memo(ObjectAdder);

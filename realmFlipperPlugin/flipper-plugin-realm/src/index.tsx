@@ -33,6 +33,8 @@ export type RealmPluginState = {
   totalObjects: number;
   sortingColumn: string | null;
   loading: boolean;
+  sortDirection: 'ascend' | 'descend' | null;
+  prev_page_cursorId: number | null;
 };
 
 export type SchemaResponseObject = {
@@ -108,6 +110,7 @@ type SchemaRequest = {
   cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
+  sortDirection: 'ascend' | 'descend' | null;
 };
 
 type ObjectRequest = {
@@ -160,6 +163,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     currentPage: 1,
     sortingColumn: null,
     loading: false,
+    sortDirection: null,
+    prev_page_cursorId: null,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -180,11 +185,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('fetched objects', data);
     pluginState.set({
       ...state,
-      objects: [...state.objects, ...result],
+      objects: [...result],
       filterCursor: data.objects[data.objects.length - 1][state.sortingColumn],
       cursorId: data.objects[data.objects.length - 1]._id,
       totalObjects: data.total,
       loading: false,
+      prev_page_cursorId: data.prev_cursor._id,
     });
   });
 
@@ -246,10 +252,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjects = (event: {
     schema: string | null;
     realm: string | null;
+    goBack: boolean;
   }) => {
     const state = pluginState.get();
-    console.log(state);
-    console.log(event);
     setLoading({ loading: true });
     event.schema = event.schema ?? state.selectedSchema;
     event.realm = event.realm ?? state.selectedRealm;
@@ -260,6 +265,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: state.filterCursor,
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
+      //prev_page_cursorId: !event.goBack ? state.prev_page_cursorId : null,
     });
   };
 
@@ -318,6 +325,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: length,
       filterCursor: null,
       cursorId: null,
+      objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -329,6 +338,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
+      objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -340,6 +351,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
       filterCursor: null,
       cursorId: null,
+      objects: [],
+      sortingColumn: null,
     });
   };
 
@@ -348,6 +361,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       selectedRealm: event.realm,
+      objects: [],
+      filterCursor: null,
+      cursorId: null,
     });
   };
 
@@ -393,12 +409,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumn = (event: { sortingColumn: string | null }) => {
+  const setSortingColumn = (sortingColumn: string | null) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
-      sortingColumn: event.sortingColumn,
+      sortingColumn: sortingColumn,
       filterCursor: null,
       cursorId: null,
     });
@@ -412,10 +428,38 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const toggleSortDirection = () => {
+    let state = pluginState.get();
+    let newSortingDirection: 'ascend' | 'descend' | null = null;
+    if (state.sortDirection === null) {
+      newSortingDirection = 'ascend';
+    } else if (state.sortDirection === 'ascend') {
+      newSortingDirection = 'descend';
+    } else {
+      newSortingDirection = null;
+      setSortingColumn(null);
+    }
+    state = pluginState.get();
+    pluginState.set({
+      ...state,
+      sortDirection: newSortingDirection,
+      filterCursor: null,
+      objects: [],
+    });
+  };
+
+  const setSortingDirection = (direction: 'ascend' | 'descend' | null) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      sortDirection: direction,
+    });
+  };
+
   client.onConnect(async () => {
-    await setTimeout(() => {}, 4000);
     getRealms();
   });
+
   return {
     state: pluginState,
     getObjects,
@@ -433,6 +477,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     updateSelectedPageSize,
     setCurrentPage,
     setSortingColumn,
+    toggleSortDirection,
+    setSortingDirection,
   };
 }
 
@@ -458,14 +504,9 @@ export function Component() {
     instance.updateViewMode({ viewMode: 'RQL' });
   }, [instance]);
 
-  useEffect(() => {
-    console.log(
-      'STATE OBJECTS',
-      state.objects,
-      state.currentPage,
-      state.selectedPageSize
-    );
-  }, [state.objects, state.currentPage, state.selectedPageSize]);
+  console.log('objects in state', state.objects);
+  console.log('current next_cursor', state.cursorId);
+  console.log('current prev_cursor', state.prev_page_cursorId);
 
   return (
     <Layout.ScrollContainer>
@@ -489,14 +530,17 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {state.viewMode === 'data' ? (
         <DataVisualizer
-          objects={state.objects.slice(
-            (state.currentPage - 1) * state.selectedPageSize,
-            state.currentPage * state.selectedPageSize
-          )}
+          // objects={state.objects.slice(
+          //   (state.currentPage - 1) * state.selectedPageSize,
+          //   state.currentPage * state.selectedPageSize
+          // )}
+          objects={state.objects}
           singleObject={state.singleObject}
           schemas={state.schemas}
           loading={state.loading}
           selectedSchema={state.selectedSchema}
+          sortDirection={state.sortDirection}
+          sortingColumn={state.sortingColumn}
           addObject={instance.addObject}
           modifyObject={instance.modifyObject}
           removeObject={instance.removeObject}

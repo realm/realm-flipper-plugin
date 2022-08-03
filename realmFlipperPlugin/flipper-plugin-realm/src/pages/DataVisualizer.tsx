@@ -16,6 +16,8 @@ import {
   StepForwardOutlined,
 } from "@ant-design/icons";
 import { RealmDataInspector } from "../components/RealmDataInspector";
+import DataPagination from '../components/DataPagination';
+import PageSizeSelect from '../components/PageSizeSelect';
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
@@ -23,6 +25,9 @@ export default function DataVisualizer(props: {
   schemas: Array<SchemaResponseObject>;
   selectedSchema: string;
   addObject: Function;
+  sortDirection: 'ascend' | 'descend' | null;
+  loading: boolean;
+  sortingColumn: string | null;
   modifyObject: Function;
   removeObject: Function;
   getOneObject: Function;
@@ -91,7 +96,7 @@ export default function DataVisualizer(props: {
     ) => (
       <Menu>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>
-          Delete selected {schema.name}{" "}
+          Delete selected {schema.name}{' '}
         </Menu.Item>
         <Menu.Item
           key={2}
@@ -161,9 +166,21 @@ export default function DataVisualizer(props: {
           columns={columns}
           objects={props.objects}
           schemas={props.schemas}
+          sortDirection={props.sortDirection}
+          sortingColumn={props.sortingColumn}
           selectedSchema={props.selectedSchema}
+          loading={props.loading}
           renderOptions={dropDown}
         />
+        <Layout.Horizontal
+          style={{
+            paddingTop: 20,
+            paddingBottom: 20,
+          }}
+        >
+          <DataPagination></DataPagination>
+          <PageSizeSelect></PageSizeSelect>
+        </Layout.Horizontal>
       </Layout.Container>
     );
   }
@@ -175,9 +192,9 @@ export default function DataVisualizer(props: {
       setGoForwardStack([]);
     }
     setInspectData(newInspectData);
-    console.log("goForwardStack");
+    console.log('goForwardStack');
     console.log(goForwardStack);
-    console.log("goBackStack");
+    console.log('goBackStack');
     console.log(goBackStack);
   }
 }

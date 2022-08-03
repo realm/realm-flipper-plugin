@@ -34,7 +34,6 @@ export function parseRows(
       if (currentFieldValue === null) {
         // @ts-ignore
         // returnObj.text[propKey] = "null";
-        returnObj[propKey].text = "null";
         returnObj[propKey].text = 'null';
         return;
       }

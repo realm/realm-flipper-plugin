@@ -8,34 +8,34 @@ export function ColumnTitle(props: {
   propertyType: string;
   isPrimaryKey: boolean;
 }) {
-  let title = "";
+  let title = '';
 
   switch (props.propertyType) {
-    case "list":
-      title = props.objectType + "[]";
+    case 'list':
+      title = props.objectType + '[]';
       break;
-    case "set":
-      title = props.objectType + "<>";
+    case 'set':
+      title = props.objectType + '<>';
       break;
-    case "set":
-      title = props.objectType + "{}";
+    case 'set':
+      title = props.objectType + '{}';
       break;
     default:
       title = props.propertyType;
   }
 
-  props.isOptional ? (title = title + "?") : null;
+  props.isOptional ? (title = title + '?') : null;
 
   return props.isPrimaryKey ? (
     <div>
-      {" "}
-      {props.name + " "} <Tag color="default">{title}</Tag>{" "}
-      <Tag color="green">Primary Key</Tag>{" "}
+      {' '}
+      {props.name + ' '} <Tag color="default">{title}</Tag>{' '}
+      <Tag color="green">Primary Key</Tag>{' '}
     </div>
   ) : (
     <div>
-      {" "}
-      {props.name + " "} <Tag color="default">{title}</Tag>
+      {' '}
+      {props.name + ' '} <Tag color="default">{title}</Tag>
     </div>
   );
 }
