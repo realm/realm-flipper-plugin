@@ -14,8 +14,8 @@ import { DecimalInput } from "./DecimalInput";
 import { SetInput } from "./SetInput";
 import { DataInput } from "./DataInput";
 import { DictionaryInput } from "./DictionaryInput";
-// import { ObjectIdInput } from "./ObjectIdInput";
-// import { ObjectInput } from "./ObjectInput";
+import { ObjectIdInput } from "./ObjectIdInput";
+import { ObjectInput } from "./ObjectInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
@@ -80,10 +80,10 @@ export const TypeInput = (props: TypeInputProps) => {
       return <DataInput {...props} />;
     case "dictionary":
       return <DictionaryInput {...props} />;
-    // case "objectId":
-    //   return <ObjectIdInput {...props} />;
-    // case "object":
-    //   return <ObjectInput {...props} />;
+    case "objectId":
+      return <ObjectIdInput {...props} />;
+    case "object":
+      return <ObjectInput {...props} />;
     default:
       return <>Input for {props.property.type} not implemented!</>;
   }
