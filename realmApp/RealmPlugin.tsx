@@ -237,30 +237,30 @@ function getObjectsByPagination(
   if (shouldSortDescending) {
     objects = getObjectsDescending(shouldSortDescending, obj, objects, limit);
   } else {
-    if (obj.prev_page_cursorId) {
-      objects = getPrevObjects(obj, objects, limit);
-    } else {
-      objects = getObjectsAscending(obj, objects, shouldSortDescending, limit);
-    }
+    // if (obj.prev_page_cursorId) {
+    //   objects = getPrevObjects(obj, objects, limit);
+    // } else {
+    objects = getObjectsAscending(obj, objects, shouldSortDescending, limit);
+    //}
   }
   return objects;
 }
 
-function getPrevObjects(
-  obj: getObjectsQuery,
-  objects: Realm.Results<Realm.Object>,
-  limit: number,
-) {
-  console.log('here');
-  objects = objects
-    .sorted('_id', true)
-    .filtered(
-      `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0  LIMIT(${limit + 1})`,
-      obj.prev_page_cursorId,
-    );
+// function getPrevObjects(
+//   obj: getObjectsQuery,
+//   objects: Realm.Results<Realm.Object>,
+//   limit: number,
+// ) {
+//   console.log('here');
+//   objects = objects
+//     .sorted('_id', true)
+//     .filtered(
+//       `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0  LIMIT(${limit + 1})`,
+//       obj.prev_page_cursorId,
+//     );
 
-  return objects.sorted('_id');
-}
+//   return objects.sorted('_id');
+// }
 
 function getObjectsDescending(
   shouldSortDescending: boolean,

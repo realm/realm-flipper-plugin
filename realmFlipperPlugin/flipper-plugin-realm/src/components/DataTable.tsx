@@ -1,9 +1,9 @@
 import React, { ReactElement, ReactNode } from "react";
 import { Dropdown, Menu, Table, Tooltip } from "antd";
 import { ColumnTitle } from "./ColumnTitle";
-import { SchemaPropertyValue, SchemaResponseObject } from "..";
-import { Layout } from "flipper-plugin";
-import { parseRows } from "../utils/Parser";
+import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
+import { Layout, usePlugin, useValue } from 'flipper-plugin';
+import { parseRows } from '../utils/Parser';
 
 type ColumnType = {
   isOptional: boolean;
@@ -18,8 +18,17 @@ export const DataTable = (props: {
   objects: Object[];
   schemas: SchemaResponseObject[];
   selectedSchema: string;
-  renderOptions: (row: Object, schemaProperty: SchemaPropertyValue, schema: SchemaResponseObject) => ReactElement; // for dropDown
+  sortDirection: 'ascend' | 'descend' | null;
+  loading: boolean;
+  sortingColumn: string | null;
+  renderOptions: (
+    row: Object,
+    schemaProperty: SchemaPropertyValue,
+    schema: SchemaResponseObject
+  ) => ReactElement; // for dropDown
 }) => {
+  const instance = usePlugin(plugin);
+  const state = useValue(instance.state);
   const currentSchema = props.schemas.find(
     (schema) => schema.name === props.selectedSchema
   );
@@ -27,6 +36,8 @@ export const DataTable = (props: {
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
+
+  const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   const filledColumns = props.columns.map((column) => {
     const property: SchemaPropertyValue = currentSchema.properties[column.name];
@@ -62,16 +73,44 @@ export const DataTable = (props: {
           </Dropdown>
         );
       },
+      sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
+      sortOrder:
+        props.sortingColumn === property.name ? props.sortDirection : null,
     };
   });
 
   const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
+
+  const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
+    sorter: SorterResult<any> | SorterResult<any>[],
+    extra: any
+  ) => {
+    //TODO: make type of a field
+    console.log('ACTION', extra);
+    if (extra.action === 'sort') {
+      if (state.sortingColumn !== sorter.field) {
+        console.log('swtiching');
+        instance.setSortingDirection('ascend');
+        instance.setSortingColumn(sorter.field);
+      } else {
+        console.log('standard');
+        instance.toggleSortDirection();
+      }
+    }
+    instance.getObjects({ realm: null, schema: null });
+    instance.setCurrentPage({ currentPage: 1 });
+  };
 
   // TODO: think about key as a property in the Realm DB
   return (
     <Table
       dataSource={rowObjs}
       columns={filledColumns}
+      onChange={handleOnChange}
+      pagination={false}
+      loading={props.loading}
     />
   );
 };

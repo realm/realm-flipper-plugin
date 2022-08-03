@@ -266,7 +266,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
-      prev_page_cursorId: !event.goBack ? state.prev_page_cursorId : null,
+      //prev_page_cursorId: !event.goBack ? state.prev_page_cursorId : null,
     });
   };
 
