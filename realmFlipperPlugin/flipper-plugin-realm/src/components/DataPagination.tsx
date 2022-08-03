@@ -12,13 +12,13 @@ const DataPagination = () => {
       instance.getObjects({
         schema: state.selectedSchema,
         realm: state.selectedRealm,
-        goBack: true,
+        goBack: false,
       });
     } else {
       instance.getObjects({
         schema: state.selectedSchema,
         realm: state.selectedRealm,
-        goBack: false,
+        goBack: true,
       });
     }
     instance.setCurrentPage({ currentPage: newSelectedPage });

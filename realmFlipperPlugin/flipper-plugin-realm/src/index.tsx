@@ -147,7 +147,7 @@ type QueryResult = {
 export function plugin(client: PluginClient<Events, Methods>) {
   const pluginState = createState<RealmPluginState>({
     realms: [],
-    selectedRealm: "",
+    selectedRealm: '',
     objects: [],
     singleObject: {},
     schemas: [],
@@ -217,7 +217,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
   });
 
-  client.onMessage("liveObjectAdded", (data: AddLiveObjectRequest) => {
+  client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
     const { newObject } = data;
     pluginState.set({ ...state, objects: [...state.objects, newObject] });
@@ -249,10 +249,29 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  const getObjects = (event: {
+  // const getObjectsBackwards = (event: {
+  //   schema: string | null;
+  //   realm: string | null;
+  // }) => {
+  //   const state = pluginState.get();
+  //   setLoading({ loading: true });
+  //   event.schema = event.schema ?? state.selectedSchema;
+  //   event.realm = event.realm ?? state.selectedRealm;
+  //   client.send('getObjectsBackwards', {
+  //     schema: event.schema,
+  //     realm: event.realm,
+  //     cursorId: state.cursorId,
+  //     filterCursor: state.filterCursor,
+  //     limit: state.selectedPageSize,
+  //     sortingColumn: state.sortingColumn,
+  //     sortDirection: state.sortDirection,
+  //     prev_page_cursorId: event.goBack ? state.prev_page_cursorId : null,
+  //   });
+  // };
+
+  const getObjectsFoward = (event: {
     schema: string | null;
     realm: string | null;
-    goBack: boolean;
   }) => {
     const state = pluginState.get();
     setLoading({ loading: true });
@@ -266,7 +285,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
-      //prev_page_cursorId: !event.goBack ? state.prev_page_cursorId : null,
+      prev_page_cursorId: event.goBack ? state.prev_page_cursorId : null,
     });
   };
 

@@ -234,14 +234,10 @@ function getObjectsByPagination(
   const shouldSortDescending = obj.sortDirection === 'descend';
   obj.cursorId =
     obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
-  if (shouldSortDescending) {
-    objects = getObjectsDescending(shouldSortDescending, obj, objects, limit);
+  if (shouldSortDescending || obj.prev_page_cursorId) {
+    objects = getObjectsDescending(obj, objects, limit);
   } else {
-    // if (obj.prev_page_cursorId) {
-    //   objects = getPrevObjects(obj, objects, limit);
-    // } else {
-    objects = getObjectsAscending(obj, objects, shouldSortDescending, limit);
-    //}
+    objects = getObjectsAscending(obj, objects, limit);
   }
   return objects;
 }
@@ -263,56 +259,62 @@ function getObjectsByPagination(
 // }
 
 function getObjectsDescending(
-  shouldSortDescending: boolean,
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  console.log('descending');
   if (obj.sortingColumn) {
     obj.filterCursor =
       obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
-        obj.sortingColumn
-      ];
+      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, shouldSortDescending],
-        ['_id', shouldSortDescending],
+        [`${obj.sortingColumn}`, true],
+        ['_id', true],
       ])
       .filtered(
         `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
           obj.cursorId ? '<=' : '<'
         } $1) LIMIT(${limit + 1})`,
         obj.filterCursor,
-        obj.cursorId,
+        obj.prev_page_cursorId ?? obj.cursorId,
       );
+    if (obj.prev_page_cursorId) {
+      objects = objects.sorted([
+        [`${obj.sortingColumn}`, false],
+        ['_id', false],
+      ]);
+    }
   } else {
+    console.log('here');
     objects = objects
-      .sorted('_id', shouldSortDescending)
+      .sorted('_id', true)
       .filtered(
         `_id ${obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.cursorId,
+        obj.prev_page_cursorId ?? obj.cursorId,
       );
+    if (obj.prev_page_cursorId) {
+      objects = objects.sorted('_id');
+    }
   }
+  console.log(obj.prev_page_cursorId);
   return objects;
 }
 
 function getObjectsAscending(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
-  shouldSortDescending: boolean,
   limit: number,
 ) {
   if (obj.sortingColumn) {
     obj.filterCursor =
       obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
-        obj.sortingColumn
-      ];
+      objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, shouldSortDescending],
-        ['_id', shouldSortDescending],
+        [`${obj.sortingColumn}`, false],
+        ['_id', false],
       ])
       .filtered(
         `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
@@ -323,7 +325,7 @@ function getObjectsAscending(
       );
   } else {
     objects = objects
-      .sorted('_id', shouldSortDescending)
+      .sorted('_id', false)
       .filtered(
         `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
         obj.cursorId,
