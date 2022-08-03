@@ -331,6 +331,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
+      objects: [],
     });
   };
 
@@ -342,6 +343,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
       filterCursor: null,
       cursorId: null,
+      objects: [],
     });
   };
 
@@ -350,6 +352,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       selectedRealm: event.realm,
+      objects: [],
+      filterCursor: null,
+      cursorId: null,
     });
   };
 
