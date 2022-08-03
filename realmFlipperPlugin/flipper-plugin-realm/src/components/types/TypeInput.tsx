@@ -11,6 +11,11 @@ import { ListInput } from "./ListInput";
 import moment from "moment";
 import { MixedInput } from "./MixedInput";
 import { DecimalInput } from "./DecimalInput";
+import { SetInput } from "./SetInput";
+import { DataInput } from "./DataInput";
+import { DictionaryInput } from "./DictionaryInput";
+import { ObjectIdInput } from "./ObjectIdInput";
+import { ObjectInput } from "./ObjectInput";
 
 export type TypeInputProps = {
   property: SchemaPropertyValue;
@@ -20,7 +25,7 @@ export type TypeInputProps = {
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {
-  if (property.optional) return null;
+  if (property.optional && property.type != "dictionary") return null;
 
   const type = property.type;
   switch (type) {
@@ -42,13 +47,14 @@ export const getDefault = (property: SchemaPropertyValue) => {
       return [];
     case "set":
       return new Set();
+    case "dictionary":
+      return new Object();
     default:
       return null;
   }
 };
 
 export const TypeInput = (props: TypeInputProps) => {
-  // const clearButton = 
   switch (props.property.type) {
     case "int":
     case "float":
@@ -62,13 +68,22 @@ export const TypeInput = (props: TypeInputProps) => {
       return <DateInput {...props} />;
     case "uuid":
       return <UUIDInput {...props} />;
-    // case "set":
+    case "set":
+      return <SetInput {...props} />;
     case "list":
       return <ListInput {...props} />;
     case "mixed":
-      return <MixedInput {...props}/>;
-    case 'decimal128':
+      return <MixedInput {...props} />;
+    case "decimal128":
       return <DecimalInput {...props} />;
+    case "data":
+      return <DataInput {...props} />;
+    case "dictionary":
+      return <DictionaryInput {...props} />;
+    case "objectId":
+      return <ObjectIdInput {...props} />;
+    case "object":
+      return <ObjectInput {...props} />;
     default:
       return <>Input for {props.property.type} not implemented!</>;
   }

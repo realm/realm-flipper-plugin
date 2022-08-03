@@ -10,21 +10,22 @@ export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
       return;
     }
     set(value);
+    setReset((v) => v + 1);
   };
+  
   return (
     <Input.Group>
       <InputNumber
-        // value={value}
+        value={value}
         style={style}
-        // key={inputReset}
         defaultValue={value}
         onChange={onChange}
-        placeholder={property.optional ? "null" : undefined}
+        placeholder={property.optional && value === null ? "null" : undefined}
       />
       {property.optional ? (
         <Button
           size="small"
-          onChange={() => {
+          onClick={() => {
             set(null);
             setReset((v) => v + 1);
           }}

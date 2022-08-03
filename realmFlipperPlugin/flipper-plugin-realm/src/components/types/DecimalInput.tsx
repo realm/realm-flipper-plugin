@@ -28,9 +28,9 @@ export const DecimalInput = ({
       {property.optional ? (
         <Button
           size="small"
-          onChange={() => {
+          onClick={() => {
             set(null);
-            setReset((v) => v + 1);
+            setReset(v => v + 1);
           }}
         >
           clear

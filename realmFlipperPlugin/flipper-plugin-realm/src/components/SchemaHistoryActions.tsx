@@ -9,8 +9,6 @@ export default () => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state);
       const goBack = useCallback(() => {
-        console.log(state.selectedSchema);
-        console.log("history",state.schemaHistory);
         const newSelectedSchema = state.schemaHistory[state.schemaHistoryIndex-1]
         if (!newSelectedSchema) {
             return;

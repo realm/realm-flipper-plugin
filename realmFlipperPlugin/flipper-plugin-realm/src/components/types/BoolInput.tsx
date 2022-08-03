@@ -19,14 +19,17 @@ export const BoolInput = ({ property, set, value }: TypeInputProps) => {
     set(value === "True");
   };
   return (
-    <Input.Group>
+    
+    <Input.Group style={{ alignItems: "stretch", justifyContent: "center", flexFlow: 'flex-end', alignContent: "center", flexGrow: 4}}>
       <Radio.Group
-        defaultValue={value ? "True" : "False"}
-        style={{ width: "100%" }}
+        defaultValue={value === null ? undefined : value ? "True" : "False"}
+        style={{ width:'100%', backgroundColor: 'white', alignItems: "center", justifyContent: "center", flexFlow: 'column', flexDirection: 'column', alignContent: "center", }}
         options={options}
         onChange={onChange}
         optionType="button"
+        value={value === null ? undefined : value ? "True" : "False"}
       />
+
       {property.optional ? (
         <Button
           size="small"
