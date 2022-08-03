@@ -250,8 +250,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realm: string | null;
   }) => {
     const state = pluginState.get();
-    console.log(state);
-    console.log(event);
     setLoading({ loading: true });
     event.schema = event.schema ?? state.selectedSchema;
     event.realm = event.realm ?? state.selectedRealm;
@@ -396,12 +394,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumn = (event: { sortingColumn: string | null }) => {
+  const setSortingColumn = (sortingColumn: string | null) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
-      sortingColumn: event.sortingColumn,
+      sortingColumn: sortingColumn,
       filterCursor: null,
       cursorId: null,
     });
@@ -416,7 +414,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const toggleSortDirection = () => {
-    const state = pluginState.get();
+    let state = pluginState.get();
     let newSortingDirection: 'ascend' | 'descend' | null = null;
     if (state.sortDirection === null) {
       newSortingDirection = 'ascend';
@@ -424,15 +422,26 @@ export function plugin(client: PluginClient<Events, Methods>) {
       newSortingDirection = 'descend';
     } else {
       newSortingDirection = null;
+      setSortingColumn(null);
     }
+    state = pluginState.get();
     pluginState.set({
       ...state,
       sortDirection: newSortingDirection,
+      filterCursor: null,
+      objects: [],
+    });
+  };
+
+  const setSortingDirection = (direction: 'ascend' | 'descend' | null) => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      sortDirection: direction,
     });
   };
 
   client.onConnect(async () => {
-    await setTimeout(() => {}, 4000);
     getRealms();
   });
   return {
@@ -453,6 +462,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     setCurrentPage,
     setSortingColumn,
     toggleSortDirection,
+    setSortingDirection,
   };
 }
 
@@ -477,15 +487,6 @@ export function Component() {
   const onRQLClicked = useCallback(() => {
     instance.updateViewMode({ viewMode: 'RQL' });
   }, [instance]);
-
-  useEffect(() => {
-    console.log(
-      'STATE OBJECTS',
-      state.objects,
-      state.currentPage,
-      state.selectedPageSize
-    );
-  }, [state.objects, state.currentPage, state.selectedPageSize]);
 
   return (
     <Layout.ScrollContainer>
@@ -518,6 +519,7 @@ export function Component() {
           loading={state.loading}
           selectedSchema={state.selectedSchema}
           sortDirection={state.sortDirection}
+          sortingColumn={state.sortingColumn}
           addObject={instance.addObject}
           modifyObject={instance.modifyObject}
           removeObject={instance.removeObject}

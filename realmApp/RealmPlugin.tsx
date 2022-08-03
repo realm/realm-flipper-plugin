@@ -69,7 +69,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             lastItem = objects[objects.length - 1]; //if this is null this is the last page
             firstItem = objects[0]; //TODO: not sure about this
           }
-          console.log('sending to client now', objects);
+          console.log('sending to client now');
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
@@ -230,10 +230,11 @@ function getObjectsByPagination(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  const shouldSortDescending = obj.sortDirection === 'descend';
   obj.cursorId =
     obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
-  const shouldSortDescending = obj.sortDirection === 'descend';
   if (shouldSortDescending) {
+    console.log('got here', shouldSortDescending);
     if (obj.sortingColumn) {
       obj.filterCursor =
         obj.filterCursor ??
@@ -291,6 +292,5 @@ function getObjectsByPagination(
         );
     }
   }
-  console.log('got objects', objects);
   return objects;
 }

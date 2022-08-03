@@ -122,7 +122,7 @@ type GenericColumn = {
   property: SchemaPropertyValue;
 };
 
-export default (props: {
+const EditableTable = (props: {
   columns: GenericColumn[];
   data: Object[];
   primaryKey: String;
@@ -132,6 +132,7 @@ export default (props: {
   loading: boolean;
 }) => {
   const instance = usePlugin(plugin);
+  const state = useValue(instance.state);
   const dataSource = props.data;
 
   const handleSave = (row: Item) => {
@@ -190,9 +191,16 @@ export default (props: {
     extra: any
   ) => {
     //TODO: make type of a field
+    console.log('ACTION', extra);
     if (extra.action === 'sort') {
-      instance.toggleSortDirection();
-      instance.setSortingColumn({ sortingColumn: sorter.field });
+      if (state.sortingColumn !== sorter.field) {
+        console.log('swtiching');
+        instance.setSortingDirection('ascend');
+        instance.setSortingColumn(sorter.field);
+      } else {
+        console.log('standard');
+        instance.toggleSortDirection();
+      }
     }
     instance.getObjects({ realm: null, schema: null });
     instance.setCurrentPage({ currentPage: 1 });
@@ -215,3 +223,5 @@ export default (props: {
     </div>
   );
 };
+
+export default EditableTable;

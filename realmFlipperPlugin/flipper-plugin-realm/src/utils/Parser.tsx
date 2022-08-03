@@ -83,7 +83,6 @@ export function parseRows(
     return returnObj;
   });
 
-  console.log(rows);
 
   return rows;
 }

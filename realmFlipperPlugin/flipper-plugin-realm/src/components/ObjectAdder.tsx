@@ -17,7 +17,7 @@ const forEachProp = (
   });
 };
 let maxId = 0;
-export default React.memo((props: {
+const ObjectAdder = (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
 }) => {
@@ -33,7 +33,7 @@ export default React.memo((props: {
   const [inputReset, setInputReset] = useState(0);
   let toClear: any[] = [];
 
-  const refresh = () => setInputReset(v => v + 1);
+  const refresh = () => setInputReset((v) => v + 1);
 
   const showModal = () => {
     refresh();
@@ -42,8 +42,8 @@ export default React.memo((props: {
   };
 
   const hideModal = () => {
-    console.log('hidemodal')
-    toClear.forEach(f => f());
+    console.log('hidemodal');
+    toClear.forEach((f) => f());
     toClear = [];
     setValues({});
     refresh();
@@ -51,26 +51,26 @@ export default React.memo((props: {
   };
 
   const addObject = () => {
-    console.log("addObject", values);
+    console.log('addObject', values);
     console.log(props.addObject);
     props.addObject(values);
 
     hideModal();
   };
 
-  console.log("here, values:", values);
+  console.log('here, values:', values);
 
   return (
     <Layout.Content>
       <Radio.Button
         type="primary"
         onClick={showModal}
-        style={{ float: "right" }}
+        style={{ float: 'right' }}
       >
         Create {schema.name}
       </Radio.Button>
       <Modal
-        title={"Create " + schema.name}
+        title={'Create ' + schema.name}
         visible={visible}
         onOk={addObject}
         onCancel={hideModal}
@@ -83,10 +83,17 @@ export default React.memo((props: {
             property={property}
             toClear={toClear}
             isPrimary={property.name == schema.primaryKey}
-            key={inputReset * Object.keys(schema.properties).length * Object.keys(schema.properties).length + index}
+            key={
+              inputReset *
+                Object.keys(schema.properties).length *
+                Object.keys(schema.properties).length +
+              index
+            }
           />
         ))}
       </Modal>
     </Layout.Content>
   );
-})
+};
+
+export default React.memo(ObjectAdder);
