@@ -2,14 +2,19 @@ import { Button, Select, Modal, Layout, Tag, Input } from "antd";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
-export const MixedInput = ({ property, value, set, style }: TypeInputProps) => {
+export const MixedInput = ({ property, set, style }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState("string");
+  // let value: any = null;
+  const [value, setValue] = useState<any>(null);
+  // const [value, setValue] = useState(null);
+  // console.log('mixedinput', value)
 
   const addObject = () => {
     // console.log("addObject", );
+    set(value);
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -28,15 +33,15 @@ export const MixedInput = ({ property, value, set, style }: TypeInputProps) => {
 
   const onChangeSelect = (v: string) => {
     setChosenType(v);
-    set(
-      getDefault({
-        type: v,
-        optional: false,
-        name: "",
-        indexed: false,
-        mapTo: "",
-      })
-    );
+    setValue(getDefault({
+      type: v,
+      optional: false,
+      name: "",
+      indexed: false,
+      mapTo: "",
+    }));
+    // value = null;
+    // setReset(v => v + 1)
   };
 
   const renderChosen = (
@@ -111,7 +116,11 @@ export const MixedInput = ({ property, value, set, style }: TypeInputProps) => {
         >
           <Layout>
             {"Select a type: "}
-            <Select defaultValue={"string"} onChange={onChangeSelect} key={reset}>
+            <Select
+              defaultValue={"string"}
+              onChange={onChangeSelect}
+              key={reset}
+            >
               {typeList.map((item, index) => {
                 return (
                   <Select.Option value={item} key={index}>
@@ -128,7 +137,9 @@ export const MixedInput = ({ property, value, set, style }: TypeInputProps) => {
                 indexed: false,
                 mapTo: "",
               }}
-              set={set}
+              set={(val: any) => {
+                setValue(val);
+              }}
               value={value}
             ></TypeInput>
           </Layout>

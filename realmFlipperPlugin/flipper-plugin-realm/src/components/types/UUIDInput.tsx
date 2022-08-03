@@ -18,7 +18,7 @@ export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
         onChange={(v) => onChange(v.target.value)}
         placeholder={property.optional ? "null" : undefined}
         allowClear={property.optional}
-        status={uuid.validate(value) ? "" : "error"}
+        status={(value === null && property.optional) || uuid.validate(value) ? "" : "error"}
       />
       <Button
         onClick={() => {
