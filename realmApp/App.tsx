@@ -20,6 +20,7 @@ import {
   AllTypesSchema,
   TaskSchema,
   MaybeSchema,
+  DictSchema,
   NoPrimaryKey
 } from './TestData/Schemas';
 
@@ -45,7 +46,7 @@ import {
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey],
+  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey, DictSchema],
   path: 'main',
   schemaVersion: 26,
 });
