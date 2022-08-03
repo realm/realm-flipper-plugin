@@ -8,37 +8,40 @@ import { parseRows } from "../utils/Parser";
 import EditableTable from "../components/EditableTable";
 import { ColumnTitle } from "../components/ColumnTitle";
 import { useState } from "react";
+import { DataTable } from "../components/DataTable";
 import {
   SearchOutlined,
   CloseCircleOutlined,
   StepBackwardOutlined,
   StepForwardOutlined,
 } from "@ant-design/icons";
-
-let goBackStack: Array<Object> = [];
-let goForwardStack: Array<Object> = [];
+import { RealmDataInspector } from "../components/RealmDataInspector";
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
   singleObject: Object;
   schemas: Array<SchemaResponseObject>;
-  selectedSchema: String;
+  selectedSchema: string;
   addObject: Function;
   modifyObject: Function;
   removeObject: Function;
   getOneObject: Function;
 }) {
+  const [inspectData, setInspectData] = useState<Object>();
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  const [goBackStack, setGoBackStack] = useState<Array<Object>>([]);
+  const [goForwardStack, setGoForwardStack] = useState<Array<Object>>([]);
+
   const getCurrentSchema = () => {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
   };
 
-  const currentSchema = props.schemas.find(
-    (schema) => schema.name === props.selectedSchema
-  );
+  const currentSchema = getCurrentSchema();
 
-  const [inspectData, setInspectData] = useState();
-
-  const [showSidebar, setShowSidebar] = useState(false);
+  if (currentSchema === undefined) {
+    return <>Please select a schema.</>;
+  }
 
   // Return buttons + tableView
   return (
@@ -55,83 +58,26 @@ export default function DataVisualizer(props: {
       </Layout.Container>
       <Layout.Container>
         <TableView />
-        {showSidebar ? (
-          <DetailSidebar>
-            <div>Inspector</div>
-            <Radio.Group>
-              <Button
-                icon={<CloseCircleOutlined />}
-                onClick={() => setShowSidebar(false)}
-              />
-
-              <Button
-                icon={<StepBackwardOutlined />}
-                onClick={() => goBackInspector()}
-              />
-              <Button
-                icon={<StepForwardOutlined />}
-                onClick={() => goForwardInspector()}
-              />
-            </Radio.Group>
-            <DataInspector
-              data={inspectData}
-              expandRoot={true}
-              collapsed={true}
-              onRenderName={(path, name) => {
-                let linkedSchema = undefined;
-                if (
-                  currentSchema !== undefined &&
-                  currentSchema.properties[name] !== undefined &&
-                  "objectType" in currentSchema.properties[name]
-                ) {
-                  console.log(currentSchema?.properties[name].objectType);
-
-                  linkedSchema = props.schemas.find(
-                    (schema) =>
-                      schema.name === currentSchema?.properties[name].objectType
-                  );
-                }
-
-                if (linkedSchema !== undefined) {
-                  return (
-                    <>
-                      {name + " "}
-                      <Tooltip title="Explore" placement="topLeft">
-                        <Button
-                          shape="circle"
-                          type="primary"
-                          size="small"
-                          icon={<SearchOutlined />}
-                          ghost
-                          onClick={() => {
-                            let object = inspectData;
-                            path.forEach((key) => (object = object[key]));
-                            console.log(object);
-                            setNewInspectData({ object });
-                          }}
-                        />
-                      </Tooltip>
-                    </>
-                  );
-                }
-                {
-                  return <>{name}</>;
-                }
-              }}
-            />
-          </DetailSidebar>
-        ) : null}
+        <RealmDataInspector
+          currentSchema={currentSchema}
+          schemas={props.schemas}
+          inspectData={inspectData}
+          setInspectData={setInspectData}
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          goBackStack={goBackStack}
+          setGoBackStack={setGoBackStack}
+          goForwardStack={goForwardStack}
+          setGoForwardStack={setGoForwardStack}
+          setNewInspectData={setNewInspectData}
+        />
       </Layout.Container>
     </Layout.ScrollContainer>
   );
 
   function TableView() {
-    const currentSchema = props.schemas.find(
-      (schema) => schema.name === props.selectedSchema
-    );
-
     if (currentSchema === undefined) {
-      return <Layout.Container>Please select schema.</Layout.Container>;
+      return <>Please select a schema.</>;
     }
 
     const deleteRow = (row: Object) => {
@@ -145,7 +91,7 @@ export default function DataVisualizer(props: {
     ) => (
       <Menu>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>
-          Delete selected {currentSchema.name}{" "}
+          Delete selected {schema.name}{" "}
         </Menu.Item>
         <Menu.Item
           key={2}
@@ -198,73 +144,26 @@ export default function DataVisualizer(props: {
       </Menu>
     );
 
-    const columnObjs = Object.keys(currentSchema.properties).map((propName) => {
-      const property: SchemaPropertyValue = currentSchema.properties[propName];
-
-      const objectType: string | undefined = property.objectType;
-      const isPrimaryKey: boolean = currentSchema.primaryKey === property.name;
-
+    const columns = Object.keys(currentSchema.properties).map((key) => {
+      const obj = currentSchema.properties[key];
+      const isPrimaryKey = obj.name === currentSchema.primaryKey;
       return {
-        title: () => {
-          return (
-            <ColumnTitle
-              isOptional={property.optional}
-              name={property.name}
-              objectType={objectType}
-              propertyType={property.type}
-              isPrimaryKey={isPrimaryKey}
-            />
-          );
-        },
-        key: property.name,
-        dataIndex: property.name,
-        width: 300,
-        ellipsis: {
-          showTitle: false,
-        },
-        property,
-        render: (text: any, row: Object) => {
-          return (
-            <Dropdown
-              overlay={() => dropDown(row, property, currentSchema)}
-              trigger={[`contextMenu`]}
-            >
-              <Tooltip placement="topLeft" title={text.text}>
-                {text.text}
-              </Tooltip>
-            </Dropdown>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          if (a[propName] > b[propName]) {
-            return 1;
-          } else if (a[propName] < b[propName]) {
-            return -1;
-          } else {
-            return 0;
-          }
-        },
+        name: obj.name,
+        isOptional: obj.optional,
+        objectType: obj.objectType,
+        propertyType: obj.type,
+        isPrimaryKey: isPrimaryKey,
       };
     });
-
-    const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
-
     return (
       <Layout.Container height={800}>
-        {/* <Table dataSource={rowObjs} columns={columns}/> */}
-        {
-          <div>
-            <EditableTable
-              data={rowObjs}
-              //@ts-ignore
-              columns={columnObjs}
-              primaryKey={currentSchema.primaryKey}
-              modifyObject={props.modifyObject}
-              schemaName={props.selectedSchema}
-              removeObject={props.removeObject}
-            ></EditableTable>
-          </div>
-        }
+        <DataTable
+          columns={columns}
+          objects={props.objects}
+          schemas={props.schemas}
+          selectedSchema={props.selectedSchema}
+          renderOptions={dropDown}
+        />
       </Layout.Container>
     );
   }
@@ -272,24 +171,13 @@ export default function DataVisualizer(props: {
   function setNewInspectData(newInspectData: {}) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
-      goForwardStack = [];
+      setGoBackStack(goBackStack);
+      setGoForwardStack([]);
     }
     setInspectData(newInspectData);
-  }
-
-  function goBackInspector() {
-    const data = goBackStack.pop();
-    if (data !== undefined) {
-      inspectData === undefined ? null : goForwardStack.push(inspectData);
-      setInspectData(data);
-    }
-  }
-
-  function goForwardInspector() {
-    const data = goForwardStack.pop();
-    if (data !== undefined) {
-      inspectData === undefined ? null : goBackStack.push(inspectData);
-      setInspectData(data);
-    }
+    console.log("goForwardStack");
+    console.log(goForwardStack);
+    console.log("goBackStack");
+    console.log(goBackStack);
   }
 }
