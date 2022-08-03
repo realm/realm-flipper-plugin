@@ -35,7 +35,12 @@ export const TaskSchema = {
       data: 'data',
       date: 'date',
       list: 'int[]',
+      linkedBanana: 'Banana?',
       linkingObjects: 'AllTypes?',
+      ListDecimal128: 'decimal128[]',
+      SetDecimal128: 'decimal128<>',
+      ObjectList: 'mixed[]',
+      ObjectSet: 'mixed<>',
       dictionary: '{}',
       set: 'int<>',
       mixed: 'mixed',
@@ -61,6 +66,7 @@ export const TaskSchema = {
       mixed: 'mixed?',
       uuid: 'uuid?',
       string: 'string?',
+<<<<<<< HEAD
       dictionary: '{}'
     },
     primaryKey: '_id',
@@ -74,3 +80,16 @@ export const TaskSchema = {
     },
     primaryKey: '_id',
   }
+=======
+    },
+    primaryKey: '_id',
+  };
+
+  export const NoPrimaryKey = {
+    name: 'NoPrimaryKey',
+    properties: {
+      _id: 'int',
+      name: 'string?',
+    }
+  };
+>>>>>>> main

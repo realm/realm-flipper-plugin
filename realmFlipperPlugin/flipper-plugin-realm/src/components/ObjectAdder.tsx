@@ -15,7 +15,8 @@ const forEachProp = (
     return f(props[property], index);
   });
 };
-export default (props: {
+let maxId = 0;
+export default React.memo((props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;
 }) => {
@@ -92,4 +93,4 @@ export default (props: {
       </Modal>
     </Layout.Content>
   );
-};
+})
