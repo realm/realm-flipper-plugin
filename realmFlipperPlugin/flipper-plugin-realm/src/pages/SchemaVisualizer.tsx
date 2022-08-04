@@ -43,7 +43,7 @@ const SchemaVisualizer = (props: {
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    instance.getObjects({ realm: state.selectedRealm, schema: selected });
+    instance.getObjectsFoward({ realm: null, schema: null });
     instance.updateSelectedSchema({
       schema: selected,
     });

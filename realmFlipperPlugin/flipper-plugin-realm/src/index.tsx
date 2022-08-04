@@ -35,6 +35,7 @@ export type RealmPluginState = {
   loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
+  prev_page_filterCursor: number | null;
 };
 
 export type SchemaResponseObject = {
@@ -67,7 +68,8 @@ type Events = {
 
 type Methods = {
   executeQuery: (query: QueryObject) => Promise<Object[]>;
-  getObjects: (data: SchemaRequest) => Promise<Object[]>;
+  getObjects: (data: getForwardsObjectsRequest) => Promise<Object[]>;
+  getObjectsBackwards: (data: any) => any; //TODO: fix types
   getOneObject: (data: ObjectRequest) => Promise<Object[]>;
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
   getRealms: () => Promise<string[]>;
@@ -103,11 +105,21 @@ type RealmRequest = {
   realm: string;
 };
 
-type SchemaRequest = {
+type getForwardsObjectsRequest = {
   schema: string;
   realm: string;
   filterCursor: string | number | null;
   cursorId: number | null;
+  limit: number;
+  sortingColumn: string | null;
+  sortDirection: 'ascend' | 'descend' | null;
+};
+
+type getBackwardsObjectsRequest = {
+  schema: string;
+  realm: string;
+  prev_page_filterCursor: string | number | null;
+  prev_page_cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
   sortDirection: 'ascend' | 'descend' | null;
@@ -165,6 +177,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     loading: false,
     sortDirection: null,
     prev_page_cursorId: null,
+    prev_page_filterCursor: null,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -186,11 +199,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       objects: [...result],
-      filterCursor: data.objects[data.objects.length - 1][state.sortingColumn],
-      cursorId: data.objects[data.objects.length - 1]._id,
+      filterCursor: data.next_cursor[state.sortingColumn],
+      cursorId: data.next_cursor._id,
       totalObjects: data.total,
       loading: false,
       prev_page_cursorId: data.prev_cursor._id,
+      prev_page_filterCursor: data.prev_cursor[state.sortingColumn],
     });
   });
 
@@ -249,25 +263,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  // const getObjectsBackwards = (event: {
-  //   schema: string | null;
-  //   realm: string | null;
-  // }) => {
-  //   const state = pluginState.get();
-  //   setLoading({ loading: true });
-  //   event.schema = event.schema ?? state.selectedSchema;
-  //   event.realm = event.realm ?? state.selectedRealm;
-  //   client.send('getObjectsBackwards', {
-  //     schema: event.schema,
-  //     realm: event.realm,
-  //     cursorId: state.cursorId,
-  //     filterCursor: state.filterCursor,
-  //     limit: state.selectedPageSize,
-  //     sortingColumn: state.sortingColumn,
-  //     sortDirection: state.sortDirection,
-  //     prev_page_cursorId: event.goBack ? state.prev_page_cursorId : null,
-  //   });
-  // };
+  const getObjectsBackwards = (event: {
+    schema: string | null;
+    realm: string | null;
+  }) => {
+    const state = pluginState.get();
+    setLoading({ loading: true });
+    event.schema = event.schema ?? state.selectedSchema;
+    event.realm = event.realm ?? state.selectedRealm;
+    client.send('getObjectsBackwards', {
+      schema: event.schema,
+      realm: event.realm,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      limit: state.selectedPageSize,
+      sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
+      prev_page_cursorId: state.prev_page_cursorId,
+    });
+  };
 
   const getObjectsFoward = (event: {
     schema: string | null;
@@ -285,7 +298,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
-      prev_page_cursorId: event.goBack ? state.prev_page_cursorId : null,
     });
   };
 
@@ -481,7 +493,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   return {
     state: pluginState,
-    getObjects,
+    getObjectsFoward,
+    getObjectsBackwards,
     getOneObject,
     getSchemas,
     updateViewMode,

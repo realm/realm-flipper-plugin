@@ -71,25 +71,25 @@ export const RealmQueryLanguage = (props: {
       ) : null}
       <Input.Group compact>
         <AutoComplete
-          style={{ width: "calc(100% - 115px)" }}
+          style={{ width: 'calc(100% - 115px)' }}
           placeholder="Enter a query to filter the data"
           onSearch={onTextChange}
           id="msgbox"
           onChange={onTextChange}
           onKeyUp={(ev) => {
-            if (ev.key == "Enter") instance.executeQuery();
+            if (ev.key == 'Enter') instance.executeQuery();
           }}
           allowClear
           showSearch
           options={[
             {
-              label: "History",
+              label: 'History',
               options: queryHistory
                 .map((val, id) => wrapItem(val, 2 * id))
                 .reverse(),
             },
             {
-              label: "Favourites",
+              label: 'Favourites',
               options: queryFavourites
                 .map((val, id) => wrapItem(val, 2 * id + 1))
                 .reverse(),
@@ -109,7 +109,7 @@ export const RealmQueryLanguage = (props: {
       <DataVisualizer
         objects={state.objects}
         schemas={state.schemas}
-        getObjects={instance.getObjects}
+        getObjects={instance.getObjectsFoward}
         selectedSchema={state.selectedSchema}
         addObject={() => {}}
         removeObject={() => {}}
