@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { DataInspector, DetailSidebar } from "flipper-plugin";
-import { Radio, Tooltip, Button } from "antd";
+import React from 'react';
+import { DataInspector, DetailSidebar } from 'flipper-plugin';
+import { Radio, Tooltip, Button } from 'antd';
 import {
   SearchOutlined,
   CloseCircleOutlined,
   StepBackwardOutlined,
   StepForwardOutlined,
-} from "@ant-design/icons";
-import { SchemaResponseObject } from "..";
+} from '@ant-design/icons';
+import { SchemaResponseObject } from '..';
 
 type PropsType = {
   currentSchema: SchemaResponseObject;
@@ -16,7 +16,7 @@ type PropsType = {
   setInspectData: (value: Object) => void;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
-  goBackStack: Array<Object>,
+  goBackStack: Array<Object>;
   setGoBackStack: (value: Array<Object>) => void;
   goForwardStack: Array<Object>;
   setGoForwardStack: (value: Array<Object>) => void;
@@ -34,14 +34,13 @@ export const RealmDataInspector = ({
   setGoBackStack,
   goForwardStack,
   setGoForwardStack,
-  setNewInspectData
-
+  setNewInspectData,
 }: PropsType) => {
   if (!showSidebar) return null;
 
-  console.log("goForwardStack");
+  console.log('goForwardStack');
   console.log(goForwardStack);
-  console.log("goBackStack");
+  console.log('goBackStack');
   console.log(goBackStack);
 
   return (
@@ -71,7 +70,7 @@ export const RealmDataInspector = ({
           if (
             currentSchema !== undefined &&
             currentSchema.properties[name] !== undefined &&
-            "objectType" in currentSchema.properties[name]
+            'objectType' in currentSchema.properties[name]
           ) {
             console.log(currentSchema?.properties[name].objectType);
 
@@ -84,7 +83,7 @@ export const RealmDataInspector = ({
           if (linkedSchema !== undefined) {
             return (
               <>
-                {name + " "}
+                {name + ' '}
                 <Tooltip title="Explore" placement="topLeft">
                   <Button
                     shape="circle"
@@ -119,10 +118,10 @@ export const RealmDataInspector = ({
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
-    console.log("goForwardStack");
+    console.log('goForwardStack');
 
     console.log(goForwardStack);
-    console.log("goBackStack");
+    console.log('goBackStack');
 
     console.log(goBackStack);
   }
@@ -135,10 +134,10 @@ export const RealmDataInspector = ({
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
-    console.log("goForwardStack");
+    console.log('goForwardStack');
 
     console.log(goForwardStack);
-    console.log("goBackStack");
+    console.log('goBackStack');
 
     console.log(goBackStack);
   }
