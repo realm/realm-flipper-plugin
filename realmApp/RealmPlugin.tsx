@@ -305,28 +305,11 @@ function getObjectsByPaginationBackwards(
   return objects;
 }
 
-// function getPrevObjects(
-//   obj: getObjectsQuery,
-//   objects: Realm.Results<Realm.Object>,
-//   limit: number,
-// ) {
-//   console.log('here');
-//   objects = objects
-//     .sorted('_id', true)
-//     .filtered(
-//       `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0  LIMIT(${limit + 1})`,
-//       obj.prev_page_cursorId,
-//     );
-
-//   return objects.sorted('_id');
-// }
-
 function getPrevObjectsDescending(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  console.log('descending');
   if (obj.sortingColumn) {
     obj.prev_page_filterCursor =
       obj.prev_page_filterCursor ??
@@ -344,7 +327,6 @@ function getPrevObjectsDescending(
         obj.prev_page_cursorId,
       );
   } else {
-    console.log('here');
     objects = objects
       .sorted('_id', true)
       .filtered(
@@ -355,7 +337,6 @@ function getPrevObjectsDescending(
       objects = objects.sorted('_id');
     }
   }
-  console.log(obj.prev_page_cursorId);
   return objects;
 }
 
@@ -381,7 +362,6 @@ function getPrevObjectsAscending(
         obj.prev_page_cursorId,
       );
   } else {
-    console.log('simple sorting');
     objects = objects
       .sorted('_id', true)
       .filtered(
@@ -397,7 +377,6 @@ function getObjectsDescending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  console.log('descending');
   if (obj.sortingColumn) {
     obj.filterCursor =
       obj.filterCursor ??
@@ -421,7 +400,6 @@ function getObjectsDescending(
       ]);
     }
   } else {
-    console.log('here');
     objects = objects
       .sorted('_id', true)
       .filtered(
@@ -429,7 +407,6 @@ function getObjectsDescending(
         obj.prev_page_cursorId ?? obj.cursorId,
       );
   }
-  console.log(obj.prev_page_cursorId);
   return objects;
 }
 
