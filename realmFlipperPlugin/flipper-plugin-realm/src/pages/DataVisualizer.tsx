@@ -97,7 +97,7 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={2}
           onClick={() => {
-            setNewInspectData({ schema });
+            setNewInspectData({ [schema.name]: schema });
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -106,7 +106,7 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={3}
           onClick={() => {
-            setNewInspectData({ schemaProperty });
+            setNewInspectData({ [schema.name + '.' + schemaProperty.name]: schemaProperty });
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -120,7 +120,7 @@ export default function DataVisualizer(props: {
               object[key] = row[key].value;
             });
 
-            setNewInspectData({ object });
+            setNewInspectData({ [schema.name]: object });
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -130,7 +130,7 @@ export default function DataVisualizer(props: {
           key={5}
           onClick={() => {
             setNewInspectData({
-              [schemaProperty.name]: row[schemaProperty.name].value,
+              [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name].value,
             });
             showSidebar ? null : setShowSidebar(true);
           }}

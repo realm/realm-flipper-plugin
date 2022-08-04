@@ -5,7 +5,7 @@ import { plugin } from '../index';
 
 const { Option } = Select;
 
-const BoldSpan = styled.span({
+export const BoldSpan = styled.span({
   fontSize: 12,
   color: '#90949c',
   fontWeight: 'bold',

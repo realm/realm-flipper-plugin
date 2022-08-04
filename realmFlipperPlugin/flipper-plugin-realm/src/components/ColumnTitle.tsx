@@ -10,6 +10,8 @@ export function ColumnTitle(props: {
 }) {
   let title = '';
 
+  console.log(props)
+
   switch (props.propertyType) {
     case 'list':
       title = props.objectType + '[]';
@@ -17,8 +19,11 @@ export function ColumnTitle(props: {
     case 'set':
       title = props.objectType + '<>';
       break;
-    case 'object':
+    case 'dictionary':
       title = props.objectType + '{}';
+      break;
+    case 'object':
+      title = props.objectType
       break;
     default:
       title = props.propertyType;
