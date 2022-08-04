@@ -69,7 +69,7 @@ type Events = {
 type Methods = {
   executeQuery: (query: QueryObject) => Promise<Object[]>;
   getObjects: (data: getForwardsObjectsRequest) => Promise<Object[]>;
-  getObjectsBackwards: (data: any) => any; //TODO: fix types
+  getObjectsBackwards: (data: getBackwardsObjectsRequest) => Promise<Object[]>;
   getOneObject: (data: ObjectRequest) => Promise<Object[]>;
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
   getRealms: () => Promise<string[]>;
@@ -91,6 +91,13 @@ type RealmsMessage = {
 type ObjectsMessage = {
   objects: Array<Object>;
   total: number;
+  next_cursor: CursorObject;
+  prev_cursor: CursorObject;
+};
+
+type CursorObject = {
+  _id: number;
+  sortingField: string | number;
 };
 
 type ObjectMessage = {
@@ -199,12 +206,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       objects: [...result],
-      filterCursor: data.next_cursor[state.sortingColumn],
+      filterCursor: state.sortingColumn
+        ? data.next_cursor[state.sortingColumn]
+        : null,
       cursorId: data.next_cursor._id,
       totalObjects: data.total,
       loading: false,
       prev_page_cursorId: data.prev_cursor._id,
-      prev_page_filterCursor: data.prev_cursor[state.sortingColumn],
+      prev_page_filterCursor: state.sortingColumn
+        ? data.prev_cursor[state.sortingColumn]
+        : null,
     });
   });
 
