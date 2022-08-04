@@ -1,42 +1,33 @@
-import React from "react";
+import React from 'react';
 
-import { Layout, DataInspector, DetailSidebar } from "flipper-plugin";
-import { Dropdown, Menu, Radio, Table, Tooltip, Tag, Button } from "antd";
-import { SchemaPropertyValue, SchemaResponseObject } from "../index";
-import ObjectAdder from "../components/ObjectAdder";
-import { parseRows } from "../utils/Parser";
-import EditableTable from "../components/EditableTable";
-import { ColumnTitle } from "../components/ColumnTitle";
-import { useState } from "react";
-import { DataTable } from "../components/DataTable";
-import {
-  SearchOutlined,
-  CloseCircleOutlined,
-  StepBackwardOutlined,
-  StepForwardOutlined,
-} from "@ant-design/icons";
-import { RealmDataInspector } from "../components/RealmDataInspector";
-import DataPagination from '../components/DataPagination';
-import PageSizeSelect from '../components/PageSizeSelect';
+import { Layout } from 'flipper-plugin';
+import { Menu, Radio } from 'antd';
+import { SchemaPropertyValue, SchemaResponseObject } from '../index';
+import ObjectAdder from '../components/ObjectAdder';
+import { useState } from 'react';
+import { DataTable } from '../components/DataTable';
+import { RealmDataInspector } from '../components/RealmDataInspector';
+import { AddObject, ObjectRequest } from '../index';
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
   singleObject: Object;
   schemas: Array<SchemaResponseObject>;
   selectedSchema: string;
-  addObject: Function;
-  sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
-  sortingColumn: string | null;
-  modifyObject: Function;
-  removeObject: Function;
-  getOneObject: Function;
+  addObject: (object: AddObject) => Promise<any>;
+  modifyObject: (newObject: AddObject) => Promise<any>;
+  removeObject: (object: AddObject) => Promise<any>;
+  getOneObject: (data: ObjectRequest) => Promise<Object[]>;
 }) {
   const [inspectData, setInspectData] = useState<Object>();
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [goBackStack, setGoBackStack] = useState<Array<Object>>([]);
-  const [goForwardStack, setGoForwardStack] = useState<Array<Object>>([]);
+  const [goBackStack, setGoBackStack] = useState<
+    Array<Object>
+  >([]);
+  const [goForwardStack, setGoForwardStack] = useState<
+    Array<Object>
+  >([]);
 
   const getCurrentSchema = () => {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
@@ -119,7 +110,7 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={4}
           onClick={() => {
-            let object = {};
+            const object = {};
             Object.keys(row).forEach((key) => {
               object[key] = row[key].value;
             });
@@ -133,11 +124,6 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={5}
           onClick={() => {
-            const linkedObjectSchema: SchemaResponseObject | undefined =
-              props.schemas.find(
-                (schema) => schema.name === schemaProperty.objectType
-              );
-
             setNewInspectData({
               [schemaProperty.name]: row[schemaProperty.name].value,
             });
@@ -185,16 +171,12 @@ export default function DataVisualizer(props: {
     );
   }
 
-  function setNewInspectData(newInspectData: {}) {
+  function setNewInspectData(newInspectData: Object) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
       setGoBackStack(goBackStack);
       setGoForwardStack([]);
     }
     setInspectData(newInspectData);
-    console.log('goForwardStack');
-    console.log(goForwardStack);
-    console.log('goBackStack');
-    console.log(goBackStack);
   }
 }
