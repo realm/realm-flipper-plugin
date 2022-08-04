@@ -547,10 +547,6 @@ export function Component() {
     instance.updateViewMode({ viewMode: 'RQL' });
   }, [instance]);
 
-  console.log('objects in state', state.objects);
-  console.log('current next_cursor', state.cursorId);
-  console.log('current prev_cursor', state.prev_page_cursorId);
-
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
