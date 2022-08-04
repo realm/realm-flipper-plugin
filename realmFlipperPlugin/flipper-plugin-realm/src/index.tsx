@@ -28,7 +28,7 @@ export type RealmPluginState = {
   schemaHistoryIndex: number;
   cursorId: number | null;
   filterCursor: number | null;
-  selectedPageSize: 10 | 100 | 1000 | 2500;
+  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
@@ -410,12 +410,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const updateSelectedPageSize = (event: {
-    pageSize: 10 | 100 | 1000 | 2500;
+    pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
   }) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       selectedPageSize: event.pageSize,
+      cursorId: null,
+      filterCursor: null,
+      objects: [],
+      sortingColumn: null,
     });
   };
 

@@ -9,7 +9,9 @@ const PageSizeSelect = () => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-  const onPageSizeSelect = (selected: 10 | 100 | 1000 | 2500) => {
+  const onPageSizeSelect = (
+    selected: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
+  ) => {
     instance.updateSelectedPageSize({
       pageSize: selected,
     });
@@ -28,6 +30,9 @@ const PageSizeSelect = () => {
       value={state.selectedPageSize}
     >
       <Option value={10}>10</Option>
+      <Option value={25}>25</Option>
+      <Option value={50}>50</Option>
+      <Option value={75}>75</Option>
       <Option value={100}>100</Option>
       <Option value={1000}>1000</Option>
       <Option value={2500}>2500</Option>
