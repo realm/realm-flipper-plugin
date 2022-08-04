@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { DataTable } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { AddObject, ObjectRequest } from '../index';
+import DataPagination from '../components/DataPagination';
+import PageSizeSelect from '../components/PageSizeSelect';
 
 export default function DataVisualizer(props: {
   objects: Array<Object>;
