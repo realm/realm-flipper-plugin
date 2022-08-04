@@ -20,10 +20,6 @@ export const RealmQueryLanguage = ({
   objects,
 }: PropsType) => {
   const [query, setQuery] = useState('');
-  if (query === '' && objects.length === 0) {
-    // get all
-    executeQuery('');
-  }
   
   queryFavourites = JSON.parse(
     localStorage.getItem("favourites") || '{"favourites":[]}'
@@ -59,7 +55,7 @@ export const RealmQueryLanguage = ({
       ) : null}
       <Input.Group compact>
         <AutoComplete
-          style={{ width: "calc(100% - 115px)" }}
+          style={{ width: 'calc(100% - 115px)' }}
           placeholder="Enter a query to filter the data"
           onSearch={onTextChange}
           id="msgbox"
@@ -71,13 +67,13 @@ export const RealmQueryLanguage = ({
           showSearch
           options={[
             {
-              label: "History",
+              label: 'History',
               options: queryHistory
                 .map((val, id) => wrapItem(val, 2 * id))
                 .reverse(),
             },
             {
-              label: "Favourites",
+              label: 'Favourites',
               options: queryFavourites
                 .map((val, id) => wrapItem(val, 2 * id + 1))
                 .reverse(),

@@ -12,7 +12,7 @@ const BoldSpan = styled.span({
   textTransform: 'uppercase',
 });
 
-export default () => {
+const RealmSchemaSelect = () => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
@@ -20,7 +20,8 @@ export default () => {
     instance.updateSelectedSchema({
       schema: selected,
     });
-    instance.getObjects({ realm: state.selectedRealm, schema: selected });
+    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>
@@ -71,3 +72,5 @@ export default () => {
     </Toolbar>
   );
 };
+
+export default React.memo(RealmSchemaSelect);

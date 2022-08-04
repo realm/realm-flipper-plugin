@@ -3,16 +3,23 @@ import { usePlugin, useValue } from "flipper-plugin";
 import { plugin } from '..';
 import {Pagination} from 'antd';
 
-export default () => {
-    const instance = usePlugin(plugin);
-    const state = useValue(instance.state);
-    
+const DataPagination = () => {
+  const instance = usePlugin(plugin);
+  const state = useValue(instance.state);
+
   const getMore = (newSelectedPage: number, currentPageSize: number) => {
+    if (newSelectedPage > state.currentPage) {
+      instance.getObjectsFoward({
+        schema: state.selectedSchema,
+        realm: state.selectedRealm,
+      });
+    } else {
+      instance.getObjectsBackwards({
+        schema: state.selectedSchema,
+        realm: state.selectedRealm,
+      });
+    }
     instance.setCurrentPage({ currentPage: newSelectedPage });
-    instance.getObjects({
-      schema: state.selectedSchema,
-      realm: state.selectedRealm,
-    });
   };
   return (
     <Pagination
@@ -26,3 +33,5 @@ export default () => {
     />
   );
 };
+
+export default React.memo(DataPagination);

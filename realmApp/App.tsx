@@ -20,8 +20,8 @@ import {
   AllTypesSchema,
   TaskSchema,
   MaybeSchema,
+  NoPrimaryKey,
   DictSchema,
-  NoPrimaryKey
 } from './TestData/Schemas';
 
 import {
@@ -46,7 +46,14 @@ import {
 
 // Open a Realm
 const realm = new Realm({
-  schema: [TaskSchema, BananaSchema, MaybeSchema, AllTypesSchema, NoPrimaryKey, DictSchema],
+  schema: [
+    TaskSchema,
+    BananaSchema,
+    MaybeSchema,
+    AllTypesSchema,
+    NoPrimaryKey,
+    DictSchema,
+  ],
   path: 'main',
   schemaVersion: 26,
 });
@@ -73,12 +80,11 @@ function createBanana() {
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: Math.floor(Math.random()*1000),
+      weight: Math.floor(Math.random() * 1000),
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
-};
-
+}
 
 function deleteBanana() {
   realm.write(() => {
