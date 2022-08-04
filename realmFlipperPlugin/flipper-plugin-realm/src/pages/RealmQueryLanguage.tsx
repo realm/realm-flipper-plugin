@@ -1,69 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import { StarOutlined } from "@ant-design/icons";
 import { Button, Input, Alert, AutoComplete } from "antd";
-import { useValue, Layout } from "flipper-plugin";
-import { RealmPluginState, plugin } from "../index";
-import DataVisualizer from "./DataVisualizer";
+import { SchemaResponseObject } from "../index";
+import { DataTable, schemaObjToColumns } from "../components/DataTable"
 
-let instance: ReturnType<typeof plugin>;
-const onTextChange = (event: String) => {
-  instance.state.update((st) => {
-    st.query = event;
-  });
-};
+type PropsType = {
+  schemas: SchemaResponseObject[];
+  selectedSchema: string;
+  errorMsg?: string;
+  executeQuery: (query: string) => void;
+  objects: Object[];
+}
 
-const wrapItem = (query: String, id: number) => ({
-  label: query,
-  value: query,
-  key: id,
-});
-let queryFavourites: Array<String>, queryHistory: Array<String>;
-
-const addToFavorites = () => {
-  const state = instance.state.get();
-  if (!queryFavourites.includes(state.query) && state.query !== "") {
-    queryFavourites = [...queryFavourites, state.query];
+export const RealmQueryLanguage = ({
+  schemas,
+  selectedSchema,
+  errorMsg,
+  executeQuery,
+  objects,
+}: PropsType) => {
+  const [query, setQuery] = useState('');
+  if (query === '' && objects.length === 0) {
+    // get all
+    executeQuery('');
   }
-  localStorage.setItem(
-    "favourites",
-    JSON.stringify({ favourites: queryFavourites })
-  );
-};
-
-export const addToHistory = (query: String) => {
-  let history = queryHistory;
-
-  if (
-    query !== "" &&
-    (history.length == 0 || history[history.length - 1] != query)
-  ) {
-    if (history.length + 1 > 10) {
-      history.shift();
-    }
-    history = [...history, query];
-  }
-
-  localStorage.setItem("history", JSON.stringify({ history: history }));
-};
-
-export const RealmQueryLanguage = (props: {
-  instance: ReturnType<typeof plugin>;
-}) => {
+  
   queryFavourites = JSON.parse(
     localStorage.getItem("favourites") || '{"favourites":[]}'
   ).favourites;
   queryHistory = JSON.parse(
     localStorage.getItem("history") || '{ "history": [] }'
   ).history;
+  if (queryHistory === undefined) {
+    queryHistory = [];
+  } 
+    console.log('queryHistory: ', queryHistory);
+    console.log('queryFavourites', queryFavourites)
+  const currentSchema = schemas.find(schema => schema.name === selectedSchema);
+  
+  if (!currentSchema) {
+    return <>Please select a schema.</>
+  }
 
-  instance = props.instance;
-  const state: RealmPluginState = useValue(instance.state);
+  const onTextChange = (event: string) => {
+    setQuery(event);
+  };
+
   return (
     <>
-      {state.errorMsg ? (
+      {errorMsg ? (
         <Alert
           message="Error"
-          description={state.errorMsg}
+          description={errorMsg}
           type="error"
           showIcon
           banner
@@ -77,7 +65,7 @@ export const RealmQueryLanguage = (props: {
           id="msgbox"
           onChange={onTextChange}
           onKeyUp={(ev) => {
-            if (ev.key == "Enter") instance.executeQuery();
+            if (ev.key == "Enter") executeQuery(query);
           }}
           allowClear
           showSearch
@@ -99,22 +87,53 @@ export const RealmQueryLanguage = (props: {
         ></AutoComplete>
         <Button
           type="primary"
-          onClick={instance.executeQuery}
+          onClick={() => executeQuery(query)}
           title="executeButton"
         >
           Execute
         </Button>
         <Button icon={<StarOutlined />} onClick={addToFavorites}></Button>
       </Input.Group>
-      <DataVisualizer
-        objects={state.objects}
-        schemas={state.schemas}
-        getObjects={instance.getObjects}
-        selectedSchema={state.selectedSchema}
-        addObject={() => {}}
-        removeObject={() => {}}
-        modifyObject={() => {}}
-      />
+      <DataTable columns={schemaObjToColumns(currentSchema)} objects={objects} schemas={schemas} selectedSchema={selectedSchema} renderOptions={() => <></>} />
     </>
   );
+};
+
+
+
+// let instance: ReturnType<typeof plugin>;
+
+
+const wrapItem = (query: string, id: number) => ({
+  label: query,
+  value: query,
+  key: id,
+});
+let queryFavourites: Array<string>, queryHistory: Array<string>;
+
+const addToFavorites = () => {
+  const state = instance.state.get();
+  if (!queryFavourites.includes(state.query) && state.query !== "") {
+    queryFavourites = [...queryFavourites, state.query];
+  }
+  localStorage.setItem(
+    "favourites",
+    JSON.stringify({ favourites: queryFavourites })
+  );
+};
+
+export const addToHistory = (query: string) => {
+  let history = queryHistory;
+
+  if (
+    query !== "" &&
+    (history.length == 0 || history[history.length - 1] != query)
+  ) {
+    if (history.length + 1 > 10) {
+      history.shift();
+    }
+    history = [...history, query];
+  }
+
+  localStorage.setItem("history", JSON.stringify({ history: history }));
 };

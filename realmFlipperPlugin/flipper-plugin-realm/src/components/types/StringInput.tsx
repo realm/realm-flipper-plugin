@@ -1,4 +1,5 @@
-import { Button, Input } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
+import { Button, Col, Input, Row } from "antd";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
@@ -11,7 +12,8 @@ export const StringInput = ({
   const [reset, setReset] = useState(0);
 
   return (
-    <Input.Group>
+    <Row align="middle" style={{ background: 'white'}}>
+      <Col flex='auto'>
       <Input
         placeholder={property.optional && value === null ? "null" : undefined}
         defaultValue={value}
@@ -23,18 +25,21 @@ export const StringInput = ({
         }}
         key={reset}
       />
+      </Col>
+
       {property.optional ? (
+        <Col>
         <Button
-          size="small"
+          icon={<ClearOutlined />}
           onClick={() => {
             // refresh();
             set(null);
             setReset((v) => v + 1);
           }}
         >
-          clear
         </Button>
+        </Col>
       ) : null}
-    </Input.Group>
+    </Row>
   );
 };

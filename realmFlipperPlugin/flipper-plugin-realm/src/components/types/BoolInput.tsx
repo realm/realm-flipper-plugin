@@ -1,6 +1,7 @@
-import { Radio, RadioChangeEvent, Input, Button } from "antd";
+import { Radio, RadioChangeEvent, Button, Row, Col } from "antd";
 import { TypeInputProps } from "./TypeInput";
 import React, { useState } from "react";
+import { ClearOutlined } from "@ant-design/icons";
 
 export const BoolInput = ({ property, set, value }: TypeInputProps) => {
   const [_, setReset] = useState(0);
@@ -20,27 +21,30 @@ export const BoolInput = ({ property, set, value }: TypeInputProps) => {
   };
   return (
     
-    <Input.Group style={{ alignItems: "stretch", justifyContent: "center", flexFlow: 'flex-end', alignContent: "center", flexGrow: 4}}>
+    <Row align="middle" style={{ background: 'white'}}>
+      <Col flex="auto">
       <Radio.Group
         defaultValue={value === null ? undefined : value ? "True" : "False"}
-        style={{ width:'100%', backgroundColor: 'white', alignItems: "center", justifyContent: "center", flexFlow: 'column', flexDirection: 'column', alignContent: "center", }}
         options={options}
         onChange={onChange}
         optionType="button"
         value={value === null ? undefined : value ? "True" : "False"}
       />
+      </Col>
+
 
       {property.optional ? (
-        <Button
-          size="small"
+        <Col>
+          <Button
+          icon={<ClearOutlined />}
           onClick={() => {
             set(null);
             setReset((v) => v + 1);
           }}
         >
-          clear
         </Button>
+        </Col>
       ) : null}
-    </Input.Group>
+    </Row>
   );
 };

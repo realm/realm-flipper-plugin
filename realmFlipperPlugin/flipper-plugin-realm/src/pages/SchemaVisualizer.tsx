@@ -27,8 +27,8 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
   
 
 
-  export function createRows(properties: { [key: string]: SchemaPropertyValue; }, primaryKey: String): Object[] {
-    let newRows: Object[] = []
+  export function createRows(properties: { [key: string]: SchemaPropertyValue; }, primaryKey: string): Object[] {
+    const newRows: Object[] = []
     Object.values(properties).forEach((value: SchemaPropertyValue, index: number) => {
       newRows.push({...value, key: index, primaryKey: value.name===primaryKey});
   })

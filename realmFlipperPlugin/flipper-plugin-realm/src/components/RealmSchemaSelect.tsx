@@ -50,7 +50,7 @@ export default () => {
         showSearch
         value={state.selectedRealm}
         onChange={onRealmSelected}
-        style={{ flex: 1 }}
+        style={{ width: '30%' }}
         dropdownMatchSelectWidth={false}
       >
         {realmOptions}

@@ -1,7 +1,8 @@
-import { Button, Input } from "antd";
+import { Button, Col, Input, Row } from "antd";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 import uuid from "react-native-uuid";
+import { ClearOutlined } from "@ant-design/icons";
 
 export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
   const [_, setReset] = useState(0);
@@ -11,34 +12,37 @@ export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
   };
   // TODO handling invalid uuids?
   return (
-    <Input.Group>
+    <Row align="middle" style={{ background: 'white'}}>
+      <Col flex="auto">
       <Input
         value={value}
         style={style}
         onChange={(v) => onChange(v.target.value)}
         placeholder={property.optional ? "null" : undefined}
-        allowClear={property.optional}
         status={(value === null && property.optional) || uuid.validate(value) ? "" : "error"}
       />
-      <Button
-        onClick={() => {
-          set(uuid.v4());
-          setReset((v) => v + 1);
-        }}
-      >
-        refresh
-      </Button>
-      {property.optional ? (
+      </Col>
+      <Col>
         <Button
-          size="small"
           onClick={() => {
-            set(null);
+            set(uuid.v4());
             setReset((v) => v + 1);
           }}
         >
-          clear
+          refresh
         </Button>
-      ) : null}
-    </Input.Group>
+        {property.optional ? (
+          <Button
+          icon={<ClearOutlined />}
+            onClick={() => {
+              set(null);
+              setReset((v) => v + 1);
+            }}
+          >
+          </Button>
+        ) : null}
+      </Col>
+
+    </Row>
   );
 };

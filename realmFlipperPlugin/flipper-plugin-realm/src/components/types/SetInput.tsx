@@ -1,5 +1,5 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Input } from "antd";
+import { Button, Col, Input, Layout, Row } from "antd";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
@@ -65,37 +65,39 @@ export const SetInput = ({ property, set, value }: TypeInputProps) => {
 
   // Array.from(container.values())
   return (
-    <Input.Group>
+    <Layout>
       {arr.map((value: any, index: number) => {
-        console.log('value: ' + value, 'index: ' + index);
-        let keyo = reset + index + 1;
+        // console.log('value: ' + value, 'index: ' + index);
         // const count = occurences.get(value);
         return (
-          <Input.Group key={index} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+          <Row key={index} style={{ backgroundColor: 'white' }}>
+            <Col flex="auto">
             <TypeInput
-            //   extraProps={{ style: { width: "calc(100% - 50px)" }, status: (count != undefined && count > 1 ? 'error' : '')}}
-              key={keyo}
+              // extraProps={{ style: { width: "calc(100% - 50px)" }, status: (count != undefined && count > 1 ? 'error' : '')}}
               property={innerProp}
               set={(val) => {
                 setRow(val, index);
-                // setReset((v) => v + container.size + 1);
+                setReset((v) => v + 1);
               }}
               value={value}
+              style={{ width: '100%' }}
             ></TypeInput>
+            </Col>
+            <Col>
             <Button
               key={-index - 1}
               type="primary"
               icon={<DeleteOutlined />}
-              size={"small"}
               // remove ith element
               onClick={() => {
-                console.log('before', arr)
+                // console.log('before', arr)
                 deleteRow(index);
-                console.log('after', arr)
+                // console.log('after', arr)
                 setReset((v) => v + arr.length + 2);
               }}
             />
-          </Input.Group>
+            </Col>
+          </Row>
         );
       })}
       <Button
@@ -106,6 +108,6 @@ export const SetInput = ({ property, set, value }: TypeInputProps) => {
       >
         Add {property.objectType}
       </Button>
-    </Input.Group>
+    </Layout>
   );
 };

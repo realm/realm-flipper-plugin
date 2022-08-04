@@ -125,9 +125,9 @@ type GenericColumn = {
 export default (props: {
   columns: GenericColumn[];
   data: Object[];
-  primaryKey: String;
+  primaryKey: string;
   modifyObject: Function;
-  schemaName: String;
+  schemaName: string;
   removeObject: Function;
   loading: boolean;
 }) => {

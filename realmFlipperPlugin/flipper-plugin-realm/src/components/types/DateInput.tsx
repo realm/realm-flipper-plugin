@@ -1,14 +1,10 @@
-import { Button, DatePicker, Input, InputNumber } from "antd";
-import moment from "moment";
-import React, { useState } from "react";
-import { TypeInputProps } from "./TypeInput";
+import { ClearOutlined } from '@ant-design/icons';
+import { Button, Col, DatePicker, Input, InputNumber, Row } from 'antd';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { TypeInputProps } from './TypeInput';
 
-export const DateInput = ({
-  property,
-  value,
-  set,
-  style,
-}: TypeInputProps) => {
+export const DateInput = ({ property, value, set, style }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
 
   const onChange = (value: moment.Moment | null, dateString: string) => {
@@ -16,24 +12,30 @@ export const DateInput = ({
   };
 
   return (
-    <Input.Group>
-      <DatePicker
-        style={style}
-        defaultValue={value}
-        format="DD-MM-YYYY HH:mm:ss.SSS"
-        showTime={{ defaultValue: property.optional ? undefined : moment() }}
-        onChange={onChange}
-        allowClear={property.optional}
-        key={reset}
-      />
+    <Row align="middle" style={{ background: 'white' }}>
+      <Col flex="auto">
+        <DatePicker
+          style={style}
+          defaultValue={value}
+          format="DD-MM-YYYY HH:mm:ss.SSS"
+          showTime={{ defaultValue: property.optional ? undefined : moment() }}
+          onChange={onChange}
+          allowClear={property.optional}
+          key={reset}
+        />
+      </Col>
+
       {property.optional ? (
-        <Button size="small" onClick={() => {
-            set(null);
-            setReset(v => v + 1)
-        }}>
-          clear
-        </Button>
+        <Col>
+          <Button
+            onClick={() => {
+              set(null);
+              setReset((v) => v + 1);
+            }}
+            icon={<ClearOutlined />}
+          ></Button>
+        </Col>
       ) : null}
-    </Input.Group>
+    </Row>
   );
 };
