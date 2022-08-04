@@ -1,4 +1,5 @@
-import { Button, DatePicker, Input, InputNumber, Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { Button, Col, DatePicker, Input, InputNumber, Layout, Row, Upload } from "antd";
 import { UploadChangeParam, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
@@ -13,14 +14,11 @@ export const DataInput = ({ property, value, set, style }: TypeInputProps) => {
   };
   const [state, setState] = useState(emptyState);
 
-  console.log('redraw')
-
   const chooseFile = (file: UploadFile<any>) => {
     set(file);
   };
 
   const onChange = (info: UploadChangeParam<UploadFile<any>>) => {
-    console.log('onCHange')
     const nextState = emptyState;
     switch (info.file.status) {
       case "uploading":
@@ -42,14 +40,15 @@ export const DataInput = ({ property, value, set, style }: TypeInputProps) => {
   };
 
   return (
-    <Input.Group>
+    <Layout style={{ backgroundColor: 'white' }}>
       <Upload
         fileList={state.selectedFileList}
         customRequest={(options) => options.onSuccess?.("ok")}
         onChange={onChange}
+        // style={{ backgroundColor: 'white' }}
       >
-        <Button>Select a file</Button>
+        <Button><UploadOutlined/>Select a file</Button>
       </Upload>
-    </Input.Group>
+    </Layout>
   );
 };

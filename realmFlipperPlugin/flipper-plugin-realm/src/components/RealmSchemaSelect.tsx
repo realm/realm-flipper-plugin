@@ -21,7 +21,7 @@ const RealmSchemaSelect = () => {
       schema: selected,
     });
     instance.getObjectsFoward({ realm: null, schema: null });
-
+    instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>
@@ -51,7 +51,7 @@ const RealmSchemaSelect = () => {
         showSearch
         value={state.selectedRealm}
         onChange={onRealmSelected}
-        style={{ flex: 1 }}
+        style={{ width: '30%' }}
         dropdownMatchSelectWidth={false}
       >
         {realmOptions}

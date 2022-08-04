@@ -1,4 +1,5 @@
-import { InputNumber, Input, Button } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
+import { InputNumber, Input, Button, Row, Col } from "antd";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
@@ -14,7 +15,8 @@ export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
   };
   
   return (
-    <Input.Group>
+    <Row align="middle" style={{ background: 'white'}}>
+      <Col flex="auto">
       <InputNumber
         value={value}
         style={style}
@@ -22,9 +24,12 @@ export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
         onChange={onChange}
         placeholder={property.optional && value === null ? "null" : undefined}
       />
+      </Col>
       {property.optional ? (
-        <Button
-          size="small"
+        <Col>
+            <Button
+          icon={<ClearOutlined />}
+
           onClick={() => {
             set(null);
             setReset((v) => v + 1);
@@ -32,7 +37,9 @@ export const IntInput = ({ property, value, set, style }: TypeInputProps) => {
         >
           clear
         </Button>
+        </Col>
+
       ) : null}
-    </Input.Group>
+    </Row>
   );
 };

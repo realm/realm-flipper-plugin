@@ -1,9 +1,10 @@
-import React, { ReactElement, ReactNode } from "react";
-import { Dropdown, Menu, Table, Tooltip } from "antd";
+import React, { Key, ReactElement, ReactNode } from "react";
+import { Dropdown, Menu, Table, TablePaginationConfig, Tooltip } from "antd";
 import { ColumnTitle } from "./ColumnTitle";
 import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import { parseRows } from '../utils/Parser';
+import { SorterResult } from "antd/lib/table/interface";
 
 type ColumnType = {
   isOptional: boolean;
@@ -12,6 +13,20 @@ type ColumnType = {
   propertyType: string;
   isPrimaryKey: boolean;
 };
+
+export const schemaObjToColumns = (schema: SchemaResponseObject) => {
+  return Object.keys(schema.properties).map((key) => {
+    const obj = schema.properties[key];
+    const isPrimaryKey = obj.name === schema.primaryKey;
+    return {
+      name: obj.name,
+      isOptional: obj.optional,
+      objectType: obj.objectType,
+      propertyType: obj.type,
+      isPrimaryKey: isPrimaryKey,
+    };
+  });
+}
 
 export const DataTable = (props: {
   columns: ColumnType[];

@@ -12,16 +12,16 @@ export function parseRows(
 ) {
   console.log(schema);
 
-  let rows: Array<Object> = objects.map((obj: any, index: number) => {
+  const rows: Array<Object> = objects.map((obj: any, index: number) => {
     // let returnObj = { text: {}, object: obj, key: index };
-    let returnObj = { key: index };
+    const returnObj = { key: index };
 
     Object.keys(schema.properties).forEach((propKey: string) => {
       const currentPropObject = schema.properties[propKey];
       const currentRealmPropType = currentPropObject.type;
       const currentFieldValue = obj[propKey];
 
-      let propRep: propertyRepresentation = {
+      const propRep: propertyRepresentation = {
         value: currentFieldValue,
         text: null,
       };
@@ -38,7 +38,7 @@ export function parseRows(
         return;
       }
 
-      let stringForPrint: string = '';
+      let stringForPrint = '';
 
       switch (currentRealmPropType) {
         case 'string':
@@ -91,7 +91,7 @@ function parseSimpleData(input: string): string {
 }
 
 function parseSetOrList(input: any[]): string {
-  let output = input.map((value) => {
+  const output = input.map((value) => {
     return parseJavaScriptTypes(value);
   });
 
@@ -117,7 +117,7 @@ function parseLinkedObject(
   key: string
 ): string {
   let stringForPrint = "";
-  let childSchema: SchemaResponseObject | undefined = schemas.find(
+  const childSchema: SchemaResponseObject | undefined = schemas.find(
     (s) => s.name === schema.properties[key].objectType
   );
   if (childSchema !== undefined) {

@@ -1,4 +1,5 @@
-import { Button, Select, Modal, Layout, Tag, Input } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
+import { Button, Select, Modal, Layout, Tag, Input, Space, Row, Col } from "antd";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
@@ -15,6 +16,7 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
   const addObject = () => {
     // console.log("addObject", );
     set(value);
+    // setValue()
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -26,6 +28,7 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
 
   const cancelWindow = () => {
     set(null);
+    setValue(null);
     setChosenType("string");
     setReset((v) => v + 1);
     hideModal();
@@ -45,38 +48,25 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
   };
 
   const renderChosen = (
-    <Layout>
-      <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-        <div
-          style={{
-            borderRadius: "5px",
-            padding: "10px",
-            backgroundColor: "#6D6B6A",
-            height: "50px",
-          }}
-        >
-          <div key={2} style={{ marginBottom: "10px", marginTop: -15 }}>
-            {value?.toString()}
-          </div>
-          <Tag
-            style={{ float: "right", marginBottom: "10px", marginTop: -50 }}
-            color="success"
-          >
+      <Row style={{ backgroundColor: 'white' }} align="middle">
+        <Col flex="auto">
+        <Tag color="success">
             {chosenType}
-          </Tag>
-
-          <Button
-            size="small"
-            onClick={() => {
+        </Tag>
+          {value?.toString()}
+        </Col>
+        <Col>
+        <Button
+              icon={<ClearOutlined />}
+              onClick={() => {
               set(null);
               setChosen(false);
+              setValue(null);
             }}
           >
-            clear
           </Button>
-        </div>
-      </Layout.Header>
-    </Layout>
+        </Col>
+      </Row>
   );
 
   const renderSelector = () => {
@@ -100,13 +90,12 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
         <Button
           onClick={() => {
             setVisible(true);
-            setChosenType("string");
+            onChangeSelect('string');
           }}
         >
-          Set mixed
+          Set a value
         </Button>
         <Modal
-          // key={chosenType}
           title={"Set mixed"}
           visible={visible}
           onOk={addObject}
@@ -115,7 +104,9 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
           cancelText="Cancel"
         >
           <Layout>
-            {"Select a type: "}
+            <div style={{ backgroundColor: 'white'}}>
+            Select a type:
+            </div>
             <Select
               defaultValue={"string"}
               onChange={onChangeSelect}
@@ -141,6 +132,7 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
                 setValue(val);
               }}
               value={value}
+              style={{ width: '100%' }}
             ></TypeInput>
           </Layout>
         </Modal>{" "}

@@ -15,7 +15,7 @@ const forEachProp = (
     return f(props[property], index);
   });
 };
-let maxId = 0;
+
 const ObjectAdder = (props: {
   schema: SchemaResponseObject | undefined;
   addObject: Function;

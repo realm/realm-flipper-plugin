@@ -1,4 +1,5 @@
-import { InputNumber, Input, Button } from "antd";
+import { ArrowRightOutlined } from "@ant-design/icons";
+import { InputNumber, Input, Button, Layout, Col, Row } from "antd";
 import React, { useState } from "react";
 import { SchemaPropertyValue } from "../..";
 import ObjectAdder from "../ObjectAdder";
@@ -34,12 +35,12 @@ export const DictionaryInput = ({
   };
 
   return (
-    <Input.Group>
+    <Layout>
       {Array.from(contents.values()).map(
         (value: [string, any], index: number) => {
-          console.log("in here");
           return (
-            <Input.Group key={index}>
+            <Row key={index} style={{ backgroundColor: 'white' }} align="middle">
+              <Col span={10}>
               <StringInput
                 value={value[0]}
                 set={(val: any) => {
@@ -49,7 +50,13 @@ export const DictionaryInput = ({
                 }}
                 property={keyProperty}
               ></StringInput>
+              </Col>
+              <Col span={2}>
+                <ArrowRightOutlined />
+              </Col>
+              <Col span={12}>
               <MixedInput
+                value={value} //shouldnt be used
                 property={keyProperty}
                 set={(val: any) => {
                   contents.set(index, [value[0], val]);
@@ -58,12 +65,13 @@ export const DictionaryInput = ({
                   setReset((v) => v + 1);
                 }}
               ></MixedInput>
-            </Input.Group>
+              </Col>
+            </Row>
           );
         }
       )}
       <Button
-        onClick={(ev) => {
+        onClick={() => {
           contents.set(contents.size, ["key" + contents.size, null]);
           console.log(contents);
           setContents(contents);
@@ -73,6 +81,6 @@ export const DictionaryInput = ({
       >
         Add new
       </Button>
-    </Input.Group>
+    </Layout>
   );
 };

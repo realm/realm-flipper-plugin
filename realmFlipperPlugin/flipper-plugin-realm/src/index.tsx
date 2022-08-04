@@ -18,10 +18,10 @@ export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
   objects: Array<Object>;
+  queryResult: Array<Object>;
   singleObject: Object;
   schemas: Array<SchemaResponseObject>;
   viewMode: 'data' | 'schemas' | 'RQL';
-  query: string;
   errorMsg?: string;
   selectedSchema: string;
   schemaHistory: Array<string>;
@@ -168,10 +168,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realms: [],
     selectedRealm: '',
     objects: [],
+    queryResult: [],
     singleObject: {},
     schemas: [],
     viewMode: 'data',
-    query: '',
     selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
@@ -238,7 +238,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       pluginState.set({ ...state, errorMsg: data.result });
     } else {
       console.log('query succeeded', data.result);
-      pluginState.set({ ...state, objects: data.result, errorMsg: undefined });
+      pluginState.set({ ...state, queryResult: data.result, objects: data.result, errorMsg: undefined });
     }
   });
 
@@ -332,12 +332,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const executeQuery = () => {
+  const executeQuery = (query: string) => {
     const state = pluginState.get();
-    addToHistory(state.query);
+    addToHistory(query);
 
     client.send('executeQuery', {
-      query: state.query,
+      query: query,
       realm: state.selectedRealm,
       schema: state.selectedSchema,
     });
@@ -598,7 +598,9 @@ export function Component() {
       ) : null}
       {state.viewMode === 'RQL' ? (
         <>
-          <RealmQueryLanguage instance={instance}></RealmQueryLanguage>
+          <RealmQueryLanguage schemas={state.schemas}
+          selectedSchema={state.selectedSchema}
+          objects={state.queryResult} executeQuery={instance.executeQuery}></RealmQueryLanguage>
         </>
       ) : null}
     </Layout.ScrollContainer>
