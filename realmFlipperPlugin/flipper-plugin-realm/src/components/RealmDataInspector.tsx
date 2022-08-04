@@ -1,15 +1,3 @@
-import React from 'react';
-import { DataInspector, DetailSidebar } from 'flipper-plugin';
-import {
-  Radio,
-  Tooltip,
-  Button,
-  Layout,
-  Row,
-  Col,
-  Space,
-  Typography,
-} from 'antd';
 import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
@@ -33,7 +21,7 @@ type PropsType = {
   setGoBackStack: (value: Array<Record<string, unknown>>) => void;
   goForwardStack: Array<Record<string, unknown>>;
   setGoForwardStack: (value: Array<Record<string, unknown>>) => void;
-  setNewInspectData: (value: Array<Record<string, unknown>>) => void;
+  setNewInspectData: (newInspectData: Array<Record<string, unknown>>) => void;
 };
 
 export const RealmDataInspector = ({
@@ -134,7 +122,7 @@ export const RealmDataInspector = ({
                               path.forEach((key) => (object = object[key]));
                               console.log(object);
                               setNewInspectData({
-                                [linkedSchema.name]: object
+                                [linkedSchema.name]: object,
                               });
                             }}
                           />
