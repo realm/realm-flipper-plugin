@@ -162,6 +162,17 @@ export default function DataVisualizer(props: {
     });
     return (
       <Layout.Container height={800}>
+        <Layout.Horizontal
+          style={{
+            paddingBottom: 10,
+            paddingTop: 15,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <DataPagination></DataPagination>
+          <PageSizeSelect></PageSizeSelect>
+        </Layout.Horizontal>
         <DataTable
           columns={columns}
           objects={props.objects}
@@ -176,6 +187,8 @@ export default function DataVisualizer(props: {
           style={{
             paddingTop: 20,
             paddingBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
           <DataPagination></DataPagination>
