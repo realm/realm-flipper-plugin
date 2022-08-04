@@ -78,7 +78,7 @@ type Methods = {
   removeObject: (object: AddObject) => Promise<any>;
 };
 
-type AddObject = {
+export type AddObject = {
   schema: string;
   realm: string;
   object: Object;
@@ -132,7 +132,7 @@ type getBackwardsObjectsRequest = {
   sortDirection: 'ascend' | 'descend' | null;
 };
 
-type ObjectRequest = {
+export type ObjectRequest = {
   schema: string;
   realm: string;
   primaryKey: string;
