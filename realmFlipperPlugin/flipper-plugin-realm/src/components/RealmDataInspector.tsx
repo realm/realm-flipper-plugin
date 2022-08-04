@@ -1,6 +1,15 @@
 import React from 'react';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
-import { Radio, Tooltip, Button, Layout, Row, Col, Space } from 'antd';
+import {
+  Radio,
+  Tooltip,
+  Button,
+  Layout,
+  Row,
+  Col,
+  Space,
+  Typography,
+} from 'antd';
 import {
   SearchOutlined,
   CloseCircleOutlined,
@@ -11,6 +20,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import { SchemaResponseObject } from '..';
+import { BoldSpan } from '../components/RealmSchemaSelect';
 
 type PropsType = {
   currentSchema: SchemaResponseObject;
@@ -52,81 +62,94 @@ export const RealmDataInspector = ({
     <DetailSidebar>
       {/* <Header style={{ backgroundColor: 'white' }}> */}
       <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-        <Row>
-          <Col span={24}>Inspector</Col>
-        </Row>
-        <Row  gutter={8}>
-          <Col span={12} >
-            <Radio.Group >
-              <Radio.Button onClick={() => setShowSidebar(false)}>
-                {' '}
-                <CloseOutlined />
-              </Radio.Button>
-            </Radio.Group>
-          </Col>
-          <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}> 
-            <Radio.Group >
-              <Radio.Button onClick={() => goBackInspector()}>
-                {' '}
-                <ArrowLeftOutlined />
-              </Radio.Button>
+        <Layout style={{ backgroundColor: 'white' }}>
+          <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+            <Row gutter={16}>
+              <Col span={24} offset={1}>
+                <BoldSpan>Inspector </BoldSpan>
+              </Col>
+            </Row>
+            <Row gutter={8}>
+              <Col span={10} offset={1}>
+                <Radio.Group>
+                  <Radio.Button onClick={() => setShowSidebar(false)}>
+                    {' '}
+                    <CloseOutlined />
+                  </Radio.Button>
+                </Radio.Group>
+              </Col>
+              <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}>
+                <Radio.Group>
+                  <Radio.Button onClick={() => goBackInspector()}>
+                    {' '}
+                    <ArrowLeftOutlined />
+                  </Radio.Button>
 
-              <Radio.Button onClick={() => goForwardInspector()}>
-                <ArrowRightOutlined />
-              </Radio.Button>
-            </Radio.Group>
-          </Col>
-        </Row>
+                  <Radio.Button onClick={() => goForwardInspector()}>
+                    <ArrowRightOutlined />
+                  </Radio.Button>
+                </Radio.Group>
+              </Col>
+            </Row>
+          </Space>
+        </Layout>
         {/* </Header> */}
         {/* <Content> */}
-        <Row>
-          <DataInspector
-            data={inspectData}
-            expandRoot={true}
-            collapsed={true}
-            onRenderName={(path, name) => {
-              let linkedSchema = undefined;
-              if (
-                currentSchema !== undefined &&
-                currentSchema.properties[name] !== undefined &&
-                'objectType' in currentSchema.properties[name]
-              ) {
-                console.log(currentSchema?.properties[name].objectType);
+        <Layout style={{ backgroundColor: 'white' }}>
+          <Row>
+            <Col offset={1} span={22}>
+              <DataInspector
+                data={inspectData}
+                expandRoot={true}
+                collapsed={true}
+                onRenderName={(path, name) => {
+                  let linkedSchema = undefined;
+                  if (
+                    currentSchema !== undefined &&
+                    currentSchema.properties[name] !== undefined &&
+                    'objectType' in currentSchema.properties[name]
+                  ) {
+                    console.log(currentSchema?.properties[name].objectType);
 
-                linkedSchema = schemas.find(
-                  (schema) =>
-                    schema.name === currentSchema?.properties[name].objectType
-                );
-              }
+                    linkedSchema = schemas.find(
+                      (schema) =>
+                        schema.name ===
+                        currentSchema?.properties[name].objectType
+                    );
+                  }
 
-              if (linkedSchema !== undefined) {
-                return (
-                  <>
-                    {name + ' '}
-                    <Tooltip title="Explore" placement="topLeft">
-                      <Button
-                        shape="circle"
-                        type="primary"
-                        size="small"
-                        icon={<SearchOutlined />}
-                        ghost
-                        onClick={() => {
-                          let object = inspectData;
-                          path.forEach((key) => (object = object[key]));
-                          console.log(object);
-                          setNewInspectData({ object });
-                        }}
-                      />
-                    </Tooltip>
-                  </>
-                );
-              }
-              {
-                return <>{name}</>;
-              }
-            }}
-          />
-        </Row>
+                  if (linkedSchema !== undefined) {
+                    return (
+                      <>
+                        {name + ' '}
+                        <Tooltip title="Explore" placement="topLeft">
+                          <Button
+                            shape="circle"
+                            type="primary"
+                            size="small"
+                            icon={<SearchOutlined />}
+                            ghost
+                            onClick={() => {
+                              let object = inspectData;
+                              path.forEach((key) => (object = object[key]));
+                              console.log(object);
+                              setNewInspectData({
+                                [linkedSchema.name]: object
+                              });
+                            }}
+                          />
+                        </Tooltip>
+                      </>
+                    );
+                  }
+                  {
+                    return <>{name}</>;
+                  }
+                }}
+              />
+            </Col>
+          </Row>
+        </Layout>
         {/* </Content> */}
       </Space>
     </DetailSidebar>
