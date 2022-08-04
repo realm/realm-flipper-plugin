@@ -107,7 +107,7 @@ props.columns[primaryKeyIndex] = tempCol
         instance.toggleSortDirection();
       }
     }
-    instance.getObjects({ realm: null, schema: null });
+    instance.getObjectsFoward({ realm: null, schema: null });
     instance.setCurrentPage({ currentPage: 1 });
   };
 

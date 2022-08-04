@@ -20,7 +20,8 @@ const RealmSchemaSelect = () => {
     instance.updateSelectedSchema({
       schema: selected,
     });
-    instance.getObjects({ realm: state.selectedRealm, schema: selected });
+    instance.getObjectsFoward({ realm: null, schema: null });
+
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>
