@@ -1,5 +1,5 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, DatePicker, Input, InputNumber, Row } from 'antd';
+import { Button, Col, DatePicker, Row } from 'antd';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';

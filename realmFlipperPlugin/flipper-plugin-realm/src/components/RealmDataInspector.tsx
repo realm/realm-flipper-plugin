@@ -1,29 +1,26 @@
-import React from 'react';
-import { DataInspector, DetailSidebar } from 'flipper-plugin';
-import { Radio, Tooltip, Button, Layout, Row, Col, Space } from 'antd';
 import {
-  SearchOutlined,
-  CloseCircleOutlined,
-  StepBackwardOutlined,
-  StepForwardOutlined,
   ArrowLeftOutlined,
   ArrowRightOutlined,
   CloseOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
+import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
+import { DataInspector, DetailSidebar } from 'flipper-plugin';
+import React from 'react';
 import { SchemaResponseObject } from '..';
 
 type PropsType = {
   currentSchema: SchemaResponseObject;
   schemas: SchemaResponseObject[];
-  inspectData?: Object;
-  setInspectData: (value: Object) => void;
+  inspectData?: Record<string, unknown> | undefined;
+  setInspectData: (value: Record<string, unknown>) => void;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
-  goBackStack: Array<Object>;
-  setGoBackStack: (value: Array<Object>) => void;
-  goForwardStack: Array<Object>;
-  setGoForwardStack: (value: Array<Object>) => void;
-  setNewInspectData: (value: Array<Object>) => void;
+  goBackStack: Array<Record<string, unknown>>;
+  setGoBackStack: (value: Array<Record<string, unknown>>) => void;
+  goForwardStack: Array<Record<string, unknown>>;
+  setGoForwardStack: (value: Array<Record<string, unknown>>) => void;
+  setNewInspectData: (value: Array<Record<string, unknown>>) => void;
 };
 
 export const RealmDataInspector = ({
@@ -55,17 +52,17 @@ export const RealmDataInspector = ({
         <Row>
           <Col span={24}>Inspector</Col>
         </Row>
-        <Row  gutter={8}>
-          <Col span={12} >
-            <Radio.Group >
+        <Row gutter={8}>
+          <Col span={12}>
+            <Radio.Group>
               <Radio.Button onClick={() => setShowSidebar(false)}>
                 {' '}
                 <CloseOutlined />
               </Radio.Button>
             </Radio.Group>
           </Col>
-          <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}> 
-            <Radio.Group >
+          <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}>
+            <Radio.Group>
               <Radio.Button onClick={() => goBackInspector()}>
                 {' '}
                 <ArrowLeftOutlined />
@@ -112,7 +109,12 @@ export const RealmDataInspector = ({
                         ghost
                         onClick={() => {
                           let object = inspectData;
-                          path.forEach((key) => (object = object[key]));
+                          path.forEach(
+                            (key) =>
+                              (object = object
+                                ? (object[key] as Record<string, unknown>)
+                                : {})
+                          );
                           console.log(object);
                           setNewInspectData({ object });
                         }}

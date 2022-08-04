@@ -1,11 +1,10 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { InputNumber, Input, Button, Layout, Col, Row } from "antd";
+import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { SchemaPropertyValue } from "../..";
-import ObjectAdder from "../ObjectAdder";
+import { SchemaPropertyValue } from '../..';
 import { MixedInput } from "./MixedInput";
 import { StringInput } from "./StringInput";
-import { getDefault, TypeInputProps } from "./TypeInput";
+import { TypeInputProps } from './TypeInput';
 
 const mapToObj = (map: Map<number, [string, any]>) => {
   const obj = new Object();

@@ -1,5 +1,5 @@
 import { UploadOutlined } from "@ant-design/icons";
-import { Button, Col, DatePicker, Input, InputNumber, Layout, Row, Upload } from "antd";
+import { Button, Layout, Upload } from 'antd';
 import { UploadChangeParam, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";

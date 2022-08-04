@@ -1,10 +1,10 @@
-import React, { Key, ReactElement, ReactNode } from "react";
-import { Dropdown, Menu, Table, TablePaginationConfig, Tooltip } from "antd";
-import { ColumnTitle } from "./ColumnTitle";
-import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
+import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
+import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
+import React, { Key, ReactElement } from 'react';
+import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
 import { parseRows } from '../utils/Parser';
-import { SorterResult } from "antd/lib/table/interface";
+import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
   isOptional: boolean;
@@ -26,18 +26,18 @@ export const schemaObjToColumns = (schema: SchemaResponseObject) => {
       isPrimaryKey: isPrimaryKey,
     };
   });
-}
+};
 
 export const DataTable = (props: {
   columns: ColumnType[];
-  objects: Object[];
+  objects: Record<string, unknown>[];
   schemas: SchemaResponseObject[];
   selectedSchema: string;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   renderOptions: (
-    row: Object,
+    row: Record<string, unknown>,
     schemaProperty: SchemaPropertyValue,
     schema: SchemaResponseObject
   ) => ReactElement; // for dropDown
@@ -48,13 +48,12 @@ export const DataTable = (props: {
     (schema) => schema.name === props.selectedSchema
   );
 
-
   //TODO: Sort objects after receiving them so that every component works with the same order.
-// Put primaryKey column in front.
-const primaryKeyIndex = props.columns.findIndex((col) => (col.isPrimaryKey))
-const tempCol =props.columns[0]
-props.columns[0] = props.columns[primaryKeyIndex]
-props.columns[primaryKeyIndex] = tempCol
+  // Put primaryKey column in front.
+  const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
+  const tempCol = props.columns[0];
+  props.columns[0] = props.columns[primaryKeyIndex];
+  props.columns[primaryKeyIndex] = tempCol;
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -84,7 +83,7 @@ props.columns[primaryKeyIndex] = tempCol
         showTitle: false,
       },
       property,
-      render: (text: any, row: Object) => {
+      render: (text: any, row: Record<string, unknown>) => {
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}

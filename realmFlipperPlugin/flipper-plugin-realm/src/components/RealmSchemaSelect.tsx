@@ -21,7 +21,7 @@ const RealmSchemaSelect = () => {
       schema: selected,
     });
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.executeQuery('');
+    //instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>

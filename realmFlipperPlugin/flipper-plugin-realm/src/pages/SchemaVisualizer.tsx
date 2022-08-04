@@ -27,116 +27,115 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
   
 
 
-  export function createRows(properties: { [key: string]: SchemaPropertyValue; }, primaryKey: string): Object[] {
-    const newRows: Object[] = []
-    Object.values(properties).forEach((value: SchemaPropertyValue, index: number) => {
-      newRows.push({...value, key: index, primaryKey: value.name===primaryKey});
-  })
+  export function createRows(
+    properties: { [key: string]: SchemaPropertyValue },
+    primaryKey: string
+  ): Record<string, unknown>[] {
+    const newRows: Record<string, unknown>[] = [];
+    Object.values(properties).forEach(
+      (value: SchemaPropertyValue, index: number) => {
+        newRows.push({
+          ...value,
+          key: index,
+          primaryKey: value.name === primaryKey,
+        });
+      }
+    );
 
     return newRows;
   }
-const SchemaVisualizer = (props: {
-  schemas: Array<SchemaResponseObject>;
-  selectedSchema: string;
-}) => {
-  const instance = usePlugin(plugin);
-  const state = useValue(instance.state);
+  const SchemaVisualizer = (props: {
+    schemas: Array<SchemaResponseObject>;
+    selectedSchema: string;
+  }) => {
+    const instance = usePlugin(plugin);
 
-  const onSchemaSelected = (selected: string) => {
-    instance.getObjectsFoward({ realm: null, schema: null });
-    instance.updateSelectedSchema({
-      schema: selected,
+    const onSchemaSelected = (selected: string) => {
+      instance.getObjectsFoward({ realm: null, schema: null });
+      instance.updateSelectedSchema({
+        schema: selected,
+      });
+    };
+
+    function createColumnConfig(columns: string[]) {
+      const columnObjs: DataTableColumn<{ [key: string]: Value }>[] =
+        columns.map((col) => ({
+          key: col,
+          title: col,
+          dataIndex: col,
+          onFilter: (value: string, record: any) =>
+            record[col].startsWith(value),
+          render: (text, record) =>
+            renderTableCells(text, typeof text, col, record),
+          filterSearch: true,
+        }));
+      return columnObjs;
+    }
+    function renderTableCells(
+      value: string,
+      type: string,
+      column: string,
+      record: any
+    ) {
+      if (column === 'objectType' && isPropertyLinked(record)) {
+        return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>;
+      }
+      switch (type) {
+        case 'boolean':
+          return (
+            <BooleanValue active={Boolean(value)}>
+              {value.toString()}
+            </BooleanValue>
+          );
+        case 'blob':
+        case 'string':
+          return <Text>{value}</Text>;
+        case 'integer':
+        case 'float':
+        case 'double':
+        case 'number':
+          return <Text>{value}</Text>;
+        case 'null':
+          return <Text>NULL</Text>;
+        case 'object':
+          if (Array.isArray(value)) return <Text>[{value.toString()}]</Text>;
+          else return <Text>{JSON.stringify(value)}</Text>;
+        default:
+          return <Text />;
+      }
+    }
+    const { schemas, selectedSchema } = props;
+    if (!schemas || !schemas.length) {
+      return <div>No schemas found</div>;
+    }
+    let currentSchema: SchemaResponseObject = schemas[0];
+    schemas.forEach((schema) => {
+      if (schema.name === selectedSchema) {
+        currentSchema = schema;
+        return;
+      }
     });
-  };
 
-  function createColumnConfig(columns: string[]) {
-    const columnObjs: DataTableColumn<{ [key: string]: Value }>[] = columns.map(
-      (col) => ({
-        key: col,
-        title: col,
-        dataIndex: col,
-        sorter: (a, b) => {
-          if (a[col] > b[col]) {
-            return 1;
-          } else if (a[col] < b[col]) {
-            return -1;
-          } else {
-            return 0;
-          }
-        },
-        onFilter: (value: string, record: any) => record[col].startsWith(value),
-        render: (text, record) =>
-          renderTableCells(text, typeof text, col, record),
-        filterSearch: true,
-      })
+    const { properties, primaryKey } = currentSchema;
+    const columns = [
+      'name',
+      'type',
+      'mapTo',
+      'indexed',
+      'optional',
+      'primaryKey',
+      'objectType',
+    ];
+    const columnObjs = useMemoize(
+      (columns: string[]) => createColumnConfig(columns),
+      [columns]
     );
-    return columnObjs;
-  }
-  function renderTableCells(
-    value: string,
-    type: string,
-    column: string,
-    record
-  ) {
-    if (column === 'objectType' && isPropertyLinked(record)) {
-      return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>;
-    }
-    switch (type) {
-      case 'boolean':
-        return (
-          <BooleanValue active={Boolean(value)}>
-            {value.toString()}
-          </BooleanValue>
-        );
-      case 'blob':
-      case 'string':
-        return <Text>{value}</Text>;
-      case 'integer':
-      case 'float':
-      case 'double':
-      case 'number':
-        return <Text>{value}</Text>;
-      case 'null':
-        return <Text>NULL</Text>;
-      case 'object':
-        if (Array.isArray(value)) return <Text>[{value.toString()}]</Text>;
-        else return <Text>{JSON.stringify(value)}</Text>;
-      default:
-        return <Text />;
-    }
-  }
-  const { schemas, selectedSchema } = props;
-  if (!schemas || !schemas.length) {
-    return <div>No schemas found</div>;
-  }
-  let currentSchema: SchemaResponseObject = schemas[0];
-  schemas.forEach((schema) => {
-    if (schema.name === selectedSchema) {
-      currentSchema = schema;
-      return;
-    }
-  });
-
-  const { properties, primaryKey } = currentSchema;
-  const columns = [
-    'name',
-    'type',
-    'mapTo',
-    'indexed',
-    'optional',
-    'primaryKey',
-    'objectType',
-  ];
-  const columnObjs = useMemoize(
-    (columns: string[]) => createColumnConfig(columns),
-    [columns]
-  );
-  const rows = createRows(properties, primaryKey);
-  return (
-    <Layout.Container height={800}>
-      <Table dataSource={rows} columns={columnObjs} />
-    </Layout.Container>
-  );
-};
+    const rows = createRows(properties, primaryKey);
+    return (
+      <Layout.Container height={800}>
+        <Table dataSource={rows} columns={columnObjs} />
+      </Layout.Container>
+    );
+  };
 
 export default React.memo(SchemaVisualizer);

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { usePlugin, useValue } from "flipper-plugin";
+import { Pagination } from 'antd';
+import { usePlugin, useValue } from 'flipper-plugin';
+import React from 'react';
 import { plugin } from '..';
-import {Pagination} from 'antd';
 
 const DataPagination = () => {
   const instance = usePlugin(plugin);

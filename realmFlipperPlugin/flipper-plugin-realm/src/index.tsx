@@ -2,24 +2,30 @@ import {
   ConsoleSqlOutlined,
   SettingOutlined,
   TableOutlined,
-} from "@ant-design/icons";
-import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
-import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+} from '@ant-design/icons';
+import { Radio, RadioChangeEvent, Typography } from 'antd';
+import {
+  createState,
+  Layout,
+  PluginClient,
+  Toolbar,
+  usePlugin,
+  useValue,
+} from 'flipper-plugin';
 
-import React, { useEffect } from 'react';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
 import DataVisualizer from './pages/DataVisualizer';
-import { RealmQueryLanguage, addToHistory } from './pages/RealmQueryLanguage';
+import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
-  objects: Array<Object>;
-  queryResult: Array<Object>;
-  singleObject: Object;
+  objects: Array<Record<string, unknown>>;
+  queryResult: Array<Record<string, unknown>>;
+  singleObject: Record<string, unknown>;
   schemas: Array<SchemaResponseObject>;
   viewMode: 'data' | 'schemas' | 'RQL';
   errorMsg?: string;
@@ -67,21 +73,25 @@ type Events = {
 };
 
 type Methods = {
-  executeQuery: (query: QueryObject) => Promise<Object[]>;
-  getObjects: (data: getForwardsObjectsRequest) => Promise<Object[]>;
-  getObjectsBackwards: (data: getBackwardsObjectsRequest) => Promise<Object[]>;
-  getOneObject: (data: ObjectRequest) => Promise<Object[]>;
+  executeQuery: (query: QueryObject) => Promise<Record<string, unknown>[]>;
+  getObjects: (
+    data: getForwardsObjectsRequest
+  ) => Promise<Record<string, unknown>[]>;
+  getObjectsBackwards: (
+    data: getBackwardsObjectsRequest
+  ) => Promise<Record<string, unknown>[]>;
+  getOneObject: (data: ObjectRequest) => Promise<Record<string, unknown>>;
   getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
   getRealms: () => Promise<string[]>;
-  addObject: (object: AddObject) => Promise<any>;
-  modifyObject: (newObject: AddObject) => Promise<any>;
-  removeObject: (object: AddObject) => Promise<any>;
+  addObject: (object: AddObject) => Promise<Record<string, unknown>>;
+  modifyObject: (newObject: AddObject) => Promise<Record<string, unknown>>;
+  removeObject: (object: AddObject) => Promise<void>;
 };
 
 export type AddObject = {
-  schema: string;
-  realm: string;
-  object: Object;
+  schema?: string;
+  realm?: string;
+  object: Record<string, unknown>;
 };
 
 type RealmsMessage = {
@@ -89,19 +99,14 @@ type RealmsMessage = {
 };
 
 type ObjectsMessage = {
-  objects: Array<Object>;
+  objects: Array<Record<string, unknown>>;
   total: number;
-  next_cursor: CursorObject;
-  prev_cursor: CursorObject;
-};
-
-type CursorObject = {
-  _id: number;
-  sortingField: string | number;
+  next_cursor: { [sortingField: string]: number };
+  prev_cursor: { [sortingField: string]: number };
 };
 
 type ObjectMessage = {
-  object: Object;
+  object: Record<string, unknown>;
 };
 
 type SchemaMessage = {
@@ -139,7 +144,7 @@ export type ObjectRequest = {
 };
 
 type AddLiveObjectRequest = {
-  newObject: Object;
+  newObject: Record<string, unknown>;
 };
 
 type DeleteLiveObjectRequest = {
@@ -147,7 +152,7 @@ type DeleteLiveObjectRequest = {
 };
 
 type EditLiveObjectRequest = {
-  newObject: Object;
+  newObject: Record<string, unknown>;
   index: number;
 };
 
@@ -158,7 +163,7 @@ type QueryObject = {
 };
 
 type QueryResult = {
-  result: Array<Object> | string;
+  result: Array<Record<string, unknown>> | string;
 };
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
@@ -238,7 +243,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
       pluginState.set({ ...state, errorMsg: data.result });
     } else {
       console.log('query succeeded', data.result);
-      pluginState.set({ ...state, queryResult: data.result, objects: data.result, errorMsg: undefined });
+      pluginState.set({
+        ...state,
+        queryResult: data.result,
+        objects: data.result,
+        errorMsg: undefined,
+      });
     }
   });
 
@@ -343,7 +353,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const addObject = (object: Object) => {
+  const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('addObject', {
@@ -427,7 +437,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     getRealms();
   });
 
-  const modifyObject = (newObject: Object) => {
+  const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('modifyObject', {
@@ -437,7 +447,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const removeObject = (object: Object) => {
+  const removeObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
 
     client.send('removeObject', {

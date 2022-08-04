@@ -17,7 +17,7 @@ export function ColumnTitle(props: {
     case 'set':
       title = props.objectType + '<>';
       break;
-    case 'set':
+    case 'object':
       title = props.objectType + '{}';
       break;
     default:

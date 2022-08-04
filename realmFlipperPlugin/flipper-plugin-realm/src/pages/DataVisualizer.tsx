@@ -12,23 +12,26 @@ import DataPagination from '../components/DataPagination';
 import PageSizeSelect from '../components/PageSizeSelect';
 
 export default function DataVisualizer(props: {
-  objects: Array<Object>;
-  singleObject: Object;
+  objects: Array<Record<string, unknown>>;
+  singleObject: Record<string, unknown>;
   schemas: Array<SchemaResponseObject>;
   selectedSchema: string;
-  addObject: (object: AddObject) => Promise<any>;
-  modifyObject: (newObject: AddObject) => Promise<any>;
-  removeObject: (object: AddObject) => Promise<any>;
-  getOneObject: (data: ObjectRequest) => Promise<Object[]>;
+  sortDirection: 'ascend' | 'descend' | null;
+  loading: boolean;
+  sortingColumn: string | null;
+  addObject: (object: AddObject) => void;
+  modifyObject: (newObject: AddObject) => void;
+  removeObject: (object: Record<string, unknown>) => void;
+  getOneObject: (data: ObjectRequest) => void;
 }) {
-  const [inspectData, setInspectData] = useState<Object>();
+  const [inspectData, setInspectData] = useState<Record<string, unknown>>();
   const [showSidebar, setShowSidebar] = useState(false);
 
   const [goBackStack, setGoBackStack] = useState<
-    Array<Object>
+    Array<Record<string, unknown>>
   >([]);
   const [goForwardStack, setGoForwardStack] = useState<
-    Array<Object>
+    Array<Record<string, unknown>>
   >([]);
 
   const getCurrentSchema = () => {
@@ -78,12 +81,12 @@ export default function DataVisualizer(props: {
       return <>Please select a schema.</>;
     }
 
-    const deleteRow = (row: Object) => {
+    const deleteRow = (row: Record<string, unknown>) => {
       props.removeObject(row);
     };
 
     const dropDown = (
-      row: Object,
+      row: Record<string, unknown>,
       schemaProperty: SchemaPropertyValue,
       schema: SchemaResponseObject
     ) => (
@@ -186,7 +189,7 @@ export default function DataVisualizer(props: {
     );
   }
 
-  function setNewInspectData(newInspectData: Object) {
+  function setNewInspectData(newInspectData: Record<string, unknown>) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
       setGoBackStack(goBackStack);
