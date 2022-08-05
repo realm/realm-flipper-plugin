@@ -13,15 +13,157 @@ import {
   useValue,
 } from 'flipper-plugin';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
 import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
-import { Events, Methods, RealmPluginState, RealmsMessage, ObjectsMessage, ObjectMessage, SchemaMessage, QueryResult, AddLiveObjectRequest, DeleteLiveObjectRequest, EditLiveObjectRequest, RealmObject } from './CommonTypes';
 
+export type RealmPluginState = {
+  realms: string[];
+  selectedRealm: string;
+  objects: Array<Record<string, unknown>>;
+  queryResult: Array<Record<string, unknown>>;
+  singleObject: Record<string, unknown>;
+  schemas: Array<SchemaResponseObject>;
+  errorMsg?: string;
+  selectedSchema: string;
+  schemaHistory: Array<string>;
+  schemaHistoryIndex: number;
+  cursorId: number | null;
+  filterCursor: number | null;
+  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
+  currentPage: number;
+  totalObjects: number;
+  sortingColumn: string | null;
+  loading: boolean;
+  sortDirection: 'ascend' | 'descend' | null;
+  prev_page_cursorId: number | null;
+  prev_page_filterCursor: number | null;
+};
 
+export type SchemaResponseObject = {
+  name: string;
+  embedded: boolean;
+  asymmetric: boolean;
+  primaryKey: string;
+  properties: { [key: string]: SchemaPropertyValue };
+};
+
+export type SchemaPropertyValue = {
+  name: string;
+  indexed: boolean;
+  optional: boolean;
+  type: string;
+  mapTo: string;
+  objectType?: string;
+};
+
+type Events = {
+  getObjects: ObjectsMessage;
+  getOneObject: ObjectMessage;
+  getSchemas: SchemaMessage;
+  liveObjectAdded: AddLiveObjectRequest;
+  liveObjectDeleted: DeleteLiveObjectRequest;
+  liveObjectEdited: EditLiveObjectRequest;
+  getRealms: RealmsMessage;
+  executeQuery: QueryResult;
+};
+
+type Methods = {
+  executeQuery: (query: QueryObject) => Promise<Record<string, unknown>[]>;
+  getObjects: (
+    data: getForwardsObjectsRequest
+  ) => Promise<Record<string, unknown>[]>;
+  getObjectsBackwards: (
+    data: getBackwardsObjectsRequest
+  ) => Promise<Record<string, unknown>[]>;
+  getOneObject: (data: ObjectRequest) => Promise<Record<string, unknown>>;
+  getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
+  getRealms: () => Promise<string[]>;
+  addObject: (object: AddObject) => Promise<Record<string, unknown>>;
+  modifyObject: (newObject: AddObject) => Promise<Record<string, unknown>>;
+  removeObject: (object: AddObject) => Promise<void>;
+};
+
+export type AddObject = {
+  schema?: string;
+  realm?: string;
+  object: Record<string, unknown>;
+};
+
+type RealmsMessage = {
+  realms: string[];
+};
+
+type ObjectsMessage = {
+  objects: Array<Record<string, unknown>>;
+  total: number;
+  next_cursor: { [sortingField: string]: number };
+  prev_cursor: { [sortingField: string]: number };
+};
+
+type ObjectMessage = {
+  object: Record<string, unknown>;
+};
+
+type SchemaMessage = {
+  schemas: Array<SchemaResponseObject>;
+};
+
+type RealmRequest = {
+  realm: string;
+};
+
+type getForwardsObjectsRequest = {
+  schema: string;
+  realm: string;
+  filterCursor: string | number | null;
+  cursorId: number | null;
+  limit: number;
+  sortingColumn: string | null;
+  sortDirection: 'ascend' | 'descend' | null;
+};
+
+type getBackwardsObjectsRequest = {
+  schema: string;
+  realm: string;
+  prev_page_filterCursor: string | number | null;
+  prev_page_cursorId: number | null;
+  limit: number;
+  sortingColumn: string | null;
+  sortDirection: 'ascend' | 'descend' | null;
+};
+
+export type ObjectRequest = {
+  schema: string;
+  realm: string;
+  primaryKey: string;
+};
+
+type AddLiveObjectRequest = {
+  newObject: Record<string, unknown>;
+};
+
+type DeleteLiveObjectRequest = {
+  index: number;
+};
+
+type EditLiveObjectRequest = {
+  newObject: Record<string, unknown>;
+  index: number;
+};
+
+type QueryObject = {
+  schema: string;
+  query: string;
+  realm: string;
+};
+
+type QueryResult = {
+  result: Array<Record<string, unknown>> | string;
+};
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -33,7 +175,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     queryResult: [],
     singleObject: {},
     schemas: [],
-    viewMode: 'data',
     selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
@@ -193,12 +334,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getSchemas', { realm: realm });
   };
 
-  const updateViewMode = (event: { viewMode: 'data' | 'schemas' | 'RQL' }) => {
-    pluginState.update((state) => {
-      state.viewMode = event.viewMode;
-    });
-  };
-
   const executeQuery = (query: string) => {
     const state = pluginState.get();
     addToHistory(query);
@@ -210,7 +345,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const addObject = (object: RealmObject) => {
+  const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('addObject', {
@@ -294,7 +429,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     getRealms();
   });
 
-  const modifyObject = (newObject: RealmObject) => {
+  const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('modifyObject', {
@@ -304,7 +439,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const removeObject = (object: RealmObject) => {
+  const removeObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
 
     client.send('removeObject', {
@@ -379,7 +514,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     getObjectsBackwards,
     getOneObject,
     getSchemas,
-    updateViewMode,
     executeQuery,
     addObject,
     updateSelectedSchema,
@@ -399,38 +533,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
 export function Component() {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const onViewModeChanged = useCallback(
-    (evt: RadioChangeEvent) => {
-      instance.updateViewMode({ viewMode: evt.target.value ?? 'data' });
-    },
-    [instance]
-  );
 
-  const onDataClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: 'data' });
-  }, [instance]);
-
-  const onSchemasClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: 'schemas' });
-  }, [instance]);
-
-  const onRQLClicked = useCallback(() => {
-    instance.updateViewMode({ viewMode: 'RQL' });
-  }, [instance]);
+  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
 
   return (
     <Layout.ScrollContainer>
       <Toolbar position="top">
-        <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
-          <Radio.Button value="data" onClick={onDataClicked}>
+        <Radio.Group value={viewMode}>
+          <Radio.Button value="data" onClick={() => setViewMode('data')}>
             <TableOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Data</Typography.Text>
           </Radio.Button>
-          <Radio.Button onClick={onSchemasClicked} value="schemas">
+          <Radio.Button onClick={() => setViewMode('schemas')} value="schemas">
             <SettingOutlined style={{ marginRight: 5 }} />
             <Typography.Text>Schema</Typography.Text>
           </Radio.Button>
-          <Radio.Button onClick={onRQLClicked} value="RQL">
+          <Radio.Button onClick={() => setViewMode('RQL')} value="RQL">
             <ConsoleSqlOutlined style={{ marginRight: 5 }} />
             <Typography.Text>RQL</Typography.Text>
           </Radio.Button>
@@ -438,7 +556,7 @@ export function Component() {
       </Toolbar>
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
-      {state.viewMode === 'data' ? (
+      {viewMode === 'data' ? (
         <DataVisualizer
           // objects={state.objects.slice(
           //   (state.currentPage - 1) * state.selectedPageSize,
@@ -457,17 +575,20 @@ export function Component() {
           getOneObject={instance.getOneObject}
         />
       ) : null}
-      {state.viewMode === 'schemas' ? (
+      {viewMode === 'schemas' ? (
         <SchemaVisualizer
           schemas={state.schemas}
           selectedSchema={state.selectedSchema}
         ></SchemaVisualizer>
       ) : null}
-      {state.viewMode === 'RQL' ? (
+      {viewMode === 'RQL' ? (
         <>
-          <RealmQueryLanguage schemas={state.schemas}
-          selectedSchema={state.selectedSchema}
-          objects={state.queryResult} executeQuery={instance.executeQuery}></RealmQueryLanguage>
+          <RealmQueryLanguage
+            schemas={state.schemas}
+            selectedSchema={state.selectedSchema}
+            objects={state.queryResult}
+            executeQuery={instance.executeQuery}
+          ></RealmQueryLanguage>
         </>
       ) : null}
     </Layout.ScrollContainer>
