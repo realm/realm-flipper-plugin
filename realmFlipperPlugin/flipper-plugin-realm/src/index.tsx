@@ -198,7 +198,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getObjects', (data: ObjectsMessage) => {
     const state = pluginState.get();
     if (!data.objects.length) {
-      setLoading({ loading: false });
+      setLoading(false);
       return;
     }
     const result = data.objects.slice(
@@ -287,7 +287,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realm: string | null;
   }) => {
     const state = pluginState.get();
-    setLoading({ loading: true });
+    setLoading(true);
     event.schema = event.schema ?? state.selectedSchema;
     event.realm = event.realm ?? state.selectedRealm;
     client.send('getObjectsBackwards', {
@@ -306,7 +306,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realm: string | null;
   }) => {
     const state = pluginState.get();
-    setLoading({ loading: true });
+    setLoading(true);
     event.schema = event.schema ?? state.selectedSchema;
     event.realm = event.realm ?? state.selectedRealm;
     client.send('getObjects', {
@@ -355,16 +355,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateSelectedSchema = (event: { schema: string }) => {
+  const updateSelectedSchema = (schema: string) => {
     const state = pluginState.get();
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
     newHistory.splice(index + 1);
-    newHistory.push(event.schema);
+    newHistory.push(schema);
     const length = newHistory.length - 1;
     pluginState.set({
       ...state,
-      selectedSchema: event.schema,
+      selectedSchema: schema,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
       filterCursor: null,
@@ -374,11 +374,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const goBackSchemaHistory = (event: { schema: string }) => {
+  const goBackSchemaHistory = (schema: string) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: event.schema,
+      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
@@ -387,11 +387,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const goForwardSchemaHistory = (event: { schema: string }) => {
+  const goForwardSchemaHistory = (schema: string) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: event.schema,
+      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
       filterCursor: null,
       cursorId: null,
@@ -400,24 +400,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateSelectedRealm = (event: { realm: string }) => {
+  const updateSelectedRealm = (realm: string) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedRealm: event.realm,
+      selectedRealm: realm,
       objects: [],
       filterCursor: null,
       cursorId: null,
     });
   };
 
-  const updateSelectedPageSize = (event: {
-    pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
-  }) => {
+  const updateSelectedPageSize = (
+    pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
+  ) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedPageSize: event.pageSize,
+      selectedPageSize: pageSize,
       cursorId: null,
       filterCursor: null,
       objects: [],
@@ -449,11 +449,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setCurrentPage = (event: { currentPage: number }) => {
+  const setCurrentPage = (currentPage: number) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      currentPage: event.currentPage,
+      currentPage: currentPage,
     });
   };
 
@@ -468,11 +468,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setLoading = (event: { loading: boolean }) => {
+  const setLoading = (loading: boolean) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      loading: event.loading,
+      loading: loading,
     });
   };
 

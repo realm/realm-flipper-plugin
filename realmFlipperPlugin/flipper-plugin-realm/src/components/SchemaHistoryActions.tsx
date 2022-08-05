@@ -14,7 +14,7 @@ const SchemaHistoryActions = () => {
       return;
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.goBackSchemaHistory({ schema: newSelectedSchema });
+    instance.goBackSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
 
   const goForward = useCallback(() => {
@@ -23,7 +23,7 @@ const SchemaHistoryActions = () => {
       return;
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.goForwardSchemaHistory({ schema: newSelectedSchema });
+    instance.goForwardSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
   return (
     <span style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>

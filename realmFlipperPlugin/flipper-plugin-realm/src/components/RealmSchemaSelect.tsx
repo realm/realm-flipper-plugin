@@ -17,9 +17,7 @@ const RealmSchemaSelect = () => {
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    instance.updateSelectedSchema({
-      schema: selected,
-    });
+    instance.updateSelectedSchema(selected);
     instance.getObjectsFoward({ realm: null, schema: null });
     //instance.executeQuery('');
   };
@@ -32,9 +30,7 @@ const RealmSchemaSelect = () => {
   const onRealmSelected = useCallback(
     (selected: string) => {
       instance.getSchemas(selected);
-      instance.updateSelectedRealm({
-        realm: selected,
-      });
+      instance.updateSelectedRealm(selected);
     },
     [instance]
   );
