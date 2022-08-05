@@ -23,7 +23,7 @@ export function ColumnTitle(props: {
       title = props.objectType + '{}';
       break;
     case 'object':
-      title = props.objectType
+      title = props.objectType + '';
       break;
     default:
       title = props.propertyType;
