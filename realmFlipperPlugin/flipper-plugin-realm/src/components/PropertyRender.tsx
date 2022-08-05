@@ -1,11 +1,11 @@
 import { Layout, Tag } from "antd";
 import React, { useState } from "react";
-import { SchemaPropertyValue } from "..";
+import { SchemaProperty } from "..";
 import { getDefault, TypeInput } from "./types/TypeInput";
 
 type InputType = {
   values: { [keys: string]: any };
-  property: SchemaPropertyValue;
+  property: SchemaProperty;
   toClear: (() => void)[];
   isPrimary: boolean;
 };

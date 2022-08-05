@@ -20,13 +20,14 @@ import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 
+
+
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
-  objects: Array<Record<string, unknown>>;
-  queryResult: Array<Record<string, unknown>>;
-  singleObject: Record<string, unknown>;
-  schemas: Array<SchemaResponseObject>;
+  objects: Array<RealmObject>;
+  queryResult: Array<RealmObject>;
+  schemas: Array<SchemaObject>;
   viewMode: 'data' | 'schemas' | 'RQL';
   errorMsg?: string;
   selectedSchema: string;
@@ -44,15 +45,17 @@ export type RealmPluginState = {
   prev_page_filterCursor: number | null;
 };
 
-export type SchemaResponseObject = {
+export type RealmObject = Record<string, unknown>
+
+export type SchemaObject = {
   name: string;
   embedded: boolean;
   asymmetric: boolean;
   primaryKey: string;
-  properties: { [key: string]: SchemaPropertyValue };
+  properties: { [key: string]: SchemaProperty };
 };
 
-export type SchemaPropertyValue = {
+export type SchemaProperty = {
   name: string;
   indexed: boolean;
   optional: boolean;
@@ -73,25 +76,25 @@ type Events = {
 };
 
 type Methods = {
-  executeQuery: (query: QueryObject) => Promise<Record<string, unknown>[]>;
+  executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
   getObjects: (
     data: getForwardsObjectsRequest
-  ) => Promise<Record<string, unknown>[]>;
+  ) => Promise<RealmObject[]>;
   getObjectsBackwards: (
     data: getBackwardsObjectsRequest
-  ) => Promise<Record<string, unknown>[]>;
-  getOneObject: (data: ObjectRequest) => Promise<Record<string, unknown>>;
-  getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
+  ) => Promise<RealmObject[]>;
+  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
+  getSchemas: (data: RealmRequest) => Promise<SchemaObject[]>;
   getRealms: () => Promise<string[]>;
-  addObject: (object: AddObject) => Promise<Record<string, unknown>>;
-  modifyObject: (newObject: AddObject) => Promise<Record<string, unknown>>;
+  addObject: (object: AddObject) => Promise<RealmObject>;
+  modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
 };
 
 export type AddObject = {
   schema?: string;
   realm?: string;
-  object: Record<string, unknown>;
+  object: RealmObject;
 };
 
 type RealmsMessage = {
@@ -99,18 +102,18 @@ type RealmsMessage = {
 };
 
 type ObjectsMessage = {
-  objects: Array<Record<string, unknown>>;
+  objects: Array<RealmObject>;
   total: number;
   next_cursor: { [sortingField: string]: number };
   prev_cursor: { [sortingField: string]: number };
 };
 
 type ObjectMessage = {
-  object: Record<string, unknown>;
+  object: RealmObject;
 };
 
 type SchemaMessage = {
-  schemas: Array<SchemaResponseObject>;
+  schemas: Array<SchemaObject>;
 };
 
 type RealmRequest = {
@@ -144,7 +147,7 @@ export type ObjectRequest = {
 };
 
 type AddLiveObjectRequest = {
-  newObject: Record<string, unknown>;
+  newObject: RealmObject;
 };
 
 type DeleteLiveObjectRequest = {
@@ -152,7 +155,7 @@ type DeleteLiveObjectRequest = {
 };
 
 type EditLiveObjectRequest = {
-  newObject: Record<string, unknown>;
+  newObject: RealmObject;
   index: number;
 };
 
@@ -163,7 +166,7 @@ type QueryObject = {
 };
 
 type QueryResult = {
-  result: Array<Record<string, unknown>> | string;
+  result: Array<RealmObject> | string;
 };
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
@@ -353,7 +356,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const addObject = (object: Record<string, unknown>) => {
+  const addObject = (object: RealmObject) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('addObject', {
@@ -437,7 +440,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     getRealms();
   });
 
-  const modifyObject = (newObject: Record<string, unknown>) => {
+  const modifyObject = (newObject: RealmObject) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
     client.send('modifyObject', {
@@ -447,7 +450,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const removeObject = (object: Record<string, unknown>) => {
+  const removeObject = (object: RealmObject) => {
     const state = pluginState.get();
 
     client.send('removeObject', {

@@ -11,12 +11,12 @@ import type { FormInstance } from "antd/es/form";
 import { Key, SorterResult } from 'antd/lib/table/interface';
 import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { SchemaPropertyValue } from "..";
+import { SchemaProperty } from "..";
 import { plugin } from '../index';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-type Item = Record<string, unknown>;
+type Item = RealmObject;
 
 interface EditableRowProps {
   index: number;
@@ -117,14 +117,14 @@ type GenericColumn = {
   title: string;
   key: string;
   dataIndex: string;
-  property: SchemaPropertyValue;
+  property: SchemaProperty;
 };
 
 const EditableTable = (props: {
   columns: GenericColumn[];
-  data: Record<string, unknown>[];
+  data: RealmObject[];
   primaryKey: string;
-  modifyObject: (objectToModify: Item) => Record<string, unknown>;
+  modifyObject: (objectToModify: Item) => RealmObject;
   schemaName: string;
   removeObject: (objectToRemove: Item) => void;
   loading: boolean;

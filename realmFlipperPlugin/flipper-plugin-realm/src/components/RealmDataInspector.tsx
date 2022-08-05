@@ -7,21 +7,21 @@ import {
 import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
 import React from 'react';
-import { SchemaResponseObject } from '..';
+import { RealmObject, SchemaObject } from '..';
 import { BoldSpan } from '../components/RealmSchemaSelect';
 
 type PropsType = {
-  currentSchema: SchemaResponseObject;
-  schemas: SchemaResponseObject[];
-  inspectData?: Record<string, unknown> | undefined;
-  setInspectData: (value: Record<string, unknown>) => void;
+  currentSchema: SchemaObject;
+  schemas: SchemaObject[];
+  inspectData?: RealmObject;
+  setInspectData: (value: RealmObject) => void;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
-  goBackStack: Array<Record<string, unknown>>;
-  setGoBackStack: (value: Array<Record<string, unknown>>) => void;
-  goForwardStack: Array<Record<string, unknown>>;
-  setGoForwardStack: (value: Array<Record<string, unknown>>) => void;
-  setNewInspectData: (newInspectData: Array<Record<string, unknown>>) => void;
+  goBackStack: Array<RealmObject>;
+  setGoBackStack: (value: Array<RealmObject>) => void;
+  goForwardStack: Array<RealmObject>;
+  setGoForwardStack: (value: Array<RealmObject>) => void;
+  setNewInspectData: (value: Array<RealmObject>) => void;
 };
 
 export const RealmDataInspector = ({
@@ -43,8 +43,6 @@ export const RealmDataInspector = ({
   console.log(goForwardStack);
   console.log('goBackStack');
   console.log(goBackStack);
-
-  const { Header, Content } = Layout;
 
   return (
     <DetailSidebar>
@@ -91,14 +89,18 @@ export const RealmDataInspector = ({
                 expandRoot={true}
                 collapsed={true}
                 onRenderName={(path, name) => {
-                  let linkedSchema = undefined;
+                  let linkedSchema: SchemaObject | undefined =
+                    undefined;
                   if (
                     currentSchema !== undefined &&
+                    // If the property with the current name exists.
                     currentSchema.properties[name] !== undefined &&
+                    // If the current schema contains the field objectType, i.e. it is an object.
                     'objectType' in currentSchema.properties[name]
                   ) {
                     console.log(currentSchema?.properties[name].objectType);
 
+                    // Find the schema the current object belongs to.
                     linkedSchema = schemas.find(
                       (schema) =>
                         schema.name ===
@@ -106,6 +108,25 @@ export const RealmDataInspector = ({
                     );
                   }
 
+                  // If the object to be rendered contains the field type which is set to object -> get the linked schema and set it as inspectData
+                  // let object = inspectData;
+                  // path.forEach((key) => (object = object[key]));
+                  // console.log('name');
+                  // console.log(name);
+                  // console.log('inspectData.type');
+                  // console.log(object.type);
+                  // if (name === 'objectType' && object.type === 'object') {
+                  //   console.log('#######');
+                  //   console.log(inspectData);
+                  //   console.log(
+                  //     schemas.find(
+                  //       (schema) => schema.name === object.objectType
+                  //     )
+                  //   );
+                  //   return name + 'xxxxxx';
+                  // }
+
+                  // If there is a schema for the object to be rendered.
                   if (linkedSchema !== undefined) {
                     return (
                       <>
@@ -118,8 +139,6 @@ export const RealmDataInspector = ({
                             icon={<SearchOutlined />}
                             ghost
                             onClick={() => {
-                              let object = inspectData;
-                              path.forEach((key) => (object = object[key]));
                               console.log(object);
                               setNewInspectData({
                                 [linkedSchema.name]: object,

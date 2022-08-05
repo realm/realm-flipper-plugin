@@ -1,6 +1,6 @@
 import { Layout, Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { SchemaPropertyValue, SchemaResponseObject } from '..';
+import { SchemaProperty, SchemaObject } from '..';
 import { AddObject } from '../index';
 
 import React from 'react';
@@ -8,9 +8,9 @@ import { PropertyRender } from './PropertyRender';
 
 const forEachProp = (
   props: {
-    [key: string]: SchemaPropertyValue;
+    [key: string]: SchemaProperty;
   },
-  f: (prop: SchemaPropertyValue, index: number) => any
+  f: (prop: SchemaProperty, index: number) => any
 ) => {
   return Object.keys(props).map((property, index) => {
     return f(props[property], index);
@@ -18,7 +18,7 @@ const forEachProp = (
 };
 
 const ObjectAdder = (props: {
-  schema: SchemaResponseObject | undefined;
+  schema: SchemaObject | undefined;
   addObject: (object: AddObject) => void;
 }) => {
   const empty: { [prop: string]: any } = {};

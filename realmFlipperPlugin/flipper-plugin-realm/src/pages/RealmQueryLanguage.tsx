@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { StarOutlined } from "@ant-design/icons";
 import { Button, Input, Alert, AutoComplete } from "antd";
-import { plugin, SchemaResponseObject } from '../index';
+import { plugin, SchemaObject } from '../index';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { usePlugin, useValue } from 'flipper-plugin';
 
 type PropsType = {
-  schemas: SchemaResponseObject[];
+  schemas: SchemaObject[];
   selectedSchema: string;
   errorMsg?: string;
   executeQuery: (query: string) => void;
-  objects: Record<string, unknown>[];
+  objects: RealmObject[];
 };
 
 export const RealmQueryLanguage = ({

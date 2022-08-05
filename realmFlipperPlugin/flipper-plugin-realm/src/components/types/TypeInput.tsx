@@ -2,7 +2,7 @@ import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
-import { SchemaPropertyValue } from '../..';
+import { SchemaProperty } from '../..';
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';
@@ -18,13 +18,13 @@ import { StringInput } from './StringInput';
 import { UUIDInput } from './UUIDInput';
 
 export type TypeInputProps = {
-  property: SchemaPropertyValue;
+  property: SchemaProperty;
   value: any;
   set: (val: any) => void;
-  style?: Record<string, unknown>;
+  style?: RealmObject;
 };
 
-export const getDefault = (property: SchemaPropertyValue) => {
+export const getDefault = (property: SchemaProperty) => {
   if (property.optional && property.type != 'dictionary') return null;
 
   const type = property.type;

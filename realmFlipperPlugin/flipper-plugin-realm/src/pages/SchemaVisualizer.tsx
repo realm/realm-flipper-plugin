@@ -1,7 +1,7 @@
 import { Table, Typography } from 'antd';
 import { DataTableColumn, Layout, styled, theme, useMemoize, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
-import { plugin, SchemaPropertyValue, SchemaResponseObject } from '../index';
+import { plugin, SchemaProperty, SchemaObject } from '../index';
 import { Value } from '../utils/TypeBasedValueRenderer';
 import { isPropertyLinked } from '../utils/linkedObject';
 const {Text} = Typography;
@@ -28,12 +28,12 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
 
 
   export function createRows(
-    properties: { [key: string]: SchemaPropertyValue },
+    properties: { [key: string]: SchemaProperty },
     primaryKey: string
-  ): Record<string, unknown>[] {
-    const newRows: Record<string, unknown>[] = [];
+  ): RealmObject[] {
+    const newRows: RealmObject[] = [];
     Object.values(properties).forEach(
-      (value: SchemaPropertyValue, index: number) => {
+      (value: SchemaProperty, index: number) => {
         newRows.push({
           ...value,
           key: index,
@@ -45,7 +45,7 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
     return newRows;
   }
   const SchemaVisualizer = (props: {
-    schemas: Array<SchemaResponseObject>;
+    schemas: Array<SchemaObject>;
     selectedSchema: string;
   }) => {
     const instance = usePlugin(plugin);
@@ -108,7 +108,7 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
     if (!schemas || !schemas.length) {
       return <div>No schemas found</div>;
     }
-    let currentSchema: SchemaResponseObject = schemas[0];
+    let currentSchema: SchemaObject = schemas[0];
     schemas.forEach((schema) => {
       if (schema.name === selectedSchema) {
         currentSchema = schema;

@@ -2,7 +2,7 @@ import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
-import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
+import { plugin, RealmObject, SchemaProperty, SchemaObject } from '..';
 import { parseRows } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
@@ -14,7 +14,7 @@ type ColumnType = {
   isPrimaryKey: boolean;
 };
 
-export const schemaObjToColumns = (schema: SchemaResponseObject) => {
+export const schemaObjToColumns = (schema: SchemaObject) => {
   return Object.keys(schema.properties).map((key) => {
     const obj = schema.properties[key];
     const isPrimaryKey = obj.name === schema.primaryKey;
@@ -30,16 +30,16 @@ export const schemaObjToColumns = (schema: SchemaResponseObject) => {
 
 export const DataTable = (props: {
   columns: ColumnType[];
-  objects: Record<string, unknown>[];
-  schemas: SchemaResponseObject[];
+  objects: RealmObject[];
+  schemas: SchemaObject[];
   selectedSchema: string;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   renderOptions: (
-    row: Record<string, unknown>,
-    schemaProperty: SchemaPropertyValue,
-    schema: SchemaResponseObject
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
   ) => ReactElement; // for dropDown
 }) => {
   const instance = usePlugin(plugin);
@@ -62,7 +62,7 @@ export const DataTable = (props: {
   const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   const filledColumns = props.columns.map((column) => {
-    const property: SchemaPropertyValue = currentSchema.properties[column.name];
+    const property: SchemaProperty = currentSchema.properties[column.name];
 
     const objectType: string | undefined = property.objectType;
     const isPrimaryKey: boolean = currentSchema.primaryKey === property.name;
@@ -83,7 +83,7 @@ export const DataTable = (props: {
         showTitle: false,
       },
       property,
-      render: (text: any, row: Record<string, unknown>) => {
+      render: (text: any, row: RealmObject) => {
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}

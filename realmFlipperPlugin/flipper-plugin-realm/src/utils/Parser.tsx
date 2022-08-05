@@ -1,4 +1,4 @@
-import { SchemaResponseObject } from "../index";
+import { SchemaObject } from "../index";
 
 type propertyRepresentation = {
   value: any;
@@ -7,8 +7,8 @@ type propertyRepresentation = {
 
 export function parseRows(
   objects: Object[],
-  schema: SchemaResponseObject,
-  schemas: Array<SchemaResponseObject>
+  schema: SchemaObject,
+  schemas: Array<SchemaObject>
 ) {
   console.log(schema);
 
@@ -111,13 +111,13 @@ function parseDecimal128(input: { $numberDecimal: string }): string {
 }
 
 function parseLinkedObject(
-  schema: SchemaResponseObject,
-  schemas: Array<SchemaResponseObject>,
+  schema: SchemaObject,
+  schemas: Array<SchemaObject>,
   linkedObj: {},
   key: string
 ): string {
   let stringForPrint = "";
-  const childSchema: SchemaResponseObject | undefined = schemas.find(
+  const childSchema: SchemaObject | undefined = schemas.find(
     (s) => s.name === schema.properties[key].objectType
   );
   if (childSchema !== undefined) {

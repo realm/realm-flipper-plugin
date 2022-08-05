@@ -1,7 +1,7 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { SchemaPropertyValue } from '../..';
+import { SchemaProperty } from '../..';
 import { MixedInput } from "./MixedInput";
 import { StringInput } from "./StringInput";
 import { TypeInputProps } from './TypeInput';
@@ -25,7 +25,7 @@ export const DictionaryInput = ({
   const [_, setReset] = useState(0);
 
   console.log("rerender, size:", contents.size);
-  const keyProperty: SchemaPropertyValue = {
+  const keyProperty: SchemaProperty = {
     name: "",
     type: "string",
     indexed: false,
