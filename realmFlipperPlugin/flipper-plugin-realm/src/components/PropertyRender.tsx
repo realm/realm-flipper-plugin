@@ -18,7 +18,7 @@ export const PropertyRender = ({
 }: InputType) => {
   const [value, setValue] = useState(getDefault(property));
 
-  console.log("renderProperty");
+  // console.log("renderProperty");
   if (values[property.name] === undefined)
     values[property.name] = getDefault(property);
 

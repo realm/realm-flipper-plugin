@@ -25,7 +25,7 @@ export type TypeInputProps = {
 };
 
 export const getDefault = (property: SchemaPropertyValue) => {
-  if (property.optional && property.type != "dictionary") return null;
+  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
 
   const type = property.type;
   switch (type) {
