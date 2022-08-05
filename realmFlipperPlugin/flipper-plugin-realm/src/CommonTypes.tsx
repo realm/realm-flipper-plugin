@@ -4,7 +4,6 @@ export type RealmPluginState = {
   objects: Array<RealmObject>;
   queryResult: Array<RealmObject>;
   schemas: Array<SchemaObject>;
-  viewMode: 'data' | 'schemas' | 'RQL';
   errorMsg?: string;
   selectedSchema: string;
   schemaHistory: Array<string>;

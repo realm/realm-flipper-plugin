@@ -12,11 +12,9 @@ const PageSizeSelect = () => {
   const onPageSizeSelect = (
     selected: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
-    instance.updateSelectedPageSize({
-      pageSize: selected,
-    });
+    instance.updateSelectedPageSize(selected);
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.setCurrentPage(1);
   };
 
   return (

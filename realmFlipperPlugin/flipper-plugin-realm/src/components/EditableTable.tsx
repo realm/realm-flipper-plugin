@@ -201,7 +201,7 @@ const EditableTable = (props: {
       }
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.setCurrentPage(1);
   };
 
   return (

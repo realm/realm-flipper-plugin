@@ -7,7 +7,7 @@ const DataPagination = () => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-  const getMore = (newSelectedPage: number, currentPageSize: number) => {
+  const getMore = (newSelectedPage: number) => {
     if (newSelectedPage > state.currentPage) {
       instance.getObjectsFoward({
         schema: state.selectedSchema,
@@ -19,7 +19,7 @@ const DataPagination = () => {
         realm: state.selectedRealm,
       });
     }
-    instance.setCurrentPage({ currentPage: newSelectedPage });
+    instance.setCurrentPage(newSelectedPage);
   };
   return (
     <Pagination

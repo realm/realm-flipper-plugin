@@ -123,7 +123,7 @@ export const DataTable = (props: {
       }
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.setCurrentPage(1);
   };
 
   // TODO: think about key as a property in the Realm DB
