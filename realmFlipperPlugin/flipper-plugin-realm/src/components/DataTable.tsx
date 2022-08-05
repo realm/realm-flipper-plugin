@@ -2,7 +2,8 @@ import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
-import { plugin, RealmObject, SchemaProperty, SchemaObject } from '..';
+import { plugin } from '..';
+import { RealmObject, SchemaProperty, SchemaObject } from "RealmPluginState";
 import { parseRows } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 

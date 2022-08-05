@@ -1,7 +1,7 @@
 import { Layout, Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { SchemaProperty, SchemaObject } from '..';
-import { AddObject } from '../index';
+import { SchemaProperty, SchemaObject } from "RealmPluginState";
+import { AddObject } from "../CommonTypes";
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';

@@ -1,4 +1,4 @@
-import { SchemaObject } from "../index";
+import { SchemaObject } from "../CommonTypes";
 
 type propertyRepresentation = {
   value: any;

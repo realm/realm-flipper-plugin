@@ -7,7 +7,7 @@ import {
 import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
 import React from 'react';
-import { RealmObject, SchemaObject } from '..';
+import { RealmObject, SchemaObject } from '../CommonTypes';
 import { BoldSpan } from '../components/RealmSchemaSelect';
 
 type PropsType = {
@@ -89,10 +89,9 @@ export const RealmDataInspector = ({
                 expandRoot={true}
                 collapsed={true}
                 onRenderName={(path, name) => {
-                  let linkedSchema: SchemaObject | undefined =
-                    undefined;
+                  let linkedSchema: SchemaObject | undefined = undefined;
                   if (
-                    currentSchema !== undefined &&
+                    currentSchema !== undefined && // The schema of the object that is currently rendered.
                     // If the property with the current name exists.
                     currentSchema.properties[name] !== undefined &&
                     // If the current schema contains the field objectType, i.e. it is an object.

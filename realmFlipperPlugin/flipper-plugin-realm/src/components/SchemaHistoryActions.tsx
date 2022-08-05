@@ -1,6 +1,6 @@
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import React from "react";
-import { Radio, RadioChangeEvent, Button } from 'antd';
+import { Button } from 'antd';
 import { usePlugin, useValue } from 'flipper-plugin';
 import { useCallback } from 'react';
 import { plugin } from '..';

@@ -2,7 +2,7 @@ import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
-import { SchemaProperty } from '../..';
+import { SchemaProperty } from "../RealmPluginState";
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';

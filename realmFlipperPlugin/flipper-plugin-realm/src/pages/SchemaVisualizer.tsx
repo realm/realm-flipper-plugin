@@ -1,7 +1,8 @@
 import { Table, Typography } from 'antd';
 import { DataTableColumn, Layout, styled, theme, useMemoize, usePlugin, useValue } from 'flipper-plugin';
 import React from "react";
-import { plugin, SchemaProperty, SchemaObject } from '../index';
+import { plugin } from '../index';
+import { SchemaProperty, SchemaObject } from "../CommonTypes";
 import { Value } from '../utils/TypeBasedValueRenderer';
 import { isPropertyLinked } from '../utils/linkedObject';
 const {Text} = Typography;

@@ -1,7 +1,7 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { SchemaProperty } from '../..';
+import { SchemaProperty } from "../RealmPluginState";
 import { MixedInput } from "./MixedInput";
 import { StringInput } from "./StringInput";
 import { TypeInputProps } from './TypeInput';

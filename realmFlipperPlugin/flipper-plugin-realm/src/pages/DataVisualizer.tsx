@@ -2,12 +2,12 @@ import React from 'react';
 
 import { Layout } from 'flipper-plugin';
 import { Menu, Radio } from 'antd';
-import { SchemaProperty, SchemaObject, RealmObject } from '../index';
+import { SchemaProperty, SchemaObject, RealmObject } from "../CommonTypes";
 import ObjectAdder from '../components/ObjectAdder';
 import { useState } from 'react';
 import { DataTable } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
-import { AddObject, ObjectRequest } from '../index';
+import { AddObject, ObjectRequest } from "../CommonTypes";
 import DataPagination from '../components/DataPagination';
 import PageSizeSelect from '../components/PageSizeSelect';
 

@@ -11,7 +11,7 @@ import type { FormInstance } from "antd/es/form";
 import { Key, SorterResult } from 'antd/lib/table/interface';
 import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { SchemaProperty } from "..";
+import { SchemaProperty } from "RealmPluginState";
 import { plugin } from '../index';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);

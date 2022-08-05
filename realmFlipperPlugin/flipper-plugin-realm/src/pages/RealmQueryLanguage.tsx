@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { StarOutlined } from "@ant-design/icons";
 import { Button, Input, Alert, AutoComplete } from "antd";
-import { plugin, SchemaObject } from '../index';
+import { plugin } from '../index';
+import { SchemaObject } from "../CommonTypes";
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { usePlugin, useValue } from 'flipper-plugin';
 
