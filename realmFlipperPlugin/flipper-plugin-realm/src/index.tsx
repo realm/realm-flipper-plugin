@@ -2,9 +2,16 @@ import {
   ConsoleSqlOutlined,
   SettingOutlined,
   TableOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 import { Button, Radio, RadioChangeEvent, Typography } from 'antd';
-import { createState, Layout, PluginClient, Toolbar, usePlugin, useValue } from 'flipper-plugin';
+import {
+  createState,
+  Layout,
+  PluginClient,
+  Toolbar,
+  usePlugin,
+  useValue,
+} from 'flipper-plugin';
 
 import React, { useEffect } from 'react';
 import { useCallback } from 'react';
@@ -23,6 +30,7 @@ export type RealmPluginState = {
   schemas: Array<SchemaResponseObject>;
   viewMode: 'data' | 'schemas' | 'RQL';
   errorMsg?: string;
+  currentSchema?: SchemaResponseObject;
   selectedSchema: string;
   schemaHistory: Array<string>;
   schemaHistoryIndex: number;
@@ -172,6 +180,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     singleObject: {},
     schemas: [],
     viewMode: 'data',
+    currentSchema: undefined,
     selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
@@ -231,16 +240,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({ ...state, schemas: data.schemas });
   });
 
-  client.onMessage('executeQuery', (data: QueryResult) => {
-    const state = pluginState.get();
-    if (typeof data.result === 'string') {
-      console.log('query failed', data.result);
-      pluginState.set({ ...state, errorMsg: data.result });
-    } else {
-      console.log('query succeeded', data.result);
-      pluginState.set({ ...state, queryResult: data.result, objects: data.result, errorMsg: undefined });
-    }
-  });
+  // client.onMessage('executeQuery', (data: QueryResult) => {
+
+  //   const state = pluginState.get();
+  //   if (typeof data.result === 'string') {
+  //     console.log('query failed', data.result);
+  //     pluginState.set({ ...state, errorMsg: data.result });
+  //   } else {
+  //     console.log('query succeeded', data.result);
+  //     pluginState.set({ ...state, queryResult: data.result, objects: data.result, errorMsg: undefined });
+  //   }
+  // });
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
@@ -332,15 +342,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const executeQuery = (query: string) => {
+  const executeQuery = async (query: string) => {
     const state = pluginState.get();
     addToHistory(query);
-
-    client.send('executeQuery', {
+    return client.send('executeQuery', {
       query: query,
       realm: state.selectedRealm,
       schema: state.selectedSchema,
     });
+
+    // try {
+    //   const result = await
+    //   return result;
+    // }
+    // catch(e) {
+    //   return e;
+    // }
   };
 
   const addObject = (object: Object) => {
@@ -351,6 +368,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: state.selectedSchema,
       object: object,
     });
+  };
+
+  const getSchemaFromName = (schemaName: string) => {
+    const state = pluginState.get();
+    return state.schemas.find((schema) => schema.name === schemaName);
   };
 
   const updateSelectedSchema = (event: { schema: string }) => {
@@ -369,6 +391,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(event.schema),
     });
   };
 
@@ -382,6 +405,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(event.schema),
     });
   };
 
@@ -395,6 +419,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(event.schema),
     });
   };
 
@@ -552,7 +577,7 @@ export function Component() {
   }, [instance]);
 
   return (
-    <Layout.ScrollContainer>
+    <Layout.Container grow>
       <Toolbar position="top">
         <Radio.Group value={state.viewMode} onChange={onViewModeChanged}>
           <Radio.Button value="data" onClick={onDataClicked}>
@@ -598,11 +623,9 @@ export function Component() {
       ) : null}
       {state.viewMode === 'RQL' ? (
         <>
-          <RealmQueryLanguage schemas={state.schemas}
-          selectedSchema={state.selectedSchema}
-          objects={state.queryResult} executeQuery={instance.executeQuery}></RealmQueryLanguage>
+          <RealmQueryLanguage schema={state.currentSchema} />
         </>
       ) : null}
-    </Layout.ScrollContainer>
+    </Layout.Container>
   );
 }

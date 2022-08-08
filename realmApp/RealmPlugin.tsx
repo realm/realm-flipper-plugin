@@ -148,25 +148,28 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getSchemas', {schemas: schemas});
         });
 
-        connection.receive('executeQuery', obj => {
+        connection.receive('executeQuery', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
           const objs = realm.objects(obj.schema);
           if (obj.query === '') {
-            connection.send('executeQuery', {result: objs});
+            responder.success(objs);
+            // connection.send('executeQuery', {result: objs});
             return;
           }
 
           let res;
           try {
-            res = {result: objs.filtered(obj.query)};
+            res = objs.filtered(obj.query);
+            responder.success(res);
           } catch (err) {
-            res = {result: err.message};
+            responder.error({message: err.message});
+            // res = {result: err.message};
           }
-
-          connection.send('executeQuery', res);
+          // responder.error(res);
+          // connection.send('executeQuery', res);
         });
         connection.receive('addObject', obj => {
           const realm = realmsMap.get(obj.realm);
