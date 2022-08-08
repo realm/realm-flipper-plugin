@@ -316,22 +316,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getSchemas', { realm: realm });
   };
 
-  const executeQuery = async (query: string) => {
+  const executeQuery = async (query: string, schema: string) => {
     const state = pluginState.get();
     addToHistory(query);
     return client.send('executeQuery', {
       query: query,
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: schema,
     });
-
-    // try {
-    //   const result = await
-    //   return result;
-    // }
-    // catch(e) {
-    //   return e;
-    // }
   };
 
   const addObject = (object: Record<string, unknown>) => {

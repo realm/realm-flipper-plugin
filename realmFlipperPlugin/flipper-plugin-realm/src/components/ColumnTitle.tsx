@@ -10,7 +10,7 @@ export function ColumnTitle(props: {
 }) {
   let title = '';
 
-  console.log(props)
+  // console.log(props)
 
   switch (props.propertyType) {
     case 'list':

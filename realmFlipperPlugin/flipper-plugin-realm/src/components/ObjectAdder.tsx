@@ -41,7 +41,7 @@ const ObjectAdder = (props: {
   };
 
   const hideModal = () => {
-    console.log('hidemodal');
+    // console.log('hidemodal');
     toClear.forEach((f) => f());
     toClear = [];
     setValues({});
@@ -51,13 +51,13 @@ const ObjectAdder = (props: {
 
   const addObject = () => {
     console.log('addObject', values);
-    console.log(props.addObject);
+    // console.log(props.addObject);
     props.addObject(values);
 
     hideModal();
   };
 
-  console.log('here, values:', values);
+  // console.log('here, values:', values);
 
   return (
     <Layout.Content>
