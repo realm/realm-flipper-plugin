@@ -26,8 +26,6 @@ export type RealmPluginState = {
   selectedSchema: string;
   schemaHistory: Array<string>;
   schemaHistoryIndex: number;
-  cursorId: number | null;
-  filterCursor: number | null;
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
   currentPage: number;
   totalObjects: number;
@@ -36,6 +34,13 @@ export type RealmPluginState = {
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
   prev_page_filterCursor: number | null;
+};
+
+type Query = {
+  cursorId: number | null;
+  filterCursor: number | string | null;
+
+  type: string;
 };
 
 export type SchemaResponseObject = {
@@ -184,6 +189,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     prev_page_cursorId: null,
     prev_page_filterCursor: null,
   });
+
+  const queryObject = createState<>({});
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
