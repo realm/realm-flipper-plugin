@@ -1,22 +1,16 @@
 import {
-  ConsoleSqlOutlined,
-  SettingOutlined,
-  TableOutlined,
-} from '@ant-design/icons';
-import { Radio, RadioChangeEvent, Typography } from 'antd';
-import {
   createState,
   Layout,
   PluginClient,
-  Toolbar,
   usePlugin,
   useValue,
 } from 'flipper-plugin';
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
+import ViewModeTabs from './components/ViewModeTabs';
 import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
@@ -536,22 +530,7 @@ export function Component() {
 
   return (
     <Layout.ScrollContainer>
-      <Toolbar position="top">
-        <Radio.Group value={viewMode}>
-          <Radio.Button value="data" onClick={() => setViewMode('data')}>
-            <TableOutlined style={{ marginRight: 5 }} />
-            <Typography.Text>Data</Typography.Text>
-          </Radio.Button>
-          <Radio.Button onClick={() => setViewMode('schemas')} value="schemas">
-            <SettingOutlined style={{ marginRight: 5 }} />
-            <Typography.Text>Schema</Typography.Text>
-          </Radio.Button>
-          <Radio.Button onClick={() => setViewMode('RQL')} value="RQL">
-            <ConsoleSqlOutlined style={{ marginRight: 5 }} />
-            <Typography.Text>RQL</Typography.Text>
-          </Radio.Button>
-        </Radio.Group>
-      </Toolbar>
+      <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' ? (
