@@ -1,16 +1,16 @@
-import React from "react";
-import { Tag } from "antd";
+import React from 'react';
+import { Tag } from 'antd';
 
-export function ColumnTitle(props: {
+export const ColumnTitle = (props: {
   isOptional: boolean;
   name: string;
-  objectType: string | undefined;
+  objectType: string;
   propertyType: string;
   isPrimaryKey: boolean;
-}) {
-  let title = '';
+}) => {
+  let title;
 
-  console.log(props)
+  console.log(props);
 
   switch (props.propertyType) {
     case 'list':
@@ -23,7 +23,7 @@ export function ColumnTitle(props: {
       title = props.objectType + '{}';
       break;
     case 'object':
-      title = props.objectType
+      title = props.objectType;
       break;
     default:
       title = props.propertyType;
@@ -43,4 +43,4 @@ export function ColumnTitle(props: {
       {props.name + ' '} <Tag color="default">{title}</Tag>
     </div>
   );
-}
+};

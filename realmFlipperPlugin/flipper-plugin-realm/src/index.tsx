@@ -16,12 +16,25 @@ import {
 import React, { useCallback } from 'react';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
-import DataVisualizer from './pages/DataVisualizer';
+import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
-import { Events, Methods, RealmPluginState, RealmsMessage, ObjectsMessage, ObjectMessage, SchemaMessage, QueryResult, AddLiveObjectRequest, DeleteLiveObjectRequest, EditLiveObjectRequest, RealmObject } from './CommonTypes';
-
-
+import {
+  Events,
+  Methods,
+  RealmPluginState,
+  RealmsMessage,
+  ObjectsMessage,
+  ObjectMessage,
+  SchemaMessage,
+  QueryResult,
+  AddLiveObjectRequest,
+  DeleteLiveObjectRequest,
+  EditLiveObjectRequest,
+  RealmObject,
+  SchemaObject,
+  SchemaObjectWithOrder,
+} from './CommonTypes';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -31,7 +44,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedRealm: '',
     objects: [],
     queryResult: [],
-    singleObject: {},
     schemas: [],
     viewMode: 'data',
     selectedSchema: '',
@@ -89,9 +101,52 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('received schemas', data.schemas);
+    const newschemas = data.schemas.map((schema) => sortSchemaProperties(schema));
+    console.log('newschemas', newschemas);
+
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: data.schemas });
+    pluginState.set({ ...state, schemas: newschemas });
+    console.log('pluginState', pluginState)
+
   });
+
+  const sortSchemaProperties = (schema: SchemaObject) => {
+    const sortedPropKeys = Object.keys(schema.properties).sort(function (a, b) {
+      return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+    console.log('sortedPropKeys');
+    console.log(sortedPropKeys);
+
+    const primKeyIndex = sortedPropKeys.findIndex(
+      (key) => schema.primaryKey === key
+    );
+    if (primKeyIndex >= 0) {
+      const primKey = sortedPropKeys[primKeyIndex];
+      sortedPropKeys.splice(primKeyIndex, 1);
+      sortedPropKeys.splice(0, 0, primKey);
+    }
+
+    const newSchemaObj: SchemaObjectWithOrder = {
+      ...schema,
+      order: sortedPropKeys,
+    };
+
+    Object.defineProperty(newSchemaObj, 'order', { enumerable: false,writable: true });
+
+    // newSchemaObj.properties = sortedPropKeys.reduce((acc, key) => {
+    //   acc[key] = newSchemaObj.properties[key];
+    //   return acc;
+    // }, {});
+    // console.log('SORTED SCHEMA');
+    // console.log(newSchemaObj);
+
+    // Object.keys(newSchemaObj.properties).map((key) =>
+    //   console.log(newSchemaObj.properties[key])
+    // );
+
+    // console.log(newSchemaObj.properties);
+    return newSchemaObj;
+  };
 
   client.onMessage('executeQuery', (data: QueryResult) => {
     const state = pluginState.get();
@@ -445,7 +500,6 @@ export function Component() {
           //   state.currentPage * state.selectedPageSize
           // )}
           objects={state.objects}
-          singleObject={state.singleObject}
           schemas={state.schemas}
           loading={state.loading}
           selectedSchema={state.selectedSchema}
@@ -465,9 +519,12 @@ export function Component() {
       ) : null}
       {state.viewMode === 'RQL' ? (
         <>
-          <RealmQueryLanguage schemas={state.schemas}
-          selectedSchema={state.selectedSchema}
-          objects={state.queryResult} executeQuery={instance.executeQuery}></RealmQueryLanguage>
+          <RealmQueryLanguage
+            schemas={state.schemas}
+            selectedSchema={state.selectedSchema}
+            objects={state.queryResult}
+            executeQuery={instance.executeQuery}
+          ></RealmQueryLanguage>
         </>
       ) : null}
     </Layout.ScrollContainer>

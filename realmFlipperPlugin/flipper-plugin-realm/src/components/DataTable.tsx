@@ -3,7 +3,7 @@ import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from "RealmPluginState";
+import { RealmObject, SchemaProperty, SchemaObject } from "../CommonTypes";
 import { parseRows } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
@@ -51,10 +51,10 @@ export const DataTable = (props: {
 
   //TODO: Sort objects after receiving them so that every component works with the same order.
   // Put primaryKey column in front.
-  const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
-  const tempCol = props.columns[0];
-  props.columns[0] = props.columns[primaryKeyIndex];
-  props.columns[primaryKeyIndex] = tempCol;
+  // const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
+  // const tempCol = props.columns[0];
+  // props.columns[0] = props.columns[primaryKeyIndex];
+  // props.columns[primaryKeyIndex] = tempCol;
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -65,8 +65,6 @@ export const DataTable = (props: {
   const filledColumns = props.columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
 
-    const objectType: string | undefined = property.objectType;
-    const isPrimaryKey: boolean = currentSchema.primaryKey === property.name;
     return {
       title: () => (
         <ColumnTitle
@@ -84,7 +82,7 @@ export const DataTable = (props: {
         showTitle: false,
       },
       property,
-      render: (text: any, row: RealmObject) => {
+      render: (text: {text: string | number, value: RealmObject}, row: RealmObject) => {
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}
