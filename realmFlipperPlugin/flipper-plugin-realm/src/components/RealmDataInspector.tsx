@@ -1,26 +1,27 @@
-import React from 'react';
-import { DataInspector, DetailSidebar } from 'flipper-plugin';
-import { Radio, Tooltip, Button } from 'antd';
 import {
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+  CloseOutlined,
   SearchOutlined,
-  CloseCircleOutlined,
-  StepBackwardOutlined,
-  StepForwardOutlined,
 } from '@ant-design/icons';
-import { SchemaResponseObject } from '..';
+import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
+import { DataInspector, DetailSidebar } from 'flipper-plugin';
+import React from 'react';
+import { RealmObject, SchemaObject } from '../CommonTypes';
+import { BoldSpan } from '../components/RealmSchemaSelect';
 
 type PropsType = {
-  currentSchema: SchemaResponseObject;
-  schemas: SchemaResponseObject[];
-  inspectData?: Object;
-  setInspectData: (value: Object) => void;
+  currentSchema: SchemaObject;
+  schemas: SchemaObject[];
+  inspectData?: RealmObject;
+  setInspectData: (value: RealmObject) => void;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
-  goBackStack: Array<Object>;
-  setGoBackStack: (value: Array<Object>) => void;
-  goForwardStack: Array<Object>;
-  setGoForwardStack: (value: Array<Object>) => void;
-  setNewInspectData: (value: Array<Object>) => void;
+  goBackStack: Array<RealmObject>;
+  setGoBackStack: (value: Array<RealmObject>) => void;
+  goForwardStack: Array<RealmObject>;
+  setGoForwardStack: (value: Array<RealmObject>) => void;
+  setNewInspectData: (value: Array<RealmObject>) => void;
 };
 
 export const RealmDataInspector = ({
@@ -45,68 +46,118 @@ export const RealmDataInspector = ({
 
   return (
     <DetailSidebar>
-      <div>Inspector</div>
-      <Radio.Group>
-        <Button
-          icon={<CloseCircleOutlined />}
-          onClick={() => setShowSidebar(false)}
-        />
+      {/* <Header style={{ backgroundColor: 'white' }}> */}
+      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+        <Layout style={{ backgroundColor: 'white' }}>
+          <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+            <Row gutter={16}>
+              <Col span={24} offset={1}>
+                <BoldSpan>Inspector </BoldSpan>
+              </Col>
+            </Row>
+            <Row gutter={8}>
+              <Col span={10} offset={1}>
+                <Radio.Group>
+                  <Radio.Button onClick={() => setShowSidebar(false)}>
+                    {' '}
+                    <CloseOutlined />
+                  </Radio.Button>
+                </Radio.Group>
+              </Col>
+              <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}>
+                <Radio.Group>
+                  <Radio.Button onClick={() => goBackInspector()}>
+                    {' '}
+                    <ArrowLeftOutlined />
+                  </Radio.Button>
 
-        <Button
-          icon={<StepBackwardOutlined />}
-          onClick={() => goBackInspector()}
-        />
-        <Button
-          icon={<StepForwardOutlined />}
-          onClick={() => goForwardInspector()}
-        />
-      </Radio.Group>
-      <DataInspector
-        data={inspectData}
-        expandRoot={true}
-        collapsed={true}
-        onRenderName={(path, name) => {
-          let linkedSchema = undefined;
-          if (
-            currentSchema !== undefined &&
-            currentSchema.properties[name] !== undefined &&
-            'objectType' in currentSchema.properties[name]
-          ) {
-            console.log(currentSchema?.properties[name].objectType);
+                  <Radio.Button onClick={() => goForwardInspector()}>
+                    <ArrowRightOutlined />
+                  </Radio.Button>
+                </Radio.Group>
+              </Col>
+            </Row>
+          </Space>
+        </Layout>
+        {/* </Header> */}
+        {/* <Content> */}
+        <Layout style={{ backgroundColor: 'white' }}>
+          <Row>
+            <Col offset={1} span={22}>
+              <DataInspector
+                data={inspectData}
+                expandRoot={true}
+                collapsed={true}
+                onRenderName={(path, name) => {
+                  let linkedSchema: SchemaObject | undefined = undefined;
+                  if (
+                    currentSchema !== undefined && // The schema of the object that is currently rendered.
+                    // If the property with the current name exists.
+                    currentSchema.properties[name] !== undefined &&
+                    // If the current schema contains the field objectType, i.e. it is an object.
+                    'objectType' in currentSchema.properties[name]
+                  ) {
+                    console.log(currentSchema?.properties[name].objectType);
 
-            linkedSchema = schemas.find(
-              (schema) =>
-                schema.name === currentSchema?.properties[name].objectType
-            );
-          }
+                    // Find the schema the current object belongs to.
+                    linkedSchema = schemas.find(
+                      (schema) =>
+                        schema.name ===
+                        currentSchema?.properties[name].objectType
+                    );
+                  }
 
-          if (linkedSchema !== undefined) {
-            return (
-              <>
-                {name + ' '}
-                <Tooltip title="Explore" placement="topLeft">
-                  <Button
-                    shape="circle"
-                    type="primary"
-                    size="small"
-                    icon={<SearchOutlined />}
-                    ghost
-                    onClick={() => {
-                      let object = inspectData;
-                      path.forEach((key) => (object = object[key]));
-                      console.log(object);
-                      setNewInspectData({ object });
-                    }}
-                  />
-                </Tooltip>
-              </>
-            );
-          }
-          {
-            return <>{name}</>;
-          }
-        }}
-      />
+                  // If the object to be rendered contains the field type which is set to object -> get the linked schema and set it as inspectData
+                  // let object = inspectData;
+                  // path.forEach((key) => (object = object[key]));
+                  // console.log('name');
+                  // console.log(name);
+                  // console.log('inspectData.type');
+                  // console.log(object.type);
+                  // if (name === 'objectType' && object.type === 'object') {
+                  //   console.log('#######');
+                  //   console.log(inspectData);
+                  //   console.log(
+                  //     schemas.find(
+                  //       (schema) => schema.name === object.objectType
+                  //     )
+                  //   );
+                  //   return name + 'xxxxxx';
+                  // }
+
+                  // If there is a schema for the object to be rendered.
+                  if (linkedSchema !== undefined) {
+                    return (
+                      <>
+                        {name + ' '}
+                        <Tooltip title="Explore" placement="topLeft">
+                          <Button
+                            shape="circle"
+                            type="primary"
+                            size="small"
+                            icon={<SearchOutlined />}
+                            ghost
+                            onClick={() => {
+                              console.log(object);
+                              setNewInspectData({
+                                [linkedSchema.name]: object,
+                              });
+                            }}
+                          />
+                        </Tooltip>
+                      </>
+                    );
+                  }
+                  {
+                    return <>{name}</>;
+                  }
+                }}
+              />
+            </Col>
+          </Row>
+        </Layout>
+        {/* </Content> */}
+      </Space>
     </DetailSidebar>
   );
 

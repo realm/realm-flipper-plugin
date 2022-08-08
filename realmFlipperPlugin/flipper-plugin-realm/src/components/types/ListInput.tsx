@@ -1,5 +1,5 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Layout, Row } from "antd";
+import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 

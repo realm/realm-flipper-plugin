@@ -13,6 +13,6 @@
       "jest",
     ],
   },
-  "files": ["src/index.tsx"],
+  "files": ["src/index.tsx", "src/globalTypes.tsx"],
   "include": ["src/**/*"]
 }

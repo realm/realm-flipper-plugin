@@ -1,5 +1,5 @@
 import { ClearOutlined } from "@ant-design/icons";
-import { InputNumber, Input, Button, Row, Col } from "antd";
+import { Button, Col, InputNumber, Row } from 'antd';
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 

@@ -1,7 +1,7 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Layout, Row } from "antd";
+import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
+import { TypeInput, TypeInputProps } from './TypeInput';
 
 export const SetInput = ({ property, set, value }: TypeInputProps) => {
   const [reset, setReset] = useState(0);

@@ -1,24 +1,22 @@
 import {
+  Form,
+  Input,
   InputNumber,
   InputRef,
   Menu,
-  Dropdown,
-  Form,
-  Input,
   Table,
-  Pagination,
   TablePaginationConfig,
-} from "antd";
+} from 'antd';
 import type { FormInstance } from "antd/es/form";
-import { plugin } from '../index';
+import { Key, SorterResult } from 'antd/lib/table/interface';
 import { usePlugin, useValue } from "flipper-plugin";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { SchemaPropertyValue } from "..";
-import { Key, RowSelectionType, SorterResult } from "antd/lib/table/interface";
+import { SchemaProperty } from "RealmPluginState";
+import { plugin } from '../index';
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
-type Item = Object;
+type Item = RealmObject;
 
 interface EditableRowProps {
   index: number;
@@ -76,7 +74,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
       toggleEdit();
       handleSave({ ...record, ...values });
     } catch (errInfo) {
-      console.log("Save failed:", errInfo);
+      console.log('Save failed:', errInfo);
     }
   };
 
@@ -87,14 +85,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
       <Form.Item style={{ margin: 0 }} name={dataIndex}>
         {!numeric ? (
           <Input
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
             ref={inputRef}
             onPressEnter={save}
             onBlur={save}
           />
         ) : (
           <InputNumber
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
             ref={inputRef as unknown as React.Ref<HTMLInputElement>}
             onPressEnter={save}
             onBlur={save}
@@ -113,22 +111,22 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 type EditableTableProps = Parameters<typeof Table>[0];
 
-type ColumnTypes = Exclude<EditableTableProps["columns"], undefined>;
+type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 
 type GenericColumn = {
   title: string;
   key: string;
   dataIndex: string;
-  property: SchemaPropertyValue;
+  property: SchemaProperty;
 };
 
 const EditableTable = (props: {
   columns: GenericColumn[];
-  data: Object[];
+  data: RealmObject[];
   primaryKey: string;
-  modifyObject: Function;
+  modifyObject: (objectToModify: Item) => RealmObject;
   schemaName: string;
-  removeObject: Function;
+  removeObject: (objectToRemove: Item) => void;
   loading: boolean;
 }) => {
   const instance = usePlugin(plugin);
@@ -202,8 +200,8 @@ const EditableTable = (props: {
         instance.toggleSortDirection();
       }
     }
-    instance.getObjects({ realm: null, schema: null, goBack: false });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.setCurrentPage(1);
   };
 
   return (

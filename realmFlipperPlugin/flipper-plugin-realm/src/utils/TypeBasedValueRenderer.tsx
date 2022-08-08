@@ -10,7 +10,6 @@
 import {theme, styled} from 'flipper-plugin';
 import {Typography} from 'antd';
 import React from 'react';
-import Prettyjson from "../components/Prettyjson";
 
 const {Text} = Typography;
 

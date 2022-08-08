@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { SchemaPropertyValue, SchemaResponseObject } from "..";
-import { Modal, Radio, Layout, Tag } from "antd";
+import { Layout, Modal, Radio } from 'antd';
+import { useState } from 'react';
+import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
 
-import React from "react";
-import { PropertyRender } from "./PropertyRender";
+import React from 'react';
+import { PropertyRender } from './PropertyRender';
 
 const forEachProp = (
   props: {
-    [key: string]: SchemaPropertyValue;
+    [key: string]: SchemaProperty;
   },
-  f: (prop: SchemaPropertyValue, index: number) => any
+  f: (prop: SchemaProperty, index: number) => any
 ) => {
   return Object.keys(props).map((property, index) => {
     return f(props[property], index);
@@ -17,8 +17,8 @@ const forEachProp = (
 };
 
 const ObjectAdder = (props: {
-  schema: SchemaResponseObject | undefined;
-  addObject: Function;
+  schema: SchemaObject | undefined;
+  addObject: (object: AddObject) => void;
 }) => {
   const empty: { [prop: string]: any } = {};
 
@@ -41,7 +41,7 @@ const ObjectAdder = (props: {
   };
 
   const hideModal = () => {
-    console.log("hidemodal");
+    console.log('hidemodal');
     toClear.forEach((f) => f());
     toClear = [];
     setValues({});

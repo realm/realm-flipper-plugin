@@ -1,11 +1,10 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { InputNumber, Input, Button, Layout, Col, Row } from "antd";
+import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { SchemaPropertyValue } from "../..";
-import ObjectAdder from "../ObjectAdder";
+import { SchemaProperty } from "../RealmPluginState";
 import { MixedInput } from "./MixedInput";
 import { StringInput } from "./StringInput";
-import { getDefault, TypeInputProps } from "./TypeInput";
+import { TypeInputProps } from './TypeInput';
 
 const mapToObj = (map: Map<number, [string, any]>) => {
   const obj = new Object();
@@ -26,7 +25,7 @@ export const DictionaryInput = ({
   const [_, setReset] = useState(0);
 
   console.log("rerender, size:", contents.size);
-  const keyProperty: SchemaPropertyValue = {
+  const keyProperty: SchemaProperty = {
     name: "",
     type: "string",
     indexed: false,

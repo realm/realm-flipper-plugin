@@ -2,36 +2,36 @@ import React from 'react';
 
 import { Layout } from 'flipper-plugin';
 import { Menu, Radio } from 'antd';
-import { SchemaPropertyValue, SchemaResponseObject } from '../index';
+import { SchemaProperty, SchemaObject, RealmObject } from "../CommonTypes";
 import ObjectAdder from '../components/ObjectAdder';
 import { useState } from 'react';
 import { DataTable } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
-import { AddObject, ObjectRequest } from '../index';
+import { AddObject, ObjectRequest } from "../CommonTypes";
 import DataPagination from '../components/DataPagination';
 import PageSizeSelect from '../components/PageSizeSelect';
 
 export default function DataVisualizer(props: {
-  objects: Array<Record<string, unknown>>;
-  singleObject: Record<string, unknown>;
-  schemas: Array<SchemaResponseObject>;
+  objects: Array<RealmObject>;
+  singleObject: RealmObject;
+  schemas: Array<SchemaObject>;
   selectedSchema: string;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   addObject: (object: AddObject) => void;
   modifyObject: (newObject: AddObject) => void;
-  removeObject: (object: Record<string, unknown>) => void;
+  removeObject: (object: RealmObject) => void;
   getOneObject: (data: ObjectRequest) => void;
 }) {
-  const [inspectData, setInspectData] = useState<Record<string, unknown>>();
+  const [inspectData, setInspectData] = useState<RealmObject>();
   const [showSidebar, setShowSidebar] = useState(false);
 
   const [goBackStack, setGoBackStack] = useState<
-    Array<Record<string, unknown>>
+    Array<RealmObject>
   >([]);
   const [goForwardStack, setGoForwardStack] = useState<
-    Array<Record<string, unknown>>
+    Array<RealmObject>
   >([]);
 
   const getCurrentSchema = () => {
@@ -81,14 +81,14 @@ export default function DataVisualizer(props: {
       return <>Please select a schema.</>;
     }
 
-    const deleteRow = (row: Record<string, unknown>) => {
+    const deleteRow = (row: RealmObject) => {
       props.removeObject(row);
     };
 
     const dropDown = (
-      row: Record<string, unknown>,
-      schemaProperty: SchemaPropertyValue,
-      schema: SchemaResponseObject
+      row: RealmObject,
+      schemaProperty: SchemaProperty,
+      schema: SchemaObject
     ) => (
       <Menu>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>
@@ -106,7 +106,9 @@ export default function DataVisualizer(props: {
         <Menu.Item
           key={3}
           onClick={() => {
-            setNewInspectData({ [schema.name + '.' + schemaProperty.name]: schemaProperty });
+            setNewInspectData({
+              [schema.name + '.' + schemaProperty.name]: schemaProperty,
+            });
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -130,7 +132,8 @@ export default function DataVisualizer(props: {
           key={5}
           onClick={() => {
             setNewInspectData({
-              [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name].value,
+              [schema.name + '.' + schemaProperty.name]:
+                row[schemaProperty.name].value,
             });
             showSidebar ? null : setShowSidebar(true);
           }}
@@ -189,7 +192,7 @@ export default function DataVisualizer(props: {
     );
   }
 
-  function setNewInspectData(newInspectData: Record<string, unknown>) {
+  function setNewInspectData(newInspectData: RealmObject) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
       setGoBackStack(goBackStack);

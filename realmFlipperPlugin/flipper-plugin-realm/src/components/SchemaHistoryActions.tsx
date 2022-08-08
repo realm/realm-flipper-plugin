@@ -1,6 +1,6 @@
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import React from "react";
-import { Radio, RadioChangeEvent, Button } from 'antd';
+import { Button } from 'antd';
 import { usePlugin, useValue } from 'flipper-plugin';
 import { useCallback } from 'react';
 import { plugin } from '..';
@@ -14,7 +14,7 @@ const SchemaHistoryActions = () => {
       return;
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.goBackSchemaHistory({ schema: newSelectedSchema });
+    instance.goBackSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
 
   const goForward = useCallback(() => {
@@ -23,7 +23,7 @@ const SchemaHistoryActions = () => {
       return;
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.goForwardSchemaHistory({ schema: newSelectedSchema });
+    instance.goForwardSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
   return (
     <span style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>

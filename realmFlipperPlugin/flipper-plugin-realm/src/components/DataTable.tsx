@@ -1,10 +1,11 @@
-import React, { Key, ReactElement, ReactNode } from "react";
-import { Dropdown, Menu, Table, TablePaginationConfig, Tooltip } from "antd";
-import { ColumnTitle } from "./ColumnTitle";
-import { plugin, SchemaPropertyValue, SchemaResponseObject } from '..';
+import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
+import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
+import React, { Key, ReactElement } from 'react';
+import { plugin } from '..';
+import { RealmObject, SchemaProperty, SchemaObject } from "RealmPluginState";
 import { parseRows } from '../utils/Parser';
-import { SorterResult } from "antd/lib/table/interface";
+import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
   isOptional: boolean;
@@ -14,7 +15,7 @@ type ColumnType = {
   isPrimaryKey: boolean;
 };
 
-export const schemaObjToColumns = (schema: SchemaResponseObject) => {
+export const schemaObjToColumns = (schema: SchemaObject) => {
   return Object.keys(schema.properties).map((key) => {
     const obj = schema.properties[key];
     const isPrimaryKey = obj.name === schema.primaryKey;
@@ -26,20 +27,20 @@ export const schemaObjToColumns = (schema: SchemaResponseObject) => {
       isPrimaryKey: isPrimaryKey,
     };
   });
-}
+};
 
 export const DataTable = (props: {
   columns: ColumnType[];
-  objects: Object[];
-  schemas: SchemaResponseObject[];
+  objects: RealmObject[];
+  schemas: SchemaObject[];
   selectedSchema: string;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   renderOptions: (
-    row: Object,
-    schemaProperty: SchemaPropertyValue,
-    schema: SchemaResponseObject
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
   ) => ReactElement; // for dropDown
 }) => {
   const instance = usePlugin(plugin);
@@ -48,13 +49,12 @@ export const DataTable = (props: {
     (schema) => schema.name === props.selectedSchema
   );
 
-
   //TODO: Sort objects after receiving them so that every component works with the same order.
-// Put primaryKey column in front.
-const primaryKeyIndex = props.columns.findIndex((col) => (col.isPrimaryKey))
-const tempCol =props.columns[0]
-props.columns[0] = props.columns[primaryKeyIndex]
-props.columns[primaryKeyIndex] = tempCol
+  // Put primaryKey column in front.
+  const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
+  const tempCol = props.columns[0];
+  props.columns[0] = props.columns[primaryKeyIndex];
+  props.columns[primaryKeyIndex] = tempCol;
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -63,7 +63,7 @@ props.columns[primaryKeyIndex] = tempCol
   const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   const filledColumns = props.columns.map((column) => {
-    const property: SchemaPropertyValue = currentSchema.properties[column.name];
+    const property: SchemaProperty = currentSchema.properties[column.name];
 
     const objectType: string | undefined = property.objectType;
     const isPrimaryKey: boolean = currentSchema.primaryKey === property.name;
@@ -84,7 +84,7 @@ props.columns[primaryKeyIndex] = tempCol
         showTitle: false,
       },
       property,
-      render: (text: any, row: Object) => {
+      render: (text: any, row: RealmObject) => {
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}
@@ -123,7 +123,7 @@ props.columns[primaryKeyIndex] = tempCol
       }
     }
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.setCurrentPage(1);
   };
 
   // TODO: think about key as a property in the Realm DB

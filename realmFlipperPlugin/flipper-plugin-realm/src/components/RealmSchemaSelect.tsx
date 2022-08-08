@@ -5,7 +5,7 @@ import { plugin } from '../index';
 
 const { Option } = Select;
 
-const BoldSpan = styled.span({
+export const BoldSpan = styled.span({
   fontSize: 12,
   color: '#90949c',
   fontWeight: 'bold',
@@ -17,11 +17,9 @@ const RealmSchemaSelect = () => {
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    instance.updateSelectedSchema({
-      schema: selected,
-    });
+    instance.updateSelectedSchema(selected);
     instance.getObjectsFoward({ realm: null, schema: null });
-    instance.executeQuery('');
+    //instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
     <Option key={name} value={name}>
@@ -32,9 +30,7 @@ const RealmSchemaSelect = () => {
   const onRealmSelected = useCallback(
     (selected: string) => {
       instance.getSchemas(selected);
-      instance.updateSelectedRealm({
-        realm: selected,
-      });
+      instance.updateSelectedRealm(selected);
     },
     [instance]
   );
