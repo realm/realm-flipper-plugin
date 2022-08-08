@@ -62,7 +62,7 @@ const RealmSchemaSelect = () => {
       >
         {schemaOptions}
       </Select>
-      <Button onClick={() => console.log('REFRESH clicked!')} type="default">
+      <Button onClick={() => instance.refreshState()} type="default">
         Refresh
       </Button>
     </Toolbar>

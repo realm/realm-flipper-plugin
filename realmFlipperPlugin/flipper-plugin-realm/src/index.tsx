@@ -496,6 +496,31 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const refreshState = () => {
+    pluginState.set({
+      realms: [],
+      selectedRealm: '',
+      objects: [],
+      queryResult: [],
+      singleObject: {},
+      schemas: [],
+      selectedSchema: '',
+      schemaHistory: [],
+      schemaHistoryIndex: 1,
+      cursorId: null,
+      filterCursor: 0,
+      selectedPageSize: 100,
+      totalObjects: 0,
+      currentPage: 1,
+      sortingColumn: null,
+      loading: false,
+      sortDirection: null,
+      prev_page_cursorId: null,
+      prev_page_filterCursor: null,
+    });
+    getRealms();
+  };
+
   client.onConnect(async () => {
     getRealms();
   });
@@ -519,6 +544,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     setSortingColumn,
     toggleSortDirection,
     setSortingDirection,
+    refreshState,
   };
 }
 
