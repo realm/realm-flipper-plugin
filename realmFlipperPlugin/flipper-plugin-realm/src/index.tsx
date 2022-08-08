@@ -3,11 +3,10 @@ import {
   Layout,
   PluginClient,
   usePlugin,
-  useValue
+  useValue,
 } from 'flipper-plugin';
 
-import React, {useState } from 'react';
-import { RealmObject } from './CommonTypes';
+import React, { useState } from 'react';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
@@ -22,14 +21,13 @@ import {
   ObjectsMessage,
   ObjectMessage,
   SchemaMessage,
-  QueryResult,
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
-  RealmObject,
   SchemaObject,
   SchemaObjectWithOrder,
 } from './CommonTypes';
+import ViewModeTabs from './components/ViewModeTabs';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -51,10 +49,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     loading: false,
     sortDirection: null,
     prev_page_cursorId: null,
-    prev_page_filterCursor: null,
+    prev_page_filterCursor: null
   });
 
-  const queryObject = createState<>({});
+  // const queryObject = createState<>({});
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
@@ -96,13 +94,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('received schemas', data.schemas);
-    const newschemas = data.schemas.map((schema) => sortSchemaProperties(schema));
+    const newschemas = data.schemas.map((schema) =>
+      sortSchemaProperties(schema)
+    );
     console.log('newschemas', newschemas);
 
     const state = pluginState.get();
     pluginState.set({ ...state, schemas: newschemas });
-    console.log('pluginState', pluginState)
-
+    console.log('pluginState', pluginState);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -126,7 +125,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
       order: sortedPropKeys,
     };
 
-    Object.defineProperty(newSchemaObj, 'order', { enumerable: false,writable: true });
+    Object.defineProperty(newSchemaObj, 'order', {
+      enumerable: false,
+      writable: true,
+    });
 
     // newSchemaObj.properties = sortedPropKeys.reduce((acc, key) => {
     //   acc[key] = newSchemaObj.properties[key];
@@ -467,9 +469,9 @@ export function Component() {
       {viewMode === 'data' ? (
         <Layout.Container height={800}>
           {state.objects.length > 20 ? <PaginationActionGroup /> : null}
+
           <DataVisualizer
             objects={state.objects}
-            singleObject={state.singleObject}
             schemas={state.schemas}
             loading={state.loading}
             selectedSchema={state.selectedSchema}
