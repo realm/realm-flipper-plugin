@@ -123,7 +123,7 @@ export const DataTable = (props: {
         instance.toggleSortDirection();
       }
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsForward();
     instance.setCurrentPage(1);
   };
 

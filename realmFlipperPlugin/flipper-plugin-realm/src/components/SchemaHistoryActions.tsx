@@ -1,8 +1,7 @@
 import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import React from "react";
 import { Button } from 'antd';
 import { usePlugin, useValue } from 'flipper-plugin';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { plugin } from '..';
 
 const SchemaHistoryActions = () => {
@@ -13,7 +12,7 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsForward();
     instance.goBackSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
 
@@ -22,7 +21,7 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsForward();
     instance.goForwardSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
   return (
