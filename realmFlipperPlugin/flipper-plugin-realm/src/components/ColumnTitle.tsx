@@ -10,8 +10,6 @@ export const ColumnTitle = (props: {
 }) => {
   let title;
 
-  console.log(props);
-
   switch (props.propertyType) {
     case 'list':
       title = props.objectType + '[]';

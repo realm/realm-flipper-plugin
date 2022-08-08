@@ -24,7 +24,7 @@ export const DictionaryInput = ({
   const [contents, setContents] = useState(new Map<number, [string, any]>());
   const [_, setReset] = useState(0);
 
-  console.log("rerender, size:", contents.size);
+  // console.log("rerender, size:", contents.size);
   const keyProperty: SchemaProperty = {
     name: "",
     type: "string",
@@ -72,7 +72,7 @@ export const DictionaryInput = ({
       <Button
         onClick={() => {
           contents.set(contents.size, ["key" + contents.size, null]);
-          console.log(contents);
+          // console.log(contents);
           setContents(contents);
           set(mapToObj(contents));
           setReset((v) => v + 1);

@@ -17,10 +17,8 @@ const RealmSchemaSelect = () => {
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    instance.updateSelectedSchema({
-      schema: selected,
-    });
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.updateSelectedSchema(selected);
+    instance.getObjectsForward();
     //instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
@@ -32,9 +30,7 @@ const RealmSchemaSelect = () => {
   const onRealmSelected = useCallback(
     (selected: string) => {
       instance.getSchemas(selected);
-      instance.updateSelectedRealm({
-        realm: selected,
-      });
+      instance.updateSelectedRealm(selected);
     },
     [instance]
   );
@@ -66,7 +62,7 @@ const RealmSchemaSelect = () => {
       >
         {schemaOptions}
       </Select>
-      <Button onClick={() => console.log('REFRESH clicked!')} type="default">
+      <Button onClick={() => instance.refreshState()} type="default">
         Refresh
       </Button>
     </Toolbar>

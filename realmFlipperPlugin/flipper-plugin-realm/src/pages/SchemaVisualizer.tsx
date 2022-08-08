@@ -52,10 +52,8 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
     const instance = usePlugin(plugin);
 
     const onSchemaSelected = (selected: string) => {
-      instance.getObjectsFoward({ realm: null, schema: null });
-      instance.updateSelectedSchema({
-        schema: selected,
-      });
+      instance.getObjectsForward();
+      instance.updateSelectedSchema(selected);
     };
 
     function createColumnConfig(columns: string[]) {

@@ -42,6 +42,7 @@ export const DataTable = (props: {
     schemaProperty: SchemaProperty,
     schema: SchemaObject
   ) => ReactElement; // for dropDown
+  // rowSelection?: TableRowSelection<RealmObject>;
 }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -120,18 +121,22 @@ export const DataTable = (props: {
         instance.toggleSortDirection();
       }
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
-    instance.setCurrentPage({ currentPage: 1 });
+    instance.getObjectsForward();
+    instance.setCurrentPage(1);
   };
 
   // TODO: think about key as a property in the Realm DB
   return (
+    // <Layout.Container grow>
     <Table
       dataSource={rowObjs}
       columns={filledColumns}
       onChange={handleOnChange}
       pagination={false}
       loading={props.loading}
+      // rowSelection={{ type: 'radio'}}
     />
+    // </Layout.Container>
+
   );
 };
