@@ -7,6 +7,12 @@ import PageSizeSelect from './PageSizeSelect';
 const PaginationGroup = () => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
+
+
+  if (!state.objects.length) {
+    return <div></div>;
+  }
+
   return (
     <Layout.Horizontal
       style={{
@@ -34,4 +40,4 @@ const PaginationGroup = () => {
   );
 };
 
-export default React.memo(PaginationGroup);
+export default PaginationGroup;

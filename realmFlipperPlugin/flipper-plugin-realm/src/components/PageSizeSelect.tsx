@@ -12,9 +12,9 @@ const PageSizeSelect = (props: {
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
 }) => {
   const onPageSizeSelect = (
-    selected: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
+    selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
-    props.updateSelectedPageSize(selected);
+    props.updateSelectedPageSize(selectedPageSize);
     props.getObjectsForward();
     props.setCurrentPage(1);
   };

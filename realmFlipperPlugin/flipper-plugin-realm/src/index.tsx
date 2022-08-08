@@ -556,7 +556,7 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' ? (
         <Layout.Container height={800}>
-          <PaginationActionGroup />
+          {state.objects.length > 20 ? <PaginationActionGroup /> : null}
           <DataVisualizer
             objects={state.objects}
             singleObject={state.singleObject}
