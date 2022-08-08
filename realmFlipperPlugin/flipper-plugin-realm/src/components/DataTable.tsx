@@ -16,7 +16,7 @@ type ColumnType = {
 };
 
 export const schemaObjToColumns = (schema: SchemaObject) => {
-  return Object.keys(schema.properties).map((key) => {
+  return schema.order.map((key) => {
     const obj = schema.properties[key];
     const isPrimaryKey = obj.name === schema.primaryKey;
     return {
@@ -49,13 +49,6 @@ export const DataTable = (props: {
   const currentSchema = props.schemas.find(
     (schema) => schema.name === props.selectedSchema
   );
-
-  //TODO: Sort objects after receiving them so that every component works with the same order.
-  // Put primaryKey column in front.
-  // const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
-  // const tempCol = props.columns[0];
-  // props.columns[0] = props.columns[primaryKeyIndex];
-  // props.columns[primaryKeyIndex] = tempCol;
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;

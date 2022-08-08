@@ -1,12 +1,12 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { StarOutlined } from '@ant-design/icons';
 import { Button, Input, Alert, AutoComplete, Row, Col } from 'antd';
-import { plugin, SchemaResponseObject } from '../index';
+import { plugin} from '../index';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { usePlugin, useValue, Layout } from 'flipper-plugin';
 import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 type PropsType = {
-  schema?: SchemaResponseObject;
+  schema?: SchemaObject;
   renderOptions?: (
     row: RealmObject,
     schemaProperty: SchemaProperty,

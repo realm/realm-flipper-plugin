@@ -4,12 +4,11 @@ import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import {
   AddObject,
-  ObjectRequest,
   RealmObject,
   SchemaObject,
   SchemaProperty,
 } from '../CommonTypes';
-import { DataTable } from '../components/DataTable';
+import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import ObjectAdder from '../components/ObjectAdder';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 
@@ -142,18 +141,8 @@ export const DataVisualizer = (props: {
       </Menu>
     );
 
-  //  const columns = Object.keys(currentSchema.properties).map((key) => {
-    const columns = currentSchema.order.map((key) => {
-      const obj = currentSchema.properties[key];
-      const isPrimaryKey = obj.name === currentSchema.primaryKey;
-      return {
-        name: obj.name,
-        isOptional: obj.optional,
-        objectType: obj.objectType,
-        propertyType: obj.type,
-        isPrimaryKey: isPrimaryKey,
-      };
-    });
+    const columns = schemaObjToColumns(currentSchema)
+
     return (
       <Layout.Container height={800}>
         <DataTable

@@ -25,7 +25,6 @@ import {
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
   SchemaObject,
-  SchemaObjectWithOrder,
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
 
@@ -120,15 +119,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortedPropKeys.splice(0, 0, primKey);
     }
 
-    const newSchemaObj: SchemaObjectWithOrder = {
+    const newSchemaObj: SchemaObject = {
       ...schema,
       order: sortedPropKeys,
     };
 
-    Object.defineProperty(newSchemaObj, 'order', {
-      enumerable: false,
-      writable: true,
-    });
+    Object.defineProperty(newSchemaObj, 'order', { enumerable: false });
 
     // newSchemaObj.properties = sortedPropKeys.reduce((acc, key) => {
     //   acc[key] = newSchemaObj.properties[key];
@@ -409,7 +405,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       selectedRealm: '',
       objects: [],
       queryResult: [],
-      singleObject: {},
       schemas: [],
       selectedSchema: '',
       schemaHistory: [],
