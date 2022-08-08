@@ -128,6 +128,7 @@ export const DataTable = (props: {
 
   // TODO: think about key as a property in the Realm DB
   return (
+    // <Layout.Container grow>
     <Table
       dataSource={rowObjs}
       columns={filledColumns}
@@ -135,5 +136,7 @@ export const DataTable = (props: {
       pagination={false}
       loading={props.loading}
     />
+    // </Layout.Container>
+
   );
 };

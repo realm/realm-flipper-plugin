@@ -3,10 +3,11 @@ import {
   Layout,
   PluginClient,
   usePlugin,
-  useValue,
+  useValue
 } from 'flipper-plugin';
 
-import React, { useState } from 'react';
+import React, {useState } from 'react';
+import { RealmObject } from './CommonTypes';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
@@ -18,11 +19,11 @@ import SchemaVisualizer from './pages/SchemaVisualizer';
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
-  objects: Array<Record<string, unknown>>;
-  queryResult: Array<Record<string, unknown>>;
-  singleObject: Record<string, unknown>;
+  objects: Array<RealmObject>;
+  singleObject: RealmObject;
   schemas: Array<SchemaResponseObject>;
   errorMsg?: string;
+  currentSchema?: SchemaResponseObject;
   selectedSchema: string;
   schemaHistory: Array<string>;
   schemaHistoryIndex: number;
@@ -39,7 +40,6 @@ export type RealmPluginState = {
 type Query = {
   cursorId: number | null;
   filterCursor: number | string | null;
-
   type: string;
 };
 
@@ -172,7 +172,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realms: [],
     selectedRealm: '',
     objects: [],
-    queryResult: [],
     singleObject: {},
     schemas: [],
     selectedSchema: '',
@@ -234,22 +233,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('received schemas', data.schemas);
     const state = pluginState.get();
     pluginState.set({ ...state, schemas: data.schemas });
-  });
-
-  client.onMessage('executeQuery', (data: QueryResult) => {
-    const state = pluginState.get();
-    if (typeof data.result === 'string') {
-      console.log('query failed', data.result);
-      pluginState.set({ ...state, errorMsg: data.result });
-    } else {
-      console.log('query succeeded', data.result);
-      pluginState.set({
-        ...state,
-        queryResult: data.result,
-        objects: data.result,
-        errorMsg: undefined,
-      });
-    }
   });
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
@@ -333,15 +316,22 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getSchemas', { realm: realm });
   };
 
-  const executeQuery = (query: string) => {
+  const executeQuery = async (query: string) => {
     const state = pluginState.get();
     addToHistory(query);
-
-    client.send('executeQuery', {
+    return client.send('executeQuery', {
       query: query,
       realm: state.selectedRealm,
       schema: state.selectedSchema,
     });
+
+    // try {
+    //   const result = await
+    //   return result;
+    // }
+    // catch(e) {
+    //   return e;
+    // }
   };
 
   const addObject = (object: Record<string, unknown>) => {
@@ -352,6 +342,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: state.selectedSchema,
       object: object,
     });
+  };
+
+  const getSchemaFromName = (schemaName: string) => {
+    const state = pluginState.get();
+    return state.schemas.find((schema) => schema.name === schemaName);
   };
 
   const updateSelectedSchema = (schema: string) => {
@@ -370,6 +365,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(schema),
     });
   };
 
@@ -383,6 +379,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(schema),
     });
   };
 
@@ -396,6 +393,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      currentSchema: getSchemaFromName(schema),
     });
   };
 
@@ -562,7 +560,7 @@ export function Component() {
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
 
   return (
-    <Layout.ScrollContainer>
+    <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
@@ -593,14 +591,9 @@ export function Component() {
       ) : null}
       {viewMode === 'RQL' ? (
         <>
-          <RealmQueryLanguage
-            schemas={state.schemas}
-            selectedSchema={state.selectedSchema}
-            objects={state.queryResult}
-            executeQuery={instance.executeQuery}
-          ></RealmQueryLanguage>
+          <RealmQueryLanguage schema={state.currentSchema} />
         </>
       ) : null}
-    </Layout.ScrollContainer>
+    </Layout.Container>
   );
 }

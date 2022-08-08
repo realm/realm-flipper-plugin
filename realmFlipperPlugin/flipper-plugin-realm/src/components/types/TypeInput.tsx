@@ -2,6 +2,7 @@ import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
+import { RealmObject } from '../../CommonTypes';
 import { SchemaProperty } from "../RealmPluginState";
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
@@ -25,7 +26,7 @@ export type TypeInputProps = {
 };
 
 export const getDefault = (property: SchemaProperty) => {
-  if (property.optional && property.type != 'dictionary') return null;
+  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
 
   const type = property.type;
   switch (type) {
