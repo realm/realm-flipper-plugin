@@ -87,17 +87,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getOneObject', (data: ObjectMessage) => {
-    console.log('received object', data.object);
     const state = pluginState.get();
     pluginState.set({ ...state, singleObject: data.object });
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log('received schemas', data.schemas);
     const newschemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
-    console.log('newschemas', newschemas);
 
     const state = pluginState.get();
     pluginState.set({ ...state, schemas: newschemas });
@@ -108,8 +105,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const sortedPropKeys = Object.keys(schema.properties).sort(function (a, b) {
       return a.toLowerCase().localeCompare(b.toLowerCase());
     });
-    console.log('sortedPropKeys');
-    console.log(sortedPropKeys);
 
     const primKeyIndex = sortedPropKeys.findIndex(
       (key) => schema.primaryKey === key
@@ -130,18 +125,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       writable: true,
     });
 
-    // newSchemaObj.properties = sortedPropKeys.reduce((acc, key) => {
-    //   acc[key] = newSchemaObj.properties[key];
-    //   return acc;
-    // }, {});
-    // console.log('SORTED SCHEMA');
-    // console.log(newSchemaObj);
-
-    // Object.keys(newSchemaObj.properties).map((key) =>
-    //   console.log(newSchemaObj.properties[key])
-    // );
-
-    // console.log(newSchemaObj.properties);
     return newSchemaObj;
   };
 
