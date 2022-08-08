@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { Menu, Radio } from 'antd';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
@@ -14,28 +13,21 @@ import { DataTable } from '../components/DataTable';
 import ObjectAdder from '../components/ObjectAdder';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 
-export default function DataVisualizer(props: {
+export const DataVisualizer = (props: {
   objects: Array<RealmObject>;
-  singleObject: RealmObject;
   schemas: Array<SchemaObject>;
   selectedSchema: string;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   addObject: (object: AddObject) => void;
-  modifyObject: (newObject: AddObject) => void;
   removeObject: (object: RealmObject) => void;
-  getOneObject: (data: ObjectRequest) => void;
-}) {
+}) => {
   const [inspectData, setInspectData] = useState<RealmObject>();
+  const [inspectorView, setInspectorView] = useState<string>();
   const [showSidebar, setShowSidebar] = useState(false);
-
-  const [goBackStack, setGoBackStack] = useState<
-    Array<RealmObject>
-  >([]);
-  const [goForwardStack, setGoForwardStack] = useState<
-    Array<RealmObject>
-  >([]);
+  const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
+  const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
 
   const getCurrentSchema = () => {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
@@ -74,6 +66,7 @@ export default function DataVisualizer(props: {
           goForwardStack={goForwardStack}
           setGoForwardStack={setGoForwardStack}
           setNewInspectData={setNewInspectData}
+          view = {inspectorView}
         />
       </Layout.Container>
     </Layout.ScrollContainer>
@@ -101,6 +94,7 @@ export default function DataVisualizer(props: {
           key={2}
           onClick={() => {
             setNewInspectData({ [schema.name]: schema });
+            setInspectorView('Inspector - Realm Schema')
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -112,6 +106,7 @@ export default function DataVisualizer(props: {
             setNewInspectData({
               [schema.name + '.' + schemaProperty.name]: schemaProperty,
             });
+            setInspectorView('Inspector - Realm Schema Property')
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -124,7 +119,7 @@ export default function DataVisualizer(props: {
             Object.keys(row).forEach((key) => {
               object[key] = row[key].value;
             });
-
+            setInspectorView('Inspector - Realm Object')
             setNewInspectData({ [schema.name]: object });
             showSidebar ? null : setShowSidebar(true);
           }}
@@ -138,6 +133,7 @@ export default function DataVisualizer(props: {
               [schema.name + '.' + schemaProperty.name]:
                 row[schemaProperty.name].value,
             });
+            setInspectorView('Inspector - Realm Object Property')
             showSidebar ? null : setShowSidebar(true);
           }}
         >
@@ -146,7 +142,8 @@ export default function DataVisualizer(props: {
       </Menu>
     );
 
-    const columns = Object.keys(currentSchema.properties).map((key) => {
+  //  const columns = Object.keys(currentSchema.properties).map((key) => {
+    const columns = currentSchema.order.map((key) => {
       const obj = currentSchema.properties[key];
       const isPrimaryKey = obj.name === currentSchema.primaryKey;
       return {
@@ -173,6 +170,7 @@ export default function DataVisualizer(props: {
     );
   }
 
+  // update inspectData and push object to GoBackStack
   function setNewInspectData(newInspectData: RealmObject) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
@@ -181,4 +179,4 @@ export default function DataVisualizer(props: {
     }
     setInspectData(newInspectData);
   }
-}
+};

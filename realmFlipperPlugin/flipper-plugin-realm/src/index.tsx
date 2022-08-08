@@ -11,159 +11,25 @@ import { RealmObject } from './CommonTypes';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
-import ViewModeTabs from './components/ViewModeTabs';
-import DataVisualizer from './pages/DataVisualizer';
+import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
-
-export type RealmPluginState = {
-  realms: string[];
-  selectedRealm: string;
-  objects: Array<RealmObject>;
-  singleObject: RealmObject;
-  schemas: Array<SchemaResponseObject>;
-  errorMsg?: string;
-  currentSchema?: SchemaResponseObject;
-  selectedSchema: string;
-  schemaHistory: Array<string>;
-  schemaHistoryIndex: number;
-  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
-  currentPage: number;
-  totalObjects: number;
-  sortingColumn: string | null;
-  loading: boolean;
-  sortDirection: 'ascend' | 'descend' | null;
-  prev_page_cursorId: number | null;
-  prev_page_filterCursor: number | null;
-};
-
-type Query = {
-  cursorId: number | null;
-  filterCursor: number | string | null;
-  type: string;
-};
-
-export type SchemaResponseObject = {
-  name: string;
-  embedded: boolean;
-  asymmetric: boolean;
-  primaryKey: string;
-  properties: { [key: string]: SchemaPropertyValue };
-};
-
-export type SchemaPropertyValue = {
-  name: string;
-  indexed: boolean;
-  optional: boolean;
-  type: string;
-  mapTo: string;
-  objectType?: string;
-};
-
-type Events = {
-  getObjects: ObjectsMessage;
-  getOneObject: ObjectMessage;
-  getSchemas: SchemaMessage;
-  liveObjectAdded: AddLiveObjectRequest;
-  liveObjectDeleted: DeleteLiveObjectRequest;
-  liveObjectEdited: EditLiveObjectRequest;
-  getRealms: RealmsMessage;
-  executeQuery: QueryResult;
-};
-
-type Methods = {
-  executeQuery: (query: QueryObject) => Promise<Record<string, unknown>[]>;
-  getObjects: (
-    data: getForwardsObjectsRequest
-  ) => Promise<Record<string, unknown>[]>;
-  getObjectsBackwards: (
-    data: getBackwardsObjectsRequest
-  ) => Promise<Record<string, unknown>[]>;
-  getOneObject: (data: ObjectRequest) => Promise<Record<string, unknown>>;
-  getSchemas: (data: RealmRequest) => Promise<SchemaResponseObject[]>;
-  getRealms: () => Promise<string[]>;
-  addObject: (object: AddObject) => Promise<Record<string, unknown>>;
-  modifyObject: (newObject: AddObject) => Promise<Record<string, unknown>>;
-  removeObject: (object: AddObject) => Promise<void>;
-};
-
-export type AddObject = {
-  schema?: string;
-  realm?: string;
-  object: Record<string, unknown>;
-};
-
-type RealmsMessage = {
-  realms: string[];
-};
-
-type ObjectsMessage = {
-  objects: Array<Record<string, unknown>>;
-  total: number;
-  next_cursor: { [sortingField: string]: number };
-  prev_cursor: { [sortingField: string]: number };
-};
-
-type ObjectMessage = {
-  object: Record<string, unknown>;
-};
-
-type SchemaMessage = {
-  schemas: Array<SchemaResponseObject>;
-};
-
-type RealmRequest = {
-  realm: string;
-};
-
-type getForwardsObjectsRequest = {
-  schema: string;
-  realm: string;
-  filterCursor: string | number | null;
-  cursorId: number | null;
-  limit: number;
-  sortingColumn: string | null;
-  sortDirection: 'ascend' | 'descend' | null;
-};
-
-type getBackwardsObjectsRequest = {
-  schema: string;
-  realm: string;
-  prev_page_filterCursor: string | number | null;
-  prev_page_cursorId: number | null;
-  limit: number;
-  sortingColumn: string | null;
-  sortDirection: 'ascend' | 'descend' | null;
-};
-
-export type ObjectRequest = {
-  schema: string;
-  realm: string;
-  primaryKey: string;
-};
-
-type AddLiveObjectRequest = {
-  newObject: Record<string, unknown>;
-};
-
-type DeleteLiveObjectRequest = {
-  index: number;
-};
-
-type EditLiveObjectRequest = {
-  newObject: Record<string, unknown>;
-  index: number;
-};
-
-type QueryObject = {
-  schema: string;
-  query: string;
-  realm: string;
-};
-
-type QueryResult = {
-  result: Array<Record<string, unknown>> | string;
-};
+import {
+  Events,
+  Methods,
+  RealmPluginState,
+  RealmsMessage,
+  ObjectsMessage,
+  ObjectMessage,
+  SchemaMessage,
+  QueryResult,
+  AddLiveObjectRequest,
+  DeleteLiveObjectRequest,
+  EditLiveObjectRequest,
+  RealmObject,
+  SchemaObject,
+  SchemaObjectWithOrder,
+} from './CommonTypes';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -172,7 +38,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     realms: [],
     selectedRealm: '',
     objects: [],
-    singleObject: {},
     schemas: [],
     selectedSchema: '',
     schemaHistory: [],
@@ -231,9 +96,52 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('received schemas', data.schemas);
+    const newschemas = data.schemas.map((schema) => sortSchemaProperties(schema));
+    console.log('newschemas', newschemas);
+
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: data.schemas });
+    pluginState.set({ ...state, schemas: newschemas });
+    console.log('pluginState', pluginState)
+
   });
+
+  const sortSchemaProperties = (schema: SchemaObject) => {
+    const sortedPropKeys = Object.keys(schema.properties).sort(function (a, b) {
+      return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+    console.log('sortedPropKeys');
+    console.log(sortedPropKeys);
+
+    const primKeyIndex = sortedPropKeys.findIndex(
+      (key) => schema.primaryKey === key
+    );
+    if (primKeyIndex >= 0) {
+      const primKey = sortedPropKeys[primKeyIndex];
+      sortedPropKeys.splice(primKeyIndex, 1);
+      sortedPropKeys.splice(0, 0, primKey);
+    }
+
+    const newSchemaObj: SchemaObjectWithOrder = {
+      ...schema,
+      order: sortedPropKeys,
+    };
+
+    Object.defineProperty(newSchemaObj, 'order', { enumerable: false,writable: true });
+
+    // newSchemaObj.properties = sortedPropKeys.reduce((acc, key) => {
+    //   acc[key] = newSchemaObj.properties[key];
+    //   return acc;
+    // }, {});
+    // console.log('SORTED SCHEMA');
+    // console.log(newSchemaObj);
+
+    // Object.keys(newSchemaObj.properties).map((key) =>
+    //   console.log(newSchemaObj.properties[key])
+    // );
+
+    // console.log(newSchemaObj.properties);
+    return newSchemaObj;
+  };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();

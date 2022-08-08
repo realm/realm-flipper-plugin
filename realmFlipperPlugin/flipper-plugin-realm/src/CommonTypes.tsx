@@ -3,7 +3,8 @@ export type RealmPluginState = {
   selectedRealm: string;
   objects: Array<RealmObject>;
   queryResult: Array<RealmObject>;
-  schemas: Array<SchemaObject>;
+  schemas: Array<SchemaObjectWithOrder>;
+  viewMode: 'data' | 'schemas' | 'RQL';
   errorMsg?: string;
   selectedSchema: string;
   schemaHistory: Array<string>;
@@ -28,6 +29,15 @@ export type SchemaObject = {
   asymmetric: boolean;
   primaryKey: string;
   properties: { [key: string]: SchemaProperty };
+};
+
+export type SchemaObjectWithOrder = {
+  name: string;
+  embedded: boolean;
+  asymmetric: boolean;
+  primaryKey: string;
+  properties: { [key: string]: SchemaProperty };
+  order: Array<string>;
 };
 
 export type SchemaProperty = {

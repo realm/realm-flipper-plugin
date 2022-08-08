@@ -22,7 +22,10 @@ type PropsType = {
   goForwardStack: Array<RealmObject>;
   setGoForwardStack: (value: Array<RealmObject>) => void;
   setNewInspectData: (value: Array<RealmObject>) => void;
+  view: string;
 };
+
+// const [inspectorView, setInspectorView] = useState<string>();
 
 export const RealmDataInspector = ({
   currentSchema,
@@ -36,6 +39,7 @@ export const RealmDataInspector = ({
   goForwardStack,
   setGoForwardStack,
   setNewInspectData,
+  view,
 }: PropsType) => {
   if (!showSidebar) return null;
 
@@ -44,15 +48,20 @@ export const RealmDataInspector = ({
   console.log('goBackStack');
   console.log(goBackStack);
 
+  // inspectData.properties
+  //   ? setInspectorView(' - Realm Schema')
+  //   : setInspectorView(' - Realm Object');
+
   return (
     <DetailSidebar>
-      {/* <Header style={{ backgroundColor: 'white' }}> */}
       <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
         <Layout style={{ backgroundColor: 'white' }}>
           <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
             <Row gutter={16}>
               <Col span={24} offset={1}>
-                <BoldSpan>Inspector </BoldSpan>
+                <BoldSpan>{view} </BoldSpan>
+                {/* <BoldSpan>Inspector + {inspectorView}</BoldSpan> */}
+                <BoldSpan>{} </BoldSpan>
               </Col>
             </Row>
             <Row gutter={8}>
@@ -79,8 +88,7 @@ export const RealmDataInspector = ({
             </Row>
           </Space>
         </Layout>
-        {/* </Header> */}
-        {/* <Content> */}
+
         <Layout style={{ backgroundColor: 'white' }}>
           <Row>
             <Col offset={1} span={22}>
@@ -107,26 +115,43 @@ export const RealmDataInspector = ({
                     );
                   }
 
-                  // If the object to be rendered contains the field type which is set to object -> get the linked schema and set it as inspectData
-                  // let object = inspectData;
-                  // path.forEach((key) => (object = object[key]));
-                  // console.log('name');
-                  // console.log(name);
-                  // console.log('inspectData.type');
-                  // console.log(object.type);
-                  // if (name === 'objectType' && object.type === 'object') {
-                  //   console.log('#######');
-                  //   console.log(inspectData);
-                  //   console.log(
-                  //     schemas.find(
-                  //       (schema) => schema.name === object.objectType
-                  //     )
-                  //   );
-                  //   return name + 'xxxxxx';
-                  // }
+                  // If the current field is named objectType find the SchemaObject corresponding to its value (if there is one) and assign it to linkedSchema.
+                  if (name === 'objectType') {
+                    let linkedSchemaName: string = inspectData;
+                    path.forEach(
+                      (key) => (linkedSchemaName = linkedSchemaName[key])
+                    );
+
+                    linkedSchema = schemas.find(
+                      (schema) => schema.name === linkedSchemaName
+                    );
+                  }
 
                   // If there is a schema for the object to be rendered.
                   if (linkedSchema !== undefined) {
+                    if (name === 'objectType') {
+                      return (
+                        <>
+                          {name + ' '}
+                          <Tooltip title="Explore Schema" placement="topLeft">
+                            <Button
+                              shape="circle"
+                              type="primary"
+                              size="small"
+                              icon={<SearchOutlined />}
+                              ghost
+                              onClick={() => {
+                                console.log(linkedSchema);
+                                setNewInspectData({
+                                  [linkedSchema.name]: linkedSchema,
+                                });
+                              }}
+                            />
+                          </Tooltip>
+                        </>
+                      );
+                    }
+
                     return (
                       <>
                         {name + ' '}
@@ -138,6 +163,8 @@ export const RealmDataInspector = ({
                             icon={<SearchOutlined />}
                             ghost
                             onClick={() => {
+                              let object = inspectData;
+                              path.forEach((key) => (object = object[key]));
                               console.log(object);
                               setNewInspectData({
                                 [linkedSchema.name]: object,
