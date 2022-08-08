@@ -1,26 +1,28 @@
 import { Pagination } from 'antd';
-import { usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
-import { plugin } from '..';
 
-const DataPagination = () => {
-  const instance = usePlugin(plugin);
-  const state = useValue(instance.state);
-
+const DataPagination = (props: {
+  totalObjects: number;
+  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
+  currentPage: number;
+  setCurrentPage: (currentPage: number) => void;
+  getObjectsForward: () => void;
+  getObjectsBackwards: () => void;
+}) => {
   const getMore = (newSelectedPage: number) => {
-    if (newSelectedPage > state.currentPage) {
-      instance.getObjectsFoward();
+    if (newSelectedPage > props.currentPage) {
+      props.getObjectsForward();
     } else {
-      instance.getObjectsBackwards();
+      props.getObjectsBackwards();
     }
-    instance.setCurrentPage(newSelectedPage);
+    props.setCurrentPage(newSelectedPage);
   };
   return (
     <Pagination
       onChange={getMore}
-      total={state.totalObjects}
-      current={state.currentPage}
-      pageSize={state.selectedPageSize}
+      total={props.totalObjects}
+      current={props.currentPage}
+      pageSize={props.selectedPageSize}
       showSizeChanger={false}
       simple={true}
       hideOnSinglePage={true}

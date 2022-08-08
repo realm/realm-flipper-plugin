@@ -1,9 +1,12 @@
-import { Layout } from 'flipper-plugin';
+import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
+import { plugin } from '..';
 import DataPagination from './DataPagination';
 import PageSizeSelect from './PageSizeSelect';
 
 const PaginationGroup = () => {
+  const instance = usePlugin(plugin);
+  const state = useValue(instance.state);
   return (
     <Layout.Horizontal
       style={{
@@ -13,8 +16,20 @@ const PaginationGroup = () => {
         alignItems: 'center',
       }}
     >
-      <DataPagination />
-      <PageSizeSelect />
+      <DataPagination
+        totalObjects={state.totalObjects}
+        selectedPageSize={state.selectedPageSize}
+        currentPage={state.currentPage}
+        getObjectsBackwards={instance.getObjectsBackwards}
+        getObjectsForward={instance.getObjectsForward}
+        setCurrentPage={instance.setCurrentPage}
+      />
+      <PageSizeSelect
+        updateSelectedPageSize={instance.updateSelectedPageSize}
+        getObjectsForward={instance.getObjectsForward}
+        setCurrentPage={instance.setCurrentPage}
+        selectedPageSize={state.selectedPageSize}
+      />
     </Layout.Horizontal>
   );
 };

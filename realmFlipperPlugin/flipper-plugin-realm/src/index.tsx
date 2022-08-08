@@ -14,6 +14,7 @@ import {
 } from 'flipper-plugin';
 
 import React, { useCallback, useState } from 'react';
+import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
 import DataVisualizer from './pages/DataVisualizer';
@@ -301,7 +302,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const getObjectsFoward = (schema?: string | null, realm?: string | null) => {
+  const getObjectsForward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
     schema = schema ?? state.selectedSchema;
@@ -507,7 +508,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   return {
     state: pluginState,
-    getObjectsFoward,
+    getObjectsForward: getObjectsForward,
     getObjectsBackwards,
     getOneObject,
     getSchemas,
@@ -554,19 +555,23 @@ export function Component() {
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' ? (
-        <DataVisualizer
-          objects={state.objects}
-          singleObject={state.singleObject}
-          schemas={state.schemas}
-          loading={state.loading}
-          selectedSchema={state.selectedSchema}
-          sortDirection={state.sortDirection}
-          sortingColumn={state.sortingColumn}
-          addObject={instance.addObject}
-          modifyObject={instance.modifyObject}
-          removeObject={instance.removeObject}
-          getOneObject={instance.getOneObject}
-        />
+        <Layout.Container height={800}>
+          <PaginationActionGroup />
+          <DataVisualizer
+            objects={state.objects}
+            singleObject={state.singleObject}
+            schemas={state.schemas}
+            loading={state.loading}
+            selectedSchema={state.selectedSchema}
+            sortDirection={state.sortDirection}
+            sortingColumn={state.sortingColumn}
+            addObject={instance.addObject}
+            modifyObject={instance.modifyObject}
+            removeObject={instance.removeObject}
+            getOneObject={instance.getOneObject}
+          />
+          <PaginationActionGroup />
+        </Layout.Container>
       ) : null}
       {viewMode === 'schemas' ? (
         <SchemaVisualizer

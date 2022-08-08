@@ -1,20 +1,22 @@
+import { Select } from 'antd';
 import React from 'react';
-import {Select} from 'antd';
-import { usePlugin, useValue } from 'flipper-plugin';
-import { plugin } from '../index';
 
 const { Option } = Select;
 
-const PageSizeSelect = () => {
-  const instance = usePlugin(plugin);
-  const state = useValue(instance.state);
-
+const PageSizeSelect = (props: {
+  updateSelectedPageSize: (
+    pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
+  ) => void;
+  getObjectsForward: () => void;
+  setCurrentPage: (pageSize: number) => void;
+  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
+}) => {
   const onPageSizeSelect = (
     selected: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
-    instance.updateSelectedPageSize(selected);
-    instance.getObjectsFoward();
-    instance.setCurrentPage(1);
+    props.updateSelectedPageSize(selected);
+    props.getObjectsForward();
+    props.setCurrentPage(1);
   };
 
   return (
@@ -25,7 +27,7 @@ const PageSizeSelect = () => {
         marginLeft: 20,
       }}
       onChange={onPageSizeSelect}
-      value={state.selectedPageSize}
+      value={props.selectedPageSize}
     >
       <Option value={10}>10</Option>
       <Option value={25}>25</Option>

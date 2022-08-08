@@ -18,7 +18,7 @@ const RealmSchemaSelect = () => {
 
   const onSchemaSelected = (selected: string) => {
     instance.updateSelectedSchema(selected);
-    instance.getObjectsFoward();
+    instance.getObjectsForward();
     //instance.executeQuery('');
   };
   const schemaOptions = state.schemas.map(({ name }) => (
