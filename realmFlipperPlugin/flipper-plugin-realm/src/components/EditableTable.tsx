@@ -200,7 +200,7 @@ const EditableTable = (props: {
         instance.toggleSortDirection();
       }
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsFoward();
     instance.setCurrentPage(1);
   };
 

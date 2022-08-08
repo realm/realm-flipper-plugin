@@ -10,6 +10,7 @@ import { RealmDataInspector } from '../components/RealmDataInspector';
 import { AddObject, ObjectRequest } from "../CommonTypes";
 import DataPagination from '../components/DataPagination';
 import PageSizeSelect from '../components/PageSizeSelect';
+import PaginationGroup from '../components/PaginationActionGroup';
 
 export default function DataVisualizer(props: {
   objects: Array<RealmObject>;
@@ -156,17 +157,7 @@ export default function DataVisualizer(props: {
     });
     return (
       <Layout.Container height={800}>
-        <Layout.Horizontal
-          style={{
-            paddingBottom: 10,
-            paddingTop: 15,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <DataPagination></DataPagination>
-          <PageSizeSelect></PageSizeSelect>
-        </Layout.Horizontal>
+        <PaginationGroup />
         <DataTable
           columns={columns}
           objects={props.objects}
@@ -177,17 +168,7 @@ export default function DataVisualizer(props: {
           loading={props.loading}
           renderOptions={dropDown}
         />
-        <Layout.Horizontal
-          style={{
-            paddingTop: 20,
-            paddingBottom: 20,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <DataPagination></DataPagination>
-          <PageSizeSelect></PageSizeSelect>
-        </Layout.Horizontal>
+        <PaginationGroup />
       </Layout.Container>
     );
   }

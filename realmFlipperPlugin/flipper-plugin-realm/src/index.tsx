@@ -282,17 +282,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  const getObjectsBackwards = (event: {
-    schema: string | null;
-    realm: string | null;
-  }) => {
+  const getObjectsBackwards = (
+    schema?: string | null,
+    realm?: string | null
+  ) => {
     const state = pluginState.get();
     setLoading(true);
-    event.schema = event.schema ?? state.selectedSchema;
-    event.realm = event.realm ?? state.selectedRealm;
+    schema = schema ?? state.selectedSchema;
+    realm = realm ?? state.selectedRealm;
     client.send('getObjectsBackwards', {
-      schema: event.schema,
-      realm: event.realm,
+      schema: schema,
+      realm: realm,
       prev_page_filterCursor: state.prev_page_filterCursor,
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
@@ -301,17 +301,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const getObjectsFoward = (event: {
-    schema: string | null;
-    realm: string | null;
-  }) => {
+  const getObjectsFoward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
-    event.schema = event.schema ?? state.selectedSchema;
-    event.realm = event.realm ?? state.selectedRealm;
+    schema = schema ?? state.selectedSchema;
+    realm = realm ?? state.selectedRealm;
     client.send('getObjects', {
-      schema: event.schema,
-      realm: event.realm,
+      schema: schema,
+      realm: realm,
       cursorId: state.cursorId,
       filterCursor: state.filterCursor,
       limit: state.selectedPageSize,
@@ -558,10 +555,6 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' ? (
         <DataVisualizer
-          // objects={state.objects.slice(
-          //   (state.currentPage - 1) * state.selectedPageSize,
-          //   state.currentPage * state.selectedPageSize
-          // )}
           objects={state.objects}
           singleObject={state.singleObject}
           schemas={state.schemas}

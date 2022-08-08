@@ -9,15 +9,9 @@ const DataPagination = () => {
 
   const getMore = (newSelectedPage: number) => {
     if (newSelectedPage > state.currentPage) {
-      instance.getObjectsFoward({
-        schema: state.selectedSchema,
-        realm: state.selectedRealm,
-      });
+      instance.getObjectsFoward();
     } else {
-      instance.getObjectsBackwards({
-        schema: state.selectedSchema,
-        realm: state.selectedRealm,
-      });
+      instance.getObjectsBackwards();
     }
     instance.setCurrentPage(newSelectedPage);
   };

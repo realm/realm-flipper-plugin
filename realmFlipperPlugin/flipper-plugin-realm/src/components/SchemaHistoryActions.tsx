@@ -13,7 +13,7 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsFoward();
     instance.goBackSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
 
@@ -22,7 +22,7 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsFoward({ realm: null, schema: null });
+    instance.getObjectsFoward();
     instance.goForwardSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
   return (
