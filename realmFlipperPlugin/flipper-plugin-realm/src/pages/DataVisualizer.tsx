@@ -1,15 +1,18 @@
 import React from 'react';
 
-import { Layout } from 'flipper-plugin';
 import { Menu, Radio } from 'antd';
-import { SchemaProperty, SchemaObject, RealmObject } from "../CommonTypes";
-import ObjectAdder from '../components/ObjectAdder';
+import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
+import {
+  AddObject,
+  ObjectRequest,
+  RealmObject,
+  SchemaObject,
+  SchemaProperty,
+} from '../CommonTypes';
 import { DataTable } from '../components/DataTable';
+import ObjectAdder from '../components/ObjectAdder';
 import { RealmDataInspector } from '../components/RealmDataInspector';
-import { AddObject, ObjectRequest } from "../CommonTypes";
-import DataPagination from '../components/DataPagination';
-import PageSizeSelect from '../components/PageSizeSelect';
 
 export default function DataVisualizer(props: {
   objects: Array<RealmObject>;
@@ -156,17 +159,6 @@ export default function DataVisualizer(props: {
     });
     return (
       <Layout.Container height={800}>
-        <Layout.Horizontal
-          style={{
-            paddingBottom: 10,
-            paddingTop: 15,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <DataPagination></DataPagination>
-          <PageSizeSelect></PageSizeSelect>
-        </Layout.Horizontal>
         <DataTable
           columns={columns}
           objects={props.objects}
@@ -177,17 +169,6 @@ export default function DataVisualizer(props: {
           loading={props.loading}
           renderOptions={dropDown}
         />
-        <Layout.Horizontal
-          style={{
-            paddingTop: 20,
-            paddingBottom: 20,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <DataPagination></DataPagination>
-          <PageSizeSelect></PageSizeSelect>
-        </Layout.Horizontal>
       </Layout.Container>
     );
   }

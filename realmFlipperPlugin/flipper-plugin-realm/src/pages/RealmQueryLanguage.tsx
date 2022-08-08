@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+git checkout swayne/refactoring-componentsimport React, { useEffect, useState } from 'react';
 import { StarOutlined } from '@ant-design/icons';
 import { Button, Input, Alert, AutoComplete, Row, Col } from 'antd';
 import { plugin, SchemaResponseObject } from '../index';
