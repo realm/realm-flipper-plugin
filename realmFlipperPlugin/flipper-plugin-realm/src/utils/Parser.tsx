@@ -10,7 +10,7 @@ export function parseRows(
   schema: SchemaObject,
   schemas: Array<SchemaObject>
 ) {
-  console.log(schema);
+  // console.log(schema);
 
   const rows: Array<Object> = objects.map((obj: any, index: number) => {
     // let returnObj = { text: {}, object: obj, key: index };

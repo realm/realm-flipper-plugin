@@ -1,15 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { StarOutlined } from '@ant-design/icons';
 import { Button, Input, Alert, AutoComplete, Row, Col } from 'antd';
 import { plugin, SchemaResponseObject } from '../index';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { usePlugin, useValue, Layout } from 'flipper-plugin';
+import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 type PropsType = {
   schema?: SchemaResponseObject;
-  // executeQuery: (query: string) => Record<string, unknown>[] | string;
+  renderOptions?: (
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => ReactElement;
 };
 
-export const RealmQueryLanguage = ({ schema }: PropsType) => {
+export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
   const [queryResult, setQueryResult] = useState<Record<string, unknown>[]>([]);
   const [query, setQuery] = useState('');
@@ -17,20 +22,7 @@ export const RealmQueryLanguage = ({ schema }: PropsType) => {
   const state = useValue(instance.state);
   // const currentSchema = state.currentSchema;
 
-  const executeQuery = async (query: string) => {
-    try {
-      const res = await instance.executeQuery(query);
-      console.log('here', res);
-      setErrorMsg(undefined);
-      setQueryResult(res);
-      return res;
-    } catch (e) {
-      setErrorMsg(e.message);
-      console.log('there', e);
 
-      return e;
-    }
-  };
 
   queryFavourites = JSON.parse(
     localStorage.getItem('favourites') || '{"favourites":[]}'
@@ -45,6 +37,25 @@ export const RealmQueryLanguage = ({ schema }: PropsType) => {
   if (!schema) {
     return <>Please select a schema.</>;
   }
+  
+  const executeQuery = async (query: string) => {
+    try {
+      const res = await instance.executeQuery(query, schema.name);
+      console.log('here', res);
+      setErrorMsg(undefined);
+      setQueryResult(res);
+      return res;
+    } catch (e) {
+      setErrorMsg(e.message);
+      console.log('there', e);
+
+      return e;
+    }
+  };
+
+  useEffect(() => {
+    executeQuery('');
+  }, [state.selectedRealm, schema.name]);
 
   const onTextChange = (event: string) => {
     setQuery(event);
@@ -109,7 +120,8 @@ export const RealmQueryLanguage = ({ schema }: PropsType) => {
             objects={queryResult}
             schemas={state.schemas}
             selectedSchema={schema.name}
-            renderOptions={() => <></>}
+            renderOptions={renderOptions ? renderOptions : () => <></>}
+            // rowSelection={rowSelection}
           />
         </Layout.ScrollContainer>
       </Layout.Container>

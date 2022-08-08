@@ -42,6 +42,7 @@ export const DataTable = (props: {
     schemaProperty: SchemaProperty,
     schema: SchemaObject
   ) => ReactElement; // for dropDown
+  // rowSelection?: TableRowSelection<RealmObject>;
 }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -135,6 +136,7 @@ export const DataTable = (props: {
       onChange={handleOnChange}
       pagination={false}
       loading={props.loading}
+      // rowSelection={{ type: 'radio'}}
     />
     // </Layout.Container>
 
