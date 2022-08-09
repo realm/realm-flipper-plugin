@@ -128,17 +128,33 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
     const { newObject } = data;
-    pluginState.set({ ...state, objects: [...state.objects, newObject] });
+    console.log(newObject);
+    if (newObject._id < state.prev_page_cursorId) {
+      return;
+    } else if (newObject._id > state.cursorId) {
+      return;
+    }
+    pluginState.set({
+      ...state,
+      objects: [...state.objects, newObject],
+      totalObjects: state.totalObjects + 1,
+    });
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();
+    console.log('delete');
     const newObjects = [...state.objects];
     newObjects.splice(data.index, 1);
-    pluginState.set({ ...state, objects: newObjects });
+    pluginState.set({
+      ...state,
+      objects: newObjects,
+      totalObjects: state.totalObjects - 1,
+    });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
+    console.log('edit');
     const state = pluginState.get();
     const { newObject } = data;
     const newObjects = [...state.objects];

@@ -88,7 +88,7 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objects('Banana'));
+    realm.delete(realm.objects('Banana')[0]);
   });
 }
 

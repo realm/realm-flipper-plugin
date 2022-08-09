@@ -25,6 +25,7 @@ type getObjectsQuery = {
 export default React.memo((props: {realms: Realm[]}) => {
   const DEFAULT_PAGE_SIZE = 100; //research right size for 0.5 second load time or possibly use a different variable.
   let realmsMap = new Map<string, Realm>();
+  let schemaToObjects = new Map<string, Realm.Results<Realm.Object>>();
 
   const {realms} = props;
   useEffect(() => {
@@ -110,7 +111,14 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           const schemas = realm.schema;
           for (let schema of realm.schema) {
-            realm.objects(schema.name).addListener(onObjectsChange);
+            const objects = realm.objects(schema.name);
+            if (schemaToObjects.has(schema.name)) {
+              console.log('removing all listeners from ', schema.name);
+              schemaToObjects.get(schema.name).removeAllListeners();
+            }
+            console.log('adding listener to', schema.name);
+            objects.addListener(onObjectsChange);
+            schemaToObjects.set(schema.name, objects);
           }
           connection.send('getSchemas', {schemas: schemas});
         });
@@ -220,6 +228,12 @@ export default React.memo((props: {realms: Realm[]}) => {
         };
       },
       onDisconnect() {
+        console.log('schemas to objects', schemaToObjects);
+        console.log(schemaToObjects.values());
+
+        for (let objects of schemaToObjects.values()) {
+          objects.removeAllListeners();
+        }
         console.log('Disconnected');
       },
     });
