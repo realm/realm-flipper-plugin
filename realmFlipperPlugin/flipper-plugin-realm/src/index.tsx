@@ -187,7 +187,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
-    console.log('fetching from schema ', schema);
     client.send('getObjects', {
       schema: schema,
       realm: realm,
