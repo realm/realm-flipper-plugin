@@ -47,12 +47,10 @@ const ObjectAdder = ({
   };
 
   return (
-    <Layout.Horizontal style={{ justifyContent: 'right' }}>
-      <Radio.Button
-        type="primary"
-        onClick={showModal}
-        style={{ float: 'right' }}
-      >
+    <Layout.Horizontal
+      style={{ justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
+    >
+      <Radio.Button type="primary" onClick={showModal}>
         Create {schema.name}
       </Radio.Button>
       <Modal

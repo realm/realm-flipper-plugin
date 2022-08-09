@@ -28,6 +28,7 @@ import {
   SchemaObjectWithOrder,
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
+import ObjectAdder from './components/ObjectAdder';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -49,10 +50,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     loading: false,
     sortDirection: null,
     prev_page_cursorId: null,
-    prev_page_filterCursor: null
+    prev_page_filterCursor: null,
   });
-
-  // const queryObject = createState<>({});
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
@@ -234,7 +233,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     return state.schemas.find((schema) => schema.name === schemaName);
   };
 
-  const updateSelectedSchema = (schema: SchemaObject) => { //TODO: fix later //selectedSchema 
+  const updateSelectedSchema = (schema: SchemaObject) => {
+    //TODO: fix later //selectedSchema
     const state = pluginState.get();
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
@@ -439,20 +439,29 @@ export function plugin(client: PluginClient<Events, Methods>) {
 }
 
 export function Component() {
-  const {state} = usePlugin(plugin);
-  const {objects, schemas, loading, selectedSchema, sortDirection, sortingColumn, currentSchema} = useValue(state);
+  const { state } = usePlugin(plugin);
+  const {
+    objects,
+    schemas,
+    loading,
+    selectedSchema,
+    sortDirection,
+    sortingColumn,
+    currentSchema,
+  } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
-
-
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
-      <RealmSchemaSelect></RealmSchemaSelect>
-      {viewMode === 'data' ? (
+      <RealmSchemaSelect />
+      {viewMode === 'data' && currentSchema ? (
         <Layout.Container height={800}>
-          {objects.length > 20 ? <PaginationActionGroup /> : null}
+          <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
+            {objects.length > 20 ? <PaginationActionGroup /> : null}
+            <ObjectAdder schema={currentSchema} />
+          </Layout.Horizontal>
           <DataVisualizer
             objects={objects}
             schemas={schemas}
@@ -471,7 +480,7 @@ export function Component() {
         ></SchemaVisualizer>
       ) : null}
       {viewMode === 'RQL' ? (
-          <RealmQueryLanguage schema={currentSchema} />
+        <RealmQueryLanguage schema={currentSchema} />
       ) : null}
     </Layout.Container>
   );
