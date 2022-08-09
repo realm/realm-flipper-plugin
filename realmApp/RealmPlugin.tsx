@@ -228,9 +228,6 @@ export default React.memo((props: {realms: Realm[]}) => {
         };
       },
       onDisconnect() {
-        console.log('schemas to objects', schemaToObjects);
-        console.log(schemaToObjects.values());
-
         for (let objects of schemaToObjects.values()) {
           objects.removeAllListeners();
         }
@@ -377,12 +374,6 @@ function getObjectsDescending(
         obj.filterCursor,
         obj.prev_page_cursorId ?? obj.cursorId,
       );
-    if (obj.prev_page_cursorId) {
-      objects = objects.sorted([
-        [`${obj.sortingColumn}`, false],
-        ['_id', false],
-      ]);
-    }
   } else {
     objects = objects
       .sorted('_id', true)
