@@ -7,28 +7,27 @@ import {
 } from 'flipper-plugin';
 
 import React, { useState } from 'react';
-import PaginationActionGroup from './components/PaginationActionGroup';
-import RealmSchemaSelect from './components/RealmSchemaSelect';
-import SchemaHistoryActions from './components/SchemaHistoryActions';
-import { DataVisualizer } from './pages/DataVisualizer';
-import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
-import SchemaVisualizer from './pages/SchemaVisualizer';
 import {
-  Events,
-  Methods,
-  RealmPluginState,
-  RealmsMessage,
-  ObjectsMessage,
-  ObjectMessage,
-  SchemaMessage,
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
+  Events,
+  Methods,
+  ObjectMessage,
+  ObjectsMessage,
+  RealmPluginState,
+  RealmsMessage,
+  SchemaMessage,
   SchemaObject,
-  SchemaObjectWithOrder,
 } from './CommonTypes';
-import ViewModeTabs from './components/ViewModeTabs';
 import ObjectAdder from './components/ObjectAdder';
+import PaginationActionGroup from './components/PaginationActionGroup';
+import RealmSchemaSelect from './components/RealmSchemaSelect';
+import SchemaHistoryActions from './components/SchemaHistoryActions';
+import ViewModeTabs from './components/ViewModeTabs';
+import { DataVisualizer } from './pages/DataVisualizer';
+import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
+import SchemaVisualizer from './pages/SchemaVisualizer';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -68,7 +67,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
-    console.log('fetched objects', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -189,6 +187,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    console.log('fetching from schema ', schema);
     client.send('getObjects', {
       schema: schema,
       realm: realm,

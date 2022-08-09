@@ -30,7 +30,7 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-  console.log(currentSchema);
+
   if (!currentSchema) {
     return <>Please select a schema.</>;
   }

@@ -33,7 +33,7 @@ const RealmSchemaSelect = (props: {
     instance.getObjectsForward();
     //instance.executeQuery('');
   };
-  console.log(schemas);
+
   const schemaOptions = schemas.map((schema) => (
     <Option key={schema.name} value={schema.name}>
       {schema.name}

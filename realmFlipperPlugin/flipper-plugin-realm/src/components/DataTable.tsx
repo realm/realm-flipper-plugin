@@ -3,7 +3,7 @@ import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from "../CommonTypes";
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { parseRows } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
@@ -55,7 +55,7 @@ export const DataTable = (props: {
   // props.columns[0] = props.columns[primaryKeyIndex];
   // props.columns[primaryKeyIndex] = tempCol;
 
-  if (currentSchema === undefined) {
+  if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 
