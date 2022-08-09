@@ -85,43 +85,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive('getObjectsBackwards', obj => {
-          const realm = realmsMap.get(obj.realm);
-          const schema = obj.schema;
-          if (!realm) {
-            return;
-          }
-          console.log('BACKWARDS: i got', obj);
-          let objects = realm.objects(schema); //optimize by just getting objects once
-          if (!objects.length) {
-            connection.send('getObjects', {
-              objects: objects,
-              total: null,
-              next_cursor: null,
-              prev_cursor: null,
-            });
-            return;
-          }
-          console.log('initially got objects', objects[0]);
-          let limit = obj.limit || DEFAULT_PAGE_SIZE;
-          limit < 1 ? (limit = 20) : {};
-          const objectsLength = objects.length;
-          objects = getObjectsByPaginationBackwards(obj, objects, limit);
-          let lastItem, firstItem;
-          if (objects.length) {
-            lastItem = objects[objects.length - 1]; //if this is null this is the last page
-            firstItem = objects[0]; //TODO: not sure about this
-          }
-          console.log('sending to client now');
-          //base64 the next and prev cursors
-          connection.send('getObjects', {
-            objects: objects,
-            total: objectsLength,
-            next_cursor: lastItem,
-            prev_cursor: firstItem,
-          });
-        });
-
         connection.receive(
           'getOneObject',
           (obj: {realm: string; schema: string; primaryKey: string}) => {
