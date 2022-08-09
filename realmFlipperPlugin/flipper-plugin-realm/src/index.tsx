@@ -38,7 +38,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedRealm: '',
     objects: [],
     schemas: [],
-    selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
     cursorId: null,
@@ -51,6 +50,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     sortDirection: null,
     prev_page_cursorId: null,
     prev_page_filterCursor: null,
+    currentSchema: null,
   });
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
@@ -91,12 +91,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    const newschemas = data.schemas.map((schema) =>
+    const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newschemas });
+    pluginState.set({ ...state, schemas: newSchemas });
     console.log('pluginState', pluginState);
   });
 
@@ -165,7 +165,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   ) => {
     const state = pluginState.get();
     setLoading(true);
-    schema = schema ?? state.selectedSchema;
+    if (!state.currentSchema) {
+      return;
+    }
+    schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjectsBackwards', {
       schema: schema,
@@ -181,7 +184,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjectsForward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
-    schema = schema ?? state.selectedSchema;
+    if (!state.currentSchema) {
+      return;
+    }
+    schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjects', {
       schema: schema,
@@ -221,20 +227,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('addObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: object,
     });
   };
 
-  const getSchemaFromName = (schemaName: string) => {
-    const state = pluginState.get();
-    return state.schemas.find((schema) => schema.name === schemaName);
-  };
-
   const updateSelectedSchema = (schema: SchemaObject) => {
-    //TODO: fix later //selectedSchema
     const state = pluginState.get();
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
@@ -243,42 +246,39 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const length = newHistory.length - 1;
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
-  const goBackSchemaHistory = (schema: string) => {
+  const goBackSchemaHistory = (schema: SchemaObject) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
-  const goForwardSchemaHistory = (schema: string) => {
+  const goForwardSchemaHistory = (schema: SchemaObject) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
@@ -314,19 +314,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('modifyObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: newObject,
     });
   };
 
   const removeObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('removeObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: object,
     });
   };
@@ -387,28 +392,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const refreshState = () => {
-    pluginState.set({
-      realms: [],
-      selectedRealm: '',
-      objects: [],
-      queryResult: [],
-      singleObject: {},
-      schemas: [],
-      selectedSchema: '',
-      schemaHistory: [],
-      schemaHistoryIndex: 1,
-      cursorId: null,
-      filterCursor: 0,
-      selectedPageSize: 100,
-      totalObjects: 0,
-      currentPage: 1,
-      sortingColumn: null,
-      loading: false,
-      sortDirection: null,
-      prev_page_cursorId: null,
-      prev_page_filterCursor: null,
-    });
-    getRealms();
+    //refresh
   };
 
   client.onConnect(async () => {
@@ -441,10 +425,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 export function Component() {
   const { state } = usePlugin(plugin);
   const {
+    realms,
     objects,
     schemas,
     loading,
-    selectedSchema,
     sortDirection,
     sortingColumn,
     currentSchema,
@@ -455,7 +439,7 @@ export function Component() {
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
-      <RealmSchemaSelect />
+      <RealmSchemaSelect schemas={schemas} realms={realms} />
       {viewMode === 'data' && currentSchema ? (
         <Layout.Container height={800}>
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
@@ -466,7 +450,7 @@ export function Component() {
             objects={objects}
             schemas={schemas}
             loading={loading}
-            selectedSchema={selectedSchema}
+            currentSchema={currentSchema}
             sortDirection={sortDirection}
             sortingColumn={sortingColumn}
           />
@@ -476,7 +460,7 @@ export function Component() {
       {viewMode === 'schemas' ? (
         <SchemaVisualizer
           schemas={schemas}
-          selectedSchema={selectedSchema}
+          currentSchema={currentSchema}
         ></SchemaVisualizer>
       ) : null}
       {viewMode === 'RQL' ? (

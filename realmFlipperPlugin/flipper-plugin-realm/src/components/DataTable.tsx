@@ -33,7 +33,7 @@ export const DataTable = (props: {
   columns: ColumnType[];
   objects: RealmObject[];
   schemas: SchemaObject[];
-  selectedSchema: string;
+  currentSchema: SchemaObject;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
@@ -46,9 +46,7 @@ export const DataTable = (props: {
 }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const currentSchema = props.schemas.find(
-    (schema) => schema.name === props.selectedSchema
-  );
+  const { currentSchema } = props;
 
   //TODO: Sort objects after receiving them so that every component works with the same order.
   // Put primaryKey column in front.
@@ -83,7 +81,10 @@ export const DataTable = (props: {
         showTitle: false,
       },
       property,
-      render: (text: {text: string | number, value: RealmObject}, row: RealmObject) => {
+      render: (
+        text: { text: string | number; value: RealmObject },
+        row: RealmObject
+      ) => {
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}
@@ -137,6 +138,5 @@ export const DataTable = (props: {
       // rowSelection={{ type: 'radio'}}
     />
     // </Layout.Container>
-
   );
 };
