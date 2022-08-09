@@ -68,7 +68,7 @@ PropertyType) => {
     renderCell: () => <></>,
   });
 
-  if (currentSchema === undefined) {
+  if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 

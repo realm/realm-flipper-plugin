@@ -68,7 +68,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
-    console.log('fetched objects', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -290,6 +289,26 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    client.send('getObjectsBackwards', {
+      schema: schema,
+      realm: realm,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      limit: state.selectedPageSize,
+      sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
+      prev_page_cursorId: state.prev_page_cursorId,
+    });
+  };
+
+  const getObjectsForward = (schema?: string | null, realm?: string | null) => {
+    const state = pluginState.get();
+    setLoading(true);
+    if (!state.currentSchema) {
+      return;
+    }
+    schema = schema ?? state.currentSchema.name;
+    realm = realm ?? state.selectedRealm;
+    console.log('fetching from schema ', schema);
     client.send('getObjects', {
       schema: schema,
       realm: realm,
