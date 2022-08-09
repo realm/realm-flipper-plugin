@@ -1,7 +1,11 @@
 import React, {useEffect} from 'react';
 import {Text} from 'react-native';
 import {addPlugin, Flipper} from 'react-native-flipper';
-import Realm from 'realm';
+import Realm, {
+  CanonicalObjectSchema,
+  CanonicalObjectSchemaProperty,
+  CanonicalPropertiesTypes,
+} from 'realm';
 
 const {BSON} = Realm;
 // config: Configuration,
@@ -27,10 +31,15 @@ type getObjectsQuery = {
 // convert object from a schema to realm one
 const typeConverter = (object: any, realm: Realm, schemaName: string) => {
   const schemaObj = realm.schema.find(schema => schema.name === schemaName);
-
-  const convertProperty = (val: any, type?: string) => {
-    console.log('got type', type);
-    switch (type) {
+  // schemaObj?.properties
+  const convertProperty = (
+    val: any,
+    property: CanonicalObjectSchemaProperty,
+  ) => {
+    // console.log('got type', type);
+    switch (property.type) {
+      case 'object':
+        return typeConverter(val, realm, property.objectType as string);
       case 'uuid':
         return new BSON.UUID(val);
       case 'decimal128':
@@ -39,18 +48,23 @@ const typeConverter = (object: any, realm: Realm, schemaName: string) => {
         return new BSON.ObjectId(val);
       case 'data':
         return new ArrayBuffer(123);
+      case 'set':
+      case 'list':
+        return val.map(obj => {
+          typeConverter(obj, realm, property.objectType);
+        });
+      case 'dictionary':
       default:
         return val;
     }
   };
+
   const obj = {};
   Object.entries(object).forEach((value: [string, unknown]) => {
-    const type = schemaObj?.properties[value[0]].type;
+    const type = schemaObj?.properties[value[0]];
     obj[value[0]] = convertProperty(value[1], type);
-    console.log('value for', value[0], ' is ', obj[value[0]])
+    console.log('value for', value[0], ' is ', obj[value[0]]);
   });
-  // console.log('returning', obj);
-  // console.log('example:', new BSON.UUID());
   return obj;
 };
 
@@ -225,7 +239,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted)
+          console.log('converted', converted);
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
