@@ -1,9 +1,10 @@
-import { Layout, Modal, Radio } from 'antd';
+import { Modal, Radio } from 'antd';
 import { useState } from 'react';
 import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';
+import { Layout } from 'flipper-plugin';
 
 const forEachProp = (
   props: {
@@ -60,7 +61,7 @@ const ObjectAdder = (props: {
   // console.log('here, values:', values);
 
   return (
-    <Layout.Content>
+    <Layout.Horizontal style={{ justifyContent: 'right' }}>
       <Radio.Button
         type="primary"
         onClick={showModal}
@@ -91,7 +92,7 @@ const ObjectAdder = (props: {
           />
         ))}
       </Modal>
-    </Layout.Content>
+    </Layout.Horizontal>
   );
 };
 

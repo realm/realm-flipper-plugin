@@ -41,20 +41,12 @@ export const DataVisualizer = (props: {
 
   // Return buttons + tableView
   return (
-    <Layout.ScrollContainer>
-      <Layout.Container>
-        <Radio.Group>
-          {
-            <ObjectAdder
-              schema={getCurrentSchema()}
-              addObject={props.addObject}
-            />
-          }
-        </Radio.Group>
-      </Layout.Container>
-      <Layout.Container>
-        <TableView />
-        <RealmDataInspector
+    <Layout.Container grow>
+      <ObjectAdder schema={getCurrentSchema()} addObject={props.addObject} />
+      <Layout.ScrollContainer>
+        <Layout.Container>
+          <TableView />
+          <RealmDataInspector
           currentSchema={currentSchema}
           schemas={props.schemas}
           inspectData={inspectData}
@@ -67,9 +59,10 @@ export const DataVisualizer = (props: {
           setGoForwardStack={setGoForwardStack}
           setNewInspectData={setNewInspectData}
           view = {inspectorView}
-        />
-      </Layout.Container>
-    </Layout.ScrollContainer>
+          />
+        </Layout.Container>
+      </Layout.ScrollContainer>
+    </Layout.Container>
   );
 
   function TableView() {
