@@ -30,12 +30,8 @@ export default function DataVisualizer(props: {
   const [inspectData, setInspectData] = useState<RealmObject>();
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const [goBackStack, setGoBackStack] = useState<
-    Array<RealmObject>
-  >([]);
-  const [goForwardStack, setGoForwardStack] = useState<
-    Array<RealmObject>
-  >([]);
+  const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
+  const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
 
   const getCurrentSchema = () => {
     return props.schemas.find((schema) => schema.name === props.selectedSchema);
@@ -49,34 +45,27 @@ export default function DataVisualizer(props: {
 
   // Return buttons + tableView
   return (
-    <Layout.ScrollContainer>
-      <Layout.Container>
-        <Radio.Group>
-          {
-            <ObjectAdder
-              schema={getCurrentSchema()}
-              addObject={props.addObject}
-            />
-          }
-        </Radio.Group>
-      </Layout.Container>
-      <Layout.Container>
-        <TableView />
-        <RealmDataInspector
-          currentSchema={currentSchema}
-          schemas={props.schemas}
-          inspectData={inspectData}
-          setInspectData={setInspectData}
-          showSidebar={showSidebar}
-          setShowSidebar={setShowSidebar}
-          goBackStack={goBackStack}
-          setGoBackStack={setGoBackStack}
-          goForwardStack={goForwardStack}
-          setGoForwardStack={setGoForwardStack}
-          setNewInspectData={setNewInspectData}
-        />
-      </Layout.Container>
-    </Layout.ScrollContainer>
+    <Layout.Container grow>
+      <ObjectAdder schema={getCurrentSchema()} addObject={props.addObject} />
+      <Layout.ScrollContainer>
+        <Layout.Container>
+          <TableView />
+          <RealmDataInspector
+            currentSchema={currentSchema}
+            schemas={props.schemas}
+            inspectData={inspectData}
+            setInspectData={setInspectData}
+            showSidebar={showSidebar}
+            setShowSidebar={setShowSidebar}
+            goBackStack={goBackStack}
+            setGoBackStack={setGoBackStack}
+            goForwardStack={goForwardStack}
+            setGoForwardStack={setGoForwardStack}
+            setNewInspectData={setNewInspectData}
+          />
+        </Layout.Container>
+      </Layout.ScrollContainer>
+    </Layout.Container>
   );
 
   function TableView() {

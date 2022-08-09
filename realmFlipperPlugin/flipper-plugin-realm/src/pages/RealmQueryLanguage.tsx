@@ -22,8 +22,6 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   const state = useValue(instance.state);
   // const currentSchema = state.currentSchema;
 
-
-
   queryFavourites = JSON.parse(
     localStorage.getItem('favourites') || '{"favourites":[]}'
   ).favourites;

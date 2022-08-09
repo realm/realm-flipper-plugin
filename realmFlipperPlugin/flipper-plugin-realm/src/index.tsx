@@ -189,7 +189,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     prev_page_filterCursor: null,
   });
 
-  const queryObject = createState<>({});
+  // const queryObject = createState<>({});
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
