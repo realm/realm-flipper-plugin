@@ -54,20 +54,9 @@ export const DataVisualizer = ({
   const onOk = () => {
     // execute update
     console.log('row: ', editingCell);
-    const pairs = Object.entries(editingCell.row).map(
-      (value: [string, unknown]) => {
-        return [value[0], value[1].value];
-      }
-    );
-    console.log(pairs);
-    const obj = new Object();
-    pairs.forEach((val) => {
-      if (val[1] != undefined) {
-        obj[val[0]] = val[1];
-      }
-    });
-    console.log('real obj:', obj);
-    obj[editingCell?.schemaProperty.name] = editingState
+    const obj = { ...editingCell?.row };
+    obj[editingCell?.schemaProperty.name] = editingState;
+    console.log('request for', obj)
     modifyObject(obj);
     onCancel();
   };
@@ -131,7 +120,7 @@ export const DataVisualizer = ({
     const editProperty = (row: RealmObject, schemaProperty: SchemaProperty) => {
       // console.log('row is', row)
       // console.log('value is', row[schemaProperty.name])
-      setEditingState(row[schemaProperty.name].value);
+      setEditingState(row[schemaProperty.name]);
       setEditingCell({
         row,
         schemaProperty,

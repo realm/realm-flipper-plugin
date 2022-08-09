@@ -30,6 +30,7 @@ type getObjectsQuery = {
 
 // convert object from a schema to realm one
 const typeConverter = (object: any, realm: Realm, schemaName: string) => {
+  console.log('converting...', object);
   const schemaObj = realm.schema.find(schema => schema.name === schemaName);
   // schemaObj?.properties
   const convertProperty = (
@@ -39,7 +40,13 @@ const typeConverter = (object: any, realm: Realm, schemaName: string) => {
     // console.log('got type', type);
     switch (property.type) {
       case 'object':
-        return typeConverter(val, realm, property.objectType as string);
+        return val === null
+          ? null
+          : realm.objectForPrimaryKey(
+              property.objectType as string,
+              val[schemaObj?.primaryKey as string],
+            );
+      // return typeConverter(val, realm, property.objectType as string);
       case 'uuid':
         return new BSON.UUID(val);
       case 'decimal128':
@@ -62,6 +69,7 @@ const typeConverter = (object: any, realm: Realm, schemaName: string) => {
   const obj = {};
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj?.properties[value[0]];
+    console.log('type is', type, 'for key', value[0]);
     obj[value[0]] = convertProperty(value[1], type);
     console.log('value for', value[0], ' is ', obj[value[0]]);
   });
