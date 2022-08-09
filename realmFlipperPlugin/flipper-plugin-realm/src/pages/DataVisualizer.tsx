@@ -11,7 +11,7 @@ import { usePlugin } from 'flipper-plugin';
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
-  selectedSchema: string;
+  currentSchema: SchemaObject;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
@@ -20,7 +20,7 @@ type PropertyType = {
 export const DataVisualizer = ({
   objects,
   schemas,
-  selectedSchema,
+  currentSchema,
   sortDirection,
   loading,
   sortingColumn,
@@ -30,18 +30,12 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-
-  const { removeObject } = usePlugin(plugin);
-
-  const getCurrentSchema = () => {
-    return schemas.find((schema) => schema.name === selectedSchema);
-  };
-
-  const currentSchema = getCurrentSchema();
-
+  console.log(currentSchema);
   if (!currentSchema) {
     return <>Please select a schema.</>;
   }
+
+  const { removeObject } = usePlugin(plugin);
 
   // Return buttons + tableView
   return (
@@ -158,7 +152,7 @@ export const DataVisualizer = ({
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
-          selectedSchema={selectedSchema}
+          currentSchema={currentSchema}
           loading={loading}
           renderOptions={dropDown}
         />

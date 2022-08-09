@@ -47,13 +47,17 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
   }
   const SchemaVisualizer = (props: {
     schemas: Array<SchemaObject>;
-    selectedSchema: string;
+    currentSchema: SchemaObject | null;
   }) => {
+    const { schemas, currentSchema } = props;
+    if (!schemas || !schemas.length) {
+      return <div>No schemas found</div>;
+    }
     const instance = usePlugin(plugin);
 
-    const onSchemaSelected = (selected: string) => {
+    const onSchemaSelected = (selectedSchema: SchemaObject) => {
       instance.getObjectsForward();
-      instance.updateSelectedSchema(selected);
+      instance.updateSelectedSchema(selectedSchema);
     };
 
     function createColumnConfig(columns: string[]) {
@@ -65,19 +69,21 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
           onFilter: (value: string, record: any) =>
             record[col].startsWith(value),
           render: (text, record) =>
-            renderTableCells(text, typeof text, col, record),
+            renderTableCells(text.name, typeof text, col, record),
           filterSearch: true,
         }));
       return columnObjs;
     }
     function renderTableCells(
-      value: string,
+      value: SchemaObject,
       type: string,
       column: string,
       record: any
     ) {
       if (column === 'objectType' && isPropertyLinked(record)) {
-        return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>;
+        return (
+          <Link onClick={() => onSchemaSelected(value)}>{value.name}</Link>
+        );
       }
       switch (type) {
         case 'boolean':
@@ -103,17 +109,6 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
           return <Text />;
       }
     }
-    const { schemas, selectedSchema } = props;
-    if (!schemas || !schemas.length) {
-      return <div>No schemas found</div>;
-    }
-    let currentSchema: SchemaObject = schemas[0];
-    schemas.forEach((schema) => {
-      if (schema.name === selectedSchema) {
-        currentSchema = schema;
-        return;
-      }
-    });
 
     const { properties, primaryKey } = currentSchema;
     const columns = [

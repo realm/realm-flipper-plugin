@@ -1,6 +1,7 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React, { useCallback } from 'react';
+import { RealmObject, SchemaObject } from '../CommonTypes';
 import { plugin } from '../index';
 
 const { Option } = Select;
@@ -12,18 +13,30 @@ export const BoldSpan = styled.span({
   textTransform: 'uppercase',
 });
 
-const RealmSchemaSelect = () => {
+const RealmSchemaSelect = (props: {
+  schemas: SchemaObject[];
+  realms: string[];
+}) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
+  const { schemas, realms } = props;
 
   const onSchemaSelected = (selected: string) => {
-    instance.updateSelectedSchema(selected);
+    let selectedSchemaObject: SchemaObject;
+    schemas.forEach((schema) => {
+      if (schema.name === selected) {
+        selectedSchemaObject = schema;
+        return;
+      }
+    });
+    instance.updateSelectedSchema(selectedSchemaObject);
     instance.getObjectsForward();
     //instance.executeQuery('');
   };
-  const schemaOptions = state.schemas.map(({ name }) => (
-    <Option key={name} value={name}>
-      {name}
+  console.log(schemas);
+  const schemaOptions = schemas.map((schema) => (
+    <Option key={schema.name} value={schema.name}>
+      {schema.name}
     </Option>
   ));
 
@@ -34,9 +47,9 @@ const RealmSchemaSelect = () => {
     },
     [instance]
   );
-  const realmOptions = state.realms.map((name) => (
-    <Option key={name} value={name}>
-      {name}
+  const realmOptions = realms.map((realm) => (
+    <Option key={realm} value={realm}>
+      {realm}
     </Option>
   ));
 
@@ -55,7 +68,7 @@ const RealmSchemaSelect = () => {
       <BoldSpan>Object type</BoldSpan>
       <Select
         showSearch
-        value={state.selectedSchema}
+        value={state.currentSchema?.name}
         onChange={onSchemaSelected}
         style={{ flex: 1 }}
         dropdownMatchSelectWidth={false}

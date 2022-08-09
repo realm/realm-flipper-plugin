@@ -14,7 +14,7 @@ const ObjectAdder = ({
   schema,
 }: PropertyType) => {
 
-  const {addObject} = usePlugin(plugin);
+  const { addObject } = usePlugin(plugin);
 
   const empty: { [prop: string]: any } = {};
   const [values, setValues] = useState(empty);
@@ -61,7 +61,7 @@ const ObjectAdder = ({
         okText="Create"
         cancelText="Cancel"
       >
-        {schema.order.map((property, index) => (
+        {schema?.order?.map((property, index) => (
           <PropertyRender
             values={values}
             property={schema.properties[property]}

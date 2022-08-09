@@ -1,11 +1,11 @@
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
-  objects: Array<RealmObject>;
-  schemas: Array<SchemaObject>;
+  objects: RealmObject[];
+  schemas: SchemaObject[];
   currentSchema: SchemaObject | null;
   errorMsg?: string;
-  schemaHistory: Array<string>;
+  schemaHistory: SchemaObject[];
   schemaHistoryIndex: number;
   cursorId: number | null;
   filterCursor: number | null;
