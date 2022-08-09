@@ -10,7 +10,7 @@ import React from 'react';
 import { RealmObject, SchemaObject } from '../CommonTypes';
 import { BoldSpan } from '../components/RealmSchemaSelect';
 
-type PropsType = {
+type PropertyType = {
   currentSchema: SchemaObject;
   schemas: SchemaObject[];
   inspectData?: RealmObject;
@@ -25,8 +25,6 @@ type PropsType = {
   view: string;
 };
 
-// const [inspectorView, setInspectorView] = useState<string>();
-
 export const RealmDataInspector = ({
   currentSchema,
   schemas,
@@ -40,17 +38,13 @@ export const RealmDataInspector = ({
   setGoForwardStack,
   setNewInspectData,
   view,
-}: PropsType) => {
+}: PropertyType) => {
   if (!showSidebar) return null;
 
   console.log('goForwardStack');
   console.log(goForwardStack);
   console.log('goBackStack');
   console.log(goBackStack);
-
-  // inspectData.properties
-  //   ? setInspectorView(' - Realm Schema')
-  //   : setInspectorView(' - Realm Object');
 
   return (
     <DetailSidebar>
@@ -60,8 +54,6 @@ export const RealmDataInspector = ({
             <Row gutter={16}>
               <Col span={24} offset={1}>
                 <BoldSpan>{view} </BoldSpan>
-                {/* <BoldSpan>Inspector + {inspectorView}</BoldSpan> */}
-                <BoldSpan>{} </BoldSpan>
               </Col>
             </Row>
             <Row gutter={8}>
@@ -99,9 +91,9 @@ export const RealmDataInspector = ({
                 onRenderName={(path, name) => {
                   let linkedSchema: SchemaObject | undefined = undefined;
                   if (
-                    currentSchema !== undefined && // The schema of the object that is currently rendered.
+                    currentSchema && // The schema of the object that is currently rendered.
                     // If the property with the current name exists.
-                    currentSchema.properties[name] !== undefined &&
+                    currentSchema.properties[name] &&
                     // If the current schema contains the field objectType, i.e. it is an object.
                     'objectType' in currentSchema.properties[name]
                   ) {

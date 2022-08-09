@@ -115,7 +115,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortedPropKeys.splice(0, 0, primKey);
     }
 
-    const newSchemaObj: SchemaObjectWithOrder = {
+    const newSchemaObj: SchemaObject = {
       ...schema,
       order: sortedPropKeys,
     };
@@ -234,7 +234,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     return state.schemas.find((schema) => schema.name === schemaName);
   };
 
-  const updateSelectedSchema = (schema: string) => {
+  const updateSelectedSchema = (schema: SchemaObject) => { //TODO: fix later //selectedSchema 
     const state = pluginState.get();
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
@@ -417,7 +417,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   return {
     state: pluginState,
-    getObjectsForward: getObjectsForward,
+    getObjectsForward,
     getObjectsBackwards,
     getOneObject,
     getSchemas,
@@ -439,10 +439,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
 }
 
 export function Component() {
-  const instance = usePlugin(plugin);
-  const state = useValue(instance.state);
+  const {state} = usePlugin(plugin);
+  const {objects, schemas, loading, selectedSchema, sortDirection, sortingColumn, currentSchema} = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
+
 
   return (
     <Layout.Container grow>
@@ -451,33 +452,26 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' ? (
         <Layout.Container height={800}>
-          {state.objects.length > 20 ? <PaginationActionGroup /> : null}
-
+          {objects.length > 20 ? <PaginationActionGroup /> : null}
           <DataVisualizer
-            objects={state.objects}
-            schemas={state.schemas}
-            loading={state.loading}
-            selectedSchema={state.selectedSchema}
-            sortDirection={state.sortDirection}
-            sortingColumn={state.sortingColumn}
-            addObject={instance.addObject}
-            modifyObject={instance.modifyObject}
-            removeObject={instance.removeObject}
-            getOneObject={instance.getOneObject}
+            objects={objects}
+            schemas={schemas}
+            loading={loading}
+            selectedSchema={selectedSchema}
+            sortDirection={sortDirection}
+            sortingColumn={sortingColumn}
           />
           <PaginationActionGroup />
         </Layout.Container>
       ) : null}
       {viewMode === 'schemas' ? (
         <SchemaVisualizer
-          schemas={state.schemas}
-          selectedSchema={state.selectedSchema}
+          schemas={schemas}
+          selectedSchema={selectedSchema}
         ></SchemaVisualizer>
       ) : null}
       {viewMode === 'RQL' ? (
-        <>
-          <RealmQueryLanguage schema={state.currentSchema} />
-        </>
+          <RealmQueryLanguage schema={currentSchema} />
       ) : null}
     </Layout.Container>
   );

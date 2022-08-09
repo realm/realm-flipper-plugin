@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { SchemaProperty } from "RealmPluginState";
 import { getDefault, TypeInput } from "./types/TypeInput";
 
-type InputType = {
+type PropertyType = {
   values: { [keys: string]: any };
   property: SchemaProperty;
   toClear: (() => void)[];
@@ -15,7 +15,7 @@ export const PropertyRender = ({
   property,
   toClear,
   isPrimary,
-}: InputType) => {
+}: PropertyType) => {
   const [value, setValue] = useState(getDefault(property));
 
   // console.log("renderProperty");

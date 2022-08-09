@@ -4,30 +4,19 @@ import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';
-import { Layout } from 'flipper-plugin';
+import { plugin } from '..';
+import { Layout, usePlugin } from 'flipper-plugin';
 
-const forEachProp = (
-  props: {
-    [key: string]: SchemaProperty;
-  },
-  f: (prop: SchemaProperty, index: number) => any
-) => {
-  return Object.keys(props).map((property, index) => {
-    return f(props[property], index);
-  });
-};
+type PropertyType = {
+  schema: SchemaObject;
+}
+const ObjectAdder = ({
+  schema,
+}: PropertyType) => {
 
-const ObjectAdder = (props: {
-  schema: SchemaObject | undefined;
-  addObject: (object: AddObject) => void;
-}) => {
+  const {addObject} = usePlugin(plugin);
+
   const empty: { [prop: string]: any } = {};
-
-  const schema = props.schema;
-  if (!schema) {
-    return <></>;
-  }
-
   const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
   const [inputReset, setInputReset] = useState(0);
@@ -50,15 +39,12 @@ const ObjectAdder = (props: {
     setVisible(false);
   };
 
-  const addObject = () => {
+  const onOk = () => {
     console.log('addObject', values);
     // console.log(props.addObject);
-    props.addObject(values);
-
+    addObject(values);
     hideModal();
   };
-
-  // console.log('here, values:', values);
 
   return (
     <Layout.Horizontal style={{ justifyContent: 'right' }}>
@@ -72,17 +58,17 @@ const ObjectAdder = (props: {
       <Modal
         title={'Create ' + schema.name}
         visible={visible}
-        onOk={addObject}
+        onOk={onOk}
         onCancel={hideModal}
         okText="Create"
         cancelText="Cancel"
       >
-        {forEachProp(schema.properties, (property, index) => (
+        {schema.order.map((property, index) => (
           <PropertyRender
             values={values}
-            property={property}
+            property={schema.properties[property]}
             toClear={toClear}
-            isPrimary={property.name == schema.primaryKey}
+            isPrimary={property == schema.primaryKey}
             key={
               inputReset *
                 Object.keys(schema.properties).length *
