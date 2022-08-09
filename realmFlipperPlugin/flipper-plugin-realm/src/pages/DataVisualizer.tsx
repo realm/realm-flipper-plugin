@@ -13,7 +13,7 @@ import { TypeInput } from '../components/types/TypeInput';
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
-  selectedSchema: string;
+  currentSchema: SchemaObject;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
@@ -22,7 +22,7 @@ type PropertyType = {
 export const DataVisualizer = ({
   objects,
   schemas,
-  selectedSchema,
+  currentSchema,
   sortDirection,
   loading,
   sortingColumn,
@@ -42,11 +42,11 @@ export const DataVisualizer = ({
   // const [editingInfo, setEditingInfo] = useState<();
   const { removeObject, modifyObject } = usePlugin(plugin);
 
-  const getCurrentSchema = () => {
-    return schemas.find((schema) => schema.name === selectedSchema);
-  };
+  // const getCurrentSchema = () => {
+  //   return schemas.find((schema) => schema.name === selectedSchema);
+  // };
 
-  const currentSchema = getCurrentSchema();
+  // const currentSchema = getCurrentSchema();
 
   if (currentSchema === undefined) {
     return <>Please select a schema.</>;
@@ -225,7 +225,7 @@ export const DataVisualizer = ({
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
-          selectedSchema={selectedSchema}
+          selectedSchema={currentSchema.name}
           loading={loading}
           renderOptions={dropDown}
         />

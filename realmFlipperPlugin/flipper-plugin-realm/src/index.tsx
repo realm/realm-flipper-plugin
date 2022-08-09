@@ -25,7 +25,6 @@ import {
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
   SchemaObject,
-  SchemaObjectWithOrder,
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
 
@@ -440,7 +439,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
 export function Component() {
   const {state} = usePlugin(plugin);
-  const {objects, schemas, loading, selectedSchema, sortDirection, sortingColumn, currentSchema} = useValue(state);
+  const {objects, schemas, loading, sortDirection, sortingColumn, currentSchema} = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
 
@@ -450,14 +449,14 @@ export function Component() {
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect></RealmSchemaSelect>
-      {viewMode === 'data' ? (
+      {viewMode === 'data' && currentSchema !== null ? (
         <Layout.Container height={800}>
           {objects.length > 20 ? <PaginationActionGroup /> : null}
           <DataVisualizer
             objects={objects}
             schemas={schemas}
             loading={loading}
-            selectedSchema={selectedSchema}
+            currentSchema={currentSchema}
             sortDirection={sortDirection}
             sortingColumn={sortingColumn}
           />
@@ -467,7 +466,7 @@ export function Component() {
       {viewMode === 'schemas' ? (
         <SchemaVisualizer
           schemas={schemas}
-          selectedSchema={selectedSchema}
+          selectedSchema={currentSchema.name}
         ></SchemaVisualizer>
       ) : null}
       {viewMode === 'RQL' ? (
