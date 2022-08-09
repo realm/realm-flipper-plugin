@@ -1,90 +1,60 @@
-import { SchemaObject } from '../CommonTypes';
+import { SchemaObject, SchemaProperty } from '../CommonTypes';
 import { BooleanValue } from '../components/BooleanValue';
 import React from 'react';
 
-type propertyRepresentation = {
-  value: unknown;
-  text: string | number | null;
-};
-
-export const parseRows = (
-  objects: Record<string, unknown>[],
+export const parsePropToCell = (
+  object: Record<string, unknown>,
+  property: SchemaProperty,
   schema: SchemaObject,
   schemas: Array<SchemaObject>
-): Array<Record<string, unknown>> => {
-  // console.log(schema);
+): Record<string, unknown> => {
+  console.log('object', object);
+  console.log('property', property);
 
-  const rows: Array<Record<string, unknown>> = objects.map(
-    (obj: any, index: number) => {
-      const returnObj = { key: index };
+  if (!object ) {
+    return;
+  }
 
-      Object.keys(schema.properties).forEach((propKey: string) => {
-        const currentPropObject = schema.properties[propKey];
-        const currentRealmPropType = currentPropObject.type;
-        const currentFieldValue = obj[propKey];
+  let stringForPrint: string | Element 
 
-        const propRep: propertyRepresentation = {
-          value: currentFieldValue,
-          text: null,
-        };
-        returnObj[propKey] = propRep;
-
-        if (currentFieldValue === undefined) {
-          return;
-        }
-
-        if (currentFieldValue === null) {
-          // @ts-ignore
-          returnObj[propKey].text = 'null';
-          return;
-        }
-
-        let stringForPrint = '';
-
-        switch (currentRealmPropType) {
-          case 'string':
-          case 'double':
-          case 'int':
-          case 'float':
-          case 'objectId':
-          case 'date':
-          case 'uuid':
-            stringForPrint = parseSimpleData(currentFieldValue);
-            break;
-          case 'bool':
-            stringForPrint = parseBoolean(currentFieldValue);
-            break;
-          case 'list':
-          case 'set':
-            stringForPrint = parseSetOrList(currentFieldValue);
-            break;
-          case 'data':
-          case 'dictionary':
-            stringForPrint = parseDataOrDictionary(currentFieldValue);
-            break;
-          case 'decimal128':
-            stringForPrint = parseDecimal128(currentFieldValue);
-            break;
-          case 'object':
-            stringForPrint = parseLinkedObject(
-              schema,
-              schemas,
-              currentFieldValue,
-              propKey
-            );
-            break;
-          case 'mixed':
-            stringForPrint = parseMixed(currentFieldValue);
-            break;
-        }
-        // @ts-ignore
-        returnObj[propKey].text = stringForPrint;
-      });
-      return returnObj;
-    }
-  );
-
-  return rows;
+  switch (property.type) {
+    case 'string':
+    case 'double':
+    case 'int':
+    case 'float':
+    case 'objectId':
+    case 'date':
+    case 'uuid':
+      stringForPrint = parseSimpleData(object);
+      break;
+    case 'bool':
+      stringForPrint = parseBoolean(object);
+      break;
+    case 'list':
+    case 'set':
+      stringForPrint = parseSetOrList(object);
+      break;
+    case 'data':
+    case 'dictionary':
+      stringForPrint = parseDataOrDictionary(object);
+      break;
+    case 'decimal128':
+      stringForPrint = parseDecimal128(object);
+      break;
+    case 'object':
+      stringForPrint = parseLinkedObject(
+        schema,
+        schemas,
+        object,
+        property.name
+      );
+      break;
+    case 'mixed':
+      stringForPrint = parseMixed(object);
+      break;
+  }
+  console.log('stringForPrint', stringForPrint);
+  return stringForPrint;
 };
 
 function parseSimpleData(input: string): string {
@@ -104,7 +74,9 @@ function parseDataOrDictionary(input: Record<string, unknown>): string {
 }
 
 function parseBoolean(input: boolean): Element {
-  return <BooleanValue active={Boolean.toString(input)}> input</BooleanValue>;
+  const inputAsString = input.toString();
+
+  return <BooleanValue active={inputAsString}> {inputAsString}</BooleanValue>;
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {
