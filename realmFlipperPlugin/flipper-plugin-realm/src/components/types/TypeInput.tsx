@@ -2,8 +2,7 @@ import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
-import { RealmObject } from '../../CommonTypes';
-import { SchemaProperty } from "../RealmPluginState";
+import { SchemaProperty } from '../../CommonTypes';
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';
@@ -20,9 +19,9 @@ import { UUIDInput } from './UUIDInput';
 
 export type TypeInputProps = {
   property: SchemaProperty;
-  value: any;
-  set: (val: any) => void;
-  style?: RealmObject;
+  defaultValue?: unknown;
+  set: (val: unknown) => void;
+  extraProps?: Record<string, unknown>;
 };
 
 export const getDefault = (property: SchemaProperty) => {

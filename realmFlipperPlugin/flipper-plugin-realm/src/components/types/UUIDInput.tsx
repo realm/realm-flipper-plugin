@@ -4,23 +4,24 @@ import React, { useState } from 'react';
 import uuid from 'react-native-uuid';
 import { TypeInputProps } from './TypeInput';
 
-export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
+export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInputProps) => {
   const [_, setReset] = useState(0);
+  const [value, setValue] = useState<string | null>(defaultValue as string);
 
   const onChange = (value: string) => {
     set(value);
   };
-  // TODO handling invalid uuids?
+
   return (
     <Row align="middle" style={{ background: 'white' }}>
       <Col flex="auto">
         <Input
-          value={value}
-          style={style}
+          {...extraProps}
+          value={value !== null ? value : undefined}
           onChange={(v) => onChange(v.target.value)}
           placeholder={property.optional ? 'null' : undefined}
           status={
-            (value === null && property.optional) || uuid.validate(value)
+            (value === null && property.optional) || (value !== null && uuid.validate(value))
               ? ''
               : 'error'
           }
@@ -29,7 +30,9 @@ export const UUIDInput = ({ property, value, set, style }: TypeInputProps) => {
       <Col>
         <Button
           onClick={() => {
-            set(uuid.v4());
+            const newVal = uuid.v4();
+            set(newVal);
+            setValue(newVal);
             setReset((v) => v + 1);
           }}
         >

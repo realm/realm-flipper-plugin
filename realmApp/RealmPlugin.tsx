@@ -2,6 +2,8 @@ import React, {useEffect} from 'react';
 import {Text} from 'react-native';
 import {addPlugin, Flipper} from 'react-native-flipper';
 import Realm from 'realm';
+
+const {BSON} = Realm;
 // config: Configuration,
 //     realms: Realm[],
 //     connection: Flipper.FlipperConnection,
@@ -20,6 +22,36 @@ type getObjectsQuery = {
   sortingColumn: string;
   prev_page_cursorId: number;
   prev_page_filterCursor: number;
+};
+
+// convert object from a schema to realm one
+const typeConverter = (object: any, realm: Realm, schemaName: string) => {
+  const schemaObj = realm.schema.find(schema => schema.name === schemaName);
+
+  const convertProperty = (val: any, type?: string) => {
+    console.log('got type', type);
+    switch (type) {
+      case 'uuid':
+        return new BSON.UUID(val);
+      case 'decimal128':
+        return new BSON.Decimal128(val);
+      case 'objectID':
+        return new BSON.ObjectId(val);
+      case 'data':
+        return new ArrayBuffer(123);
+      default:
+        return val;
+    }
+  };
+  const obj = {};
+  Object.entries(object).forEach((value: [string, unknown]) => {
+    const type = schemaObj?.properties[value[0]].type;
+    obj[value[0]] = convertProperty(value[1], type);
+    console.log('value for', value[0], ' is ', obj[value[0]])
+  });
+  // console.log('returning', obj);
+  // console.log('example:', new BSON.UUID());
+  return obj;
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
@@ -176,8 +208,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
+          const converted = typeConverter(obj.object, realm, obj.schema);
+
           realm.write(() => {
-            let t = realm.create(obj.schema, obj.object);
+            let t = realm.create(obj.schema, converted);
             console.log('created', t);
           });
 
@@ -185,12 +219,15 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getObjects', {objects: objects});
         });
         connection.receive('modifyObject', obj => {
+          // console.log('modify', obj)
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
+          const converted = typeConverter(obj.object, realm, obj.schema);
+          console.log('converted', converted)
           realm.write(() => {
-            realm.create(obj.schema, obj.object, 'modified');
+            realm.create(obj.schema, converted, 'modified');
           });
 
           const objects = realm.objects(obj.schema);

@@ -3,8 +3,8 @@ import { Button, Col, Radio, RadioChangeEvent, Row } from 'antd';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
-export const BoolInput = ({ property, set, value }: TypeInputProps) => {
-  const [_, setReset] = useState(0);
+export const BoolInput = ({ property, set, defaultValue }: TypeInputProps) => {
+  const [value, setValue] = useState<boolean | null>(defaultValue as boolean | null);
 
   const options = [
     {
@@ -16,14 +16,16 @@ export const BoolInput = ({ property, set, value }: TypeInputProps) => {
       value: 'False',
     },
   ];
+
   const onChange = ({ target: { value } }: RadioChangeEvent) => {
+    setValue(value === 'True')
     set(value === 'True');
   };
+
   return (
     <Row align="middle" style={{ background: 'white' }}>
       <Col flex="auto">
         <Radio.Group
-          defaultValue={value === null ? undefined : value ? 'True' : 'False'}
           options={options}
           onChange={onChange}
           optionType="button"
@@ -36,8 +38,8 @@ export const BoolInput = ({ property, set, value }: TypeInputProps) => {
           <Button
             icon={<ClearOutlined />}
             onClick={() => {
+              setValue(null);
               set(null);
-              setReset((v) => v + 1);
             }}
           ></Button>
         </Col>

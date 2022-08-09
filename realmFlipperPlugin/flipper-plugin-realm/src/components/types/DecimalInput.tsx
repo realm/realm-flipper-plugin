@@ -6,23 +6,25 @@ import { TypeInputProps } from './TypeInput';
 
 export const DecimalInput = ({
   property,
-  value,
+  defaultValue,
   set,
-  style,
+  extraProps,
 }: TypeInputProps) => {
-  const [reset, setReset] = useState(0);
+  console.log('val:', defaultValue)
+  const [value, setValue] = useState<bigDecimal | null>(defaultValue as bigDecimal | null);
 
-  const onChange = (value: string) => {
-    set(new bigDecimal(value));
+  const onChange = (val: string) => {
+    console.log('onChange', val);
+    setValue(new bigDecimal(val));
+    set(new bigDecimal(val));
   };
 
   return (
     <Row align="middle" style={{ background: 'white' }}>
       <Col flex="auto">
         <InputNumber
-          key={reset}
-          style={style}
-          defaultValue={value}
+        {...extraProps}
+          defaultValue={value?.getValue()}
           onChange={onChange}
           placeholder={property.optional ? 'null' : undefined}
           stringMode
@@ -35,7 +37,7 @@ export const DecimalInput = ({
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);
-              setReset((v) => v + 1);
+              setValue(null);
             }}
           ></Button>
         </Col>

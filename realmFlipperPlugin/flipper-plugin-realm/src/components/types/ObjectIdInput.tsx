@@ -4,8 +4,8 @@ import { TypeInputProps } from './TypeInput';
 
 // TODO: use Realm.BSON ObjectId
 
-export const ObjectIdInput = ({ property, set, style, value }: TypeInputProps) => {
+export const ObjectIdInput = (props: TypeInputProps) => {
     return (
-        <StringInput property={property} set={set} style={style} value={value}></StringInput>
+        <StringInput {...props}></StringInput>
     )
 }

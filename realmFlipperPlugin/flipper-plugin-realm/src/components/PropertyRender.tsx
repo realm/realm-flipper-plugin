@@ -1,7 +1,7 @@
-import { Layout, Tag } from "antd";
-import React, { useState } from "react";
-import { SchemaProperty } from "RealmPluginState";
-import { getDefault, TypeInput } from "./types/TypeInput";
+import { Layout, Tag } from 'antd';
+import React, { useState } from 'react';
+import { SchemaProperty } from 'RealmPluginState';
+import { getDefault, TypeInput } from './types/TypeInput';
 
 type PropertyType = {
   values: { [keys: string]: any };
@@ -24,11 +24,11 @@ export const PropertyRender = ({
 
   let typeName;
   switch (property.type) {
-    case "list":
-      typeName = property.objectType + "[]";
+    case 'list':
+      typeName = property.objectType + '[]';
       break;
-    case "set":
-      typeName = property.objectType + "<>";
+    case 'set':
+      typeName = property.objectType + '<>';
       break;
     default:
       typeName = property.type;
@@ -46,21 +46,20 @@ export const PropertyRender = ({
     <Layout>
       <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
         <div style={{ backgroundColor: 'white' }}>
-        {property.name}
-        <span style={{ float: "right" }}>
-          <Tag color="default">{typeName}</Tag>
-          {!property.optional ? <Tag color="blue">required</Tag> : null}
-          {isPrimary ? <Tag color="blue">primary key</Tag> : null}
-        </span>
+          {property.name}
+          <span style={{ float: 'right' }}>
+            <Tag color="default">{typeName}</Tag>
+            {!property.optional ? <Tag color="blue">required</Tag> : null}
+            {isPrimary ? <Tag color="blue">primary key</Tag> : null}
+          </span>
         </div>
-
       </Layout.Header>
       <Layout.Content>
         <TypeInput
           property={property}
           set={setter}
-          value={value}
-          style={{ width: "100%" }}
+          defaultValue={value}
+          extraProps={{ style: { width: '100%' } }}
         />
       </Layout.Content>
     </Layout>

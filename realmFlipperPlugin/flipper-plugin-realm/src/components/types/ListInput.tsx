@@ -1,12 +1,13 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Col, Layout, Row } from 'antd';
+import { Button, Col, Row } from 'antd';
+import { Layout } from "flipper-plugin";
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
-export const ListInput = ({ property, set, value }: TypeInputProps) => {
+export const ListInput = ({ property, set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
-  const array: any[] = value;
-  const setArray = set;
+  const [array, setArray] = useState<unknown[]>([]);
+
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -20,22 +21,22 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
   };
   // console.log(array);
   return (
-    <Layout>
-      {array.map((value: any, index: number) => {
+    <Layout.Container grow>
+      {array.map((value: unknown, index: number) => {
         return (
-          <Layout key={index} style={{ backgroundColor: "white"}}>
+          <Layout.Container grow key={index} style={{ backgroundColor: "white"}}>
             <Row align="middle">
               <Col flex="auto">
                 <TypeInput
-                style={{ width: "100%" }}
+                extraProps={{style: { width: "100%" }}}
                 property={innerProp}
                 set={(val) => {
                   const arr = array;
                   arr[index] = val;
                   setArray(arr);
-                  setReset((v) => v + 1);
+                  set(arr);
                 }}
-                value={value}
+                defaultValue={value}
               ></TypeInput>
               </Col>
               <Col>
@@ -47,17 +48,18 @@ export const ListInput = ({ property, set, value }: TypeInputProps) => {
               // remove ith element
               onClick={() => {
                 setArray(array.filter((_, i) => i !== index));
+                set(array.filter((_, i) => i !== index))
                 setReset((v) => v + array.length + 2);
               }}
             />
               </Col>
             </Row>
-          </Layout>
+          </Layout.Container>
         );
       })}
       <Button onClick={() => setArray([...array, getDefault(innerProp)])}>
         Add {property.objectType}
       </Button>
-    </Layout>
+    </Layout.Container>
   );
 };
