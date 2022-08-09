@@ -56,7 +56,7 @@ const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
     const instance = usePlugin(plugin);
 
     const onSchemaSelected = (selectedSchema: SchemaObject) => {
-      instance.getObjectsForward();
+      instance.getObjects();
       instance.updateSelectedSchema(selectedSchema);
     };
 

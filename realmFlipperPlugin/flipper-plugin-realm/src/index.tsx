@@ -157,29 +157,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  const getObjectsBackwards = (
+  const getObjects = (
     schema?: string | null,
-    realm?: string | null
+    realm?: string | null,
+    backwards?: boolean
   ) => {
-    const state = pluginState.get();
-    setLoading(true);
-    if (!state.currentSchema) {
-      return;
-    }
-    schema = schema ?? state.currentSchema.name;
-    realm = realm ?? state.selectedRealm;
-    client.send('getObjectsBackwards', {
-      schema: schema,
-      realm: realm,
-      prev_page_filterCursor: state.prev_page_filterCursor,
-      limit: state.selectedPageSize,
-      sortingColumn: state.sortingColumn,
-      sortDirection: state.sortDirection,
-      prev_page_cursorId: state.prev_page_cursorId,
-    });
-  };
-
-  const getObjectsForward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
     if (!state.currentSchema) {
@@ -195,6 +177,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      prev_page_cursorId: state.prev_page_cursorId,
+      backwards: Boolean(backwards),
     });
   };
 
@@ -399,8 +384,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   return {
     state: pluginState,
-    getObjectsForward,
-    getObjectsBackwards,
+    getObjects,
     getOneObject,
     getSchemas,
     executeQuery,

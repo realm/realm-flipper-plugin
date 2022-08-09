@@ -7,7 +7,11 @@ const PageSizeSelect = (props: {
   updateSelectedPageSize: (
     pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => void;
-  getObjectsForward: () => void;
+  getObjects: (
+    schema?: string | null,
+    realm?: string | null,
+    backwards?: boolean
+  ) => void;
   setCurrentPage: (pageSize: number) => void;
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
 }) => {
@@ -15,7 +19,7 @@ const PageSizeSelect = (props: {
     selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
     props.updateSelectedPageSize(selectedPageSize);
-    props.getObjectsForward();
+    props.getObjects();
     props.setCurrentPage(1);
   };
 

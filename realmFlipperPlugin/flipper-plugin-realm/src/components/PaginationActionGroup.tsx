@@ -26,13 +26,12 @@ const PaginationGroup = () => {
         totalObjects={state.totalObjects}
         selectedPageSize={state.selectedPageSize}
         currentPage={state.currentPage}
-        getObjectsBackwards={instance.getObjectsBackwards}
-        getObjectsForward={instance.getObjectsForward}
+        getObjects={instance.getObjects}
         setCurrentPage={instance.setCurrentPage}
       />
       <PageSizeSelect
         updateSelectedPageSize={instance.updateSelectedPageSize}
-        getObjectsForward={instance.getObjectsForward}
+        getObjects={instance.getObjects}
         setCurrentPage={instance.setCurrentPage}
         selectedPageSize={state.selectedPageSize}
       />

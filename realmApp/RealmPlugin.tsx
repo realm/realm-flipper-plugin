@@ -65,7 +65,11 @@ export default React.memo((props: {realms: Realm[]}) => {
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
-          objects = getObjectsByPagination(obj, objects, limit);
+          if (obj.backwards) {
+            objects = getObjectsByPaginationBackwards(obj, objects, limit);
+          } else {
+            objects = getObjectsByPagination(obj, objects, limit);
+          }
           let lastItem, firstItem;
           if (objects.length) {
             lastItem = objects[objects.length - 1]; //if this is null this is the last page

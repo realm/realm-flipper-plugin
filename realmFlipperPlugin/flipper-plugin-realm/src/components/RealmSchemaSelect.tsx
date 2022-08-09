@@ -30,7 +30,7 @@ const RealmSchemaSelect = (props: {
       }
     });
     instance.updateSelectedSchema(selectedSchemaObject);
-    instance.getObjectsForward();
+    instance.getObjects();
     //instance.executeQuery('');
   };
 
