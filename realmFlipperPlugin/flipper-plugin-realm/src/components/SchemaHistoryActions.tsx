@@ -25,7 +25,7 @@ const SchemaHistoryActions = () => {
     instance.goForwardSchemaHistory(newSelectedSchema);
   }, [state.selectedSchema]);
   return (
-    <span style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>
+    <span style={{ position: 'absolute', top: 25, right: 25, zIndex: 1 }}>
       <Button
         disabled={
           !state.realms.length ||
