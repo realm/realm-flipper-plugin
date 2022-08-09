@@ -7,6 +7,7 @@ import { TypeInputProps } from "./TypeInput";
 export const DataInput = ({ set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
 
+
   const emptyState: {
     selectedFile?: UploadFile<unknown>;
     selectedFileList: UploadFile<unknown>[];
@@ -16,18 +17,7 @@ export const DataInput = ({ set }: TypeInputProps) => {
   const [state, setState] = useState(emptyState);
 
   const chooseFile = (file: UploadFile<unknown>) => {
-    const fileObj = file.originFileObj
-    if (!fileObj) {
-      set(null);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      const contents = e.target?.result as ArrayBuffer;
-      const typedArray = new Uint8Array(contents)
-      set(Array.from(typedArray));
-    }
-    reader.readAsArrayBuffer(fileObj);
+    set(file);
   };
 
   const onChange = (info: UploadChangeParam<UploadFile<unknown>>) => {

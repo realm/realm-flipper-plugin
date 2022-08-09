@@ -4,16 +4,9 @@ import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 import { UUID } from 'bson';
 
-export const UUIDInput = ({
-  property,
-  defaultValue,
-  set,
-  extraProps,
-}: TypeInputProps) => {
+export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [value, setValue] = useState<string | null>(
-    defaultValue ? (defaultValue as UUID).toString() : null
-  );
+  const [value, setValue] = useState<string | null>(defaultValue as string);
 
   const onChange = (value: string) => {
     setValue(value);
@@ -33,8 +26,7 @@ export const UUIDInput = ({
           onChange={(v) => onChange(v.target.value)}
           placeholder={property.optional ? 'null' : undefined}
           status={
-            (value === null && property.optional) ||
-            (value !== null && UUID.isValid(value))
+            (value === null && property.optional) || (value !== null && uuid.validate(value))
               ? ''
               : 'error'
           }
@@ -43,9 +35,9 @@ export const UUIDInput = ({
       <Col>
         <Button
           onClick={() => {
-            const newVal = new UUID();
-            setValue(newVal.toString());
+            const newVal = uuid.v4();
             set(newVal);
+            setValue(newVal);
             setReset((v) => v + 1);
           }}
         >

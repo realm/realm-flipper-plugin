@@ -329,13 +329,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
+    console.log('addObject in index', object)
     if (!state.currentSchema) {
       return;
     }
     client.send('addObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: object,
     });
   };
@@ -418,13 +418,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
+    console.log('addObject in index', newObject)
     if (!state.currentSchema) {
       return;
     }
     client.send('modifyObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: newObject,
     });
   };

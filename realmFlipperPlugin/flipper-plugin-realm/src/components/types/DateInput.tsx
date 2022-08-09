@@ -5,18 +5,13 @@ import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 import { theme } from 'flipper-plugin';
 
-export const DateInput = ({
-  property,
-  defaultValue,
-  set,
-  extraProps,
-}: TypeInputProps) => {
-  // console.log('dateInput', property, defaultValue, set, extraProps)
+export const DateInput = ({ property, defaultValue, set, extraProps }: TypeInputProps) => {
+  console.log('dateInput', property, defaultValue, set, extraProps)
   const [reset, setReset] = useState(0);
-  const [value, setValue] = useState<Date | null>(defaultValue as Date | null);
+  const [value, setValue] = useState<moment.Moment | undefined>(defaultValue as moment.Moment);
 
   const onChange = (value: moment.Moment | null) => {
-    setValue(value ? value.toDate() : null);
+    setValue(value ? value : undefined);
     set(value ? value.toDate() : null);
   };
 
@@ -39,8 +34,8 @@ export const DateInput = ({
           <Button
             onClick={() => {
               set(null);
-              setValue(null);
-              setReset((v) => v + 1);
+              setValue(undefined);
+              setReset(v => v + 1)
             }}
             icon={<ClearOutlined />}
           ></Button>

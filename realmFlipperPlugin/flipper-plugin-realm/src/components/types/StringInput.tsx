@@ -10,7 +10,7 @@ export const StringInput = ({
   extraProps,
 }: TypeInputProps) => {
   const [value, setValue] = useState<string | null>(defaultValue as string | null);
-
+  console.log('my value is', value)
   return (
     <Row align="middle" style={{ background: 'white'}}>
       <Col flex='auto'>

@@ -10,6 +10,7 @@ import { TypeInputProps } from './TypeInput';
 export const ObjectInput = ({
   property,
   set,
+  extraProps,
 }: // value,
 TypeInputProps) => {
   const instance = usePlugin(plugin);
@@ -28,7 +29,7 @@ TypeInputProps) => {
   }
 
   const renderChosen = () => {
-    const val = value[targetSchema.primaryKey];
+    const val = value[targetSchema.primaryKey].text;
     const content = `${targetSchema?.primaryKey}: ${val}`;
     return (
       <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">

@@ -3,15 +3,13 @@ import { Button, Col, Layout, Row } from 'antd';
 import React, { useEffect, useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
+export const SetInput = ({ property, set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [arr, setArr] = useState<any[]>(defaultValue as any[]);
   const [occurences] = useState(new Map<any, number>());
 
   const [container, setContainer] = useState(new Set());
-  useEffect(() => {
-    setArr(defaultValue as any[])
-  }, [defaultValue]);  
+  
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -83,7 +81,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
                 setReset((v) => v + 1);
               }}
               defaultValue={value}
-              extraProps={{style: { width: '100%' }, status: (count < 2 ? '' : 'error') }}
+              extraProps={{style: { width: '100%' }}}
             ></TypeInput>
             </Col>
             <Col>

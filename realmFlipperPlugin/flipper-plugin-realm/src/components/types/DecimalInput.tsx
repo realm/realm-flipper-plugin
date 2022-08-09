@@ -9,12 +9,13 @@ export const DecimalInput = ({
   set,
   extraProps,
 }: TypeInputProps) => {
-  const [value, setValue] = useState<string | null>(defaultValue as string | null);
+  console.log('val:', defaultValue)
+  const [value, setValue] = useState<bigDecimal | null>(defaultValue as bigDecimal | null);
 
   const onChange = (val: string) => {
-    console.log('val is', typeof(val), "and has a value of", val)
-    setValue(val);
-    set(val);
+    console.log('onChange', val);
+    setValue(new bigDecimal(val));
+    set(new bigDecimal(val));
   };
 
   return (
@@ -22,7 +23,7 @@ export const DecimalInput = ({
       <Col flex="auto">
         <InputNumber
         {...extraProps}
-          defaultValue={value === null ? undefined : value}
+          defaultValue={value?.getValue()}
           onChange={onChange}
           placeholder={property.optional ? 'null' : undefined}
           stringMode
