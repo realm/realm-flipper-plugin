@@ -440,7 +440,7 @@ export function Component() {
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect schemas={schemas} realms={realms} />
-      {viewMode === 'data' && currentSchema ? (
+      {viewMode === 'data' ? (
         <Layout.Container height={800}>
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
             {objects.length > 20 ? <PaginationActionGroup /> : null}
