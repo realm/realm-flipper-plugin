@@ -25,7 +25,12 @@ export type TypeInputProps = {
   extraProps?: Record<string, unknown>;
 };
 
-export const getDefault = (property: SchemaProperty) => {
+type TypeDescription = {
+  type: string;
+  optional: boolean;
+}
+
+export const getDefault = (property: TypeDescription) => {
   if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
 
   const type = property.type;

@@ -1,19 +1,17 @@
 import { Layout, Tag } from 'antd';
 import React, { useState } from 'react';
-import { SchemaProperty } from 'RealmPluginState';
+import { SchemaProperty } from '../CommonTypes';
 import { getDefault, TypeInput } from './types/TypeInput';
 
 type PropertyType = {
   values: { [keys: string]: any };
   property: SchemaProperty;
-  toClear: (() => void)[];
   isPrimary: boolean;
 };
 
 export const PropertyRender = ({
   values,
   property,
-  toClear,
   isPrimary,
 }: PropertyType) => {
   const [value, setValue] = useState(getDefault(property));
@@ -34,8 +32,6 @@ export const PropertyRender = ({
       typeName = property.type;
       break;
   }
-
-  toClear = [...toClear, () => setValue(getDefault(property))];
 
   const setter = (val: any) => {
     values[property.name] = val;

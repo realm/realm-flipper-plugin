@@ -39,7 +39,7 @@ export const AllTypesSchema = {
     linkedBanana: 'Banana?',
     linkingObjects: 'AllTypes?',
     ListDecimal128: 'decimal128[]',
-    SetDecimal128: 'decimal128<>',
+    // SetDecimal128: 'decimal128<>',
     ObjectList: 'mixed[]',
     ObjectSet: 'mixed<>',
     dictionary: '{}',
@@ -86,5 +86,16 @@ export const NoPrimaryKey = {
   properties: {
     _id: 'int',
     name: 'string?',
+  },
+};
+
+export const SetsSchema = {
+  name: 'Sets',
+  properties: {
+    _id: 'uuid',
+    intSet: 'int<>',
+    setsSet: 'Sets<>',
+    decimalSet: 'decimal128<>',
+    mixedSet: 'mixed<>',
   },
 };
