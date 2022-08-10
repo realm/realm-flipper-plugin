@@ -67,6 +67,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
+    console.log('received', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -132,71 +133,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log(state.prev_page_cursorId, state.cursorId);
     console.log('objects in state', state.objects);
     console.log('inserting at index ', index);
-    const lastObjectInMemory = state.objects[state.objects.length - 1];
-    // if (state.selectedPageSize > state.objects.length) {
-    //   pluginState.set({
-    //     ...state,
-    //     objects: [...state.objects, newObject],
-    //     totalObjects: state.totalObjects + 1,
-    //   });
-    //   return;
-    // }
-    // if (state.sortingColumn) {
-    //   if (
-    //     newObject[state.sortingColumn] < state.prev_page_filterCursor ||
-    //     (state.prev_page_cursorId === newObject[state.sortingColumn] &&
-    //       newObject._id < lastObjectInMemory._id)
-    //   ) {
-    //     return false;
-    //   } else if (
-    //     newObject[state.sortingColumn] >
-    //       lastObjectInMemory[state.sortingColumn] ||
-    //     (state.prev_page_cursorId === newObject[state.sortingColumn] &&
-    //       newObject._id > lastObjectInMemory._id)
-    //   ) {
-    //     return false;
-    //   }
-    // } else {
-    //   if (newObject._id < state.prev_page_cursorId) {
-    //     return false;
-    //   } else if (newObject._id > lastObjectInMemory._id) {
-    //     return false;
-    //   }
-    // }
-
-    // for (let i = 1; i < state.objects.length; i++) {
-    //   const prevObject = state.objects[i - 1];
-    //   const nextObject = state.objects[i + 1];
-    //   if (state.sortingColumn) {
-    //     if (
-    //       (newObject[state.sortingColumn] > prevObject[state.sortingColumn] &&
-    //         newObject[state.sortingColumn] < nextObject[state.sortingColumn]) ||
-    //       (newObject[state.sortingColumn] === prevObject[state.sortDirection] &&
-    //         newObject._id > prevObject._id &&
-    //         newObject[state.sortingColumn] ===
-    //           nextObject[state.sortDirection] &&
-    //         newObject._id > nextObject._id)
-    //     ) {
-    //       state.objects.splice(i + 1, 0, newObject);
-    //       break;
-    //     }
-    //   } else {
-    //     if (newObject._id > prevObject._id && newObject._id < nextObject._id) {
-    //       console.log('inserting at index', i);
-    state.objects.splice(index, 0, newObject);
-    //       break;
-    //     }
-    //   }
-    // }
-    //console.log(state.objects);
-    state.objects = state.objects.slice(0, 10);
-    //console.log(state.objects);
+    let copyOfStateObjects = state.objects;
+    copyOfStateObjects.splice(index, 0, newObject);
+    copyOfStateObjects = copyOfStateObjects.slice(0, state.selectedPageSize);
     pluginState.set({
       ...state,
-      objects: [...state.objects],
+      objects: [...copyOfStateObjects],
       totalObjects: state.totalObjects + 1,
     });
-  };);
+  });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();

@@ -77,11 +77,11 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 9,
+      _id: 223423411803 + i,
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: 379,
+      weight: 631,
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
     i++;
