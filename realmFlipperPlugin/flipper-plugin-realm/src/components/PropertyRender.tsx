@@ -1,6 +1,6 @@
 import { Layout, Tag } from 'antd';
 import React, { useState } from 'react';
-import { SchemaProperty } from 'RealmPluginState';
+import { SchemaProperty } from '../CommonTypes';
 import { getDefault, TypeInput } from './types/TypeInput';
 
 type PropertyType = {

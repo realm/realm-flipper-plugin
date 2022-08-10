@@ -98,8 +98,5 @@ export const SetsSchema = {
     setsSet: 'Sets<>',
     decimalSet: 'decimal128<>',
     mixedSet: 'mixed<>',
-    objectSet: 'AllTypes<>',
   },
-  primaryKey: '_id'
 };
-

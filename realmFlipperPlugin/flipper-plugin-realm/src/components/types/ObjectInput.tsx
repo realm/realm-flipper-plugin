@@ -10,7 +10,6 @@ import { TypeInputProps } from './TypeInput';
 export const ObjectInput = ({
   property,
   set,
-  extraProps,
 }: // value,
 TypeInputProps) => {
   const instance = usePlugin(plugin);
