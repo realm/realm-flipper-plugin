@@ -21,6 +21,7 @@ export function createRows(
   primaryKey: string
 ): RealmObject[] {
   const newRows: RealmObject[] = [];
+  console.log('properties', properties);
   Object.values(properties).forEach((value: SchemaProperty, index: number) => {
     newRows.push({
       ...value,
@@ -36,6 +37,7 @@ const SchemaVisualizer = (props: {
   currentSchema: SchemaObject | null;
 }) => {
   const { schemas, currentSchema } = props;
+  console.log('SchemaVisualizerCurrentSchema', currentSchema);
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;
@@ -46,9 +48,17 @@ const SchemaVisualizer = (props: {
   }
   const instance = usePlugin(plugin);
 
-  const onSchemaSelected = (selectedSchema: SchemaObject) => {
+  const onSchemaSelected = (selectedSchema: string) => {
+    const selectedSchemaObject = schemas.find(
+      (schema) => schema.name === selectedSchema
+    );
+
+    if (!selectedSchemaObject) {
+      return <div>Schema {selectedSchema} not found!</div>;
+    }
+
     instance.getObjectsForward();
-    instance.updateSelectedSchema(selectedSchema);
+    instance.updateSelectedSchema(selectedSchemaObject);
   };
 
   function createColumnConfig(columns: string[]) {
@@ -66,18 +76,18 @@ const SchemaVisualizer = (props: {
     return columnObjs;
   }
   function renderTableCells(
-    value: SchemaObject,
+    value: string,
     type: string,
     column: string,
     record: any
   ) {
     if (column === 'objectType' && isPropertyLinked(record)) {
-      return <Link onClick={() => onSchemaSelected(value)}>{value.name}</Link>;
+      return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>;
     }
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={Boolean(value)}>
+          <BooleanValue active={value.toString()}>
             {value.toString()}
           </BooleanValue>
         );
@@ -113,10 +123,13 @@ const SchemaVisualizer = (props: {
     (columns: string[]) => createColumnConfig(columns),
     [columns]
   );
+  console.log('currentSchema', currentSchema);
+  console.log('createRowsproperties', properties);
   const rows = createRows(properties, primaryKey);
+
   return (
     <Layout.Container height={800}>
-      <Table dataSource={rows} columns={columnObjs} />
+      <Table dataSource={rows} columns={columnObjs} size="middle" />
     </Layout.Container>
   );
 };
