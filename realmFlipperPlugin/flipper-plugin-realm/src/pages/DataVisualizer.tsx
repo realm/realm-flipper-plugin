@@ -36,7 +36,7 @@ export const DataVisualizer = ({
     return <>Please select a schema.</>;
   }
 
-  const { removeObject } = usePlugin(plugin);
+  // const { removeObject } = usePlugin(plugin);
 
   // Return buttons + tableView
   return (
@@ -152,7 +152,7 @@ export const DataVisualizer = ({
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
-          selectedSchema={currentSchema.name}
+          currentSchema={currentSchema}
           loading={loading}
           renderOptions={dropDown}
         />
