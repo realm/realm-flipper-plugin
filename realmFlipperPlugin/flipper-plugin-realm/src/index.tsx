@@ -91,13 +91,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
+    console.log('schemas: ', data.schemas);
     const newschemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
     pluginState.set({ ...state, schemas: newschemas });
-    console.log('pluginState', pluginState);
+    // console.log('pluginState', pluginState);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -196,7 +197,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const getOneObject = (event: { schema: string; primaryKey: string }) => {
     const state = pluginState.get();
-    console.log('myRealm', event);
+    // console.log('myRealm', event);
     client.send('getOneObject', {
       schema: event.schema,
       realm: state.selectedRealm,
@@ -220,7 +221,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    console.log('addObject', object)
     client.send('addObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
@@ -312,7 +313,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', newObject)
+    console.log('modifyObject', newObject)
     client.send('modifyObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,

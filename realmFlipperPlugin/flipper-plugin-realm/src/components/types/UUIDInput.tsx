@@ -1,15 +1,27 @@
 import { ClearOutlined } from '@ant-design/icons';
 import { Button, Col, Input, Row } from 'antd';
 import React, { useState } from 'react';
-import uuid from 'react-native-uuid';
 import { TypeInputProps } from './TypeInput';
+import { UUID } from 'bson';
 
-export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInputProps) => {
+export const UUIDInput = ({
+  property,
+  defaultValue,
+  set,
+  extraProps,
+}: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [value, setValue] = useState<string | null>(defaultValue as string);
+  const [value, setValue] = useState<string | null>(
+    defaultValue ? (defaultValue as UUID).toString() : null
+  );
 
   const onChange = (value: string) => {
-    set(value);
+    setValue(value);
+    if (UUID.isValid(value)) {
+      set(new UUID(value));
+    } else {
+      set(null);
+    }
   };
 
   return (
@@ -21,7 +33,8 @@ export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInput
           onChange={(v) => onChange(v.target.value)}
           placeholder={property.optional ? 'null' : undefined}
           status={
-            (value === null && property.optional) || (value !== null && uuid.validate(value))
+            (value === null && property.optional) ||
+            (value !== null && UUID.isValid(value))
               ? ''
               : 'error'
           }
@@ -30,9 +43,9 @@ export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInput
       <Col>
         <Button
           onClick={() => {
-            const newVal = uuid.v4();
+            const newVal = new UUID();
+            setValue(newVal.toString());
             set(newVal);
-            setValue(newVal);
             setReset((v) => v + 1);
           }}
         >
@@ -43,6 +56,7 @@ export const UUIDInput = ({ property, defaultValue, set, extraProps }: TypeInput
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);
+              setValue(null);
               setReset((v) => v + 1);
             }}
           ></Button>

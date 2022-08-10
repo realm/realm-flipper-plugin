@@ -16,6 +16,7 @@ import { ObjectInput } from './ObjectInput';
 import { SetInput } from './SetInput';
 import { StringInput } from './StringInput';
 import { UUIDInput } from './UUIDInput';
+import { UUID, ObjectId } from 'bson';
 
 export type TypeInputProps = {
   property: SchemaProperty;
@@ -38,7 +39,7 @@ export const getDefault = (property: SchemaProperty) => {
     case 'date':
       return moment(new Date());
     case 'uuid':
-      return uuid.v4();
+      return new UUID();
     case 'decimal128':
       return new bigDecimal();
     case 'string':
@@ -46,9 +47,11 @@ export const getDefault = (property: SchemaProperty) => {
     case 'list':
       return [];
     case 'set':
-      return new Set();
+      return []; //problem with serializing Set
     case 'dictionary':
       return new Object();
+    case 'objectId':
+      return new ObjectId();
     default:
       return null;
   }

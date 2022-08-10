@@ -76,8 +76,8 @@ export const DataTable = (props: {
       },
       property,
       render: (value: RealmObject, row: RealmObject) => {
-        console.log('value',value)
-        console.log('props.objects',props.objects)
+        // console.log('value',value)
+        // console.log('props.objects',props.objects)
 
         return (
           <Dropdown

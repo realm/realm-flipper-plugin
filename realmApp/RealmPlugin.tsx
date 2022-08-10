@@ -29,14 +29,20 @@ type getObjectsQuery = {
 };
 
 // convert object from a schema to realm one
-const typeConverter = (object: any, realm: Realm, schemaName: string) => {
+const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
+  if (!schemaName) {
+    throw new Error('Converting with missing schema name');
+  }
   console.log('converting...', object);
   const schemaObj = realm.schema.find(schema => schema.name === schemaName);
-  // schemaObj?.properties
+
   const convertProperty = (
     val: any,
     property: CanonicalObjectSchemaProperty,
   ) => {
+    if (val === null) {
+      return null;
+    }
     // console.log('got type', type);
     switch (property.type) {
       case 'object':
@@ -46,7 +52,6 @@ const typeConverter = (object: any, realm: Realm, schemaName: string) => {
               property.objectType as string,
               val[schemaObj?.primaryKey as string],
             );
-      // return typeConverter(val, realm, property.objectType as string);
       case 'uuid':
         return new BSON.UUID(val);
       case 'decimal128':
@@ -54,9 +59,17 @@ const typeConverter = (object: any, realm: Realm, schemaName: string) => {
       case 'objectID':
         return new BSON.ObjectId(val);
       case 'data':
-        return new ArrayBuffer(123);
+        const typedArray = Uint8Array.from(val);
+        return typedArray.buffer;
+        // return new ArrayBuffer(val);
       case 'set':
+        // due to a problem with serialization, Set is being passed over as a list
+        const realVal = (val as any[]).map(value => {
+          typeConverter(value, realm, property.objectType);
+        });
+        return new Set(realVal);
       case 'list':
+        console.log('prop:', property, ' val:', val);
         return val.map(obj => {
           typeConverter(obj, realm, property.objectType);
         });

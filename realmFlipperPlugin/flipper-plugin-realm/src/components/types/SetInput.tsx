@@ -1,11 +1,11 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Col, Layout, Row } from 'antd';
-import React, { useState } from "react";
-import { TypeInput, TypeInputProps } from './TypeInput';
+import React, { useEffect, useState } from "react";
+import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
 export const SetInput = ({ property, set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
-  const [arr, setArr] = useState([] as any[]);
+  const [arr, setArr] = useState<any[]>([]);
   const [occurences] = useState(new Map<any, number>());
 
   const [container, setContainer] = useState(new Set());
@@ -43,7 +43,7 @@ export const SetInput = ({ property, set }: TypeInputProps) => {
       }
 
       container.add(val);
-      set(container);
+      set(Array.from(container.values()));
       arr[index] = val;
       occurences.set(val, (occurences.get(val) || 0) + 1);
     }
@@ -63,12 +63,12 @@ export const SetInput = ({ property, set }: TypeInputProps) => {
     console.log('deleteRow', occurences);
   };
 
-  // Array.from(container.values())
   return (
     <Layout>
       {arr.map((value: any, index: number) => {
-        // console.log('value: ' + value, 'index: ' + index);
-        // const count = occurences.get(value);
+        const count = occurences.get(value) || 0;
+        console.log('index:', index, ' count is', count)
+        // const count = occurences.get(index) > 1;
         return (
           <Row key={index} style={{ backgroundColor: 'white' }}>
             <Col flex="auto">
@@ -80,7 +80,7 @@ export const SetInput = ({ property, set }: TypeInputProps) => {
                 setReset((v) => v + 1);
               }}
               defaultValue={value}
-              extraProps={{style: { width: '100%' }}}
+              extraProps={{style: { width: '100%' }, status: (count < 2 ? '' : 'error') }}
             ></TypeInput>
             </Col>
             <Col>
@@ -103,7 +103,10 @@ export const SetInput = ({ property, set }: TypeInputProps) => {
       <Button
         onClick={() => {
           // const val = getDefault(innerProp);
-          setArr([...arr, null]);
+          const newVal = getDefault(innerProp);
+          container.add(newVal);
+          occurences.set(newVal, (occurences.get(newVal) || 0) + 1);
+          setArr([...arr, newVal]);
         }}
       >
         Add {property.objectType}

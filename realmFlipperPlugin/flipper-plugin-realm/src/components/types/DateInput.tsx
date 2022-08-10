@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
 export const DateInput = ({ property, defaultValue, set, extraProps }: TypeInputProps) => {
-  console.log('dateInput', property, defaultValue, set, extraProps)
+  // console.log('dateInput', property, defaultValue, set, extraProps)
   const [reset, setReset] = useState(0);
   const [value, setValue] = useState<moment.Moment | undefined>(defaultValue as moment.Moment);
 

@@ -40,7 +40,7 @@ const ObjectAdder = ({
   };
 
   const onOk = () => {
-    console.log('addObject', values);
+    // console.log('addObject', values);
     // console.log(props.addObject);
     addObject(values);
     hideModal();
