@@ -55,7 +55,7 @@ const realm = new Realm({
     DictSchema,
   ],
   path: 'main',
-  schemaVersion: 30,
+  schemaVersion: 32,
 });
 
 //realmPlugin.newfunc();

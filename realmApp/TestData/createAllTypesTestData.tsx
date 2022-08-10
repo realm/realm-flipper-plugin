@@ -100,11 +100,8 @@ export function createAllTypesTestData(realm: Realm) {
       Decimal128.fromString('1'),
       Decimal128.fromString('2'),
     ],
-    SetDecimal128: [
-      Decimal128.fromString('1'),
-      Decimal128.fromString('1'),
-      Decimal128.fromString('2'),
-    ],
+    // SetDecimal128: [Decimal128.fromString('1'), Decimal128.fromString('2')],
+    SetString: ['Vingegaard', 'Pogacar'],
     // ObjectList: [
     //   {
     //     name: 'Jonas',
@@ -158,18 +155,16 @@ export function createAllTypesTestData(realm: Realm) {
     name: 'Fanta',
   };
 
-
   let NoPrimaryKey3 = {
     _id: 25234,
     name: 'Sprite',
   };
 
-  realm.objects("Banana").filter
+  realm.objects('Banana').filter;
 
   realm.write(() => {
     realm.create('NoPrimaryKey', NoPrimaryKey1);
     realm.create('NoPrimaryKey', NoPrimaryKey2);
     realm.create('NoPrimaryKey', NoPrimaryKey3);
-
   });
 }

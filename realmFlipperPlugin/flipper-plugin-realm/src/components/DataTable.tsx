@@ -3,8 +3,8 @@ import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from "../CommonTypes";
-import { parsePropToCell, parseRows } from '../utils/Parser';
+import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
@@ -76,8 +76,8 @@ export const DataTable = (props: {
       },
       property,
       render: (value: RealmObject, row: RealmObject) => {
-        console.log('value',value)
-        console.log('props.objects',props.objects)
+        console.log('value', value);
+        console.log('props.objects', props.objects);
 
         return (
           <Dropdown
@@ -85,7 +85,7 @@ export const DataTable = (props: {
             trigger={[`contextMenu`]}
           >
             {/* <Tooltip placement="topLeft" title={text}> */}
-            <Tooltip placement="topLeft" title={"aaa"}>
+            <Tooltip placement="topLeft" title={'aaa'}>
               {parsePropToCell(value, property, currentSchema, props.schemas)}
             </Tooltip>
           </Dropdown>
@@ -134,6 +134,5 @@ export const DataTable = (props: {
       // rowSelection={{ type: 'radio'}}
     />
     // </Layout.Container>
-
   );
 };

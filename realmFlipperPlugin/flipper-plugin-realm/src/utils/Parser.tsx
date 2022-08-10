@@ -3,19 +3,18 @@ import { BooleanValue } from '../components/BooleanValue';
 import React from 'react';
 
 export const parsePropToCell = (
-  object: Record<string, unknown>,
+  value: string | number | Record<string, unknown>,
   property: SchemaProperty,
   schema: SchemaObject,
   schemas: Array<SchemaObject>
-): Record<string, unknown> => {
-  console.log('object', object);
-  console.log('property', property);
+): JSX.Element | string | number => {
 
-  if (!object ) {
-    return;
+  if (!value) {
+    return value;
   }
 
-  let stringForPrint: string | Element 
+  let returnValue: JSX.Element | string | number = '';
+  console.log('value', value);
 
   switch (property.type) {
     case 'string':
@@ -24,44 +23,44 @@ export const parsePropToCell = (
     case 'float':
     case 'objectId':
     case 'date':
-    case 'uuid':
-      stringForPrint = parseSimpleData(object);
+    case 'uuid': //@ts-ignore --> These type errors are okay because the Realm data types guarantee type safety here.
+      returnValue = parseSimpleData(value);
       break;
-    case 'bool':
-      stringForPrint = parseBoolean(object);
+    case 'bool': //@ts-ignore
+      returnValue = parseBoolean(value);
       break;
     case 'list':
-    case 'set':
-      stringForPrint = parseSetOrList(object);
+    case 'set': //@ts-ignore
+      console.log('setlist', value);
+      //@ts-ignore
+      returnValue = parseSetOrList(value);
       break;
     case 'data':
-    case 'dictionary':
-      stringForPrint = parseDataOrDictionary(object);
+    case 'dictionary': //@ts-ignore
+      returnValue = parseDataOrDictionary(value);
       break;
-    case 'decimal128':
-      stringForPrint = parseDecimal128(object);
+    case 'decimal128': //@ts-ignore
+      returnValue = parseDecimal128(value);
       break;
-    case 'object':
-      stringForPrint = parseLinkedObject(
-        schema,
-        schemas,
-        object,
-        property.name
-      );
+    case 'object': //@ts-ignore
+      returnValue = parseLinkedObject(schema, schemas, value, property.name);
       break;
     case 'mixed':
-      stringForPrint = parseMixed(object);
+      returnValue = parseMixed(value);
       break;
   }
-  console.log('stringForPrint', stringForPrint);
-  return stringForPrint;
+  // console.log('returnValue', returnValue);
+
+  return returnValue;
 };
 
-function parseSimpleData(input: string): string {
+function parseSimpleData(input: string | number): string | number {
   return input;
 }
 
 function parseSetOrList(input: any[]): string {
+  console.log('parseSetOrList', input);
+
   const output = input.map((value) => {
     return parseJavaScriptTypes(value);
   });
@@ -73,10 +72,10 @@ function parseDataOrDictionary(input: Record<string, unknown>): string {
   return JSON.stringify(input);
 }
 
-function parseBoolean(input: boolean): Element {
+function parseBoolean(input: boolean): JSX.Element {
   const inputAsString = input.toString();
 
-  return <BooleanValue active={inputAsString}> {inputAsString}</BooleanValue>;
+  return <BooleanValue active={input} > {inputAsString}</BooleanValue>;
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {
@@ -89,31 +88,36 @@ function parseLinkedObject(
   linkedObj: Record<string, unknown>,
   key: string
 ): string {
-  let stringForPrint = '';
+  console.log('schema', schema);
+  console.log('schemas', schemas);
+  console.log('linkedObj', linkedObj);
+  console.log('key', key);
+  let returnValue = '';
   const childSchema: SchemaObject | undefined = schemas.find(
     (s) => s.name === schema.properties[key].objectType
   );
+  console.log('childSchema', childSchema);
   if (childSchema !== undefined) {
-    stringForPrint =
+    returnValue =
       '[' +
       childSchema.name +
       ']' +
       '.' +
       childSchema.primaryKey +
       ': ' +
-      //@ts-ignore
       linkedObj[childSchema.primaryKey];
   }
 
-  return stringForPrint;
+  return returnValue;
 }
 
 function parseMixed(input: any): string {
   return JSON.stringify(input);
 }
 
-function parseJavaScriptTypes(input: any): string | Element {
+function parseJavaScriptTypes(input: any): string | number | JSX.Element {
   const type = typeof input;
+  console.log('parseJavaScriptTypes', input);
 
   switch (type) {
     case 'string':
@@ -125,9 +129,11 @@ function parseJavaScriptTypes(input: any): string | Element {
     case 'object':
       if (Array.isArray(input)) {
         return parseSetOrList(input);
-      } else if ('$numberDecimal' in input) {
-        return input.$numberDecimal;
-      } else {
+      }
+      //else if ('$numberDecimal' in input) {
+      //   return input.$numberDecimal;
+      //}
+      else {
         return parseMixed(input);
       }
     case 'undefined':
