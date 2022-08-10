@@ -36,8 +36,6 @@ export const DataVisualizer = ({
     return <>Please select a schema.</>;
   }
 
-  // const { removeObject } = usePlugin(plugin);
-
   // Return buttons + tableView
   return (
     <Layout.Container grow>
