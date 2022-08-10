@@ -50,7 +50,7 @@ const {Link} = Typography;
           onFilter: (value: string, record: any) =>
             record[col].startsWith(value),
           render: (text, record) =>
-            renderTableCells(text.name, typeof text, col, record),
+            renderTableCells(text, typeof text, col, record),
           filterSearch: true,
         }));
       return columnObjs;
