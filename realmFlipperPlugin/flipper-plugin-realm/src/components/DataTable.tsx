@@ -15,20 +15,6 @@ type ColumnType = {
   isPrimaryKey: boolean;
 };
 
-export const schemaObjToColumns = (schema: SchemaObject) => {
-  return Object.keys(schema.properties).map((key) => {
-    const obj = schema.properties[key];
-    const isPrimaryKey = obj.name === schema.primaryKey;
-    return {
-      name: obj.name,
-      isOptional: obj.optional,
-      objectType: obj.objectType,
-      propertyType: obj.type,
-      isPrimaryKey: isPrimaryKey,
-    };
-  });
-};
-
 type PropertyType = {
   columns: ColumnType[];
   objects: RealmObject[];
@@ -44,6 +30,20 @@ type PropertyType = {
     schema: SchemaObject
   ) => ReactElement;
   // rowSelection?: TableRowSelection<RealmObject>;
+};
+
+export const schemaObjToColumns = (schema: SchemaObject) => {
+  return Object.keys(schema.properties).map((key) => {
+    const obj = schema.properties[key];
+    const isPrimaryKey = obj.name === schema.primaryKey;
+    return {
+      name: obj.name,
+      isOptional: obj.optional,
+      objectType: obj.objectType,
+      propertyType: obj.type,
+      isPrimaryKey: isPrimaryKey,
+    };
+  });
 };
 
 export const DataTable = ({
@@ -132,6 +132,7 @@ PropertyType) => {
       onChange={handleOnChange}
       pagination={false}
       loading={loading}
+      size='middle'
     />
   );
 };
