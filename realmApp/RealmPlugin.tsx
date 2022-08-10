@@ -52,7 +52,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           console.log('i got', obj, obj.filterCursor, obj.cursorId);
-          let objects = realm.objects(schema); //optimize by just getting objects once
+          let objects = realm.objects(schema);
           if (!objects.length) {
             connection.send('getObjects', {
               objects: objects,
@@ -74,10 +74,19 @@ export default React.memo((props: {realms: Realm[]}) => {
           let lastItem, firstItem;
           if (objects.length) {
             lastItem = objects[objects.length - 1]; //if this is null this is the last page
-            firstItem = objects[0]; //TODO: not sure about this
+            firstItem = objects[0];
           }
           console.log('sending to client now');
           //base64 the next and prev cursors
+
+          if (schemaToObjects.has(schema)) {
+            console.log('removing all listeners from ', schema);
+            schemaToObjects.get(schema).removeAllListeners();
+          }
+          console.log('adding listener to', schema);
+          objects.addListener(onObjectsChange);
+          schemaToObjects.set(schema, objects);
+
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
@@ -110,16 +119,16 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           const schemas = realm.schema;
-          for (let schema of realm.schema) {
-            const objects = realm.objects(schema.name);
-            if (schemaToObjects.has(schema.name)) {
-              console.log('removing all listeners from ', schema.name);
-              schemaToObjects.get(schema.name).removeAllListeners();
-            }
-            console.log('adding listener to', schema.name);
-            objects.addListener(onObjectsChange);
-            schemaToObjects.set(schema.name, objects);
-          }
+          // for (let schema of realm.schema) {
+          //   const objects = realm.objects(schema.name);
+          //   if (schemaToObjects.has(schema.name)) {
+          //     console.log('removing all listeners from ', schema.name);
+          //     schemaToObjects.get(schema.name).removeAllListeners();
+          //   }
+          //   console.log('adding listener to', schema.name);
+          //   objects.addListener(onObjectsChange);
+          //   schemaToObjects.set(schema.name, objects);
+          // }
           connection.send('getSchemas', {schemas: schemas});
         });
 
@@ -202,6 +211,8 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
+          console.log('objects', objects);
+          console.log('changes', changes);
           console.log('small listener fires');
           changes.deletions.forEach(index => {
             if (connection) {
@@ -212,7 +223,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           changes.insertions.forEach(index => {
             const inserted = objects[index];
             if (connection) {
-              connection.send('liveObjectAdded', {newObject: inserted});
+              connection.send('liveObjectAdded', {
+                newObject: inserted,
+                index: index,
+              });
             }
           });
           // Handle Dog objects that were modified

@@ -71,24 +71,26 @@ function createToDo() {
     console.log(`created one task: ${task1.name} with id ${task1._id}`);
   });
 }
+let i = 1;
 
 function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: Math.floor(Math.random() * 100000000000000),
+      _id: 9,
       name: 'Jack',
       color: 'yellow',
       length: 40,
-      weight: Math.floor(Math.random() * 1000),
+      weight: 379,
     });
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
+    i++;
   });
 }
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objects('Banana')[0]);
+    realm.delete(realm.objects('Banana'));
   });
 }
 
