@@ -1,5 +1,6 @@
 import { ClearOutlined } from '@ant-design/icons';
 import { Button, Col, InputNumber, Row } from 'antd';
+// import bigDecimal from 'js-big-decimal';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
@@ -9,13 +10,13 @@ export const DecimalInput = ({
   set,
   extraProps,
 }: TypeInputProps) => {
-  console.log('val:', defaultValue)
-  const [value, setValue] = useState<bigDecimal | null>(defaultValue as bigDecimal | null);
+  // console.log('val:', defaultValue)
+  const [value, setValue] = useState<string | null>(defaultValue as string | null);
 
   const onChange = (val: string) => {
-    console.log('onChange', val);
-    setValue(new bigDecimal(val));
-    set(new bigDecimal(val));
+    // console.log('onChange', val);
+    setValue(val);
+    set(val);
   };
 
   return (
@@ -23,7 +24,7 @@ export const DecimalInput = ({
       <Col flex="auto">
         <InputNumber
         {...extraProps}
-          defaultValue={value?.getValue()}
+          defaultValue={value === null ? undefined : value}
           onChange={onChange}
           placeholder={property.optional ? 'null' : undefined}
           stringMode

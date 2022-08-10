@@ -33,6 +33,8 @@ const ObjectAdder = ({ schema }: PropertyType) => {
   };
 
   const onOk = () => {
+    // console.log('addObject', values);
+    // console.log(props.addObject);
     addObject(values);
     hideModal();
   };

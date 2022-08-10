@@ -17,7 +17,18 @@ export const DataInput = ({ set }: TypeInputProps) => {
   const [state, setState] = useState(emptyState);
 
   const chooseFile = (file: UploadFile<unknown>) => {
-    set(file);
+    const fileObj = file.originFileObj
+    if (!fileObj) {
+      set(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const contents = e.target?.result as ArrayBuffer;
+      const typedArray = new Uint8Array(contents)
+      set(Array.from(typedArray));
+    }
+    reader.readAsArrayBuffer(fileObj);
   };
 
   const onChange = (info: UploadChangeParam<UploadFile<unknown>>) => {

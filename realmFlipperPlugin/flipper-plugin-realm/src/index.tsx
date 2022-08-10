@@ -90,14 +90,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log('got schemas', data.schemas);
-    const newSchemas = data.schemas.map((schema) =>
+    console.log('schemas: ', data.schemas);
+    const newschemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newSchemas });
-    console.log('pluginState', pluginState);
+    pluginState.set({ ...state, schemas: newschemas });
+    // console.log('pluginState', pluginState);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -418,10 +418,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', newObject)
-    if (!state.currentSchema) {
-      return;
-    }
+    console.log('modifyObject', newObject)
     client.send('modifyObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
