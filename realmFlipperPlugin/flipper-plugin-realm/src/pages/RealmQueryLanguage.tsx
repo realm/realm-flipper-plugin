@@ -70,54 +70,54 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
           banner
         />
       ) : null}
-      <Layout.Container grow style={{ minHeight: '500px'}}>
-          <Row style={{ backgroundColor: 'white' }}>
-            <Col flex="auto">
-              <AutoComplete
-                style={{ width: '100%' }}
-                placeholder="Enter a query to filter the data"
-                onSearch={onTextChange}
-                id="msgbox"
-                onChange={onTextChange}
-                onKeyUp={(ev) => {
-                  if (ev.key == 'Enter') executeQuery(query);
-                }}
-                allowClear
-                showSearch
-                options={[
-                  {
-                    label: 'History',
-                    options: queryHistory
-                      .map((val, id) => wrapItem(val, 2 * id))
-                      .reverse(),
-                  },
-                  {
-                    label: 'Favourites',
-                    options: queryFavourites
-                      .map((val, id) => wrapItem(val, 2 * id + 1))
-                      .reverse(),
-                  },
-                ]}
-                backfill={true}
-              />
-            </Col>
-            <Col>
-              <Button
-                type="primary"
-                onClick={() => executeQuery(query)}
-                title="executeButton"
-              >
-                Execute
-              </Button>
-              <Button icon={<StarOutlined />} onClick={addToFavorites}></Button>
-            </Col>
-          </Row>
+      <Layout.Container grow style={{ minHeight: '500px' }}>
+        <Row style={{ backgroundColor: 'white' }}>
+          <Col flex="auto">
+            <AutoComplete
+              style={{ width: '100%' }}
+              placeholder="Enter a query to filter the data"
+              onSearch={onTextChange}
+              id="msgbox"
+              onChange={onTextChange}
+              onKeyUp={(ev) => {
+                if (ev.key == 'Enter') executeQuery(query);
+              }}
+              allowClear
+              showSearch
+              options={[
+                {
+                  label: 'History',
+                  options: queryHistory
+                    .map((val, id) => wrapItem(val, 2 * id))
+                    .reverse(),
+                },
+                {
+                  label: 'Favourites',
+                  options: queryFavourites
+                    .map((val, id) => wrapItem(val, 2 * id + 1))
+                    .reverse(),
+                },
+              ]}
+              backfill={true}
+            />
+          </Col>
+          <Col>
+            <Button
+              type="primary"
+              onClick={() => executeQuery(query)}
+              title="executeButton"
+            >
+              Execute
+            </Button>
+            <Button icon={<StarOutlined />} onClick={addToFavorites}></Button>
+          </Col>
+        </Row>
         <Layout.ScrollContainer>
           <DataTable
             columns={schemaObjToColumns(schema)}
             objects={queryResult}
             schemas={state.schemas}
-            selectedSchema={schema.name}
+            currentSchema={schema.name}
             renderOptions={renderOptions ? renderOptions : () => <></>}
             // rowSelection={rowSelection}
           />

@@ -4,7 +4,6 @@ import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { DataTable } from '../components/DataTable';
-import ObjectAdder from '../components/ObjectAdder';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
@@ -31,17 +30,17 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-
   const { removeObject } = usePlugin(plugin);
 
   if (currentSchema === undefined) {
     return <>Please select a schema.</>;
   }
 
+  const { removeObject } = usePlugin(plugin);
+
   // Return buttons + tableView
   return (
     <Layout.Container grow>
-      <ObjectAdder schema={currentSchema} />
       <Layout.ScrollContainer>
         <Layout.Container>
           <TableView />

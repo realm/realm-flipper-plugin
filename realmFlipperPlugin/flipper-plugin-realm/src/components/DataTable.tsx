@@ -33,7 +33,7 @@ export const DataTable = (props: {
   columns: ColumnType[];
   objects: RealmObject[];
   schemas: SchemaObject[];
-  selectedSchema: string;
+  currentSchema: SchemaObject;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
@@ -46,9 +46,7 @@ export const DataTable = (props: {
 }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const currentSchema = props.schemas.find(
-    (schema) => schema.name === props.selectedSchema
-  );
+  const { currentSchema } = props;
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -78,7 +76,6 @@ export const DataTable = (props: {
       render: (value: RealmObject, row: RealmObject) => {
         console.log('value', value);
         console.log('props.objects', props.objects);
-
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}

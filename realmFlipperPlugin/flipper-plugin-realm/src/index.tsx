@@ -27,6 +27,7 @@ import {
   SchemaObject,
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
+import ObjectAdder from './components/ObjectAdder';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -36,7 +37,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     selectedRealm: '',
     objects: [],
     schemas: [],
-    selectedSchema: '',
     schemaHistory: [],
     schemaHistoryIndex: 1,
     cursorId: null,
@@ -48,10 +48,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     loading: false,
     sortDirection: null,
     prev_page_cursorId: null,
-    prev_page_filterCursor: null
+    prev_page_filterCursor: null,
+    currentSchema: null,
   });
-
-  // const queryObject = createState<>({});
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
@@ -91,12 +90,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    const newschemas = data.schemas.map((schema) =>
+    const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newschemas });
+    pluginState.set({ ...state, schemas: newSchemas });
     console.log('pluginState', pluginState);
   });
 
@@ -165,7 +164,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   ) => {
     const state = pluginState.get();
     setLoading(true);
-    schema = schema ?? state.selectedSchema;
+    if (!state.currentSchema) {
+      return;
+    }
+    schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjectsBackwards', {
       schema: schema,
@@ -181,7 +183,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjectsForward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
-    schema = schema ?? state.selectedSchema;
+    if (!state.currentSchema) {
+      return;
+    }
+    schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjects', {
       schema: schema,
@@ -221,19 +226,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('addObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: object,
     });
   };
 
-  const getSchemaFromName = (schemaName: string) => {
-    const state = pluginState.get();
-    return state.schemas.find((schema) => schema.name === schemaName);
-  };
-
-  const updateSelectedSchema = (schema: SchemaObject) => { //TODO: fix later //selectedSchema 
+  const updateSelectedSchema = (schema: SchemaObject) => {
     const state = pluginState.get();
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
@@ -242,42 +245,39 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const length = newHistory.length - 1;
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
-  const goBackSchemaHistory = (schema: string) => {
+  const goBackSchemaHistory = (schema: SchemaObject) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
-  const goForwardSchemaHistory = (schema: string) => {
+  const goForwardSchemaHistory = (schema: SchemaObject) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      selectedSchema: schema,
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
       filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      currentSchema: getSchemaFromName(schema),
+      currentSchema: schema,
     });
   };
 
@@ -313,19 +313,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
     // console.log('addObject in index', object)
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('modifyObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: newObject,
     });
   };
 
   const removeObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-
+    if (!state.currentSchema) {
+      return;
+    }
     client.send('removeObject', {
       realm: state.selectedRealm,
-      schema: state.selectedSchema,
+      schema: state.currentSchema.name,
       object: object,
     });
   };
@@ -386,28 +391,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const refreshState = () => {
-    pluginState.set({
-      realms: [],
-      selectedRealm: '',
-      objects: [],
-      queryResult: [],
-      singleObject: {},
-      schemas: [],
-      selectedSchema: '',
-      schemaHistory: [],
-      schemaHistoryIndex: 1,
-      cursorId: null,
-      filterCursor: 0,
-      selectedPageSize: 100,
-      totalObjects: 0,
-      currentPage: 1,
-      sortingColumn: null,
-      loading: false,
-      sortDirection: null,
-      prev_page_cursorId: null,
-      prev_page_filterCursor: null,
-    });
-    getRealms();
+    //refresh
   };
 
   client.onConnect(async () => {
@@ -440,10 +424,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 export function Component() {
   const {state} = usePlugin(plugin);
   const {objects, schemas, loading, sortDirection, sortingColumn, currentSchema} = useValue(state);
-
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
-
-
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -451,7 +432,10 @@ export function Component() {
       <RealmSchemaSelect></RealmSchemaSelect>
       {viewMode === 'data' && currentSchema !== null ? (
         <Layout.Container height={800}>
-          {objects.length > 20 ? <PaginationActionGroup /> : null}
+          <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
+            {objects.length > 20 ? <PaginationActionGroup /> : null}
+            <ObjectAdder schema={currentSchema} />
+          </Layout.Horizontal>
           <DataVisualizer
             objects={objects}
             schemas={schemas}
@@ -470,7 +454,7 @@ export function Component() {
         ></SchemaVisualizer>
       ) : null}
       {viewMode === 'RQL' ? (
-          <RealmQueryLanguage schema={currentSchema} />
+        <RealmQueryLanguage schema={currentSchema} />
       ) : null}
     </Layout.Container>
   );
