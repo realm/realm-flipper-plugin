@@ -1,6 +1,6 @@
 import { Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
+import { AddObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';
@@ -8,12 +8,9 @@ import { plugin } from '..';
 import { Layout, usePlugin } from 'flipper-plugin';
 
 type PropertyType = {
-  schema: SchemaObject;
-}
-const ObjectAdder = ({
-  schema,
-}: PropertyType) => {
-
+  schema: SchemaObject | null;
+};
+const ObjectAdder = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
   const empty: { [prop: string]: any } = {};
@@ -45,6 +42,10 @@ const ObjectAdder = ({
     addObject(values);
     hideModal();
   };
+
+  if (!schema) {
+    return;
+  }
 
   return (
     <Layout.Horizontal
