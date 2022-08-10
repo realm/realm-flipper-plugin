@@ -5,28 +5,9 @@ import { plugin } from '../index';
 import { SchemaProperty, SchemaObject } from "../CommonTypes";
 import { Value } from '../utils/TypeBasedValueRenderer';
 import { isPropertyLinked } from '../utils/linkedObject';
+ import { BooleanValue } from '../components/BooleanValue';
 const {Text} = Typography;
 const {Link} = Typography;
-
-const NonWrappingText = styled(Text)({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
-const BooleanValue = styled(NonWrappingText)<{active?: boolean}>((props) => ({
-  '&::before': {
-    content: '""',
-    display: 'inline-block',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: props.active ? theme.successColor : theme.errorColor,
-    marginRight: 5,
-    marginTop: 1,
-  },
-}));
-  
-
 
   export function createRows(
     properties: { [key: string]: SchemaProperty },

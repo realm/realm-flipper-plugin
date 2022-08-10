@@ -1,109 +1,81 @@
-import { SchemaObject } from "../CommonTypes";
+import { SchemaObject, SchemaProperty } from '../CommonTypes';
+import { BooleanValue } from '../components/BooleanValue';
+import React from 'react';
 
-type propertyRepresentation = {
-  value: any;
-  text: string | number | null;
-};
-
-export function parseRows(
-  objects: Object[],
+export const parsePropToCell = (
+  value: string | number | Record<string, unknown>,
+  property: SchemaProperty,
   schema: SchemaObject,
   schemas: Array<SchemaObject>
-) {
-  // console.log(schema);
+): JSX.Element | string | number => {
 
-  const rows: Array<Object> = objects.map((obj: any, index: number) => {
-    // let returnObj = { text: {}, object: obj, key: index };
-    const returnObj = { key: index };
+  if (!value) {
+    return value;
+  }
 
-    Object.keys(schema.properties).forEach((propKey: string) => {
-      const currentPropObject = schema.properties[propKey];
-      const currentRealmPropType = currentPropObject.type;
-      const currentFieldValue = obj[propKey];
+  let returnValue: JSX.Element | string | number = '';
+  console.log('value', value);
 
-      const propRep: propertyRepresentation = {
-        value: currentFieldValue,
-        text: null,
-      };
-      returnObj[propKey] = propRep;
+  switch (property.type) {
+    case 'string':
+    case 'double':
+    case 'int':
+    case 'float':
+    case 'objectId':
+    case 'date':
+    case 'uuid': //@ts-ignore --> These type errors are okay because the Realm data types guarantee type safety here.
+      returnValue = parseSimpleData(value);
+      break;
+    case 'bool': //@ts-ignore
+      returnValue = parseBoolean(value);
+      break;
+    case 'list':
+    case 'set': //@ts-ignore
+      console.log('setlist', value);
+      //@ts-ignore
+      returnValue = parseSetOrList(value);
+      break;
+    case 'data':
+    case 'dictionary': //@ts-ignore
+      returnValue = parseDataOrDictionary(value);
+      break;
+    case 'decimal128': //@ts-ignore
+      returnValue = parseDecimal128(value);
+      break;
+    case 'object': //@ts-ignore
+      returnValue = parseLinkedObject(schema, schemas, value, property.name);
+      break;
+    case 'mixed':
+      returnValue = parseMixed(value);
+      break;
+  }
+  // console.log('returnValue', returnValue);
 
-      if (currentFieldValue === undefined) {
-        return;
-      }
+  return returnValue;
+};
 
-      if (currentFieldValue === null) {
-        // @ts-ignore
-        // returnObj.text[propKey] = "null";
-        returnObj[propKey].text = 'null';
-        return;
-      }
-
-      let stringForPrint = '';
-
-      switch (currentRealmPropType) {
-        case 'string':
-        case 'double':
-        case 'int':
-        case 'float':
-        case 'objectId':
-        case 'date':
-        case 'uuid':
-          stringForPrint = parseSimpleData(currentFieldValue);
-          break;
-        case 'bool':
-          stringForPrint = parseBoolean(currentFieldValue);
-          break;
-        case 'list':
-        case 'set':
-          stringForPrint = parseSetOrList(currentFieldValue);
-          break;
-        case 'data':
-        case 'dictionary':
-          stringForPrint = parseDataOrDictionary(currentFieldValue);
-          break;
-        case 'decimal128':
-          stringForPrint = parseDecimal128(currentFieldValue);
-          break;
-        case 'object':
-          stringForPrint = parseLinkedObject(
-            schema,
-            schemas,
-            currentFieldValue,
-            propKey
-          );
-          break;
-        case 'mixed':
-          stringForPrint = parseMixed(currentFieldValue);
-          break;
-      }
-      // @ts-ignore
-      //returnObj.text[propKey] = stringForPrint;
-      returnObj[propKey].text = stringForPrint;
-    });
-    return returnObj;
-  });
-
-  return rows;
-}
-
-function parseSimpleData(input: string): string {
+function parseSimpleData(input: string | number): string | number {
   return input;
 }
 
 function parseSetOrList(input: any[]): string {
+  console.log('parseSetOrList', input);
+
   const output = input.map((value) => {
     return parseJavaScriptTypes(value);
   });
 
-  return "[" + output + "]";
+  return '[' + output + ']';
 }
 
-function parseDataOrDictionary(input: {}): string {
+function parseDataOrDictionary(input: Record<string, unknown>): string {
   return JSON.stringify(input);
 }
 
-function parseBoolean(input: boolean): string {
-  return input.toString();
+function parseBoolean(input: boolean): JSX.Element {
+  const inputAsString = input.toString();
+
+  return <BooleanValue active={input} > {inputAsString}</BooleanValue>;
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {
@@ -113,53 +85,60 @@ function parseDecimal128(input: { $numberDecimal: string }): string {
 function parseLinkedObject(
   schema: SchemaObject,
   schemas: Array<SchemaObject>,
-  linkedObj: {},
+  linkedObj: Record<string, unknown>,
   key: string
 ): string {
-  let stringForPrint = "";
+  console.log('schema', schema);
+  console.log('schemas', schemas);
+  console.log('linkedObj', linkedObj);
+  console.log('key', key);
+  let returnValue = '';
   const childSchema: SchemaObject | undefined = schemas.find(
     (s) => s.name === schema.properties[key].objectType
   );
+  console.log('childSchema', childSchema);
   if (childSchema !== undefined) {
-    stringForPrint =
-      "[" +
+    returnValue =
+      '[' +
       childSchema.name +
-      "]" +
-      "." +
+      ']' +
+      '.' +
       childSchema.primaryKey +
-      ": " +
-      //@ts-ignore
+      ': ' +
       linkedObj[childSchema.primaryKey];
   }
 
-  return stringForPrint;
+  return returnValue;
 }
 
 function parseMixed(input: any): string {
   return JSON.stringify(input);
 }
 
-function parseJavaScriptTypes(input: any): string {
+function parseJavaScriptTypes(input: any): string | number | JSX.Element {
   const type = typeof input;
+  console.log('parseJavaScriptTypes', input);
 
   switch (type) {
-    case "string":
-    case "number":
-    case "symbol":
+    case 'string':
+    case 'number':
+    case 'symbol':
       return parseSimpleData(input);
-    case "boolean":
+    case 'boolean':
       return parseBoolean(input);
-    case "object":
+    case 'object':
       if (Array.isArray(input)) {
         return parseSetOrList(input);
-      } else if ("$numberDecimal" in input) {
-        return input.$numberDecimal;
-      } else {
+      }
+      //else if ('$numberDecimal' in input) {
+      //   return input.$numberDecimal;
+      //}
+      else {
         return parseMixed(input);
       }
-    case "undefined":
-    case "bigint":
-    case "function":
+    case 'undefined':
+    case 'bigint':
+    case 'function':
     default:
       return input;
   }

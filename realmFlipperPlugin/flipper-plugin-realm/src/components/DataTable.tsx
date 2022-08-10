@@ -3,8 +3,8 @@ import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { Key, ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from "../CommonTypes";
-import { parseRows } from '../utils/Parser';
+import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
@@ -48,13 +48,6 @@ export const DataTable = (props: {
   const state = useValue(instance.state);
   const { currentSchema } = props;
 
-  //TODO: Sort objects after receiving them so that every component works with the same order.
-  // Put primaryKey column in front.
-  // const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
-  // const tempCol = props.columns[0];
-  // props.columns[0] = props.columns[primaryKeyIndex];
-  // props.columns[primaryKeyIndex] = tempCol;
-
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
@@ -63,7 +56,6 @@ export const DataTable = (props: {
 
   const filledColumns = props.columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
-
     return {
       title: () => (
         <ColumnTitle
@@ -81,17 +73,17 @@ export const DataTable = (props: {
         showTitle: false,
       },
       property,
-      render: (
-        text: { text: string | number; value: RealmObject },
-        row: RealmObject
-      ) => {
+      render: (value: RealmObject, row: RealmObject) => {
+        console.log('value', value);
+        console.log('props.objects', props.objects);
         return (
           <Dropdown
             overlay={props.renderOptions(row, property, currentSchema)}
             trigger={[`contextMenu`]}
           >
-            <Tooltip placement="topLeft" title={text.text}>
-              {text.text}
+            {/* <Tooltip placement="topLeft" title={text}> */}
+            <Tooltip placement="topLeft" title={'aaa'}>
+              {parsePropToCell(value, property, currentSchema, props.schemas)}
             </Tooltip>
           </Dropdown>
         );
@@ -102,7 +94,8 @@ export const DataTable = (props: {
     };
   });
 
-  const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
+  // const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
+  // console.log('ROWS', rowObjs)
 
   const handleOnChange = (
     pagination: TablePaginationConfig,
@@ -130,7 +123,7 @@ export const DataTable = (props: {
   return (
     // <Layout.Container grow>
     <Table
-      dataSource={rowObjs}
+      dataSource={props.objects}
       columns={filledColumns}
       onChange={handleOnChange}
       pagination={false}

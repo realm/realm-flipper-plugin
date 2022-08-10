@@ -30,8 +30,9 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-  console.log(currentSchema);
-  if (!currentSchema) {
+  const { removeObject } = usePlugin(plugin);
+
+  if (currentSchema === undefined) {
     return <>Please select a schema.</>;
   }
 
@@ -107,7 +108,7 @@ export const DataVisualizer = ({
           onClick={() => {
             const object = {};
             Object.keys(row).forEach((key) => {
-              object[key] = row[key].value;
+              object[key] = row[key];
             });
             setInspectorView('Inspector - Realm Object');
             setNewInspectData({ [schema.name]: object });
@@ -121,7 +122,7 @@ export const DataVisualizer = ({
           onClick={() => {
             setNewInspectData({
               [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name].value,
+                row[schemaProperty.name],
             });
             setInspectorView('Inspector - Realm Object Property');
             showSidebar ? null : setShowSidebar(true);
@@ -132,7 +133,6 @@ export const DataVisualizer = ({
       </Menu>
     );
 
-    //  const columns = Object.keys(currentSchema.properties).map((key) => {
     const columns = currentSchema.order.map((key) => {
       const obj = currentSchema.properties[key];
       const isPrimaryKey = obj.name === currentSchema.primaryKey;
@@ -152,7 +152,7 @@ export const DataVisualizer = ({
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
-          currentSchema={currentSchema}
+          selectedSchema={currentSchema.name}
           loading={loading}
           renderOptions={dropDown}
         />
