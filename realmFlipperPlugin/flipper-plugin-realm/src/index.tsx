@@ -140,6 +140,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       firstObjectInMemory
     );
     console.log('sortDirection', state.sortDirection, state.currentPage);
+    console.log("last object new", state.objects[state.objects.length-1])
     if (state.currentPage === 1 && largerNeighbor === firstObjectInMemory) {
       //TODO: set new cursor
       let newObjects = [newObject, ...state.objects];
@@ -148,6 +149,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
         ...state,
         objects: [...newObjects],
         totalObjects: state.totalObjects + 1,
+        cursorId: state.objects[state.objects.length-1]._id,
+        filterCursor: state.sortingColumn ? state.objects[state.objects.length-1][state.sortingColumn] : null,
+        prev_page_cursorId: newObject._id,
+        prev_page_filterCursor: state.sortingColumn ? newObject[state.sortingColumn] : null,
       });
       return;
     }

@@ -312,7 +312,7 @@ function getPrevObjectsDescending(
 ) {
   console.log('descending previous');
   if (obj.sortingColumn) {
-    obj.prev_page_filterCursor =
+    const filterCursor =
       obj.prev_page_filterCursor ??
       objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
     objects = objects
@@ -321,10 +321,12 @@ function getPrevObjectsDescending(
         ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
+        `${obj.sortingColumn} ${
+          !obj.prev_page_filterCursor ? '>=' : '>'
+        } $0 || (${obj.sortingColumn} == $0 && _id ${
           obj.cursorId ? '>=' : '>'
         } $1) LIMIT(${limit + 1})`,
-        obj.prev_page_filterCursor,
+        filterCursor,
         obj.prev_page_cursorId,
       );
   } else {
@@ -353,8 +355,8 @@ function getPrevObjectsAscending(
 ) {
   console.log('ascending previous');
   if (obj.sortingColumn) {
-    obj.prev_page_filterCursor =
-      obj.prev_page_filterCursor ??
+    const filterCursor =
+      obj.filterCursor ??
       objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
     objects = objects
       .sorted([
@@ -362,10 +364,12 @@ function getPrevObjectsAscending(
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
+        `${obj.sortingColumn} ${
+          !obj.prev_page_filterCursor ? '<=' : '<'
+        } $0 || (${obj.sortingColumn} == $0 && _id ${
           obj.prev_page_cursorId ? '<=' : '<'
         } $1) LIMIT(${limit + 1})`,
-        obj.prev_page_filterCursor,
+        filterCursor,
         obj.prev_page_cursorId,
       );
   } else {
@@ -394,19 +398,20 @@ function getObjectsDescending(
   limit: number,
 ) {
   if (obj.sortingColumn) {
-    obj.filterCursor =
+    const filterCursor =
       obj.filterCursor ??
       objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+    console.log("filtercursor is ",obj.filterCursor);
     objects = objects
       .sorted([
         [`${obj.sortingColumn}`, true],
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
+        `${obj.sortingColumn} ${!obj.filterCursor ? '<=' : '<'} $0 || (${obj.sortingColumn} == $0 && _id ${
           obj.cursorId ? '<=' : '<'
         } $1) LIMIT(${limit + 1})`,
-        obj.filterCursor,
+        filterCursor,
         obj.cursorId,
       );
   } else {
@@ -426,7 +431,7 @@ function getObjectsAscending(
   limit: number,
 ) {
   if (obj.sortingColumn) {
-    obj.filterCursor =
+    const filterCursor =
       obj.filterCursor ??
       objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
     objects = objects
@@ -435,10 +440,10 @@ function getObjectsAscending(
         ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '>=' : '>'
-        } $1) LIMIT(${limit + 1})`,
-        obj.filterCursor,
+        `${obj.sortingColumn} ${!obj.filterCursor ? '>=' : '>'} $0 || (${
+          obj.sortingColumn
+        } == $0 && _id ${obj.cursorId ? '>=' : '>'} $1) LIMIT(${limit + 1})`,
+        filterCursor,
         obj.cursorId,
       );
   } else {
