@@ -77,7 +77,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 179,
+      _id: 5,
       name: 'Jack',
       color: 'yellow',
       length: 40,

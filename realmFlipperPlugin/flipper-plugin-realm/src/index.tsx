@@ -135,31 +135,42 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const firstObjectInMemory = state.objects[state.objects.length - 1];
     //if sorted by ascending:
     console.log('neighbors', smallerNeighbor, largerNeighbor);
-    if (state.objects.length > state.selectedPageSize) {
+    console.log("sortDirection", state.sortDirection);
+    if (state.objects.length >= state.selectedPageSize) {
       if (state.sortDirection === 'ascend') {
-        if (smallerNeighbor < firstObjectInMemory) {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
           return false;
-        } else if (largerNeighbor > lastObjectInMemory) {
+        }
+      } else {
+        console.log("descending")
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
           return false;
         }
       }
     }
-    //if sorting descending, check if larger than last element and smaller than first element
-    //, so just reverse of what is above
 
+    console.log("inserting")
     let newObjects = state.objects;
     const objectsLength = state.objects.length;
     for (let i = 1; i < objectsLength; i++) {
       if (
-        state.objects[i - 1]._id === smallerNeighbor &&
-        state.objects[i]._id === largerNeighbor
+       ( state.objects[i - 1]._id === smallerNeighbor ||
+        state.objects[i - 1]._id === largerNeighbor) &&
+          (state.objects[i]._id === largerNeighbor ||
+        state.objects[i]._id === smallerNeighbor)
       ) {
         newObjects.splice(i, 0, newObject);
         break;
       } else if (!largerNeighbor && !smallerNeighbor) {
         newObjects = [newObject];
         break;
-      } else if (!largerNeighbor) {
+      } else if (!largerNeighbor || !smallerNeighbor) {
         console.log('this case');
         //TODO: set new cursor
         newObjects.push(newObject);
@@ -336,6 +347,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       objects: [],
       sortingColumn: null,
+      sortDirection: null,
     });
   };
 
