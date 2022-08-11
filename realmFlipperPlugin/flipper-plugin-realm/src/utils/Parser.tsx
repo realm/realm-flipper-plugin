@@ -14,7 +14,6 @@ export const parsePropToCell = (
   }
 
   let returnValue: JSX.Element | string | number = '';
-  console.log('value', value);
 
   switch (property.type) {
     case 'string':
@@ -31,7 +30,6 @@ export const parsePropToCell = (
       break;
     case 'list':
     case 'set': //@ts-ignore
-      console.log('setlist', value);
       //@ts-ignore
       returnValue = parseSetOrList(value);
       break;
@@ -49,7 +47,6 @@ export const parsePropToCell = (
       returnValue = parseMixed(value);
       break;
   }
-  // console.log('returnValue', returnValue);
 
   return returnValue;
 };
@@ -59,7 +56,6 @@ function parseSimpleData(input: string | number): string | number {
 }
 
 function parseSetOrList(input: any[]): string {
-  console.log('parseSetOrList', input);
 
   const output = input.map((value) => {
     return parseJavaScriptTypes(value);
@@ -88,15 +84,10 @@ function parseLinkedObject(
   linkedObj: Record<string, unknown>,
   key: string
 ): string {
-  console.log('schema', schema);
-  console.log('schemas', schemas);
-  console.log('linkedObj', linkedObj);
-  console.log('key', key);
   let returnValue = '';
   const childSchema: SchemaObject | undefined = schemas.find(
     (s) => s.name === schema.properties[key].objectType
   );
-  console.log('childSchema', childSchema);
   if (childSchema !== undefined) {
     returnValue =
       '[' +
@@ -117,7 +108,6 @@ function parseMixed(input: any): string {
 
 function parseJavaScriptTypes(input: any): string | number | JSX.Element {
   const type = typeof input;
-  console.log('parseJavaScriptTypes', input);
 
   switch (type) {
     case 'string':
