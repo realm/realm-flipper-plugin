@@ -1,4 +1,5 @@
-import { Dropdown, Table, Tooltip } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { ReactElement } from 'react';
@@ -86,8 +87,38 @@ PropertyType) => {
       },
       property,
       render: (value: RealmObject, row: RealmObject) => {
-        console.log('value', value);
-        console.log('objects', objects);
+        if (property.objectType && value) {
+
+console.log('property.objectType', property.objectType)
+
+
+          const linkedSchema = schemas.find(
+            (schema) => schema.name === property.objectType
+          );
+          if (linkedSchema) {
+            return (
+              <Layout.Container style={{display:'flex', flexDirection: 'row', gap: '5px'}}>
+                <Button
+                  shape="circle"
+                  type="primary"
+                  size="small"
+                  icon={<SearchOutlined />}
+                  ghost
+                />
+                <Dropdown
+                  overlay={renderOptions(row, property, currentSchema)}
+                  trigger={[`contextMenu`]}
+                >
+                  <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+                    {parsePropToCell(value, property, currentSchema, schemas)}
+                  </Tooltip>
+                </Dropdown>
+
+                
+              </Layout.Container>
+            );
+          }
+        }
         return (
           <Dropdown
             overlay={renderOptions(row, property, currentSchema)}
@@ -129,10 +160,11 @@ PropertyType) => {
     <Table
       dataSource={objects}
       columns={filledColumns}
+      rowClassName = {() => 'testStyle'}
       onChange={handleOnChange}
       pagination={false}
       loading={loading}
-      size='middle'
+      size="middle"
     />
   );
 };
