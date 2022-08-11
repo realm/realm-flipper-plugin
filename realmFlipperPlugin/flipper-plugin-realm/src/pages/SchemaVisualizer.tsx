@@ -13,6 +13,7 @@ import { plugin } from '../index';
 import { SchemaProperty, SchemaObject } from '../CommonTypes';
 import { isPropertyLinked } from '../utils/linkedObject';
 import { BooleanValue } from '../components/BooleanValue';
+import { SchemaGraph } from './SchemaGraph';
 const { Text } = Typography;
 const { Link } = Typography;
 

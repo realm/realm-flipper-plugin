@@ -29,6 +29,7 @@ import {
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
 import ObjectAdder from './components/ObjectAdder';
+import { SchemaGraph } from './pages/SchemaGraph';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -435,7 +436,7 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
+  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL' | 'schemaGraph'>('data');
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -467,6 +468,9 @@ export function Component() {
       {viewMode === 'RQL' ? (
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
+      {viewMode === 'schemaGraph' ? (
+              <SchemaGraph schemas={schemas}></SchemaGraph>
+      ): null}
     </Layout.Container>
   );
 }
