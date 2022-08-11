@@ -62,7 +62,11 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
           </Layout.Container>
         );
       })}
-      <Button onClick={() => setArray([...array, getDefault(innerProp)])}>
+      <Button onClick={() => {
+        const newArray = [...array, getDefault(innerProp)]
+        setArray(newArray)
+        set(newArray);
+      }}>
         Add {property.objectType}
       </Button>
     </Layout.Container>

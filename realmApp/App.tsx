@@ -22,7 +22,7 @@ import {
   MaybeSchema,
   NoPrimaryKey,
   DictSchema,
-  SetsSchema
+  SetsSchema,
 } from './TestData/Schemas';
 
 import {
@@ -57,7 +57,7 @@ const realm = new Realm({
     SetsSchema,
   ],
   path: 'main',
-  schemaVersion: 32,
+  schemaVersion: 34,
 });
 
 //realmPlugin.newfunc();

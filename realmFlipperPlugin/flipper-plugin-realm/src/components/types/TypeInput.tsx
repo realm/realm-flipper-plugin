@@ -1,4 +1,3 @@
-import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
@@ -47,7 +46,7 @@ export const getDefault = (property: TypeDescription) => {
       return new UUID();
     case 'decimal128':
       // storing as a string
-      return '0';
+      return "0";
     case 'string':
       return '';
     case 'list':

@@ -77,6 +77,7 @@ export const DictSchema = {
   properties: {
     _id: 'uuid',
     dict: '{}',
+    AllTypess: 'AllTypes[]',
   },
   primaryKey: '_id',
 };
@@ -97,5 +98,8 @@ export const SetsSchema = {
     setsSet: 'Sets<>',
     decimalSet: 'decimal128<>',
     mixedSet: 'mixed<>',
+    objectSet: 'AllTypes<>',
   },
+  primaryKey: '_id'
 };
+

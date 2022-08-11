@@ -8,16 +8,21 @@ export const parsePropToCell = (
   schema: SchemaObject,
   schemas: Array<SchemaObject>
 ): JSX.Element | string | number => {
-
-  if (!value) {
-    return value;
+  if (value === null) {
+    return "null";
   }
+
+  // if (!value) {
+  //   return value;
+  // }
 
   let returnValue: JSX.Element | string | number = '';
   console.log('value', value);
 
   switch (property.type) {
     case 'string':
+      returnValue = '"' + parseSimpleData(value) + '"';
+      break;
     case 'double':
     case 'int':
     case 'float':
