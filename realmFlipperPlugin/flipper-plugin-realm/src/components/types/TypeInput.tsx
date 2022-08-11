@@ -93,6 +93,10 @@ export const TypeInput = (props: TypeInputProps) => {
     case 'object':
       return <ObjectInput {...props} />;
     default:
-      return <>Input for {props.property.type} not implemented!</>;
+      // container of objects
+      props.property.objectType = props.property.type;
+      props.property.type = 'object';
+      return <ObjectInput {...props} />;
+      // return <>Input for {props.property.type} not implemented!</>;
   }
 };

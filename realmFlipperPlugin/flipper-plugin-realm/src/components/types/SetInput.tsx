@@ -24,6 +24,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
     mapTo: "",
     optional: false,
   };
+  console.log('innerProp', innerProp);
   const setRow = (val: any, index: number) => {
     const prevValue = arr[index];
     if (val === null && prevValue === null) {
