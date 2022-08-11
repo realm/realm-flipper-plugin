@@ -8,8 +8,8 @@ export const parsePropToCell = (
   schema: SchemaObject,
   schemas: Array<SchemaObject>
 ): Record<string, unknown> => {
-  console.log('object', object);
-  console.log('property', property);
+  // console.log('object', object);
+  // console.log('property', property);
 
   if (!object ) {
     return;

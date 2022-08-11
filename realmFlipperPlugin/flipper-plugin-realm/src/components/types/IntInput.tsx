@@ -1,6 +1,6 @@
 import { ClearOutlined } from '@ant-design/icons';
 import { Button, Col, InputNumber, Row } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
 export const IntInput = ({
@@ -11,7 +11,12 @@ export const IntInput = ({
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
   const [value, setValue] = useState<number | undefined>(defaultValue as number);
+  
+  useEffect(() => {
+    setValue(defaultValue as number);
+  }, [defaultValue]);
 
+  console.log('rendering intinput, value:', value)
   const onChange = (value: number) => {
     if (property.type === 'int' && !Number.isInteger(value)) {
       return;

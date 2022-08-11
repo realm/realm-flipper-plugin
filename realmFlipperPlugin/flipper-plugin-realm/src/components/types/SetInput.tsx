@@ -3,13 +3,15 @@ import { Button, Col, Layout, Row } from 'antd';
 import React, { useEffect, useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const SetInput = ({ property, set }: TypeInputProps) => {
+export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
-  const [arr, setArr] = useState<any[]>([]);
+  const [arr, setArr] = useState<any[]>(defaultValue as any[]);
   const [occurences] = useState(new Map<any, number>());
 
   const [container, setContainer] = useState(new Set());
-  
+  useEffect(() => {
+    setArr(defaultValue as any[])
+  }, [defaultValue]);  
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;

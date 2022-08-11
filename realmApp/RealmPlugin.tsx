@@ -29,24 +29,28 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   if (!schemaName) {
     throw new Error('Converting with missing schema name');
   }
+  const readObject = (objectType: string, value: any) => {
+    return value === null
+      ? null
+      : realm.objectForPrimaryKey(
+          objectType,
+          value[schemaObj?.primaryKey as string],
+        );
+  };
 
-  const convertLeaf = (value: any, typeName: string) => {
-    console.log('convertLeaf', value, typeName);
-    const schemaObj = realm.schema.find(schema => schema.name === typeName);
-    let objectType;
-    if (schemaObj) {
-      // if found the schema, then we are dealing with an object
-      typeName = 'object';
-      objectType = schemaObj.name;
-    }
-    switch (typeName) {
+  const convertLeaf = (value: any, type: string, objectType?: string) => {
+    // console.log('convertLeaf', value, typeName);
+    // const schemaObj = realm.schema.find(schema => schema.name === typeName);
+    // let objectType;
+    // if (schemaObj) {
+    //   // if found the schema, then we are dealing with an object
+    //   typeName = 'object';
+    //   objectType = schemaObj.name;
+    // }
+    console.log(value);
+    switch (type) {
       case 'object':
-        return value === null
-          ? null
-          : realm.objectForPrimaryKey(
-              objectType as string,
-              value[schemaObj?.primaryKey as string],
-            );
+        return readObject(objectType as string, value);
       case 'uuid':
         return new BSON.UUID(value);
       case 'decimal128':
@@ -57,7 +61,7 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
         const typedArray = Uint8Array.from(value);
         return typedArray.buffer;
       default:
-        console.log('returning default', value)
+        // console.log('returning default', value)
         return value;
     }
   };
@@ -81,12 +85,14 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'list':
         console.log('prop:', property, ' val:', val);
         return val.map(obj => {
-          return convertLeaf(obj, property.objectType);
+          return convertLeaf(obj, property.type, property.objectType);
         });
       case 'dictionary':
         return val;
+      case 'object':
+        return readObject(property.objectType as string, val);
       default:
-        return convertLeaf(val, property.type);
+        return convertLeaf(val, property.type, property.objectType);
     }
   };
 
@@ -95,10 +101,10 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   const obj = {};
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj?.properties[value[0]];
-    console.log('type is', type, 'for key', value[0]);
-    console.log('type is', type);
+    // console.log('type is', type, 'for key', value[0]);
+    // console.log('type is', type);
     obj[value[0]] = convertRoot(value[1], type);
-    console.log('value for', value[0], ' is ', obj[value[0]]);
+    // console.log('value for', value[0], ' is ', obj[value[0]]);
   });
   return obj;
 };
@@ -273,6 +279,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
+          console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
           console.log('converted', converted);
           realm.write(() => {

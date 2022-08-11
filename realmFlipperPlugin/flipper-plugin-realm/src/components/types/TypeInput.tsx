@@ -42,11 +42,12 @@ export const getDefault = (property: TypeDescription) => {
     case 'bool':
       return false;
     case 'date':
-      return moment(new Date());
+      return new Date();
     case 'uuid':
       return new UUID();
     case 'decimal128':
-      return new bigDecimal();
+      // storing as a string
+      return '0';
     case 'string':
       return '';
     case 'list':
