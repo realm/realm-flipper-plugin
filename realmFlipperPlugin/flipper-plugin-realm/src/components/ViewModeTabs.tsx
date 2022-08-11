@@ -1,5 +1,6 @@
 import {
   ConsoleSqlOutlined,
+  RadarChartOutlined,
   SettingOutlined,
   TableOutlined,
 } from '@ant-design/icons';
@@ -8,8 +9,8 @@ import { Toolbar } from 'flipper-plugin';
 import React from 'react';
 
 const ViewModeTabs = (props: {
-  setViewMode: (viewMode: 'data' | 'schemas' | 'RQL') => void;
-  viewMode: 'data' | 'schemas' | 'RQL';
+  setViewMode: (viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph') => void;
+  viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph';
 }) => {
   return (
     <Toolbar position="top">
@@ -28,6 +29,10 @@ const ViewModeTabs = (props: {
         <Radio.Button onClick={() => props.setViewMode('RQL')} value="RQL">
           <ConsoleSqlOutlined style={{ marginRight: 5 }} />
           <Typography.Text>RQL</Typography.Text>
+        </Radio.Button>
+        <Radio.Button onClick={() => props.setViewMode('schemaGraph')} value="schemaGraph">
+        <RadarChartOutlined style={{ marginRight: 5 }}/>
+          <Typography.Text>Schemas Graph</Typography.Text>
         </Radio.Button>
       </Radio.Group>
     </Toolbar>
