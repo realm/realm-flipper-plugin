@@ -31,13 +31,13 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-  
   const [editingCell, setEditingCell] = useState<{
     row: RealmObject;
     schemaProperty: SchemaProperty;
   }>();
 
   const [editingState, setEditingState] = useState<RealmObject>();
+  const { removeObject, modifyObject } = usePlugin(plugin);
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;

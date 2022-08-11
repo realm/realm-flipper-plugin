@@ -22,7 +22,7 @@ import {
   MaybeSchema,
   NoPrimaryKey,
   DictSchema,
-  SetsSchema
+  SetsSchema,
 } from './TestData/Schemas';
 
 import {

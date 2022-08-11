@@ -12,6 +12,7 @@ export const DecimalInput = ({
   const [value, setValue] = useState<string | null>(defaultValue as string | null);
 
   const onChange = (val: string) => {
+    console.log('val is', typeof(val), "and has a value of", val)
     setValue(val);
     set(val);
   };

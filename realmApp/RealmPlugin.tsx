@@ -1,7 +1,10 @@
 import React, {useEffect} from 'react';
 import {Text} from 'react-native';
 import {addPlugin, Flipper} from 'react-native-flipper';
-import Realm, {CanonicalObjectSchemaProperty} from 'realm';
+import Realm, {
+  CanonicalObjectSchema,
+  CanonicalObjectSchemaProperty,
+} from 'realm';
 
 const {BSON} = Realm;
 // config: Configuration,
@@ -30,16 +33,20 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
     throw new Error('Converting with missing schema name');
   }
   const readObject = (objectType: string, value: any) => {
+    const innerSchema = realm.schema.find(
+      schema => schema.name === objectType,
+    ) as CanonicalObjectSchema;
+    const convertedKey = convertLeaf(
+      value[schemaObj?.primaryKey as string],
+      innerSchema.properties[innerSchema.primaryKey as string].type,
+    );
     return value === null
       ? null
-      : realm.objectForPrimaryKey(
-          objectType,
-          value[schemaObj?.primaryKey as string],
-        );
+      : realm.objectForPrimaryKey(objectType, convertedKey);
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    // console.log('convertLeaf', value, typeName);
+    console.log('convertLeaf', value, type);
     // const schemaObj = realm.schema.find(schema => schema.name === typeName);
     // let objectType;
     // if (schemaObj) {
@@ -85,7 +92,7 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'list':
         console.log('prop:', property, ' val:', val);
         return val.map(obj => {
-          return convertLeaf(obj, property.type, property.objectType);
+          return convertLeaf(obj, property.objectType as string);
         });
       case 'dictionary':
         return val;
