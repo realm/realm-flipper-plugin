@@ -63,6 +63,23 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           console.log('initially got objects', objects[0]);
+          if (schemaToObjects.has(schema)) {
+            console.log('removing all listeners from ', schema);
+            schemaToObjects.get(schema).removeAllListeners();
+          }
+          console.log('adding listener to', schema);
+          if (obj.sortingColumn) {
+            objects
+              .sorted([
+                [`${obj.sortingColumn}`, false],
+                ['_id', false],
+              ])
+              .addListener(onObjectsChange);
+          } else {
+            objects.sorted('_id').addListener(onObjectsChange);
+          }
+          console.log('i got', obj);
+          schemaToObjects.set(schema, objects.sorted('_id'));
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
@@ -78,14 +95,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('sending to client now');
           //base64 the next and prev cursors
-
-          if (schemaToObjects.has(schema)) {
-            console.log('removing all listeners from ', schema);
-            schemaToObjects.get(schema).removeAllListeners();
-          }
-          console.log('adding listener to', schema);
-          objects.addListener(onObjectsChange);
-          schemaToObjects.set(schema, objects);
 
           connection.send('getObjects', {
             objects: objects,
@@ -211,7 +220,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
-          console.log('objects', objects);
+          //console.log('objects', objects);
           console.log('changes', changes);
           console.log('small listener fires');
           changes.deletions.forEach(index => {
@@ -222,10 +231,14 @@ export default React.memo((props: {realms: Realm[]}) => {
           // Handle newly added Dog objects
           changes.insertions.forEach(index => {
             const inserted = objects[index];
+            const smallerNeighbor = objects[index - 1];
+            const largerNeighbor = objects[index + 1];
             if (connection) {
               connection.send('liveObjectAdded', {
                 newObject: inserted,
                 index: index,
+                smallerNeighbor: smallerNeighbor?._id,
+                largerNeighbor: largerNeighbor?._id,
               });
             }
           });
@@ -289,14 +302,6 @@ function getObjectsByPaginationBackwards(
   } else {
     objects = getPrevObjectsAscending(obj, objects, limit);
   }
-  if (obj.prev_page_filterCursor) {
-    objects = objects.sorted([
-      [`${obj.sortingColumn}`, false],
-      ['_id', false],
-    ]);
-  } else if (obj.prev_page_cursorId) {
-    objects = objects.sorted('_id');
-  }
   return objects;
 }
 
@@ -305,32 +310,38 @@ function getPrevObjectsDescending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  console.log('descending previous');
   if (obj.sortingColumn) {
     obj.prev_page_filterCursor =
       obj.prev_page_filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+      objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
-        ['_id', true],
+        [`${obj.sortingColumn}`, false],
+        ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '<=' : '<'
+        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
+          obj.cursorId ? '>=' : '>'
         } $1) LIMIT(${limit + 1})`,
         obj.prev_page_filterCursor,
         obj.prev_page_cursorId,
       );
   } else {
     objects = objects
-      .sorted('_id', true)
+      .sorted('_id', false)
       .filtered(
-        `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
+        `_id ${obj.prev_page_cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
         obj.prev_page_cursorId,
       );
-    if (obj.prev_page_cursorId) {
-      objects = objects.sorted('_id');
-    }
+  }
+  if (obj.prev_page_filterCursor) {
+    objects = objects.sorted([
+      [`${obj.sortingColumn}`, true],
+      ['_id', true],
+    ]);
+  } else if (obj.prev_page_cursorId) {
+    objects = objects.sorted('_id', true);
   }
   return objects;
 }
@@ -340,6 +351,7 @@ function getPrevObjectsAscending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  console.log('ascending previous');
   if (obj.sortingColumn) {
     obj.prev_page_filterCursor =
       obj.prev_page_filterCursor ??
@@ -364,6 +376,15 @@ function getPrevObjectsAscending(
         obj.prev_page_cursorId,
       );
   }
+  if (obj.prev_page_filterCursor) {
+    objects = objects.sorted([
+      [`${obj.sortingColumn}`, false],
+      ['_id', false],
+    ]);
+  } else if (obj.prev_page_cursorId) {
+    objects = objects.sorted('_id');
+  }
+
   return objects;
 }
 
@@ -386,14 +407,14 @@ function getObjectsDescending(
           obj.cursorId ? '<=' : '<'
         } $1) LIMIT(${limit + 1})`,
         obj.filterCursor,
-        obj.prev_page_cursorId ?? obj.cursorId,
+        obj.cursorId,
       );
   } else {
     objects = objects
       .sorted('_id', true)
       .filtered(
         `_id ${obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId ?? obj.cursorId,
+        obj.cursorId,
       );
   }
   return objects;

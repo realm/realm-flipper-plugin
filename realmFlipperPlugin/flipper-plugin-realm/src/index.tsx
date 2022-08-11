@@ -128,17 +128,48 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
-    const { newObject, index } = data;
+    const { newObject, index, smallerNeighbor, largerNeighbor } = data;
     console.log(newObject);
-    console.log(state.prev_page_cursorId, state.cursorId);
     console.log('objects in state', state.objects);
-    console.log('inserting at index ', index);
-    let copyOfStateObjects = state.objects;
-    copyOfStateObjects.splice(index, 0, newObject);
-    copyOfStateObjects = copyOfStateObjects.slice(0, state.selectedPageSize);
+    const lastObjectInMemory = state.objects[state.objects.length - 1];
+    const firstObjectInMemory = state.objects[state.objects.length - 1];
+    //if sorted by ascending:
+    console.log('neighbors', smallerNeighbor, largerNeighbor);
+    if (state.objects.length > state.selectedPageSize) {
+      if (state.sortDirection === 'ascend') {
+        if (smallerNeighbor < firstObjectInMemory) {
+          return false;
+        } else if (largerNeighbor > lastObjectInMemory) {
+          return false;
+        }
+      }
+    }
+    //if sorting descending, check if larger than last element and smaller than first element
+    //, so just reverse of what is above
+
+    let newObjects = state.objects;
+    const objectsLength = state.objects.length;
+    for (let i = 1; i < objectsLength; i++) {
+      if (
+        state.objects[i - 1]._id === smallerNeighbor &&
+        state.objects[i]._id === largerNeighbor
+      ) {
+        newObjects.splice(i, 0, newObject);
+        break;
+      } else if (!largerNeighbor && !smallerNeighbor) {
+        newObjects = [newObject];
+        break;
+      } else if (!largerNeighbor) {
+        console.log('this case');
+        //TODO: set new cursor
+        newObjects.push(newObject);
+        break;
+      }
+    }
+    newObjects = newObjects.slice(0, state.selectedPageSize);
     pluginState.set({
       ...state,
-      objects: [...copyOfStateObjects],
+      objects: [...newObjects],
       totalObjects: state.totalObjects + 1,
     });
   });
