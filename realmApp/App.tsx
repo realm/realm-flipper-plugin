@@ -57,7 +57,7 @@ const realm = new Realm({
     SetsSchema,
   ],
   path: 'main',
-  // schemaVersion: 31,
+  schemaVersion: 32,
 });
 
 //realmPlugin.newfunc();

@@ -4,7 +4,6 @@ import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { DataTable } from '../components/DataTable';
-import ObjectAdder from '../components/ObjectAdder';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
@@ -13,7 +12,7 @@ import { TypeInput } from '../components/types/TypeInput';
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
-  currentSchema: SchemaObject;
+  currentSchema: SchemaObject | null;
   sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
@@ -32,25 +31,14 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-  
-  const [editingCell, setEditingCell] = useState<{
-    row: RealmObject;
-    schemaProperty: SchemaProperty;
-  }>();
+  const { removeObject } = usePlugin(plugin);
 
-  const [editingState, setEditingState] = useState<RealmObject>();
+  if (!currentSchema) {
+    return <div>Please select a schema.</div>;
+  }
 
-  // const [editingInfo, setEditingInfo] = useState<();
-  const { removeObject, modifyObject } = usePlugin(plugin);
-
-  // const getCurrentSchema = () => {
-  //   return schemas.find((schema) => schema.name === selectedSchema);
-  // };
-
-  // const currentSchema = getCurrentSchema();
-
-  if (currentSchema === undefined) {
-    return <>Please select a schema.</>;
+  if (!schemas || !schemas.length) {
+    return <div>No schemas found. Check selected Realm.</div>;
   }
   const onOk = () => {
     // execute update
@@ -68,7 +56,6 @@ export const DataVisualizer = ({
   // Return buttons + tableView
   return (
     <Layout.Container grow>
-      <ObjectAdder schema={currentSchema} />
       <Layout.ScrollContainer>
         <Layout.Container>
           <Modal
@@ -111,9 +98,6 @@ export const DataVisualizer = ({
   );
 
   function TableView() {
-    if (currentSchema === undefined) {
-      return <>Please select a schema.</>;
-    }
 
     const deleteRow = (row: RealmObject) => {
       removeObject(row);
@@ -171,7 +155,7 @@ export const DataVisualizer = ({
           onClick={() => {
             const object = {};
             Object.keys(row).forEach((key) => {
-              object[key] = row[key].value;
+              object[key] = row[key];
             });
             setInspectorView('Inspector - Realm Object');
             setNewInspectData({ [schema.name]: object });
@@ -185,7 +169,7 @@ export const DataVisualizer = ({
           onClick={() => {
             setNewInspectData({
               [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name].value,
+                row[schemaProperty.name],
             });
             setInspectorView('Inspector - Realm Object Property');
             showSidebar ? null : setShowSidebar(true);
@@ -196,7 +180,6 @@ export const DataVisualizer = ({
       </Menu>
     );
 
-    //  const columns = Object.keys(currentSchema.properties).map((key) => {
     const columns = currentSchema.order.map((key) => {
       const obj = currentSchema.properties[key];
       const isPrimaryKey = obj.name === currentSchema.primaryKey;
@@ -216,7 +199,7 @@ export const DataVisualizer = ({
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
-          selectedSchema={currentSchema.name}
+          currentSchema={currentSchema}
           loading={loading}
           renderOptions={dropDown}
         />

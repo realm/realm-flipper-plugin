@@ -1,10 +1,10 @@
-import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
+import { Dropdown, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { Key, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from "../CommonTypes";
-import { parsePropToCell, parseRows } from '../utils/Parser';
+import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
@@ -13,6 +13,23 @@ type ColumnType = {
   objectType: string | undefined;
   propertyType: string;
   isPrimaryKey: boolean;
+};
+
+type PropertyType = {
+  columns: ColumnType[];
+  objects: RealmObject[];
+  schemas: SchemaObject[];
+  currentSchema: SchemaObject;
+  sortDirection: 'ascend' | 'descend' | null;
+  loading: boolean;
+  sortingColumn: string | null;
+  renderOptions: (
+    // for dropDown
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => ReactElement;
+  // rowSelection?: TableRowSelection<RealmObject>;
 };
 
 export const schemaObjToColumns = (schema: SchemaObject) => {
@@ -29,26 +46,19 @@ export const schemaObjToColumns = (schema: SchemaObject) => {
   });
 };
 
-export const DataTable = (props: {
-  columns: ColumnType[];
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  selectedSchema: string;
-  sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
-  sortingColumn: string | null;
-  renderOptions: (
-    row: RealmObject,
-    schemaProperty: SchemaProperty,
-    schema: SchemaObject
-  ) => ReactElement; // for dropDown
-  // rowSelection?: TableRowSelection<RealmObject>;
-}) => {
+export const DataTable = ({
+  columns,
+  objects,
+  schemas,
+  currentSchema,
+  sortDirection,
+  loading,
+  sortingColumn,
+  renderOptions,
+}: // rowSelection
+PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const currentSchema = props.schemas.find(
-    (schema) => schema.name === props.selectedSchema
-  );
 
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -56,7 +66,7 @@ export const DataTable = (props: {
 
   const sortableTypes = new Set(['string', 'int', 'uuid']);
 
-  const filledColumns = props.columns.map((column) => {
+  const filledColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
     return {
       title: () => (
@@ -81,28 +91,21 @@ export const DataTable = (props: {
 
         return (
           <Dropdown
-            overlay={props.renderOptions(row, property, currentSchema)}
+            overlay={renderOptions(row, property, currentSchema)}
             trigger={[`contextMenu`]}
           >
-            {/* <Tooltip placement="topLeft" title={text}> */}
-            <Tooltip placement="topLeft" title={"aaa"}>
-              {parsePropToCell(value, property, currentSchema, props.schemas)}
+            <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+              {parsePropToCell(value, property, currentSchema, schemas)}
             </Tooltip>
           </Dropdown>
         );
       },
       sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      sortOrder:
-        props.sortingColumn === property.name ? props.sortDirection : null,
+      sortOrder: sortingColumn === property.name ? sortDirection : null,
     };
   });
 
-  // const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
-  // console.log('ROWS', rowObjs)
-
   const handleOnChange = (
-    pagination: TablePaginationConfig,
-    filters: Record<string, Key[] | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
@@ -124,16 +127,13 @@ export const DataTable = (props: {
 
   // TODO: think about key as a property in the Realm DB
   return (
-    // <Layout.Container grow>
     <Table
-      dataSource={props.objects}
+      dataSource={objects}
       columns={filledColumns}
       onChange={handleOnChange}
       pagination={false}
-      loading={props.loading}
-      // rowSelection={{ type: 'radio'}}
+      loading={loading}
+      size='middle'
     />
-    // </Layout.Container>
-
   );
 };

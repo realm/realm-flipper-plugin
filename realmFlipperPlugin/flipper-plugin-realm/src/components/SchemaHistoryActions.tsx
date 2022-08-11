@@ -14,7 +14,7 @@ const SchemaHistoryActions = () => {
     }
     instance.getObjectsForward();
     instance.goBackSchemaHistory(newSelectedSchema);
-  }, [state.selectedSchema]);
+  }, [state.currentSchema]);
 
   const goForward = useCallback(() => {
     const newSelectedSchema = state.schemaHistory[state.schemaHistoryIndex + 1];
@@ -23,14 +23,14 @@ const SchemaHistoryActions = () => {
     }
     instance.getObjectsForward();
     instance.goForwardSchemaHistory(newSelectedSchema);
-  }, [state.selectedSchema]);
+  }, [state.currentSchema]);
   return (
-    <span style={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>
+    <span style={{ position: 'absolute', top: 25, right: 25, zIndex: 1 }}>
       <Button
         disabled={
           !state.realms.length ||
           !state.schemas.length ||
-          state.selectedSchema === '' ||
+          !state.currentSchema ||
           state.schemaHistoryIndex === 0
         }
         value="table"
@@ -42,7 +42,7 @@ const SchemaHistoryActions = () => {
         disabled={
           !state.realms.length ||
           !state.schemas.length ||
-          state.selectedSchema === '' ||
+          !state.currentSchema ||
           state.schemaHistoryIndex === state.schemaHistory.length - 1
         }
         onClick={goForward}

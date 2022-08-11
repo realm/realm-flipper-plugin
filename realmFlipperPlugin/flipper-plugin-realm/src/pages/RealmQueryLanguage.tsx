@@ -31,6 +31,9 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   if (queryHistory === undefined) {
     queryHistory = [];
   }
+  useEffect(() => {
+    if (schema) executeQuery('');
+  }, [state.selectedRealm, schema]);
 
   if (!schema) {
     return <>Please select a schema.</>;
@@ -50,10 +53,6 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
       return e;
     }
   };
-
-  useEffect(() => {
-    executeQuery('');
-  }, [state.selectedRealm, schema.name]);
 
   const onTextChange = (event: string) => {
     setQuery(event);
@@ -117,7 +116,7 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
             columns={schemaObjToColumns(schema)}
             objects={queryResult}
             schemas={state.schemas}
-            selectedSchema={schema.name}
+            currentSchema={schema}
             renderOptions={renderOptions ? renderOptions : () => <></>}
             // rowSelection={rowSelection}
           />

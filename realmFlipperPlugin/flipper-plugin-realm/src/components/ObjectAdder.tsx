@@ -1,6 +1,6 @@
 import { Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
+import { AddObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';
@@ -8,13 +8,10 @@ import { plugin } from '..';
 import { Layout, usePlugin } from 'flipper-plugin';
 
 type PropertyType = {
-  schema: SchemaObject;
-}
-const ObjectAdder = ({
-  schema,
-}: PropertyType) => {
-
-  const {addObject} = usePlugin(plugin);
+  schema: SchemaObject | null;
+};
+const ObjectAdder = ({ schema }: PropertyType) => {
+  const { addObject } = usePlugin(plugin);
 
   const empty: { [prop: string]: any } = {};
   const [values, setValues] = useState(empty);
@@ -40,13 +37,15 @@ const ObjectAdder = ({
     hideModal();
   };
 
+  if (!schema) {
+    return;
+  }
+
   return (
-    <Layout.Horizontal style={{ justifyContent: 'right' }}>
-      <Radio.Button
-        type="primary"
-        onClick={showModal}
-        style={{ float: 'right' }}
-      >
+    <Layout.Horizontal
+      style={{ justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
+    >
+      <Radio.Button type="primary" onClick={showModal}>
         Create {schema.name}
       </Radio.Button>
       <Modal
@@ -58,7 +57,7 @@ const ObjectAdder = ({
         cancelText="Cancel"
         destroyOnClose
       >
-        {schema.order.map((property, index) => (
+        {schema?.order?.map((property, index) => (
           <PropertyRender
             values={values}
             property={schema.properties[property]}
