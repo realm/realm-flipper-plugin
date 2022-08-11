@@ -1,7 +1,7 @@
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Button, Col, Layout, Row } from 'antd';
 import React, { useState } from "react";
-import { SchemaProperty } from "../RealmPluginState";
+import { SchemaProperty } from "../../CommonTypes";
 import { MixedInput } from "./MixedInput";
 import { StringInput } from "./StringInput";
 import { TypeInputProps } from './TypeInput';
@@ -16,12 +16,9 @@ const mapToObj = (map: Map<number, [string, any]>) => {
 };
 
 export const DictionaryInput = ({
-  property,
-  value,
   set,
-  style,
 }: TypeInputProps) => {
-  const [contents, setContents] = useState(new Map<number, [string, any]>());
+  const [contents, setContents] = useState(new Map<number, [string, unknown]>());
   const [_, setReset] = useState(0);
 
   // console.log("rerender, size:", contents.size);
@@ -41,7 +38,7 @@ export const DictionaryInput = ({
             <Row key={index} style={{ backgroundColor: 'white' }} align="middle">
               <Col span={10}>
               <StringInput
-                value={value[0]}
+                defaultValue={value[0]}
                 set={(val: any) => {
                   contents.set(index, [val, value[1]]);
                   setContents(contents);
@@ -55,7 +52,6 @@ export const DictionaryInput = ({
               </Col>
               <Col span={12}>
               <MixedInput
-                value={value} //shouldnt be used
                 property={keyProperty}
                 set={(val: any) => {
                   contents.set(index, [value[0], val]);

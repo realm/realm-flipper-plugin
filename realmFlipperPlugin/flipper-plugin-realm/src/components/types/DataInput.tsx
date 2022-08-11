@@ -4,21 +4,33 @@ import { UploadChangeParam, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
-export const DataInput = ({ property, value, set, style }: TypeInputProps) => {
+export const DataInput = ({ set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
+
   const emptyState: {
-    selectedFile?: UploadFile<any>;
-    selectedFileList: UploadFile<any>[];
+    selectedFile?: UploadFile<unknown>;
+    selectedFileList: UploadFile<unknown>[];
   } = {
     selectedFileList: [],
   };
   const [state, setState] = useState(emptyState);
 
-  const chooseFile = (file: UploadFile<any>) => {
-    set(file);
+  const chooseFile = (file: UploadFile<unknown>) => {
+    const fileObj = file.originFileObj
+    if (!fileObj) {
+      set(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const contents = e.target?.result as ArrayBuffer;
+      const typedArray = new Uint8Array(contents)
+      set(Array.from(typedArray));
+    }
+    reader.readAsArrayBuffer(fileObj);
   };
 
-  const onChange = (info: UploadChangeParam<UploadFile<any>>) => {
+  const onChange = (info: UploadChangeParam<UploadFile<unknown>>) => {
     const nextState = emptyState;
     switch (info.file.status) {
       case "uploading":

@@ -91,6 +91,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
+    console.log('got schemas', data.schemas);
     const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
@@ -202,7 +203,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const getOneObject = (event: { schema: string; primaryKey: string }) => {
     const state = pluginState.get();
-    console.log('myRealm', event);
+    // console.log('myRealm', event);
     client.send('getOneObject', {
       schema: event.schema,
       realm: state.selectedRealm,

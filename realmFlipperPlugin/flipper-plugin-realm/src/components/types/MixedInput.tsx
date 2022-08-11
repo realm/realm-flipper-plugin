@@ -3,20 +3,15 @@ import { Button, Col, Layout, Modal, Row, Select, Tag } from 'antd';
 import React, { useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
 
-export const MixedInput = ({ property, set, style }: TypeInputProps) => {
+export const MixedInput = ({ set, extraProps }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState("string");
-  // let value: any = null;
-  const [value, setValue] = useState<any>(null);
-  // const [value, setValue] = useState(null);
-  // console.log('mixedinput', value)
+  const [value, setValue] = useState<any | undefined>();
 
   const addObject = () => {
-    // console.log("addObject", );
     set(value);
-    // setValue()
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -43,8 +38,6 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
       indexed: false,
       mapTo: "",
     }));
-    // value = null;
-    // setReset(v => v + 1)
   };
 
   const renderChosen = (
@@ -131,8 +124,8 @@ export const MixedInput = ({ property, set, style }: TypeInputProps) => {
               set={(val: any) => {
                 setValue(val);
               }}
-              value={value}
-              style={{ width: '100%' }}
+              defaultValue={value}
+              extraProps={{ style: {width: '100%'} }}
             ></TypeInput>
           </Layout>
         </Modal>{" "}

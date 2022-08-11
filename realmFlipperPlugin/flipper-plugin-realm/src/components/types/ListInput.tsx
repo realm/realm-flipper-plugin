@@ -1,63 +1,74 @@
-import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Col, Layout, Row } from 'antd';
-import React, { useState } from "react";
-import { getDefault, TypeInput, TypeInputProps } from "./TypeInput";
+import { DeleteOutlined } from '@ant-design/icons';
+import { Button, Col, Row } from 'antd';
+import { Layout } from 'flipper-plugin';
+import React, { useState } from 'react';
+import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const ListInput = ({ property, set, value }: TypeInputProps) => {
+export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
-  const array: any[] = value;
-  const setArray = set;
+  const [array, setArray] = useState(defaultValue as unknown[]);
+  console.log('rendering listinput', array);
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
   }
   const innerProp = {
     type: typePointed,
-    name: "",
+    name: '',
     indexed: false,
-    mapTo: "",
+    mapTo: '',
     optional: false,
   };
   // console.log(array);
   return (
-    <Layout>
-      {array.map((value: any, index: number) => {
+    <Layout.Container grow>
+      {array.map((value: unknown, index: number) => {
         return (
-          <Layout key={index} style={{ backgroundColor: "white"}}>
+          <Layout.Container
+            grow
+            key={index}
+            style={{ backgroundColor: 'white' }}
+          >
             <Row align="middle">
               <Col flex="auto">
                 <TypeInput
-                style={{ width: "100%" }}
-                property={innerProp}
-                set={(val) => {
-                  const arr = array;
-                  arr[index] = val;
-                  setArray(arr);
-                  setReset((v) => v + 1);
-                }}
-                value={value}
-              ></TypeInput>
+                  extraProps={{ style: { width: '100%' } }}
+                  property={innerProp}
+                  set={(val) => {
+                    const arr = array;
+                    arr[index] = val;
+                    setArray(arr);
+                    set(arr);
+                    setReset(v => v + 1);
+                  }}
+                  defaultValue={value}
+                ></TypeInput>
               </Col>
               <Col>
-              <Button
-              key={-index - 1}
-              type="primary"
-              icon={<DeleteOutlined />}
-              // size={"small"}
-              // remove ith element
-              onClick={() => {
-                setArray(array.filter((_, i) => i !== index));
-                setReset((v) => v + array.length + 2);
-              }}
-            />
+                <Button
+                  key={-index - 1}
+                  type="primary"
+                  icon={<DeleteOutlined />}
+                  // size={"small"}
+                  // remove ith element
+                  onClick={() => {
+                    setArray(array.filter((_, i) => i !== index));
+                    set(array.filter((_, i) => i !== index));
+                    setReset((v) => v + 1);
+                  }}
+                />
               </Col>
             </Row>
-          </Layout>
+          </Layout.Container>
         );
       })}
-      <Button onClick={() => setArray([...array, getDefault(innerProp)])}>
+      <Button onClick={() => {
+        const newArray = [...array, getDefault(innerProp)]
+        setArray(newArray)
+        set(newArray);
+      }}>
         Add {property.objectType}
       </Button>
-    </Layout>
+    </Layout.Container>
   );
 };

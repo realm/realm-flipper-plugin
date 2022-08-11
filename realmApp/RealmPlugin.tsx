@@ -1,7 +1,12 @@
 import React, {useEffect} from 'react';
 import {Text} from 'react-native';
 import {addPlugin, Flipper} from 'react-native-flipper';
-import Realm from 'realm';
+import Realm, {
+  CanonicalObjectSchema,
+  CanonicalObjectSchemaProperty,
+} from 'realm';
+
+const {BSON} = Realm;
 // config: Configuration,
 //     realms: Realm[],
 //     connection: Flipper.FlipperConnection,
@@ -20,6 +25,95 @@ type getObjectsQuery = {
   sortingColumn: string;
   prev_page_cursorId: number;
   prev_page_filterCursor: number;
+};
+
+// convert object from a schema to realm one
+const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
+  if (!schemaName) {
+    throw new Error('Converting with missing schema name');
+  }
+  const readObject = (objectType: string, value: any) => {
+    const innerSchema = realm.schema.find(
+      schema => schema.name === objectType,
+    ) as CanonicalObjectSchema;
+    const convertedKey = convertLeaf(
+      value[schemaObj?.primaryKey as string],
+      innerSchema.properties[innerSchema.primaryKey as string].type,
+    );
+    return value === null
+      ? null
+      : realm.objectForPrimaryKey(objectType, convertedKey);
+  };
+
+  const convertLeaf = (value: any, type: string, objectType?: string) => {
+    console.log('convertLeaf', value, type);
+    // const schemaObj = realm.schema.find(schema => schema.name === typeName);
+    // let objectType;
+    // if (schemaObj) {
+    //   // if found the schema, then we are dealing with an object
+    //   typeName = 'object';
+    //   objectType = schemaObj.name;
+    // }
+    console.log(value);
+    switch (type) {
+      case 'object':
+        return readObject(objectType as string, value);
+      case 'uuid':
+        return new BSON.UUID(value);
+      case 'decimal128':
+        return new BSON.Decimal128(value);
+      case 'objectID':
+        return new BSON.ObjectId(value);
+      case 'data':
+        const typedArray = Uint8Array.from(value);
+        return typedArray.buffer;
+      default:
+        // console.log('returning default', value)
+        return value;
+    }
+  };
+
+  // console.log('converting...', object);
+  const convertRoot = (val: any, property: CanonicalObjectSchemaProperty) => {
+    console.log('convertRoot', val, property);
+
+    if (val === null) {
+      return null;
+    }
+    // console.log('got type', type);
+    switch (property.type) {
+      case 'set':
+        console.log('received set:', val);
+        // due to a problem with serialization, Set is being passed over as a list
+        const realVal = (val as any[]).map(value => {
+          return convertLeaf(value, property.objectType);
+        });
+        return realVal;
+      case 'list':
+        console.log('prop:', property, ' val:', val);
+        return val.map(obj => {
+          return convertLeaf(obj, property.objectType as string);
+        });
+      case 'dictionary':
+        return val;
+      case 'object':
+        return readObject(property.objectType as string, val);
+      default:
+        return convertLeaf(val, property.type, property.objectType);
+    }
+  };
+
+  const schemaObj = realm.schema.find(schema => schema.name === schemaName);
+
+  const obj = {};
+  Object.entries(object).forEach((value: [string, unknown]) => {
+    const type = schemaObj?.properties[value[0]];
+    // console.log('type is', type, 'for key', value[0]);
+    // console.log('type is', type);
+    obj[value[0]] = convertRoot(value[1], type);
+    // console.log('value for', value[0], ' is ', obj[value[0]]);
+  });
+  return obj;
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
@@ -176,8 +270,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
+          const converted = typeConverter(obj.object, realm, obj.schema);
+          console.log('trying to create:', converted);
           realm.write(() => {
-            let t = realm.create(obj.schema, obj.object);
+            let t = realm.create(obj.schema, converted);
             console.log('created', t);
           });
 
@@ -185,12 +281,16 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getObjects', {objects: objects});
         });
         connection.receive('modifyObject', obj => {
+          // console.log('modify', obj)
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
+          console.log('got', obj.object);
+          const converted = typeConverter(obj.object, realm, obj.schema);
+          console.log('converted', converted);
           realm.write(() => {
-            realm.create(obj.schema, obj.object, 'modified');
+            realm.create(obj.schema, converted, 'modified');
           });
 
           const objects = realm.objects(obj.schema);

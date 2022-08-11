@@ -17,7 +17,6 @@ const ObjectAdder = ({ schema }: PropertyType) => {
   const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
   const [inputReset, setInputReset] = useState(0);
-  let toClear: any[] = [];
 
   const refresh = () => setInputReset((v) => v + 1);
 
@@ -28,17 +27,12 @@ const ObjectAdder = ({ schema }: PropertyType) => {
   };
 
   const hideModal = () => {
-    // console.log('hidemodal');
-    toClear.forEach((f) => f());
-    toClear = [];
     setValues({});
     refresh();
     setVisible(false);
   };
 
   const onOk = () => {
-    console.log('addObject', values);
-    // console.log(props.addObject);
     addObject(values);
     hideModal();
   };
@@ -61,12 +55,12 @@ const ObjectAdder = ({ schema }: PropertyType) => {
         onCancel={hideModal}
         okText="Create"
         cancelText="Cancel"
+        destroyOnClose
       >
         {schema?.order?.map((property, index) => (
           <PropertyRender
             values={values}
             property={schema.properties[property]}
-            toClear={toClear}
             isPrimary={property == schema.primaryKey}
             key={
               inputReset *
