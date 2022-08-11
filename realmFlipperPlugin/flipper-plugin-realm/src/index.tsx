@@ -131,11 +131,26 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const { newObject, index, smallerNeighbor, largerNeighbor } = data;
     console.log(newObject);
     console.log('objects in state', state.objects);
-    const lastObjectInMemory = state.objects[state.objects.length - 1];
-    const firstObjectInMemory = state.objects[state.objects.length - 1];
-    //if sorted by ascending:
-    console.log('neighbors', smallerNeighbor, largerNeighbor);
-    console.log("sortDirection", state.sortDirection);
+    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
+    const firstObjectInMemory = state.objects[0]?._id;
+    console.log(
+      'neighbors',
+      smallerNeighbor,
+      largerNeighbor,
+      firstObjectInMemory
+    );
+    console.log('sortDirection', state.sortDirection, state.currentPage);
+    if (state.currentPage === 1 && largerNeighbor === firstObjectInMemory) {
+      //TODO: set new cursor
+      let newObjects = [newObject, ...state.objects];
+      newObjects = newObjects.slice(0, state.selectedPageSize);
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects + 1,
+      });
+      return;
+    }
     if (state.objects.length >= state.selectedPageSize) {
       if (state.sortDirection === 'ascend') {
         if (
@@ -145,7 +160,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
           return false;
         }
       } else {
-        console.log("descending")
+        console.log('descending');
         if (
           largerNeighbor > firstObjectInMemory ||
           smallerNeighbor < lastObjectInMemory
@@ -155,20 +170,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
       }
     }
 
-    console.log("inserting")
+    console.log('inserting');
     let newObjects = state.objects;
     const objectsLength = state.objects.length;
     for (let i = 1; i < objectsLength; i++) {
       if (
-       ( state.objects[i - 1]._id === smallerNeighbor ||
-        state.objects[i - 1]._id === largerNeighbor) &&
-          (state.objects[i]._id === largerNeighbor ||
-        state.objects[i]._id === smallerNeighbor)
+        (state.objects[i - 1]._id === smallerNeighbor ||
+          state.objects[i - 1]._id === largerNeighbor) &&
+        (state.objects[i]._id === largerNeighbor ||
+          state.objects[i]._id === smallerNeighbor)
       ) {
         newObjects.splice(i, 0, newObject);
         break;
       } else if (!largerNeighbor && !smallerNeighbor) {
-        newObjects = [newObject];
+        newObjects.push(newObject);
         break;
       } else if (!largerNeighbor || !smallerNeighbor) {
         console.log('this case');

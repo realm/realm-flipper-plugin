@@ -71,13 +71,13 @@ function createToDo() {
     console.log(`created one task: ${task1.name} with id ${task1._id}`);
   });
 }
-let i = 13;
+let i = 2;
 
 function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 5,
+      _id: 6,
       name: 'Jack',
       color: 'yellow',
       length: 40,
