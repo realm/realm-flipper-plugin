@@ -140,8 +140,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
       firstObjectInMemory
     );
     console.log('sortDirection', state.sortDirection, state.currentPage);
-    console.log("last object new", state.objects[state.objects.length-1])
-    if (state.currentPage === 1 && largerNeighbor === firstObjectInMemory) {
+    console.log('last object new', state.objects[state.objects.length - 1]);
+    if (
+      state.currentPage === 1 &&
+      (largerNeighbor === firstObjectInMemory ||
+        smallerNeighbor === firstObjectInMemory)
+    ) {
       //TODO: set new cursor
       let newObjects = [newObject, ...state.objects];
       newObjects = newObjects.slice(0, state.selectedPageSize);
@@ -149,26 +153,30 @@ export function plugin(client: PluginClient<Events, Methods>) {
         ...state,
         objects: [...newObjects],
         totalObjects: state.totalObjects + 1,
-        cursorId: state.objects[state.objects.length-1]._id,
-        filterCursor: state.sortingColumn ? state.objects[state.objects.length-1][state.sortingColumn] : null,
+        cursorId: state.objects[state.objects.length - 1]._id,
+        filterCursor: state.sortingColumn
+          ? state.objects[state.objects.length - 1][state.sortingColumn]
+          : null,
         prev_page_cursorId: newObject._id,
-        prev_page_filterCursor: state.sortingColumn ? newObject[state.sortingColumn] : null,
+        prev_page_filterCursor: state.sortingColumn
+          ? newObject[state.sortingColumn]
+          : null,
       });
       return;
     }
     if (state.objects.length >= state.selectedPageSize) {
-      if (state.sortDirection === 'ascend') {
-        if (
-          smallerNeighbor < firstObjectInMemory ||
-          largerNeighbor > lastObjectInMemory
-        ) {
-          return false;
-        }
-      } else {
+      if (state.sortDirection === 'descend') {
         console.log('descending');
         if (
           largerNeighbor > firstObjectInMemory ||
           smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
         ) {
           return false;
         }
@@ -191,10 +199,19 @@ export function plugin(client: PluginClient<Events, Methods>) {
         newObjects.push(newObject);
         break;
       } else if (!largerNeighbor || !smallerNeighbor) {
-        console.log('this case');
-        //TODO: set new cursor
         newObjects.push(newObject);
-        break;
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: newObject._id,
+          filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+        });
+        return;
       }
     }
     newObjects = newObjects.slice(0, state.selectedPageSize);
@@ -316,6 +333,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
+      currentPage: 1,
     });
   };
 
