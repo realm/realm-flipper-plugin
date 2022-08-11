@@ -46,7 +46,7 @@ export const getDefault = (property: TypeDescription) => {
       return new UUID();
     case 'decimal128':
       // storing as a string
-      return "0";
+      return '0';
     case 'string':
       return '';
     case 'list':

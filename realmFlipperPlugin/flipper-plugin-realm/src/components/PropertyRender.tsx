@@ -1,4 +1,5 @@
 import { Layout, Tag } from 'antd';
+import { theme } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { SchemaProperty } from '../CommonTypes';
 import { getDefault, TypeInput } from './types/TypeInput';
@@ -41,7 +42,8 @@ export const PropertyRender = ({
   return (
     <Layout>
       <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-        <div style={{ backgroundColor: 'white' }}>
+        <div style={{ backgroundColor: 'white'
+ }}>
           {property.name}
           <span style={{ float: 'right' }}>
             <Tag color="default">{typeName}</Tag>
