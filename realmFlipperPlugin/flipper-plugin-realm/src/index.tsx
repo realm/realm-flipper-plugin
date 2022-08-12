@@ -129,26 +129,30 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
     const { newObject, index, smallerNeighbor, largerNeighbor } = data;
-    console.log(newObject);
-    console.log('objects in state', state.objects);
+    // console.log(newObject);
+    // console.log('objects in state', state.objects);
     const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
     const firstObjectInMemory = state.objects[0]?._id;
-    console.log(
-      'neighbors',
-      smallerNeighbor,
-      largerNeighbor,
-      firstObjectInMemory
-    );
-    console.log('sortDirection', state.sortDirection, state.currentPage);
-    console.log('last object new', state.objects[state.objects.length - 1]);
+    // console.log(
+    //   'neighbors',
+    //   smallerNeighbor,
+    //   largerNeighbor,
+    //   firstObjectInMemory
+    // );
+    // console.log('sortDirection', state.sortDirection, state.currentPage);
+    // console.log('last object new', state.objects[state.objects.length - 1]);
     if (
       state.currentPage === 1 &&
-      (largerNeighbor === firstObjectInMemory ||
-        smallerNeighbor === firstObjectInMemory)
+      state.objects.length >= state.selectedPageSize &&
+        !smallerNeighbor
     ) {
-      //TODO: set new cursor
       let newObjects = [newObject, ...state.objects];
       newObjects = newObjects.slice(0, state.selectedPageSize);
+      // console.log(
+      //   'set cursorId to',
+      //   state.objects[state.objects.length - 1]._id
+      // );
+
       pluginState.set({
         ...state,
         objects: [...newObjects],
@@ -183,7 +187,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       }
     }
 
-    console.log('inserting');
+    //console.log('inserting');
     let newObjects = state.objects;
     const objectsLength = state.objects.length;
     for (let i = 1; i < objectsLength; i++) {
@@ -194,10 +198,34 @@ export function plugin(client: PluginClient<Events, Methods>) {
           state.objects[i]._id === smallerNeighbor)
       ) {
         newObjects.splice(i, 0, newObject);
-        break;
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: state.objects[state.objects.length - 1]._id,
+          filterCursor: state.sortingColumn
+            ? state.objects[state.objects.length - 1][state.sortingColumn]
+            : null,
+        });
+        return;
       } else if (!largerNeighbor && !smallerNeighbor) {
         newObjects.push(newObject);
-        break;
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: newObject._id,
+          filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+          prev_page_cursorId: newObject._id,
+          prev_page_filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+        });
+        return;
       } else if (!largerNeighbor || !smallerNeighbor) {
         newObjects.push(newObject);
         newObjects = newObjects.slice(0, state.selectedPageSize);
@@ -214,12 +242,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
         return;
       }
     }
-    newObjects = newObjects.slice(0, state.selectedPageSize);
-    pluginState.set({
-      ...state,
-      objects: [...newObjects],
-      totalObjects: state.totalObjects + 1,
-    });
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {

@@ -355,6 +355,7 @@ function getPrevObjectsAscending(
 ) {
   console.log('ascending previous');
   if (obj.sortingColumn) {
+    objects.findIndex
     const filterCursor =
       obj.filterCursor ??
       objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
