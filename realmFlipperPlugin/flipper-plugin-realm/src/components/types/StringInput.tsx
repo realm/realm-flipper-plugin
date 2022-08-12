@@ -5,25 +5,24 @@ import { TypeInputProps } from "./TypeInput";
 
 export const StringInput = ({
   property,
-  value,
+  defaultValue,
   set,
-  style,
+  extraProps,
 }: TypeInputProps) => {
-  const [reset, setReset] = useState(0);
+  const [value, setValue] = useState<string | null>(defaultValue as string | null);
 
   return (
     <Row align="middle" style={{ background: 'white'}}>
       <Col flex='auto'>
       <Input
+        {...extraProps}
         placeholder={property.optional && value === null ? "null" : undefined}
-        defaultValue={value}
-        style={style}
+        defaultValue={value !== null ? value : undefined}
         onChange={(v) => {
           // user change vs clear button
           if (v.type == "change") set(v.target.value);
           else set(null);
         }}
-        key={reset}
       />
       </Col>
 
@@ -34,7 +33,7 @@ export const StringInput = ({
           onClick={() => {
             // refresh();
             set(null);
-            setReset((v) => v + 1);
+            setValue(null);
           }}
         >
         </Button>

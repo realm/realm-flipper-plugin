@@ -28,6 +28,7 @@ import ViewModeTabs from './components/ViewModeTabs';
 import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
+import { SchemaGraph } from './pages/SchemaGraph';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -67,7 +68,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
-    console.log('received', data);
+    console.log('fetched objects', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -90,6 +91,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
+    console.log('got schemas', data.schemas);
     const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
@@ -304,7 +306,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const getOneObject = (event: { schema: string; primaryKey: string }) => {
     const state = pluginState.get();
-    console.log('myRealm', event);
+    // console.log('myRealm', event);
     client.send('getOneObject', {
       schema: event.schema,
       realm: state.selectedRealm,
@@ -537,13 +539,13 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL'>('data');
+  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL' | 'schemaGraph'>('data');
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect schemas={schemas} realms={realms} />
-      {viewMode === 'data' && currentSchema ? (
+      {viewMode === 'data' ? (
         <Layout.Container height={800}>
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
             {objects.length > 20 ? <PaginationActionGroup /> : null}
@@ -569,6 +571,9 @@ export function Component() {
       {viewMode === 'RQL' ? (
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
+      {viewMode === 'schemaGraph' ? (
+              <SchemaGraph schemas={schemas}></SchemaGraph>
+      ): null}
     </Layout.Container>
   );
 }

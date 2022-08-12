@@ -21,7 +21,7 @@ type PropertyType = {
   setGoBackStack: (value: Array<RealmObject>) => void;
   goForwardStack: Array<RealmObject>;
   setGoForwardStack: (value: Array<RealmObject>) => void;
-  setNewInspectData: (value: Array<RealmObject>) => void;
+  setNewInspectData: (value: RealmObject) => void;
   view: string;
 };
 
@@ -108,9 +108,11 @@ export const RealmDataInspector = ({
                   }
 
                   // If the current field is named objectType find the SchemaObject corresponding to its value (if there is one) and assign it to linkedSchema.
-                  if (name === 'objectType') {
-                    let linkedSchemaName: string = inspectData;
+                  // Assigning inspectData to linkedSchemaName and then traverse it using path to get the linkedSchemaName.
+                  if (name === 'objectType' && inspectData) {
+                    let linkedSchemaName: string | RealmObject = inspectData;
                     path.forEach(
+                      //@ts-ignore
                       (key) => (linkedSchemaName = linkedSchemaName[key])
                     );
 

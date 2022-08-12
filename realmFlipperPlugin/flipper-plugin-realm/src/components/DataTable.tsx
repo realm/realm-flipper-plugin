@@ -1,10 +1,11 @@
-import { Dropdown, Table, TablePaginationConfig, Tooltip } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { Key, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { parseRows } from '../utils/Parser';
+import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
 type ColumnType = {
@@ -13,6 +14,23 @@ type ColumnType = {
   objectType: string | undefined;
   propertyType: string;
   isPrimaryKey: boolean;
+};
+
+type PropertyType = {
+  columns: ColumnType[];
+  objects: RealmObject[];
+  schemas: SchemaObject[];
+  currentSchema: SchemaObject;
+  sortDirection: 'ascend' | 'descend' | null;
+  loading: boolean;
+  sortingColumn: string | null;
+  renderOptions: (
+    // for dropDown
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => ReactElement;
+  // rowSelection?: TableRowSelection<RealmObject>;
 };
 
 export const schemaObjToColumns = (schema: SchemaObject) => {
@@ -29,41 +47,28 @@ export const schemaObjToColumns = (schema: SchemaObject) => {
   });
 };
 
-export const DataTable = (props: {
-  columns: ColumnType[];
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  currentSchema: SchemaObject;
-  sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
-  sortingColumn: string | null;
-  renderOptions: (
-    row: RealmObject,
-    schemaProperty: SchemaProperty,
-    schema: SchemaObject
-  ) => ReactElement; // for dropDown
-  // rowSelection?: TableRowSelection<RealmObject>;
-}) => {
+export const DataTable = ({
+  columns,
+  objects,
+  schemas,
+  currentSchema,
+  sortDirection,
+  loading,
+  sortingColumn,
+  renderOptions,
+}: // rowSelection
+PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const { currentSchema } = props;
 
-  //TODO: Sort objects after receiving them so that every component works with the same order.
-  // Put primaryKey column in front.
-  // const primaryKeyIndex = props.columns.findIndex((col) => col.isPrimaryKey);
-  // const tempCol = props.columns[0];
-  // props.columns[0] = props.columns[primaryKeyIndex];
-  // props.columns[primaryKeyIndex] = tempCol;
-
-  if (!currentSchema) {
+  if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 
   const sortableTypes = new Set(['string', 'int', 'uuid']);
 
-  const filledColumns = props.columns.map((column) => {
+  const filledColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
-
     return {
       title: () => (
         <ColumnTitle
@@ -81,32 +86,56 @@ export const DataTable = (props: {
         showTitle: false,
       },
       property,
-      render: (
-        text: { text: string | number; value: RealmObject },
-        row: RealmObject
-      ) => {
+      render: (value: RealmObject, row: RealmObject) => {
+        if (property.objectType && value) {
+
+console.log('property.objectType', property.objectType)
+
+
+          const linkedSchema = schemas.find(
+            (schema) => schema.name === property.objectType
+          );
+          if (linkedSchema) {
+            return (
+              <Layout.Container style={{display:'flex', flexDirection: 'row', gap: '5px'}}>
+                <Button
+                  shape="circle"
+                  type="primary"
+                  size="small"
+                  icon={<SearchOutlined />}
+                  ghost
+                />
+                <Dropdown
+                  overlay={renderOptions(row, property, currentSchema)}
+                  trigger={[`contextMenu`]}
+                >
+                  <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+                    {parsePropToCell(value, property, currentSchema, schemas)}
+                  </Tooltip>
+                </Dropdown>
+
+                
+              </Layout.Container>
+            );
+          }
+        }
         return (
           <Dropdown
-            overlay={props.renderOptions(row, property, currentSchema)}
+            overlay={renderOptions(row, property, currentSchema)}
             trigger={[`contextMenu`]}
           >
-            <Tooltip placement="topLeft" title={text.text}>
-              {text.text}
+            <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+              {parsePropToCell(value, property, currentSchema, schemas)}
             </Tooltip>
           </Dropdown>
         );
       },
       sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      sortOrder:
-        props.sortingColumn === property.name ? props.sortDirection : null,
+      sortOrder: sortingColumn === property.name ? sortDirection : null,
     };
   });
 
-  const rowObjs = parseRows(props.objects, currentSchema, props.schemas);
-
   const handleOnChange = (
-    pagination: TablePaginationConfig,
-    filters: Record<string, Key[] | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
@@ -125,15 +154,14 @@ export const DataTable = (props: {
 
   // TODO: think about key as a property in the Realm DB
   return (
-    // <Layout.Container grow>
     <Table
-      dataSource={rowObjs}
+      dataSource={objects}
       columns={filledColumns}
+      rowClassName = {() => 'testStyle'}
       onChange={handleOnChange}
       pagination={false}
-      loading={props.loading}
-      // rowSelection={{ type: 'radio'}}
+      loading={loading}
+      size="middle"
     />
-    // </Layout.Container>
   );
 };

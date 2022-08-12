@@ -39,7 +39,7 @@ export const AllTypesSchema = {
     linkedBanana: 'Banana?',
     linkingObjects: 'AllTypes?',
     ListDecimal128: 'decimal128[]',
-    SetDecimal128: 'decimal128<>',
+    // SetDecimal128: 'decimal128<>',
     ObjectList: 'mixed[]',
     ObjectSet: 'mixed<>',
     dictionary: '{}',
@@ -77,6 +77,7 @@ export const DictSchema = {
   properties: {
     _id: 'uuid',
     dict: '{}',
+    AllTypess: 'AllTypes[]',
   },
   primaryKey: '_id',
 };
@@ -88,3 +89,17 @@ export const NoPrimaryKey = {
     name: 'string?',
   },
 };
+
+export const SetsSchema = {
+  name: 'Sets',
+  properties: {
+    _id: 'uuid',
+    intSet: 'int<>',
+    setsSet: 'Sets<>',
+    decimalSet: 'decimal128<>',
+    mixedSet: 'mixed<>',
+    objectSet: 'AllTypes<>',
+  },
+  primaryKey: '_id'
+};
+

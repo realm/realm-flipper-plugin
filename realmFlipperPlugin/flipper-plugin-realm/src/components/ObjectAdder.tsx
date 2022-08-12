@@ -1,6 +1,6 @@
 import { Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { AddObject,  SchemaProperty, SchemaObject} from "../CommonTypes";
+import { AddObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 
 import React from 'react';
 import { PropertyRender } from './PropertyRender';
@@ -8,19 +8,15 @@ import { plugin } from '..';
 import { Layout, usePlugin } from 'flipper-plugin';
 
 type PropertyType = {
-  schema: SchemaObject;
-}
-const ObjectAdder = ({
-  schema,
-}: PropertyType) => {
-
+  schema: SchemaObject | null;
+};
+const ObjectAdder = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
   const empty: { [prop: string]: any } = {};
   const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
   const [inputReset, setInputReset] = useState(0);
-  let toClear: any[] = [];
 
   const refresh = () => setInputReset((v) => v + 1);
 
@@ -31,20 +27,19 @@ const ObjectAdder = ({
   };
 
   const hideModal = () => {
-    // console.log('hidemodal');
-    toClear.forEach((f) => f());
-    toClear = [];
     setValues({});
     refresh();
     setVisible(false);
   };
 
   const onOk = () => {
-    console.log('addObject', values);
-    // console.log(props.addObject);
     addObject(values);
     hideModal();
   };
+
+  if (!schema) {
+    return;
+  }
 
   return (
     <Layout.Horizontal
@@ -60,12 +55,12 @@ const ObjectAdder = ({
         onCancel={hideModal}
         okText="Create"
         cancelText="Cancel"
+        destroyOnClose
       >
         {schema?.order?.map((property, index) => (
           <PropertyRender
             values={values}
             property={schema.properties[property]}
-            toClear={toClear}
             isPrimary={property == schema.primaryKey}
             key={
               inputReset *

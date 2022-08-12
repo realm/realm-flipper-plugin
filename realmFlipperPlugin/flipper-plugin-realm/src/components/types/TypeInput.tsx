@@ -1,9 +1,7 @@
-import bigDecimal from 'js-big-decimal';
 import moment from 'moment';
 import React from 'react';
 import uuid from 'react-native-uuid';
-import { RealmObject } from '../../CommonTypes';
-import { SchemaProperty } from "../RealmPluginState";
+import { SchemaProperty } from '../../CommonTypes';
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';
@@ -17,15 +15,21 @@ import { ObjectInput } from './ObjectInput';
 import { SetInput } from './SetInput';
 import { StringInput } from './StringInput';
 import { UUIDInput } from './UUIDInput';
+import { UUID, ObjectId } from 'bson';
 
 export type TypeInputProps = {
   property: SchemaProperty;
-  value: any;
-  set: (val: any) => void;
-  style?: RealmObject;
+  defaultValue?: unknown;
+  set: (val: unknown) => void;
+  extraProps?: Record<string, unknown>;
 };
 
-export const getDefault = (property: SchemaProperty) => {
+type TypeDescription = {
+  type: string;
+  optional: boolean;
+}
+
+export const getDefault = (property: TypeDescription) => {
   if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
 
   const type = property.type;
@@ -37,19 +41,22 @@ export const getDefault = (property: SchemaProperty) => {
     case 'bool':
       return false;
     case 'date':
-      return moment(new Date());
+      return new Date();
     case 'uuid':
-      return uuid.v4();
+      return new UUID();
     case 'decimal128':
-      return new bigDecimal();
+      // storing as a string
+      return "0";
     case 'string':
       return '';
     case 'list':
       return [];
     case 'set':
-      return new Set();
+      return []; //problem with serializing Set
     case 'dictionary':
       return new Object();
+    case 'objectId':
+      return new ObjectId();
     default:
       return null;
   }
@@ -86,6 +93,10 @@ export const TypeInput = (props: TypeInputProps) => {
     case 'object':
       return <ObjectInput {...props} />;
     default:
-      return <>Input for {props.property.type} not implemented!</>;
+      // container of objects
+      props.property.objectType = props.property.type;
+      props.property.type = 'object';
+      return <ObjectInput {...props} />;
+      // return <>Input for {props.property.type} not implemented!</>;
   }
 };
