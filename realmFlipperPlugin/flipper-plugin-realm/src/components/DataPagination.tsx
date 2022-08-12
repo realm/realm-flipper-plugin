@@ -6,14 +6,17 @@ const DataPagination = (props: {
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
   currentPage: number;
   setCurrentPage: (currentPage: number) => void;
-  getObjectsForward: () => void;
-  getObjectsBackwards: () => void;
+  getObjects: (
+    schema?: string | null,
+    realm?: string | null,
+    backwards?: boolean
+  ) => void;
 }) => {
   const getMore = (newSelectedPage: number) => {
     if (newSelectedPage > props.currentPage) {
-      props.getObjectsForward();
+      props.getObjects();
     } else {
-      props.getObjectsBackwards();
+      props.getObjects(null, null, true);
     }
     props.setCurrentPage(newSelectedPage);
   };

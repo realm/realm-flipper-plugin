@@ -140,18 +140,15 @@ console.log('property.objectType', property.objectType)
     extra: any
   ) => {
     //TODO: make type of a field
-    console.log('ACTION', extra);
     if (extra.action === 'sort') {
       if (state.sortingColumn !== sorter.field) {
-        console.log('swtiching');
         instance.setSortingDirection('ascend');
         instance.setSortingColumn(sorter.field);
       } else {
-        console.log('standard');
         instance.toggleSortDirection();
       }
     }
-    instance.getObjectsForward();
+    instance.getObjects();
     instance.setCurrentPage(1);
   };
 

@@ -7,28 +7,27 @@ import {
 } from 'flipper-plugin';
 
 import React, { useState } from 'react';
-import PaginationActionGroup from './components/PaginationActionGroup';
-import RealmSchemaSelect from './components/RealmSchemaSelect';
-import SchemaHistoryActions from './components/SchemaHistoryActions';
-import { DataVisualizer } from './pages/DataVisualizer';
-import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
-import SchemaVisualizer from './pages/SchemaVisualizer';
 import {
-  Events,
-  Methods,
-  RealmPluginState,
-  RealmsMessage,
-  ObjectsMessage,
-  ObjectMessage,
-  SchemaMessage,
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
+  Events,
+  Methods,
+  ObjectMessage,
+  ObjectsMessage,
+  RealmPluginState,
+  RealmsMessage,
+  SchemaMessage,
   SchemaObject,
-  SchemaObjectWithOrder,
 } from './CommonTypes';
-import ViewModeTabs from './components/ViewModeTabs';
 import ObjectAdder from './components/ObjectAdder';
+import PaginationActionGroup from './components/PaginationActionGroup';
+import RealmSchemaSelect from './components/RealmSchemaSelect';
+import SchemaHistoryActions from './components/SchemaHistoryActions';
+import ViewModeTabs from './components/ViewModeTabs';
+import { DataVisualizer } from './pages/DataVisualizer';
+import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
+import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
@@ -131,18 +130,136 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
-    const { newObject } = data;
-    pluginState.set({ ...state, objects: [...state.objects, newObject] });
+    const { newObject, index, smallerNeighbor, largerNeighbor } = data;
+    // console.log(newObject);
+    // console.log('objects in state', state.objects);
+    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
+    const firstObjectInMemory = state.objects[0]?._id;
+    // console.log(
+    //   'neighbors',
+    //   smallerNeighbor,
+    //   largerNeighbor,
+    //   firstObjectInMemory
+    // );
+    // console.log('sortDirection', state.sortDirection, state.currentPage);
+    // console.log('last object new', state.objects[state.objects.length - 1]);
+    if (
+      state.currentPage === 1 &&
+      state.objects.length >= state.selectedPageSize &&
+        !smallerNeighbor
+    ) {
+      let newObjects = [newObject, ...state.objects];
+      newObjects = newObjects.slice(0, state.selectedPageSize);
+      // console.log(
+      //   'set cursorId to',
+      //   state.objects[state.objects.length - 1]._id
+      // );
+
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects + 1,
+        cursorId: state.objects[state.objects.length - 1]._id,
+        filterCursor: state.sortingColumn
+          ? state.objects[state.objects.length - 1][state.sortingColumn]
+          : null,
+        prev_page_cursorId: newObject._id,
+        prev_page_filterCursor: state.sortingColumn
+          ? newObject[state.sortingColumn]
+          : null,
+      });
+      return;
+    }
+    if (state.objects.length >= state.selectedPageSize) {
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
+          return false;
+        }
+      }
+    }
+
+    //console.log('inserting');
+    let newObjects = state.objects;
+    const objectsLength = state.objects.length;
+    for (let i = 1; i < objectsLength; i++) {
+      if (
+        (state.objects[i - 1]._id === smallerNeighbor ||
+          state.objects[i - 1]._id === largerNeighbor) &&
+        (state.objects[i]._id === largerNeighbor ||
+          state.objects[i]._id === smallerNeighbor)
+      ) {
+        newObjects.splice(i, 0, newObject);
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: state.objects[state.objects.length - 1]._id,
+          filterCursor: state.sortingColumn
+            ? state.objects[state.objects.length - 1][state.sortingColumn]
+            : null,
+        });
+        return;
+      } else if (!largerNeighbor && !smallerNeighbor) {
+        newObjects.push(newObject);
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: newObject._id,
+          filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+          prev_page_cursorId: newObject._id,
+          prev_page_filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+        });
+        return;
+      } else if (!largerNeighbor || !smallerNeighbor) {
+        newObjects.push(newObject);
+        newObjects = newObjects.slice(0, state.selectedPageSize);
+
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects + 1,
+          cursorId: newObject._id,
+          filterCursor: state.sortingColumn
+            ? newObject[state.sortingColumn]
+            : null,
+        });
+        return;
+      }
+    }
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();
+    console.log('delete');
     const newObjects = [...state.objects];
     newObjects.splice(data.index, 1);
-    pluginState.set({ ...state, objects: newObjects });
+    pluginState.set({
+      ...state,
+      objects: newObjects,
+      totalObjects: state.totalObjects - 1,
+    });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
+    console.log('edit');
     const state = pluginState.get();
     const { newObject } = data;
     const newObjects = [...state.objects];
@@ -161,29 +278,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  const getObjectsBackwards = (
+  const getObjects = (
     schema?: string | null,
-    realm?: string | null
+    realm?: string | null,
+    backwards?: boolean
   ) => {
-    const state = pluginState.get();
-    setLoading(true);
-    if (!state.currentSchema) {
-      return;
-    }
-    schema = schema ?? state.currentSchema.name;
-    realm = realm ?? state.selectedRealm;
-    client.send('getObjectsBackwards', {
-      schema: schema,
-      realm: realm,
-      prev_page_filterCursor: state.prev_page_filterCursor,
-      limit: state.selectedPageSize,
-      sortingColumn: state.sortingColumn,
-      sortDirection: state.sortDirection,
-      prev_page_cursorId: state.prev_page_cursorId,
-    });
-  };
-
-  const getObjectsForward = (schema?: string | null, realm?: string | null) => {
     const state = pluginState.get();
     setLoading(true);
     if (!state.currentSchema) {
@@ -199,6 +298,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      prev_page_cursorId: state.prev_page_cursorId,
+      backwards: Boolean(backwards),
     });
   };
 
@@ -255,6 +357,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
+      currentPage: 1,
     });
   };
 
@@ -306,6 +409,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       objects: [],
       sortingColumn: null,
+      sortDirection: null,
     });
   };
 
@@ -403,8 +507,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   return {
     state: pluginState,
-    getObjectsForward,
-    getObjectsBackwards,
+    getObjects,
     getOneObject,
     getSchemas,
     executeQuery,

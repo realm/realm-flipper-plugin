@@ -12,8 +12,8 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsForward();
     instance.goBackSchemaHistory(newSelectedSchema);
+    instance.getObjects();
   }, [state.currentSchema]);
 
   const goForward = useCallback(() => {
@@ -21,8 +21,8 @@ const SchemaHistoryActions = () => {
     if (!newSelectedSchema) {
       return;
     }
-    instance.getObjectsForward();
     instance.goForwardSchemaHistory(newSelectedSchema);
+    instance.getObjects();
   }, [state.currentSchema]);
   return (
       <span style={{ display:'flex', justifyContent: 'flex-end', gap: '5px', padding:'5px' }}>

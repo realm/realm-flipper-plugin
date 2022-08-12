@@ -58,7 +58,7 @@ const SchemaVisualizer = (props: {
       return <div>Schema {selectedSchema} not found!</div>;
     }
 
-    instance.getObjectsForward();
+    instance.getObjects();
     instance.updateSelectedSchema(selectedSchemaObject);
   };
 
