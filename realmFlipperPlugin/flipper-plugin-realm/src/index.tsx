@@ -146,7 +146,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (
       state.currentPage === 1 &&
       state.objects.length >= state.selectedPageSize &&
-        !smallerNeighbor
+      !smallerNeighbor
     ) {
       let newObjects = [newObject, ...state.objects];
       newObjects = newObjects.slice(0, state.selectedPageSize);
@@ -170,30 +170,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
       });
       return;
     }
-    if (state.objects.length >= state.selectedPageSize) {
-      if (state.sortDirection === 'descend') {
-        console.log('descending');
-        if (
-          largerNeighbor > firstObjectInMemory ||
-          smallerNeighbor < lastObjectInMemory
-        ) {
-          return false;
-        }
-      } else {
-        if (
-          smallerNeighbor < firstObjectInMemory ||
-          largerNeighbor > lastObjectInMemory
-        ) {
-          return false;
-        }
-      }
-    }
 
+    if (
+      !updateIsInRange(
+        largerNeighbor,
+        smallerNeighbor,
+        firstObjectInMemory,
+        lastObjectInMemory,
+        state
+      )
+    ) {
+      return;
+    }
     //console.log('inserting');
     let newObjects = state.objects;
     const objectsLength = state.objects.length;
     for (let i = 1; i < objectsLength; i++) {
       if (
+        //its in the middle
         (state.objects[i - 1]._id === smallerNeighbor ||
           state.objects[i - 1]._id === largerNeighbor) &&
         (state.objects[i]._id === largerNeighbor ||
@@ -212,6 +206,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         });
         return;
       } else if (!largerNeighbor && !smallerNeighbor) {
+        //its the first element
         newObjects.push(newObject);
         newObjects = newObjects.slice(0, state.selectedPageSize);
         pluginState.set({
@@ -229,6 +224,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         });
         return;
       } else if (!largerNeighbor || !smallerNeighbor) {
+        //its in one of the ends
         newObjects.push(newObject);
         newObjects = newObjects.slice(0, state.selectedPageSize);
 
@@ -248,14 +244,102 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();
-    console.log('delete');
-    const newObjects = [...state.objects];
-    newObjects.splice(data.index, 1);
-    pluginState.set({
-      ...state,
-      objects: newObjects,
-      totalObjects: state.totalObjects - 1,
-    });
+    console.log('delete at ', data.index);
+    const { smallerNeighbor, largerNeighbor } = data;
+    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
+    const firstObjectInMemory = state.objects[0]?._id;
+    console.log(
+      'neighbors',
+      smallerNeighbor,
+      largerNeighbor,
+      firstObjectInMemory,
+      lastObjectInMemory
+    );
+    if (state.objects.length >= state.selectedPageSize) {
+      console.log('here', state.sortDirection);
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor >= lastObjectInMemory ||
+          largerNeighbor <= firstObjectInMemory
+        ) {
+          return false;
+        }
+      }
+    }
+    console.log('trying to insert');
+    let newObjects = state.objects;
+    const objectsLength = state.objects.length;
+    for (let i = 1; i < objectsLength; i++) {
+      console.log("current object", state.objects[i]);
+      console.log('previous', state.objects[i-1]);
+
+      if (
+        //its in the middle
+        (state.objects[i - 1]._id === smallerNeighbor ||
+          state.objects[i - 1]._id === largerNeighbor) &&
+        ((state.objects[i + 1] && state.objects[i + 1]._id) ===
+          largerNeighbor ||
+          (state.objects[i + 1] && state.objects[i + 1]._id) ===
+            smallerNeighbor)
+      ) {
+        console.log('its in the middle at index', i);
+        newObjects.splice(i, 1);
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects - 1,
+          cursorId: state.objects[state.objects.length - 1]._id,
+          filterCursor: state.sortingColumn
+            ? state.objects[state.objects.length - 1][state.sortingColumn]
+            : null,
+        });
+        return;
+      } else if (
+        smallerNeighbor <= lastObjectInMemory &&
+        largerNeighbor >= lastObjectInMemory
+      ) {
+        //delete last object
+        console.log('delete last object');
+        newObjects.pop();
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects - 1,
+          cursorId: state.objects[state.objects.length - 1]._id,
+          filterCursor: state.sortingColumn
+            ? state.objects[state.objects.length - 1][state.sortingColumn]
+            : null,
+        });
+        return;
+      } else if (
+        smallerNeighbor <= firstObjectInMemory &&
+        largerNeighbor >= firstObjectInMemory
+      ) {
+        console.log('delete first object');
+        newObjects.unshift();
+        pluginState.set({
+          ...state,
+          objects: [...newObjects],
+          totalObjects: state.totalObjects - 1,
+          cursorId: state.objects[state.objects.length - 1]._id,
+          filterCursor: state.sortingColumn
+            ? state.objects[state.objects.length - 1][state.sortingColumn]
+            : null,
+          prev_page_cursorId: state.objects[0]._id,
+          prev_page_filterCursor: state.sortingColumn
+            ? state.objects[0][state.sortingColumn]
+            : null,
+        });
+      }
+    }
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
@@ -489,6 +573,37 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  function updateIsInRange(
+    largerNeighbor: number,
+    smallerNeighbor: number,
+    firstObjectInMemory: number,
+    lastObjectInMemory: number,
+    state: RealmPluginState
+  ) {
+    console.log('here');
+    if (state.objects.length >= state.selectedPageSize) {
+      console.log('here', state.sortDirection);
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   const setSortingDirection = (direction: 'ascend' | 'descend' | null) => {
     const state = pluginState.get();
     pluginState.set({
@@ -539,7 +654,9 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL' | 'schemaGraph'>('data');
+  const [viewMode, setViewMode] = useState<
+    'data' | 'schemas' | 'RQL' | 'schemaGraph'
+  >('data');
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -572,8 +689,8 @@ export function Component() {
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
       {viewMode === 'schemaGraph' ? (
-              <SchemaGraph schemas={schemas}></SchemaGraph>
-      ): null}
+        <SchemaGraph schemas={schemas}></SchemaGraph>
+      ) : null}
     </Layout.Container>
   );
 }

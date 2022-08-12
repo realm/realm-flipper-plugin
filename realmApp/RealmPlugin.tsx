@@ -320,15 +320,21 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
-          //console.log('objects', objects);
+
           console.log('changes', changes);
           console.log('small listener fires');
           changes.deletions.forEach(index => {
             if (connection) {
-              connection.send('liveObjectDeleted', {index: index});
+              const smallerNeighbor = objects[index - 1];
+              const largerNeighbor = objects[index];
+              console.log(smallerNeighbor._objectId);
+              connection.send('liveObjectDeleted', {
+                smallerNeighbor: smallerNeighbor?._id,
+                largerNeighbor: largerNeighbor?._id,
+              });
             }
           });
-          // Handle newly added Dog objects
+
           changes.insertions.forEach(index => {
             const inserted = objects[index];
             const smallerNeighbor = objects[index - 1];
@@ -342,7 +348,7 @@ export default React.memo((props: {realms: Realm[]}) => {
               });
             }
           });
-          // Handle Dog objects that were modified
+
           changes.modifications.forEach(index => {
             const modified = objects[index];
             if (connection) {

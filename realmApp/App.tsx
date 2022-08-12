@@ -92,7 +92,7 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objects('Banana').sorted('_id')[0]);
+    realm.delete(realm.objectForPrimaryKey("Banana", 17));
   });
 }
 
