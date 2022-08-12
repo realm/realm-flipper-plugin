@@ -2,7 +2,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useRef, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 import { parsePropToCell } from '../utils/Parser';
@@ -61,6 +61,13 @@ PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
+  const [rowSelectionProp, setRowSelectionProp] = useState({
+    selectedRowKeys: [],
+    hideSelectAll: true,
+    columnWidth: '0px',
+    renderCell: () => <></>,
+  });
+
   if (currentSchema === undefined) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
@@ -88,21 +95,26 @@ PropertyType) => {
       property,
       render: (value: RealmObject, row: RealmObject) => {
         if (property.objectType && value) {
-
-console.log('property.objectType', property.objectType)
-
+          console.log('property.objectType', property.objectType);
 
           const linkedSchema = schemas.find(
             (schema) => schema.name === property.objectType
           );
           if (linkedSchema) {
             return (
-              <Layout.Container style={{display:'flex', flexDirection: 'row', gap: '5px'}}>
+              <Layout.Container
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: '5px',
+                }}
+              >
                 <Button
                   shape="circle"
                   type="primary"
                   size="small"
                   icon={<SearchOutlined />}
+                  onClick={() => highlightRow(value[currentSchema.primaryKey])}
                   ghost
                 />
                 <Dropdown
@@ -113,8 +125,6 @@ console.log('property.objectType', property.objectType)
                     {parsePropToCell(value, property, currentSchema, schemas)}
                   </Tooltip>
                 </Dropdown>
-
-                
               </Layout.Container>
             );
           }
@@ -152,12 +162,31 @@ console.log('property.objectType', property.objectType)
     instance.setCurrentPage(1);
   };
 
+  const addSelectedRowKey = (key: string) => {
+    const newRowSelectionProp = {
+      ...rowSelectionProp,
+      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([key]),
+    };
+    setRowSelectionProp(newRowSelectionProp);
+  };
+
+  const highlightRow = (key: string | number) => {
+    addSelectedRowKey(key.toString());
+    setTimeout(
+      () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
+      5000
+    );
+  };
+
   // TODO: think about key as a property in the Realm DB
   return (
     <Table
       dataSource={objects}
+      rowSelection={rowSelectionProp}
+      rowKey={(record) => {
+        return record[currentSchema.primaryKey];
+      }}
       columns={filledColumns}
-      rowClassName = {() => 'testStyle'}
       onChange={handleOnChange}
       pagination={false}
       loading={loading}
