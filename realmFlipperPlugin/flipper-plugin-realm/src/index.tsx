@@ -90,6 +90,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({ ...state, singleObject: data.object });
   });
 
+  client.onMessage('getCurrentQuery', () => {
+    const state = pluginState.get();
+    client.send('receivedCurrentQuery', {
+      schema: state.currentSchema.name,
+      realm: state.selectedRealm,
+      cursorId: state.cursorId,
+      filterCursor: state.filterCursor,
+      limit: state.selectedPageSize,
+      sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      prev_page_cursorId: state.prev_page_cursorId,
+    });
+  });
+
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('got schemas', data.schemas);
     const newSchemas = data.schemas.map((schema) =>
@@ -129,6 +144,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+    console.log('ADD');
     const state = pluginState.get();
     const { newObject, index, smallerNeighbor, largerNeighbor } = data;
     // console.log(newObject);
@@ -243,6 +259,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
+    console.log("DELETE")
     const state = pluginState.get();
     console.log('delete at ', data);
     const { smallerNeighbor, largerNeighbor, index } = data;
@@ -649,7 +666,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
-  client.onConnect(async () => {
+  client.onConnect( () => {
     getRealms();
   });
 
