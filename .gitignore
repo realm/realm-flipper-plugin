@@ -305,3 +305,4 @@ realmApp/package-lock.json
 realmApp/yarn.lock
 
 realmApp/ios/realmApp.xcworkspace/xcshareddata/
+realmFlipperPlugin/package-lock.json
