@@ -244,8 +244,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();
-    console.log('delete at ', data.index);
-    const { smallerNeighbor, largerNeighbor } = data;
+    console.log('delete at ', data);
+    const { smallerNeighbor, largerNeighbor, index } = data;
     const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
     const firstObjectInMemory = state.objects[0]?._id;
     console.log(
@@ -274,58 +274,25 @@ export function plugin(client: PluginClient<Events, Methods>) {
         }
       }
     }
-    console.log('trying to insert');
+    console.log('trying to insert at index', index);
+    console.log(
+      'currently looking at index ',
+      (state.currentPage - 1) * state.selectedPageSize,
+      state.currentPage * state.selectedPageSize
+    );
     let newObjects = state.objects;
-    const objectsLength = state.objects.length;
-    for (let i = 1; i < objectsLength; i++) {
-      console.log("current object", state.objects[i]);
-      console.log('previous', state.objects[i-1]);
-
-      if (
-        //its in the middle
-        (state.objects[i - 1]._id === smallerNeighbor ||
-          state.objects[i - 1]._id === largerNeighbor) &&
-        ((state.objects[i + 1] && state.objects[i + 1]._id) ===
-          largerNeighbor ||
-          (state.objects[i + 1] && state.objects[i + 1]._id) ===
-            smallerNeighbor)
-      ) {
-        console.log('its in the middle at index', i);
-        newObjects.splice(i, 1);
-        pluginState.set({
-          ...state,
-          objects: [...newObjects],
-          totalObjects: state.totalObjects - 1,
-          cursorId: state.objects[state.objects.length - 1]._id,
-          filterCursor: state.sortingColumn
-            ? state.objects[state.objects.length - 1][state.sortingColumn]
-            : null,
-        });
-        return;
-      } else if (
-        smallerNeighbor <= lastObjectInMemory &&
-        largerNeighbor >= lastObjectInMemory
-      ) {
-        //delete last object
-        console.log('delete last object');
-        newObjects.pop();
-        pluginState.set({
-          ...state,
-          objects: [...newObjects],
-          totalObjects: state.totalObjects - 1,
-          cursorId: state.objects[state.objects.length - 1]._id,
-          filterCursor: state.sortingColumn
-            ? state.objects[state.objects.length - 1][state.sortingColumn]
-            : null,
-        });
-        return;
-      } else if (
-        smallerNeighbor <= firstObjectInMemory &&
-        largerNeighbor >= firstObjectInMemory
-      ) {
-        console.log('delete first object');
-        newObjects.unshift();
-        pluginState.set({
+    console.log(
+      'before',
+      newObjects,
+      index - (state.currentPage - 1) * state.selectedPageSize
+    );
+    newObjects.splice(
+      index - ((state.currentPage - 1) * state.selectedPageSize),
+      1
+    );
+    
+    console.log("after",newObjects);
+    pluginState.set({
           ...state,
           objects: [...newObjects],
           totalObjects: state.totalObjects - 1,
@@ -338,17 +305,83 @@ export function plugin(client: PluginClient<Events, Methods>) {
             ? state.objects[0][state.sortingColumn]
             : null,
         });
-      }
-    }
+    // const objectsLength = state.objects.length;
+    // for (let i = 1; i < objectsLength; i++) {
+    //   console.log('current object', state.objects[i]);
+    //   console.log('previous', state.objects[i - 1]);
+
+    //   if (
+    //     //its in the middle
+    //     (state.objects[i - 1]._id === smallerNeighbor ||
+    //       state.objects[i - 1]._id === largerNeighbor) &&
+    //     ((state.objects[i + 1] && state.objects[i + 1]._id) ===
+    //       largerNeighbor ||
+    //       (state.objects[i + 1] && state.objects[i + 1]._id) ===
+    //         smallerNeighbor)
+    //   ) {
+    //     console.log('its in the middle at index', i);
+    //     newObjects.splice(i, 1);
+    //     pluginState.set({
+    //       ...state,
+    //       objects: [...newObjects],
+    //       totalObjects: state.totalObjects - 1,
+    //       cursorId: state.objects[state.objects.length - 1]._id,
+    //       filterCursor: state.sortingColumn
+    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
+    //         : null,
+    //     });
+    //     return;
+    //   } else if (
+    //     smallerNeighbor <= lastObjectInMemory &&
+    //     largerNeighbor >= lastObjectInMemory
+    //   ) {
+    //     //delete last object
+    //     console.log('delete last object');
+    //     newObjects.pop();
+    //     pluginState.set({
+    //       ...state,
+    //       objects: [...newObjects],
+    //       totalObjects: state.totalObjects - 1,
+    //       cursorId: state.objects[state.objects.length - 1]._id,
+    //       filterCursor: state.sortingColumn
+    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
+    //         : null,
+    //     });
+    //     return;
+    //   } else if (
+    //     smallerNeighbor <= firstObjectInMemory &&
+    //     largerNeighbor >= firstObjectInMemory
+    //   ) {
+    //     console.log('delete first object');
+    //     newObjects.unshift();
+    //     pluginState.set({
+    //       ...state,
+    //       objects: [...newObjects],
+    //       totalObjects: state.totalObjects - 1,
+    //       cursorId: state.objects[state.objects.length - 1]._id,
+    //       filterCursor: state.sortingColumn
+    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
+    //         : null,
+    //       prev_page_cursorId: state.objects[0]._id,
+    //       prev_page_filterCursor: state.sortingColumn
+    //         ? state.objects[0][state.sortingColumn]
+    //         : null,
+    //     });
+    //   }
+    // }
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     console.log('edit');
     const state = pluginState.get();
-    const { newObject } = data;
-    const newObjects = [...state.objects];
-    newObjects.splice(data.index, 1, newObject);
-    pluginState.set({ ...state, objects: newObjects });
+    const { newObject, index } = data;
+    console.log('trying to insert at index', index);
+    console.log(
+      'currently looking at index ',
+      (state.currentPage - 1) * state.selectedPageSize,
+      state.currentPage * state.selectedPageSize
+    );
+    //pluginState.set({ ...state, objects: newObjects });
   });
 
   client.addMenuEntry({

@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {componentWillUnmount, useEffect} from 'react';
 import Realm from 'realm';
 
 import type {Node} from 'react';
@@ -36,7 +36,7 @@ import {
   Button,
 } from 'react-native';
 
-import RealmPlugin from './RealmPlugin';
+import {RealmPlugin} from './RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -44,6 +44,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {addPlugin} from 'react-native-flipper';
 
 // Open a Realm
 const realm = new Realm({
@@ -59,7 +60,6 @@ const realm = new Realm({
   path: 'main',
   schemaVersion: 34,
 });
-
 //realmPlugin.newfunc();
 // Write a ToDo with random ID to database
 function createToDo() {
@@ -79,7 +79,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 290,
+      _id: 250,
       name: 'Jack',
       color: 'yellow',
       length: 40,
@@ -92,17 +92,34 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objectForPrimaryKey("Banana", 17));
+    realm.delete(realm.objectForPrimaryKey('Banana', 130));
   });
 }
 
 function editBanana() {
   realm.write(() => {
-    realm.objects('Banana').sorted("_id")[0].name = 'Maximillian';
+    realm.objectForPrimaryKey('Banana', 180).yellow = 'Blue';
   });
 }
 
 const Section = ({children, title}): Node => {
+  useEffect(() => {
+    addPlugin({
+      getId() {
+        return 'realm';
+      },
+      onConnect(connection) {
+        const realmPlugin = new RealmPlugin([realm], connection);
+        realmPlugin.connectPlugin();
+      },
+      onDisconnect() {
+        console.log('Disconnected');
+      },
+    });
+    return () => {
+      console.log('before reload');
+    };
+  });
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -137,7 +154,6 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <RealmPlugin realms={[realm]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
