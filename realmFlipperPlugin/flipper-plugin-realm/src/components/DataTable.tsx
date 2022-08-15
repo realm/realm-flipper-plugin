@@ -117,7 +117,7 @@ PropertyType) => {
                   onClick={() => highlightRow(value[currentSchema.primaryKey])}
                   ghost
                 />
-                <Dropdown
+                <Dropdown 
                   overlay={renderOptions(row, property, currentSchema)}
                   trigger={[`contextMenu`]}
                 >
@@ -162,16 +162,15 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  const addSelectedRowKey = (key: string) => {
-    const newRowSelectionProp = {
+  const highlightRow = (key: string | number) => {
+    let newRowSelectionProp = {
       ...rowSelectionProp,
-      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([key]),
+      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
+        key.toString(),
+      ]),
     };
     setRowSelectionProp(newRowSelectionProp);
-  };
 
-  const highlightRow = (key: string | number) => {
-    addSelectedRowKey(key.toString());
     setTimeout(
       () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
       5000
