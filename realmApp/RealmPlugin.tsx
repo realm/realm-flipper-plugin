@@ -133,27 +133,27 @@ export default React.memo((props: {realms: Realm[]}) => {
       onConnect(connection) {
         connection.send('getCurrentQuery');
 
-        // connection.receive('receivedCurrentQuery', obj => {
-        //   const realm = realmsMap.get(obj.realm);
-        //   if (schemaToObjects.has(obj.schema)) {
-        //     schemaToObjects.get(obj.schema).removeAllListeners();
-        //   }
+        connection.receive('receivedCurrentQuery', obj => {
+          const realm = realmsMap.get(obj.realm);
+          if (schemaToObjects.has(obj.schema)) {
+            schemaToObjects.get(obj.schema).removeAllListeners();
+          }
 
-        //   let objects = realm?.objects(obj.schema);
-        //   let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
-        //     obj.schema,
-        //   );
-        //   if (obj.sortingColumn) {
-        //     objectsToListenTo = objects.sorted([
-        //       [`${obj.sortingColumn}`, false],
-        //       ['_id', false],
-        //     ]);
-        //   } else {
-        //     objectsToListenTo = objects.sorted('_id');
-        //   }
-        //   objectsToListenTo.addListener(onObjectsChange);
-        //   schemaToObjects.set(obj.schema, objectsToListenTo);
-        // });
+          let objects = realm?.objects(obj.schema);
+          let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
+            obj.schema,
+          );
+          if (obj.sortingColumn) {
+            objectsToListenTo = objects.sorted([
+              [`${obj.sortingColumn}`, false],
+              ['_id', false],
+            ]);
+          } else {
+            objectsToListenTo = objects.sorted('_id');
+          }
+          objectsToListenTo.addListener(onObjectsChange);
+          schemaToObjects.set(obj.schema, objectsToListenTo);
+        });
 
         connection.receive('getRealms', () => {
           connection.send('getRealms', {
@@ -342,12 +342,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         const onObjectsChange = (objects, changes) => {
           changes.deletions.forEach(index => {
             if (connection) {
-              const smallerNeighbor = objects[index - 1];
-              const largerNeighbor = objects[index];
-              console.log(smallerNeighbor._objectId);
               connection.send('liveObjectDeleted', {
-                smallerNeighbor: smallerNeighbor?._id,
-                largerNeighbor: largerNeighbor?._id,
                 index: index,
               });
             }
@@ -355,14 +350,10 @@ export default React.memo((props: {realms: Realm[]}) => {
 
           changes.insertions.forEach(index => {
             const inserted = objects[index];
-            const smallerNeighbor = objects[index - 1];
-            const largerNeighbor = objects[index + 1];
             if (connection) {
               connection.send('liveObjectAdded', {
                 newObject: inserted,
                 index: index,
-                smallerNeighbor: smallerNeighbor?._id,
-                largerNeighbor: largerNeighbor?._id,
               });
             }
           });
