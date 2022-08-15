@@ -259,133 +259,43 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
-    console.log("DELETE")
+    console.log('DELETE');
     const state = pluginState.get();
-    console.log('delete at ', data);
-    const { smallerNeighbor, largerNeighbor, index } = data;
-    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
-    const firstObjectInMemory = state.objects[0]?._id;
-    console.log(
-      'neighbors',
-      smallerNeighbor,
-      largerNeighbor,
-      firstObjectInMemory,
-      lastObjectInMemory
-    );
-    if (state.objects.length >= state.selectedPageSize) {
-      console.log('here', state.sortDirection);
-      if (state.sortDirection === 'descend') {
-        console.log('descending');
-        if (
-          largerNeighbor > firstObjectInMemory ||
-          smallerNeighbor < lastObjectInMemory
-        ) {
-          return false;
-        }
-      } else {
-        if (
-          smallerNeighbor >= lastObjectInMemory ||
-          largerNeighbor <= firstObjectInMemory
-        ) {
-          return false;
-        }
-      }
+    const { index } = data;
+    const upperIndex = state.currentPage * state.selectedPageSize - 1;
+    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+    if (index > upperIndex || index < lowerIndex) {
+      return false;
     }
-    console.log('trying to insert at index', index);
-    console.log(
-      'currently looking at index ',
-      (state.currentPage - 1) * state.selectedPageSize,
-      state.currentPage * state.selectedPageSize
-    );
     let newObjects = state.objects;
+    console.log("object to delete at ",index);
     console.log(
       'before',
       newObjects,
       index - (state.currentPage - 1) * state.selectedPageSize
     );
     newObjects.splice(
-      index - ((state.currentPage - 1) * state.selectedPageSize),
+      index - (state.currentPage - 1) * state.selectedPageSize,
       1
     );
-    
-    console.log("after",newObjects);
-    pluginState.set({
-          ...state,
-          objects: [...newObjects],
-          totalObjects: state.totalObjects - 1,
-          cursorId: state.objects[state.objects.length - 1]._id,
-          filterCursor: state.sortingColumn
-            ? state.objects[state.objects.length - 1][state.sortingColumn]
-            : null,
-          prev_page_cursorId: state.objects[0]._id,
-          prev_page_filterCursor: state.sortingColumn
-            ? state.objects[0][state.sortingColumn]
-            : null,
-        });
-    // const objectsLength = state.objects.length;
-    // for (let i = 1; i < objectsLength; i++) {
-    //   console.log('current object', state.objects[i]);
-    //   console.log('previous', state.objects[i - 1]);
 
-    //   if (
-    //     //its in the middle
-    //     (state.objects[i - 1]._id === smallerNeighbor ||
-    //       state.objects[i - 1]._id === largerNeighbor) &&
-    //     ((state.objects[i + 1] && state.objects[i + 1]._id) ===
-    //       largerNeighbor ||
-    //       (state.objects[i + 1] && state.objects[i + 1]._id) ===
-    //         smallerNeighbor)
-    //   ) {
-    //     console.log('its in the middle at index', i);
-    //     newObjects.splice(i, 1);
-    //     pluginState.set({
-    //       ...state,
-    //       objects: [...newObjects],
-    //       totalObjects: state.totalObjects - 1,
-    //       cursorId: state.objects[state.objects.length - 1]._id,
-    //       filterCursor: state.sortingColumn
-    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
-    //         : null,
-    //     });
-    //     return;
-    //   } else if (
-    //     smallerNeighbor <= lastObjectInMemory &&
-    //     largerNeighbor >= lastObjectInMemory
-    //   ) {
-    //     //delete last object
-    //     console.log('delete last object');
-    //     newObjects.pop();
-    //     pluginState.set({
-    //       ...state,
-    //       objects: [...newObjects],
-    //       totalObjects: state.totalObjects - 1,
-    //       cursorId: state.objects[state.objects.length - 1]._id,
-    //       filterCursor: state.sortingColumn
-    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
-    //         : null,
-    //     });
-    //     return;
-    //   } else if (
-    //     smallerNeighbor <= firstObjectInMemory &&
-    //     largerNeighbor >= firstObjectInMemory
-    //   ) {
-    //     console.log('delete first object');
-    //     newObjects.unshift();
-    //     pluginState.set({
-    //       ...state,
-    //       objects: [...newObjects],
-    //       totalObjects: state.totalObjects - 1,
-    //       cursorId: state.objects[state.objects.length - 1]._id,
-    //       filterCursor: state.sortingColumn
-    //         ? state.objects[state.objects.length - 1][state.sortingColumn]
-    //         : null,
-    //       prev_page_cursorId: state.objects[0]._id,
-    //       prev_page_filterCursor: state.sortingColumn
-    //         ? state.objects[0][state.sortingColumn]
-    //         : null,
-    //     });
-    //   }
-    // }
+    console.log('after', newObjects);
+    const newFirstObject = newObjects[0];
+    const newLastObject = newObjects[newObjects.length-1];
+    console.log(newFirstObject, newLastObject);
+    pluginState.set({
+      ...state,
+      objects: [...newObjects],
+      totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._id,
+      filterCursor: state.sortingColumn
+        ? newLastObject[state.sortingColumn]
+        : null,
+      prev_page_cursorId: newFirstObject._id,
+      prev_page_filterCursor: state.sortingColumn
+        ? newFirstObject[state.sortingColumn]
+        : null,
+    });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
@@ -418,12 +328,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     backwards?: boolean
   ) => {
     const state = pluginState.get();
-    setLoading(true);
     if (!state.currentSchema) {
       return;
     }
+    setLoading(true);
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    console.log("state is",state);
     client.send('getObjects', {
       schema: schema,
       realm: realm,
@@ -666,7 +577,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
-  client.onConnect( () => {
+  client.onConnect(() => {
     getRealms();
   });
 

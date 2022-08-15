@@ -133,29 +133,27 @@ export default React.memo((props: {realms: Realm[]}) => {
       onConnect(connection) {
         connection.send('getCurrentQuery');
 
-        connection.receive('receivedCurrentQuery', obj => {
-          const realm = realmsMap.get(obj.realm);
-          console.log('here', obj);
-          console.log('schemaToObjects', schemaToObjects);
-          if (schemaToObjects.has(obj.schema)) {
-            console.log('removing all listeners from ', obj.schema);
-            schemaToObjects.get(obj.schema).removeAllListeners();
-          }
-          console.log('adding listener to', obj.schema);
-          let objects = realm?.objects(obj.schema);
-          let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(obj.schema);
-          if (obj.sortingColumn) {
-            objectsToListenTo = objects.sorted([
-              [`${obj.sortingColumn}`, false],
-              ['_id', false],
-            ]);
-          } else {
-            objectsToListenTo = objects.sorted('_id');
-          }
-          objectsToListenTo.addListener(onObjectsChange);
-          schemaToObjects.set(obj.schema, objectsToListenTo);
-        });
-        console.log('connecting', connection);
+        // connection.receive('receivedCurrentQuery', obj => {
+        //   const realm = realmsMap.get(obj.realm);
+        //   if (schemaToObjects.has(obj.schema)) {
+        //     schemaToObjects.get(obj.schema).removeAllListeners();
+        //   }
+
+        //   let objects = realm?.objects(obj.schema);
+        //   let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
+        //     obj.schema,
+        //   );
+        //   if (obj.sortingColumn) {
+        //     objectsToListenTo = objects.sorted([
+        //       [`${obj.sortingColumn}`, false],
+        //       ['_id', false],
+        //     ]);
+        //   } else {
+        //     objectsToListenTo = objects.sorted('_id');
+        //   }
+        //   objectsToListenTo.addListener(onObjectsChange);
+        //   schemaToObjects.set(obj.schema, objectsToListenTo);
+        // });
 
         connection.receive('getRealms', () => {
           connection.send('getRealms', {
@@ -179,7 +177,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          console.log('schemaToObjects', schemaToObjects);
+          console.log("get Objects query", obj);
           if (schemaToObjects.has(schema)) {
             console.log('removing all listeners from ', schema);
             schemaToObjects.get(schema).removeAllListeners();
@@ -201,13 +199,13 @@ export default React.memo((props: {realms: Realm[]}) => {
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
           if (obj.backwards) {
-            objects = getObjectsByPaginationBackwards(obj, objects, limit);
+            objects = getPrevObjectsByPagination(obj, objects, limit);
           } else {
             objects = getObjectsByPagination(obj, objects, limit);
           }
           let lastItem, firstItem;
           if (objects.length) {
-            lastItem = objects[objects.length - 1]; //if this is null this is the last page
+            lastItem = objects[objects.length - 1];
             firstItem = objects[0];
           }
           //base64 the next and prev cursors
@@ -342,8 +340,6 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
-          console.log('changes', changes);
-          console.log('small listener fires');
           changes.deletions.forEach(index => {
             if (connection) {
               const smallerNeighbor = objects[index - 1];
@@ -352,6 +348,7 @@ export default React.memo((props: {realms: Realm[]}) => {
               connection.send('liveObjectDeleted', {
                 smallerNeighbor: smallerNeighbor?._id,
                 largerNeighbor: largerNeighbor?._id,
+                index: index,
               });
             }
           });
@@ -389,7 +386,6 @@ export default React.memo((props: {realms: Realm[]}) => {
       },
     });
     return () => {
-      console.log('removing listeners from', schemaToObjects);
       for (let objects of schemaToObjects.values()) {
         objects.removeAllListeners();
       }
@@ -397,73 +393,103 @@ export default React.memo((props: {realms: Realm[]}) => {
   });
   return <Text>dd</Text>;
 });
+
 function getObjectsByPagination(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  let filterCursor = null;
   const shouldSortDescending = obj.sortDirection === 'descend';
-  obj.cursorId =
+  const cursorId =
     obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
+  if (obj.sortingColumn) {
+    filterCursor =
+      obj.filterCursor ??
+      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+        obj.sortingColumn
+      ];
+  }
   if (shouldSortDescending) {
-    objects = getObjectsDescending(obj, objects, limit);
+    objects = getObjectsDescending(obj, cursorId, filterCursor, objects, limit);
   } else {
-    objects = getObjectsAscending(obj, objects, limit);
+    objects = getObjectsAscending(obj, cursorId, filterCursor, objects, limit);
   }
   return objects;
 }
 
-function getObjectsByPaginationBackwards(
+function getPrevObjectsByPagination(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  let filterCursor = null;
   const shouldSortDescending = obj.sortDirection === 'descend';
-  obj.prev_page_cursorId =
+  if (obj.sortingColumn) {
+    filterCursor =
+      obj.prev_page_filterCursor ??
+      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+        obj.sortingColumn
+      ];
+  }
+  const prevPageCursorId =
     obj.prev_page_cursorId ??
     objects.sorted('_id', shouldSortDescending)[0]._id;
   if (shouldSortDescending) {
-    objects = getPrevObjectsDescending(obj, objects, limit);
+    objects = getPrevObjectsDescending(
+      obj,
+      prevPageCursorId,
+      filterCursor,
+      objects,
+      limit,
+    );
   } else {
-    objects = getPrevObjectsAscending(obj, objects, limit);
+    objects = getPrevObjectsAscending(
+      obj,
+      prevPageCursorId,
+      filterCursor,
+      objects,
+      limit,
+    );
   }
   return objects;
 }
 
 function getPrevObjectsDescending(
   obj: getObjectsQuery,
+  prevPageCursorId: number,
+  prevPageFilterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    const filterCursor =
-      obj.prev_page_filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, false],
+        [`${sortingColumn}`, false],
         ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} ${
+        `${sortingColumn} ${
           !obj.prev_page_filterCursor ? '>=' : '>'
-        } $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '>=' : '>'
-        } $1) LIMIT(${limit + 1})`,
-        filterCursor,
-        obj.prev_page_cursorId,
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.prev_page_cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit})`,
+        prevPageFilterCursor,
+        prevPageCursorId,
       );
   } else {
     objects = objects
       .sorted('_id', false)
       .filtered(
-        `_id ${obj.prev_page_cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId,
+        `_id ${!obj.prev_page_cursorId ? '>=' : '>'} $0 LIMIT(${limit})`,
+        prevPageCursorId,
       );
   }
+  console.log(obj.prev_page_filterCursor);
   if (obj.prev_page_filterCursor) {
     objects = objects.sorted([
-      [`${obj.sortingColumn}`, true],
+      [`${sortingColumn}`, true],
       ['_id', true],
     ]);
   } else if (obj.prev_page_cursorId) {
@@ -474,40 +500,39 @@ function getPrevObjectsDescending(
 
 function getPrevObjectsAscending(
   obj: getObjectsQuery,
+  prevPageCursorId: number,
+  prevPageFilterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  const {sortingColumn} = obj;
   console.log('ascending previous');
-  if (obj.sortingColumn) {
-    objects.findIndex;
-    const filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
+        [`${sortingColumn}`, true],
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} ${
+        `${sortingColumn} ${
           !obj.prev_page_filterCursor ? '<=' : '<'
-        } $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.prev_page_cursorId ? '<=' : '<'
-        } $1) LIMIT(${limit + 1})`,
-        filterCursor,
-        obj.prev_page_cursorId,
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.prev_page_cursorId ? '<=' : '<'
+        } $1) LIMIT(${limit})`,
+        prevPageFilterCursor,
+        prevPageCursorId,
       );
   } else {
     objects = objects
       .sorted('_id', true)
       .filtered(
-        `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId,
+        `_id ${!obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit})`,
+        prevPageCursorId,
       );
   }
   if (obj.prev_page_filterCursor) {
     objects = objects.sorted([
-      [`${obj.sortingColumn}`, false],
+      [`${sortingColumn}`, false],
       ['_id', false],
     ]);
   } else if (obj.prev_page_cursorId) {
@@ -519,32 +544,33 @@ function getPrevObjectsAscending(
 
 function getObjectsDescending(
   obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    const filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
-    console.log('filtercursor is ', obj.filterCursor);
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
+        [`${sortingColumn}`, true],
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} ${!obj.filterCursor ? '<=' : '<'} $0 || (${
-          obj.sortingColumn
-        } == $0 && _id ${obj.cursorId ? '<=' : '<'} $1) LIMIT(${limit + 1})`,
+        `${sortingColumn} ${
+          !obj.filterCursor ? '<=' : '<'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.cursorId ? '<=' : '<'
+        } $1) LIMIT(${limit})`,
         filterCursor,
-        obj.cursorId,
+        cursorId,
       );
   } else {
     objects = objects
       .sorted('_id', true)
       .filtered(
-        `_id ${obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.cursorId,
+        `_id ${!obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit})`,
+        cursorId,
       );
   }
   return objects;
@@ -552,31 +578,33 @@ function getObjectsDescending(
 
 function getObjectsAscending(
   obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: number | string | null,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    const filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, false],
+        [`${sortingColumn}`, false],
         ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} ${!obj.filterCursor ? '>=' : '>'} $0 || (${
-          obj.sortingColumn
-        } == $0 && _id ${obj.cursorId ? '>=' : '>'} $1) LIMIT(${limit + 1})`,
+        `${sortingColumn} ${
+          !obj.filterCursor ? '>=' : '>'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit})`,
         filterCursor,
-        obj.cursorId,
+        cursorId,
       );
   } else {
     objects = objects
       .sorted('_id', false)
       .filtered(
-        `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
-        obj.cursorId,
+        `_id ${!obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit})`,
+        cursorId,
       );
   }
   return objects;
