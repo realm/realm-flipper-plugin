@@ -146,6 +146,8 @@ PropertyType) => {
   });
 
   const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
