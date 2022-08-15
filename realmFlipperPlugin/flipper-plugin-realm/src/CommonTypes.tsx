@@ -40,7 +40,6 @@ export type SchemaProperty = {
 };
 export type Events = {
   getObjects: ObjectsMessage;
-  getOneObject: ObjectMessage;
   getSchemas: SchemaMessage;
   liveObjectAdded: AddLiveObjectRequest;
   liveObjectDeleted: DeleteLiveObjectRequest;
@@ -51,7 +50,6 @@ export type Events = {
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
   getObjects: (data: getForwardsObjectsRequest) => Promise<RealmObject[]>;
-  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
   getSchemas: (data: RealmRequest) => Promise<SchemaObject[]>;
   getRealms: () => Promise<string[]>;
   addObject: (object: AddObject) => Promise<RealmObject>;

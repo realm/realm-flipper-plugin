@@ -68,7 +68,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
-    console.log('fetched objects', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -85,20 +84,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   });
 
-  client.onMessage('getOneObject', (data: ObjectMessage) => {
-    const state = pluginState.get();
-    pluginState.set({ ...state, singleObject: data.object });
-  });
-
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log('got schemas', data.schemas);
-    const newSchemas = data.schemas.map((schema) =>
+    console.log('schemas: ', data.schemas);
+    const newschemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newSchemas });
-    console.log('pluginState', pluginState);
+    pluginState.set({ ...state, schemas: newschemas });
+    // console.log('pluginState', pluginState);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -304,16 +298,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const getOneObject = (event: { schema: string; primaryKey: string }) => {
-    const state = pluginState.get();
-    // console.log('myRealm', event);
-    client.send('getOneObject', {
-      schema: event.schema,
-      realm: state.selectedRealm,
-      primaryKey: event.primaryKey,
-    });
-  };
-
   const getSchemas = (realm: string) => {
     client.send('getSchemas', { realm: realm });
   };
@@ -330,13 +314,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
+    console.log('addObject in index', object)
     if (!state.currentSchema) {
       return;
     }
     client.send('addObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: object,
     });
   };
@@ -419,13 +403,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
-    if (!state.currentSchema) {
-      return;
-    }
+    console.log('modifyObject', newObject)
     client.send('modifyObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: newObject,
     });
   };
@@ -508,7 +489,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   return {
     state: pluginState,
     getObjects,
-    getOneObject,
     getSchemas,
     executeQuery,
     addObject,

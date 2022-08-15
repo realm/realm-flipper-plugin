@@ -3,6 +3,7 @@ import { SchemaObject, SchemaProperty } from '../CommonTypes';
 import mermaid from 'mermaid';
 import { Layout } from 'flipper-plugin';
 
+// based on https://github.com/realm/realm-js/blob/master/packages/realm-tools/src/realm-schema.ts
 
 type Relationship = {
   from: string;
@@ -13,7 +14,6 @@ type InputType = {
   schemas: SchemaObject[];
 };
 
-// based on https://github.com/realm/realm-js/blob/master/packages/realm-tools/src/realm-schema.ts
 const calculateMermaid = (schemas: SchemaObject[]): string => {
   mermaid.initialize({
     startOnLoad: true,
@@ -68,11 +68,10 @@ const calculateMermaid = (schemas: SchemaObject[]): string => {
   });
   
   let str = '';
-  
   function writer(line: string) {
+    console.log(str);
     str += line + '\n';
   }
-
   const collectionTypes = ['list', 'dictionary', 'set'];
   const primitiveTypes = [
     'bool',
@@ -116,24 +115,23 @@ const calculateMermaid = (schemas: SchemaObject[]): string => {
   });
   return str;
 };
-
+// let fd = fs.openSync(args.outputFileName, "w");
 export const SchemaGraph = ({ schemas }: InputType) => {
-  if (schemas.length == 0) {
-    return <>No schemas found.</>
-  }
   const str = calculateMermaid(schemas);
 
   return (
     <Layout.ScrollContainer style={{ height: '800px' }}>
-      <Mermaid content={str} />
+      <Mermaid content={str} style={{ height: '800px' }}></Mermaid>
     </Layout.ScrollContainer>
   );
 };
 
 
-class Mermaid extends React.Component<{content: string}> {
+class Mermaid extends React.Component {
   componentDidMount() {
+    
     mermaid.contentLoaded();
+    
   }
   render() {
     return <div className="mermaid">{this.props.content}</div>;
