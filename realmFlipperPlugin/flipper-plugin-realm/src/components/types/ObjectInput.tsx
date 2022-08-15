@@ -28,7 +28,7 @@ TypeInputProps) => {
   }
 
   const renderChosen = () => {
-    const val = value[targetSchema.primaryKey];
+    const val = value[targetSchema.primaryKey].text;
     const content = `${targetSchema?.primaryKey}: ${val}`;
     return (
       <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">

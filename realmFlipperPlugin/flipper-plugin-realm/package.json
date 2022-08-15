@@ -11,7 +11,7 @@
     "flipper-plugin"
   ],
   "icon": "apps",
-  "title": "realm",
+  "title": "Realm",
   "scripts": {
     "prepack": "flipper-pkg lint && flipper-pkg bundle",
     "build": "flipper-pkg bundle",

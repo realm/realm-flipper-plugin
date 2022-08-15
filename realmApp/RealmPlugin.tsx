@@ -113,6 +113,8 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
     obj[value[0]] = convertRoot(value[1], type);
     // console.log('value for', value[0], ' is ', obj[value[0]]);
   });
+  // console.log('returning', obj);
+  // console.log('example:', new BSON.UUID());
   return obj;
 };
 
@@ -216,24 +218,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive(
-          'getOneObject',
-          (obj: {realm: string; schema: string; primaryKey: string}) => {
-            const realm = realmsMap.get(obj.realm);
-
-            currentRealm = realm;
-
-            const schema = obj.schema;
-            if (!realm) {
-              return;
-            }
-
-            const object = realm.objectForPrimaryKey(schema, obj.primaryKey);
-
-            connection.send('getOneObject', {object: object});
-          },
-        );
-
         connection.receive('getSchemas', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
@@ -299,7 +283,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted);
+          console.log('converted', converted)
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
