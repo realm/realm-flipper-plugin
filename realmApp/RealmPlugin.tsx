@@ -134,6 +134,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.send('getCurrentQuery');
 
         connection.receive('receivedCurrentQuery', obj => {
+          console.log("received");
           const realm = realmsMap.get(obj.realm);
           if (schemaToObjects.has(obj.schema)) {
             schemaToObjects.get(obj.schema).removeAllListeners();
@@ -177,12 +178,9 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          console.log("get Objects query", obj);
           if (schemaToObjects.has(schema)) {
-            console.log('removing all listeners from ', schema);
             schemaToObjects.get(schema).removeAllListeners();
           }
-          console.log('adding listener to', schema);
           let objectsToListenTo: Realm.Results<Realm.Object> = objects;
           if (obj.sortingColumn) {
             objectsToListenTo = objects.sorted([
