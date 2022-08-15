@@ -1,44 +1,52 @@
 import React from 'react';
 import { Tag } from 'antd';
 
-export const ColumnTitle = (props: {
+type PropertyType = {
   isOptional: boolean;
   name: string;
   objectType: string;
   propertyType: string;
   isPrimaryKey: boolean;
-}) => {
+};
+
+export const ColumnTitle = ({
+  isOptional,
+  name,
+  objectType,
+  propertyType,
+  isPrimaryKey,
+}: PropertyType) => {
   let title;
 
-  switch (props.propertyType) {
+  switch (propertyType) {
     case 'list':
-      title = props.objectType + '[]';
+      title = objectType + '[]';
       break;
     case 'set':
-      title = props.objectType + '<>';
+      title = objectType + '<>';
       break;
     case 'dictionary':
-      title = props.objectType + '{}';
+      title = objectType + '{}';
       break;
     case 'object':
-      title = props.objectType;
+      title = objectType;
       break;
     default:
-      title = props.propertyType;
+      title = propertyType;
   }
 
-  props.isOptional ? (title = title + '?') : null;
+  isOptional ? (title = title + '?') : null;
 
-  return props.isPrimaryKey ? (
+  return isPrimaryKey ? (
     <div>
       {' '}
-      {props.name + ' '} <Tag color="default">{title}</Tag>{' '}
+      {name + ' '} <Tag color="default">{title}</Tag>{' '}
       <Tag color="green">Primary Key</Tag>{' '}
     </div>
   ) : (
     <div>
       {' '}
-      {props.name + ' '} <Tag color="default">{title}</Tag>
+      {name + ' '} <Tag color="default">{title}</Tag>
     </div>
   );
 };
