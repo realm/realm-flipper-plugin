@@ -1,9 +1,13 @@
-import { ArrowRightOutlined } from "@ant-design/icons";
+import {
+  ArrowRightOutlined,
+  DeleteColumnOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import { Button, Col, Layout, Row } from 'antd';
-import React, { useState } from "react";
-import { SchemaProperty } from "../../CommonTypes";
-import { MixedInput } from "./MixedInput";
-import { StringInput } from "./StringInput";
+import React, { useState } from 'react';
+import { SchemaProperty } from '../../../CommonTypes';
+import { MixedInput } from './MixedInput';
+import { StringInput } from './StringInput';
 import { TypeInputProps } from './TypeInput';
 
 const mapToObj = (map: Map<number, [string, any]>) => {
@@ -15,51 +19,65 @@ const mapToObj = (map: Map<number, [string, any]>) => {
   return obj;
 };
 
-export const DictionaryInput = ({
-  set,
-}: TypeInputProps) => {
-  const [contents, setContents] = useState(new Map<number, [string, unknown]>());
-  const [_, setReset] = useState(0);
-
-  // console.log("rerender, size:", contents.size);
+export const DictionaryInput = ({ set }: TypeInputProps) => {
+  const [contents, setContents] = useState(
+    new Map<number, [string, unknown]>()
+  );
+  // const [_, setReset] = useState(0);
+  const [resetOffset, setResetOffset] = useState(0);
   const keyProperty: SchemaProperty = {
-    name: "",
-    type: "string",
+    name: '',
+    type: 'string',
     indexed: false,
     optional: false,
-    mapTo: "",
+    mapTo: '',
   };
 
   return (
     <Layout>
       {Array.from(contents.values()).map(
-        (value: [string, any], index: number) => {
+        (value: [string, unknown], index: number) => {
           return (
-            <Row key={index} style={{ backgroundColor: 'white' }} align="middle">
-              <Col span={10}>
-              <StringInput
-                defaultValue={value[0]}
-                set={(val: any) => {
-                  contents.set(index, [val, value[1]]);
-                  setContents(contents);
-                  set(mapToObj(contents));
-                }}
-                property={keyProperty}
-              ></StringInput>
+            <Row
+              key={index}
+              style={{ backgroundColor: 'white' }}
+              align="middle"
+            >
+              <Col span={9}>
+                <StringInput
+                  defaultValue={value[0]}
+                  set={(val: any) => {
+                    contents.set(index, [val, value[1]]);
+                    setContents(contents);
+                    set(mapToObj(contents));
+                  }}
+                  property={keyProperty}
+                  key={index + resetOffset}
+                ></StringInput>
               </Col>
-              <Col span={2}>
+              <Col span={1}>
                 <ArrowRightOutlined />
               </Col>
               <Col span={12}>
-              <MixedInput
-                property={keyProperty}
-                set={(val: any) => {
-                  contents.set(index, [value[0], val]);
-                  setContents(contents);
-                  set(mapToObj(contents));
-                  setReset((v) => v + 1);
-                }}
-              ></MixedInput>
+                <MixedInput
+                  key={index + resetOffset}
+                  property={keyProperty}
+                  set={(val: any) => {
+                    contents.set(index, [value[0], val]);
+                    setContents(contents);
+                    set(mapToObj(contents));
+                    // setReset((v) => v + 1);
+                  }}
+                ></MixedInput>
+              </Col>
+              <Col span={1}>
+                <Button
+                  icon={<DeleteOutlined />}
+                  onClick={() => {
+                    setResetOffset(v => v + contents.size);
+                    contents.delete(index);
+                  }}
+                ></Button>
               </Col>
             </Row>
           );
@@ -67,8 +85,7 @@ export const DictionaryInput = ({
       )}
       <Button
         onClick={() => {
-          contents.set(contents.size, ["key" + contents.size, null]);
-          // console.log(contents);
+          contents.set(contents.size, ['key' + contents.size, null]);
           setContents(contents);
           set(mapToObj(contents));
           setReset((v) => v + 1);

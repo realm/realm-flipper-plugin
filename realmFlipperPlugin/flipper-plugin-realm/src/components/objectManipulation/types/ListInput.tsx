@@ -5,9 +5,8 @@ import React, { useState } from 'react';
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
 export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
-  const [reset, setReset] = useState(0);
   const [array, setArray] = useState(defaultValue as unknown[]);
-  console.log('rendering listinput', array);
+  const [removalOffset, setRemovalOffset] = useState(0);
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -19,7 +18,7 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
     mapTo: '',
     optional: property.optional,
   };
-  // console.log(array);
+
   return (
     <Layout.Container grow>
       {array.map((value: unknown, index: number) => {
@@ -39,9 +38,9 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
                     arr[index] = val;
                     setArray(arr);
                     set(arr);
-                    setReset(v => v + 1);
                   }}
                   defaultValue={value}
+                  key={removalOffset + index}
                 ></TypeInput>
               </Col>
               <Col>
@@ -52,9 +51,9 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
                   // size={"small"}
                   // remove ith element
                   onClick={() => {
+                    setRemovalOffset(v => v + array.length)
                     setArray(array.filter((_, i) => i !== index));
                     set(array.filter((_, i) => i !== index));
-                    setReset((v) => v + 1);
                   }}
                 />
               </Col>

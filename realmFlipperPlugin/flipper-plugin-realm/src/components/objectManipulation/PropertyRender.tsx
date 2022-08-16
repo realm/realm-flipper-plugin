@@ -53,7 +53,7 @@ export const PropertyRender = ({
           <span style={{ float: 'right' }}>
             <Tag color="default">{title}</Tag>
             {!property.optional ? <Tag color="blue">required</Tag> : null}
-            {isPrimary ? <Tag color="blue">primary key</Tag> : null}
+            {isPrimary ? <Tag color="green">primary key</Tag> : null}
           </span>
         </div>
       </Layout.Header>
