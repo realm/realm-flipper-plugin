@@ -1,22 +1,23 @@
-import { Modal } from 'antd';
 import React from 'react';
 import { useState } from 'react';
-import { RealmObject, SchemaObject } from '../CommonTypes';
+import { RealmObject, SchemaObject } from '../../CommonTypes';
 import { PropertyRender } from './PropertyRender';
 import { getDefault } from './types/TypeInput';
 
+
+
 type InputType = {
   schema: SchemaObject;
-  initialObject?: RealmObject;
+  initialObject: RealmObject;
 };
 
 export const PropertiesModify = ({ schema, initialObject }: InputType) => {
   const [value] = useState<RealmObject>(initialObject || {});
-    console.log('len:', value.length);
+    // console.log('len:', value.length);
 
   if (Object.keys(value).length === 0) {
     console.log('inputType, here')
-    schema.order.forEach((propertyName) => {
+    schema.order.forEach((propertyName: string) => {
       const property = schema.properties[propertyName];
       value[propertyName] = getDefault(property);
     });
@@ -24,7 +25,7 @@ export const PropertiesModify = ({ schema, initialObject }: InputType) => {
   console.log('inputType value', value == {} )
   return (
     <>
-      {schema.order.map((propertyName, index) => {
+      {schema.order.map((propertyName: string, index: number) => {
         const set = (val: unknown) => {
           value[propertyName] = val;
         };

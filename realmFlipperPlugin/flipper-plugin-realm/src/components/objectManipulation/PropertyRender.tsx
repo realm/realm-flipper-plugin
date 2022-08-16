@@ -1,6 +1,6 @@
 import { Layout, Tag } from 'antd';
 import React from 'react';
-import { SchemaProperty } from '../CommonTypes';
+import { SchemaProperty } from '../../CommonTypes';
 import { TypeInput } from './types/TypeInput';
 
 type PropertyType = {

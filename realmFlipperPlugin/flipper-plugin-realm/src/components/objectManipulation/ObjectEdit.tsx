@@ -1,0 +1,47 @@
+import { Modal } from 'antd';
+import React, { useState } from 'react';
+import { PropertiesModify } from './PropertiesModify';
+import { usePlugin } from 'flipper-plugin';
+import { RealmObject, SchemaObject } from '../../CommonTypes';
+import { plugin } from '../..';
+
+type InputType = {
+  schema: SchemaObject;
+  initialObject: RealmObject;
+  setVisible: (value: boolean) => void;
+  visible: boolean;
+};
+
+export const ObjectEdit = ({
+  schema,
+  initialObject,
+  setVisible,
+  visible,
+}: InputType) => {
+  const [value] = useState(initialObject);
+  const { modifyObject } = usePlugin(plugin);
+
+  const onOk = () => {
+    modifyObject(value);
+    hideModal();
+  };
+
+  const hideModal = () => {
+    setVisible(false);
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      title={'Modify ' + schema.name}
+      onOk={onOk}
+      onCancel={hideModal}
+      okText="Modify"
+    >
+      <PropertiesModify
+        schema={schema}
+        initialObject={value}
+      ></PropertiesModify>
+    </Modal>
+  );
+};

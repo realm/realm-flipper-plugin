@@ -2,18 +2,17 @@ import { ClearOutlined } from '@ant-design/icons';
 import { Button, Col, Menu, Modal, Row, Tag } from 'antd';
 import { usePlugin, useValue, Layout } from 'flipper-plugin';
 import React, { useState } from 'react';
-import { plugin } from '../..';
-import { RealmObject } from '../../CommonTypes';
-import { RealmQueryLanguage } from '../../pages/RealmQueryLanguage';
+import { plugin } from '../../..';
+import { RealmObject } from '../../../CommonTypes';
+import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
 
 export const ObjectInput = ({
   property,
   set,
-  defaultValue
-}: // value,
-TypeInputProps) => {
-  console.log('objectInput defaultValue:', defaultValue)
+  defaultValue,
+}: TypeInputProps) => {
+  console.log('objectInput defaultValue:', defaultValue);
   const instance = usePlugin(plugin);
   const { schemas } = useValue(instance.state);
 

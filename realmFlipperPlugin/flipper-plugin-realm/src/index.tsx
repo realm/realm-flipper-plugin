@@ -25,11 +25,10 @@ import {
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
   SchemaObject,
-  SchemaObjectWithOrder,
 } from './CommonTypes';
 import ViewModeTabs from './components/ViewModeTabs';
-import ObjectAdder from './components/ObjectAdder';
 import { SchemaGraph } from './pages/SchemaGraph';
+import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -228,7 +227,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
@@ -436,7 +435,9 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL' | 'schemaGraph'>('data');
+  const [viewMode, setViewMode] = useState<
+    'data' | 'schemas' | 'RQL' | 'schemaGraph'
+  >('data');
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -446,7 +447,7 @@ export function Component() {
         <Layout.Container height={800}>
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
             {objects.length > 20 ? <PaginationActionGroup /> : null}
-            <ObjectAdder schema={currentSchema} />
+            {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
           </Layout.Horizontal>
           <DataVisualizer
             objects={objects}
@@ -469,8 +470,8 @@ export function Component() {
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
       {viewMode === 'schemaGraph' ? (
-              <SchemaGraph schemas={schemas}></SchemaGraph>
-      ): null}
+        <SchemaGraph schemas={schemas}></SchemaGraph>
+      ) : null}
     </Layout.Container>
   );
 }
