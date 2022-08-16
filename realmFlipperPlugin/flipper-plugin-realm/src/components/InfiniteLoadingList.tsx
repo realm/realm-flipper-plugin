@@ -41,6 +41,7 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
     <div
       style={{
         overflow: 'auto',
+        height: '100%',
         width:"100%",
         textAlign: "center",
       }}
