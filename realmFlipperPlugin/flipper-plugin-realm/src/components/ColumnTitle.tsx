@@ -4,7 +4,7 @@ import { Tag } from 'antd';
 type PropertyType = {
   isOptional: boolean;
   name: string;
-  objectType: string;
+  objectType?: string;
   propertyType: string;
   isPrimaryKey: boolean;
 };

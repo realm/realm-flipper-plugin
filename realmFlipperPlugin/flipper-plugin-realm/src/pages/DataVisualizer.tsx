@@ -37,7 +37,7 @@ export const DataVisualizer = ({
   }>();
 
   const [editingState, setEditingState] = useState<RealmObject>();
-  const { removeObject, modifyObject } = usePlugin(plugin);
+  const { removeObject, modifyObject, getOneObject } = usePlugin(plugin);
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;
@@ -62,7 +62,7 @@ export const DataVisualizer = ({
       }
     });
     console.log('real obj:', obj);
-    obj[editingCell?.schemaProperty.name] = editingState
+    obj[editingCell?.schemaProperty.name] = editingState;
     modifyObject(obj);
     onCancel();
   };
@@ -115,7 +115,6 @@ export const DataVisualizer = ({
   );
 
   function TableView() {
-
     const deleteRow = (row: RealmObject) => {
       removeObject(row);
     };
@@ -197,17 +196,7 @@ export const DataVisualizer = ({
       </Menu>
     );
 
-    const columns = currentSchema.order.map((key) => {
-      const obj = currentSchema.properties[key];
-      const isPrimaryKey = obj.name === currentSchema.primaryKey;
-      return {
-        name: obj.name,
-        isOptional: obj.optional,
-        objectType: obj.objectType,
-        propertyType: obj.type,
-        isPrimaryKey: isPrimaryKey,
-      };
-    });
+    const columns = createColumns(currentSchema);
     return (
       <Layout.Container height={800}>
         <DataTable
@@ -219,6 +208,7 @@ export const DataVisualizer = ({
           currentSchema={currentSchema}
           loading={loading}
           renderOptions={dropDown}
+          getOneObject={getOneObject}
         />
       </Layout.Container>
     );
@@ -233,4 +223,18 @@ export const DataVisualizer = ({
     }
     setInspectData(newInspectData);
   }
+};
+
+export const createColumns = (currentSchema) => {
+  return currentSchema.order.map((key) => {
+    const obj = currentSchema.properties[key];
+    const isPrimaryKey = obj.name === currentSchema.primaryKey;
+    return {
+      name: obj.name,
+      isOptional: obj.optional,
+      objectType: obj.objectType,
+      propertyType: obj.type,
+      isPrimaryKey: isPrimaryKey,
+    };
+  });
 };
