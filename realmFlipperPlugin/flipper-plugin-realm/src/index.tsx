@@ -14,6 +14,7 @@ import {
   Events,
   Methods,
   ObjectMessage,
+  ObjectRequest,
   ObjectsMessage,
   RealmPluginState,
   RealmsMessage,
@@ -140,7 +141,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (
       state.currentPage === 1 &&
       state.objects.length >= state.selectedPageSize &&
-        !smallerNeighbor
+      !smallerNeighbor
     ) {
       let newObjects = [newObject, ...state.objects];
       newObjects = newObjects.slice(0, state.selectedPageSize);
@@ -298,6 +299,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const getOneObject = async (schema: string, primaryKey: any) => {
+    const state = pluginState.get();
+    return client
+      .send('getOneObject', {
+        schema: schema,
+        realm: state.selectedRealm,
+        primaryKey: primaryKey,
+      });
+  };
+
   const getSchemas = (realm: string) => {
     client.send('getSchemas', { realm: realm });
   };
@@ -314,7 +325,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
@@ -403,7 +414,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject)
+    console.log('modifyObject', newObject);
     client.send('modifyObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
@@ -504,6 +515,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     toggleSortDirection,
     setSortingDirection,
     refreshState,
+    getOneObject,
   };
 }
 
@@ -519,7 +531,9 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'RQL' | 'schemaGraph'>('data');
+  const [viewMode, setViewMode] = useState<
+    'data' | 'schemas' | 'RQL' | 'schemaGraph'
+  >('data');
   return (
     <Layout.Container grow>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -552,8 +566,8 @@ export function Component() {
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
       {viewMode === 'schemaGraph' ? (
-              <SchemaGraph schemas={schemas}></SchemaGraph>
-      ): null}
+        <SchemaGraph schemas={schemas}></SchemaGraph>
+      ) : null}
     </Layout.Container>
   );
 }
