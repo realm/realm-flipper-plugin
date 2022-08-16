@@ -38,7 +38,6 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   };
 
   const [loading, setLoading] = useState(false);
-  console.log("loading", loading);
   return (
     <div
       style={{
