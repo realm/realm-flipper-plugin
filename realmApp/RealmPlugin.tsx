@@ -203,9 +203,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           } else {
             objects = getObjectsByPagination(obj, objects, limit);
           }
-          let lastItem, firstItem;
-          console.log(firstItem, lastItem);
-          //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
