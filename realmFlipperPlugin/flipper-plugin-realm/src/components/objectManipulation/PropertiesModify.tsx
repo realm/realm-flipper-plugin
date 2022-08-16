@@ -16,13 +16,13 @@ export const PropertiesModify = ({ schema, initialObject }: InputType) => {
     // console.log('len:', value.length);
 
   if (Object.keys(value).length === 0) {
-    console.log('inputType, here')
+    // console.log('inputType, here')
     schema.order.forEach((propertyName: string) => {
       const property = schema.properties[propertyName];
       value[propertyName] = getDefault(property);
     });
   }
-  console.log('inputType value', value == {} )
+  // console.log('inputType value', value == {} )
   return (
     <>
       {schema.order.map((propertyName: string, index: number) => {

@@ -1,5 +1,4 @@
 export const TaskSchema = {
-
   name: 'Task',
   properties: {
     _id: 'int',
@@ -96,10 +95,27 @@ export const SetsSchema = {
     _id: 'uuid',
     intSet: 'int<>',
     setsSet: 'Sets<>',
-    decimalSet: 'decimal128<>',
+    // decimalSet: 'decimal128<>',
+    decimalSet: {
+      type: 'set',
+      objectType: 'decimal128',
+    },
     mixedSet: 'mixed<>',
     objectSet: 'AllTypes<>',
   },
-  primaryKey: '_id'
+  primaryKey: '_id',
 };
 
+export const OptionalContainers = {
+  name: 'OptionalContainers',
+  properties: {
+    list: 'int?[]',
+    listt: {
+      type: 'list',
+      objectType: 'int',
+      optional: true,
+    },
+    _id: 'uuid',
+  },
+  primaryKey: '_id',
+};

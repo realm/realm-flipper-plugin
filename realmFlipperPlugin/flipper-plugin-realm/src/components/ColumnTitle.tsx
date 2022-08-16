@@ -1,6 +1,8 @@
 import React from 'react';
 import { Tag } from 'antd';
 
+// export const propertyToString = ({isOptional })
+
 export const ColumnTitle = (props: {
   isOptional: boolean;
   name: string;
@@ -12,14 +14,8 @@ export const ColumnTitle = (props: {
 
   switch (props.propertyType) {
     case 'list':
-      title = props.objectType + '[]';
-      break;
     case 'set':
-      title = props.objectType + '<>';
-      break;
     case 'dictionary':
-      title = props.objectType + '{}';
-      break;
     case 'object':
       title = props.objectType;
       break;
@@ -27,7 +23,21 @@ export const ColumnTitle = (props: {
       title = props.propertyType;
   }
 
-  props.isOptional ? (title = title + '?') : null;
+  if (props.isOptional) {
+    title += '?';
+  }
+
+  switch (props.propertyType) {
+    case 'list':
+      title += '[]';
+      break;
+    case 'set':
+      title += '<>';
+      break;
+    case 'dictionary':
+      title += '{}';
+      break;
+  }
 
   return props.isPrimaryKey ? (
     <div>

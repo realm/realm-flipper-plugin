@@ -17,7 +17,7 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
     name: '',
     indexed: false,
     mapTo: '',
-    optional: false,
+    optional: property.optional,
   };
   // console.log(array);
   return (

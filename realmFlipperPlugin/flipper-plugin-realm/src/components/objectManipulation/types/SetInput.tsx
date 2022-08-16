@@ -22,7 +22,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
     name: "",
     indexed: false,
     mapTo: "",
-    optional: false,
+    optional: property.optional,
   };
   console.log('innerProp', innerProp);
   const setRow = (val: any, index: number) => {

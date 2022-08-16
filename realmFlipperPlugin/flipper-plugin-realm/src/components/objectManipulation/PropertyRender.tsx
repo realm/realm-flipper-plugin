@@ -16,19 +16,32 @@ export const PropertyRender = ({
   isPrimary,
   set,
 }: PropertyType) => {
-  let typeName;
+  let title;
+  
   switch (property.type) {
     case 'list':
-      typeName = property.objectType + '[]';
-      break;
     case 'set':
-      typeName = property.objectType + '<>';
-      break;
+    case 'dictionary':
     case 'object':
-      typeName = property.objectType;
+      title = property.objectType;
       break;
     default:
-      typeName = property.type;
+      title = property.type;
+  }
+  
+  if (property.optional) {
+    title += '?';
+  }
+
+  switch (property.type) {
+    case 'list':
+      title += '[]';
+      break;
+    case 'set':
+      title += '<>';
+      break;
+    case 'dictionary':
+      title += '{}';
       break;
   }
 
@@ -38,7 +51,7 @@ export const PropertyRender = ({
         <div style={{ backgroundColor: 'white' }}>
           {property.name}
           <span style={{ float: 'right' }}>
-            <Tag color="default">{typeName}</Tag>
+            <Tag color="default">{title}</Tag>
             {!property.optional ? <Tag color="blue">required</Tag> : null}
             {isPrimary ? <Tag color="blue">primary key</Tag> : null}
           </span>
