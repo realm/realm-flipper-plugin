@@ -6,17 +6,19 @@ import React from 'react';
 import { PropertyRender } from './PropertyRender';
 import { plugin } from '..';
 import { Layout, usePlugin } from 'flipper-plugin';
+import { PropertiesModify } from './PropertiesModify';
 
 type PropertyType = {
   schema: SchemaObject | null;
 };
+
 const ObjectAdder = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
   const empty: { [prop: string]: any } = {};
   const [values, setValues] = useState(empty);
   const [visible, setVisible] = useState(false);
-  const [inputReset, setInputReset] = useState(0);
+  const [_, setInputReset] = useState(0);
 
   const refresh = () => setInputReset((v) => v + 1);
 
@@ -57,19 +59,7 @@ const ObjectAdder = ({ schema }: PropertyType) => {
         cancelText="Cancel"
         destroyOnClose
       >
-        {schema?.order?.map((property, index) => (
-          <PropertyRender
-            values={values}
-            property={schema.properties[property]}
-            isPrimary={property == schema.primaryKey}
-            key={
-              inputReset *
-                Object.keys(schema.properties).length *
-                Object.keys(schema.properties).length +
-              index
-            }
-          />
-        ))}
+        <PropertiesModify schema={schema} initialObject={values}/>
       </Modal>
     </Layout.Horizontal>
   );

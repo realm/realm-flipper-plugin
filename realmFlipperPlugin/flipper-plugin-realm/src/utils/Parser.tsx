@@ -1,6 +1,8 @@
 import { SchemaObject, SchemaProperty } from '../CommonTypes';
 import { BooleanValue } from '../components/BooleanValue';
 import React from 'react';
+import { Button } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 
 export const parsePropToCell = (
   value: string | number | Record<string, unknown>,
@@ -9,7 +11,7 @@ export const parsePropToCell = (
   schemas: Array<SchemaObject>
 ): JSX.Element | string | number => {
   if (value === null) {
-    return "null";
+    return 'null';
   }
 
   // if (!value) {
@@ -38,9 +40,11 @@ export const parsePropToCell = (
       //@ts-ignore
       returnValue = parseSetOrList(value);
       break;
-    case 'data':
+    case 'data': //@ts-ignore
+      returnValue = parseData(value);
+      break;
     case 'dictionary': //@ts-ignore
-      returnValue = parseDataOrDictionary(value);
+      returnValue = parseDictionary(value);
       break;
     case 'decimal128': //@ts-ignore
       returnValue = parseDecimal128(value);
@@ -61,7 +65,6 @@ function parseSimpleData(input: string | number): string | number {
 }
 
 function parseSetOrList(input: any[]): string {
-
   const output = input.map((value) => {
     return parseJavaScriptTypes(value);
   });
@@ -69,14 +72,45 @@ function parseSetOrList(input: any[]): string {
   return '[' + output + ']';
 }
 
-function parseDataOrDictionary(input: Record<string, unknown>): string {
+function parseDictionary(input: Record<string, unknown>): string {
   return JSON.stringify(input);
+}
+
+function parseData(input) {
+  const blob = new Blob([input]);
+  // / Convert Blob to URL
+  const blobUrl = URL.createObjectURL(blob);
+
+  // Create an a element with blobl URL
+  const anchor = document.createElement('a');
+  anchor.href = blobUrl;
+  anchor.target = '_blank';
+  anchor.download = 'file';
+
+  // Auto click on a element, trigger the file download
+  // anchor.click();
+
+  // Don't forget ;)
+  // URL.revokeObjectURL(blobUrl);
+
+  // const file = new File(input, 'fname');
+  // console.log('parseData', new Uint8Array(input));
+  // return <>
+  // {'['+input.length+' bytes]'}
+  // <Button onClick={() => anchor.click()} icon={<DownloadOutlined />}></Button>
+  // </>;
+  return (
+    <a href={blobUrl} target="_blank" rel="noreferrer" download="file">
+      aaa
+    </a>
+  );
+  return anchor;
 }
 
 function parseBoolean(input: boolean): JSX.Element {
   const inputAsString = input.toString();
 
-  return <BooleanValue active={input} > {inputAsString}</BooleanValue>;
+  return <BooleanValue active={input}> {inputAsString}</BooleanValue>;
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {

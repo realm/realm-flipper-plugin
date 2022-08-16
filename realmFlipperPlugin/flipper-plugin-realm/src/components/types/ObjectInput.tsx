@@ -10,13 +10,15 @@ import { TypeInputProps } from './TypeInput';
 export const ObjectInput = ({
   property,
   set,
+  defaultValue
 }: // value,
 TypeInputProps) => {
+  console.log('objectInput defaultValue:', defaultValue)
   const instance = usePlugin(plugin);
   const { schemas } = useValue(instance.state);
 
-  const [value, setValue] = useState<RealmObject>();
-  const [chosen, setChosen] = useState(false);
+  const [value, setValue] = useState<RealmObject>(defaultValue as RealmObject);
+  const [chosen, setChosen] = useState(!!value);
   const [visible, setVisible] = useState(false);
 
   const targetSchema = schemas.find(
@@ -24,7 +26,7 @@ TypeInputProps) => {
   );
 
   if (!targetSchema) {
-    return <>Object has no objectType</>;
+    return <>Target schema {property.objectType} not found</>;
   }
 
   const renderChosen = () => {
@@ -33,9 +35,7 @@ TypeInputProps) => {
     return (
       <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">
         <Col>
-        <Tag color="success">
-            {targetSchema?.name}
-        </Tag>
+          <Tag color="success">{targetSchema?.name}</Tag>
         </Col>
         <Col flex="auto">{content}</Col>
         <Col>
@@ -85,6 +85,7 @@ TypeInputProps) => {
           forceRender
           visible={visible}
           width={800}
+          closable={false}
         >
           <Layout.Container grow>
             <RealmQueryLanguage

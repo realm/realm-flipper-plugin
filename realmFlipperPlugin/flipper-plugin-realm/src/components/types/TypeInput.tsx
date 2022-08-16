@@ -63,6 +63,7 @@ export const getDefault = (property: TypeDescription) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
+  console.log('typeInput', props.property.name, props.defaultValue)
   switch (props.property.type) {
     case 'int':
     case 'float':

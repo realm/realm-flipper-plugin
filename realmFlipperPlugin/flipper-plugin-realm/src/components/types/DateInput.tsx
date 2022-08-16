@@ -12,11 +12,12 @@ export const DateInput = ({
   extraProps,
 }: TypeInputProps) => {
   // console.log('dateInput', property, defaultValue, set, extraProps)
+  console.log('defaultValue as Date:', defaultValue as Date);
   const [reset, setReset] = useState(0);
-  const [value, setValue] = useState<Date | null>(defaultValue as Date | null);
+  const [value, setValue] = useState<Date | undefined>(defaultValue === null ? undefined : defaultValue as Date);
 
   const onChange = (value: moment.Moment | null) => {
-    setValue(value ? value.toDate() : null);
+    setValue(value ? value.toDate() : undefined);
     set(value ? value.toDate() : null);
   };
 
@@ -25,7 +26,7 @@ export const DateInput = ({
       <Col flex="auto">
         <DatePicker
           {...extraProps}
-          defaultValue={moment(value)}
+          defaultValue={value !== undefined ? moment(value) : undefined}
           format="DD-MM-YYYY HH:mm:ss.SSS"
           showTime={{ defaultValue: property.optional ? undefined : moment() }}
           onChange={onChange}
@@ -39,7 +40,7 @@ export const DateInput = ({
           <Button
             onClick={() => {
               set(null);
-              setValue(null);
+              setValue(undefined);
               setReset((v) => v + 1);
             }}
             icon={<ClearOutlined />}

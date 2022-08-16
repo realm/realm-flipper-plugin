@@ -228,7 +228,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
+    console.log('addObject in index', object)
     if (!state.currentSchema) {
       return;
     }

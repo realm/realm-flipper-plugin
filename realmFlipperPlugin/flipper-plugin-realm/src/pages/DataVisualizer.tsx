@@ -8,6 +8,8 @@ import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
 import { TypeInput } from '../components/types/TypeInput';
+import { PropertyRender } from '../components/PropertyRender';
+import { ObjectEdit } from '../components/ObjectEdit';
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -35,6 +37,8 @@ export const DataVisualizer = ({
     row: RealmObject;
     schemaProperty: SchemaProperty;
   }>();
+
+  const [editingObject, setEditingObject] = useState(false);
 
   const [editingState, setEditingState] = useState<RealmObject>();
   const { removeObject, modifyObject } = usePlugin(plugin);
@@ -64,7 +68,8 @@ export const DataVisualizer = ({
     <Layout.Container grow>
       <Layout.ScrollContainer>
         <Layout.Container>
-          <Modal
+        {editingObject ? <ObjectEdit schema={currentSchema} initialObject={editingCell?.row} setVisible={setEditingObject} visible={editingObject}></ObjectEdit> : null}
+          {/* <Modal
             title={'Edit'}
             visible={!!editingCell}
             onOk={onOk}
@@ -72,7 +77,7 @@ export const DataVisualizer = ({
             destroyOnClose
           >
             {editingCell ? (
-              <TypeInput
+    <TypeInput
                 property={editingCell.schemaProperty}
                 defaultValue={editingState}
                 set={(val) => {
@@ -82,7 +87,7 @@ export const DataVisualizer = ({
                 extraProps={{ style: { width: '100%' } }}
               ></TypeInput>
             ) : null}
-          </Modal>
+          </Modal> */}
           <TableView />
           <RealmDataInspector
             currentSchema={currentSchema}
@@ -128,7 +133,13 @@ export const DataVisualizer = ({
         <Menu.Item key={-1} onClick={() => editProperty(row, schemaProperty)}>
           Edit property
         </Menu.Item>
-        <Menu.Item key={0} onClick={() => {}}>
+        <Menu.Item key={0} onClick={() => {
+          setEditingObject(true);
+          setEditingCell({
+            row: row,
+            schemaProperty: schemaProperty
+          })
+        }}>
           Edit object
         </Menu.Item>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>

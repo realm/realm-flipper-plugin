@@ -1,26 +1,21 @@
 import { Layout, Tag } from 'antd';
-import { theme } from 'flipper-plugin';
-import React, { useState } from 'react';
+import React from 'react';
 import { SchemaProperty } from '../CommonTypes';
-import { getDefault, TypeInput } from './types/TypeInput';
+import { TypeInput } from './types/TypeInput';
 
 type PropertyType = {
-  values: { [keys: string]: any };
+  initialValue: unknown;
   property: SchemaProperty;
   isPrimary: boolean;
+  set: (value: unknown) => void;
 };
 
 export const PropertyRender = ({
-  values,
+  initialValue,
   property,
   isPrimary,
+  set,
 }: PropertyType) => {
-  const [value, setValue] = useState(getDefault(property));
-
-  // console.log("renderProperty");
-  if (values[property.name] === undefined)
-    values[property.name] = getDefault(property);
-
   let typeName;
   switch (property.type) {
     case 'list':
@@ -29,21 +24,18 @@ export const PropertyRender = ({
     case 'set':
       typeName = property.objectType + '<>';
       break;
+    case 'object':
+      typeName = property.objectType;
+      break;
     default:
       typeName = property.type;
       break;
   }
 
-  const setter = (val: any) => {
-    values[property.name] = val;
-    setValue(val);
-  };
-
   return (
     <Layout>
       <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-        <div style={{ backgroundColor: 'white'
- }}>
+        <div style={{ backgroundColor: 'white' }}>
           {property.name}
           <span style={{ float: 'right' }}>
             <Tag color="default">{typeName}</Tag>
@@ -55,8 +47,8 @@ export const PropertyRender = ({
       <Layout.Content>
         <TypeInput
           property={property}
-          set={setter}
-          defaultValue={value}
+          set={set}
+          defaultValue={initialValue}
           extraProps={{ style: { width: '100%' } }}
         />
       </Layout.Content>
