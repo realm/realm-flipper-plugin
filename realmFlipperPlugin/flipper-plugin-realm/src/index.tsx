@@ -420,14 +420,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setLoading = (loading: boolean) => {
-    const state = pluginState.get();
-    pluginState.set({
-      ...state,
-      loading: loading,
-    });
-  };
-
   const toggleSortDirection = () => {
     let state = pluginState.get();
     let newSortingDirection: 'ascend' | 'descend' | null = null;
@@ -447,37 +439,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
     });
   };
-
-  function updateIsInRange(
-    largerNeighbor: number,
-    smallerNeighbor: number,
-    firstObjectInMemory: number,
-    lastObjectInMemory: number,
-    state: RealmPluginState
-  ) {
-    console.log('here');
-    if (state.objects.length >= state.selectedPageSize) {
-      console.log('here', state.sortDirection);
-      if (state.sortDirection === 'descend') {
-        console.log('descending');
-        if (
-          largerNeighbor > firstObjectInMemory ||
-          smallerNeighbor < lastObjectInMemory
-        ) {
-          return false;
-        }
-      } else {
-        if (
-          smallerNeighbor < firstObjectInMemory ||
-          largerNeighbor > lastObjectInMemory
-        ) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
 
   const setSortingDirection = (direction: 'ascend' | 'descend' | null) => {
     const state = pluginState.get();
