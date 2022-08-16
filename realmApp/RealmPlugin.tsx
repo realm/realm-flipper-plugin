@@ -136,7 +136,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.send('getCurrentQuery');
 
         connection.receive('receivedCurrentQuery', obj => {
-          console.log("received");
+          console.log('received');
           const realm = realmsMap.get(obj.realm);
           if (schemaToObjects.has(obj.schema)) {
             schemaToObjects.get(obj.schema).removeAllListeners();
@@ -283,7 +283,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted)
+          console.log('converted', converted);
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
@@ -327,6 +327,7 @@ export default React.memo((props: {realms: Realm[]}) => {
               connection.send('liveObjectDeleted', {
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -337,6 +338,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: inserted,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -347,6 +349,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: modified,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
         };
