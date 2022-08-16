@@ -209,12 +209,12 @@ export default React.memo((props: {realms: Realm[]}) => {
             firstItem = objects[0];
           }
           //base64 the next and prev cursors
-
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
             next_cursor: lastItem,
             prev_cursor: firstItem,
+            hasMore: objects.length >= limit,
           });
         });
 

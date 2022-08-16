@@ -7,6 +7,7 @@ import { plugin } from '..';
 import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
 import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
+import InfiniteLoadingList from './InfiniteLoadingList';
 
 type ColumnType = {
   isOptional: boolean;
@@ -181,17 +182,18 @@ PropertyType) => {
 
   // TODO: think about key as a property in the Realm DB
   return (
-    <Table
-      dataSource={objects}
-      rowSelection={rowSelectionProp}
-      rowKey={(record) => {
-        return record[currentSchema.primaryKey];
-      }}
-      columns={filledColumns}
-      onChange={handleOnChange}
-      pagination={false}
-      loading={loading}
-      size="middle"
-    />
+    <InfiniteLoadingList objects= {objects} columns={filledColumns} />
+    // <Table
+    //   dataSource={objects}
+    //   rowSelection={rowSelectionProp}
+    //   rowKey={(record) => {
+    //     return record[currentSchema.primaryKey];
+    //   }}
+    //   columns={filledColumns}
+    //   onChange={handleOnChange}
+    //   pagination={false}
+    //   loading={loading}
+    //   size="middle"
+    // />
   );
 };

@@ -16,6 +16,7 @@ export type RealmPluginState = {
   loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
+  hasMore: boolean;
   prev_page_filterCursor: number | null;
 };
 

@@ -72,8 +72,7 @@ export const DataVisualizer = ({
   };
   // Return buttons + tableView
   return (
-    <Layout.Container grow>
-      <Layout.ScrollContainer>
+    <>
         <Layout.Container>
           <Modal
             title={'Edit'}
@@ -110,8 +109,7 @@ export const DataVisualizer = ({
             view={inspectorView}
           />
         </Layout.Container>
-      </Layout.ScrollContainer>
-    </Layout.Container>
+    </>
   );
 
   function TableView() {
@@ -209,7 +207,7 @@ export const DataVisualizer = ({
       };
     });
     return (
-      <Layout.Container height={800}>
+      <Layout.Container>
         <DataTable
           columns={columns}
           objects={objects}

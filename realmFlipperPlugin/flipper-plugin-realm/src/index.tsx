@@ -21,6 +21,7 @@ import {
   SchemaObject,
 } from './CommonTypes';
 import ObjectAdder from './components/ObjectAdder';
+import InfinityLoadingList from './components/InfiniteLoadingList';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
@@ -50,6 +51,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     sortDirection: null,
     prev_page_cursorId: null,
     prev_page_filterCursor: null,
+    hasMore: false,
     currentSchema: null,
   });
 
@@ -70,7 +72,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     );
     pluginState.set({
       ...state,
-      objects: [...result],
+      objects: [...state.objects, ...result],
       filterCursor: state.sortingColumn
         ? data.next_cursor[state.sortingColumn]
         : null,
@@ -81,6 +83,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       prev_page_filterCursor: state.sortingColumn
         ? data.prev_cursor[state.sortingColumn]
         : null,
+      hasMore: data.hasMore,
     });
   });
 
@@ -292,7 +295,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
@@ -381,7 +384,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject)
+    console.log('modifyObject', newObject);
     client.send('modifyObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
@@ -532,14 +535,21 @@ export function Component() {
     'data' | 'schemas' | 'RQL' | 'schemaGraph'
   >('data');
   return (
-    <Layout.Container grow>
+    <>
       <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
       <SchemaHistoryActions />
       <RealmSchemaSelect schemas={schemas} realms={realms} />
       {viewMode === 'data' ? (
-        <Layout.Container height={800}>
+        <div
+          style={{
+            border: '1px solid #e8e8e8',
+            borderRadius: ' 4px',
+            overflow: 'auto',
+            padding: '8px 24px',
+            height: '1000px',
+          }}
+        >
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
-            {objects.length > 20 ? <PaginationActionGroup /> : null}
             <ObjectAdder schema={currentSchema} />
           </Layout.Horizontal>
           <DataVisualizer
@@ -550,8 +560,8 @@ export function Component() {
             sortDirection={sortDirection}
             sortingColumn={sortingColumn}
           />
-          <PaginationActionGroup />
-        </Layout.Container>
+          {/* <InfinityLoadingList columns={null}/> */}
+        </div>
       ) : null}
       {viewMode === 'schemas' ? (
         <SchemaVisualizer
@@ -565,6 +575,6 @@ export function Component() {
       {viewMode === 'schemaGraph' ? (
         <SchemaGraph schemas={schemas}></SchemaGraph>
       ) : null}
-    </Layout.Container>
+    </>
   );
 }

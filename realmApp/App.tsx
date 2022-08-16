@@ -90,6 +90,10 @@ function createBanana() {
   });
 }
 
+// for (let i = 0; i<1000000; i++) {
+//   createBanana();
+// }
+
 function deleteBanana() {
   realm.write(() => {
     realm.delete(realm.objectForPrimaryKey('Banana', 320));
