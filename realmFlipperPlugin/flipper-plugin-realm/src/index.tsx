@@ -32,6 +32,8 @@ import ViewModeTabs from './components/ViewModeTabs';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
+import DataVisualizer from './pages/DataVisualizer';
+import ObjectAdder from './components/ObjectAdder';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -65,16 +67,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getObjects', (data: ObjectsMessage) => {
     const state = pluginState.get();
     if (!data.objects.length) {
-      setLoading(false);
+      //setLoading(false);
       return;
     }
-    const result = data.objects.slice(
-      0,
-      Math.max(state.selectedPageSize, data.objects.length - 1)
-    );
     pluginState.set({
       ...state,
-      objects: [...state.objects, ...result],
+      objects: [...state.objects, ...data.objects],
       filterCursor: state.sortingColumn
         ? data.next_cursor[state.sortingColumn]
         : null,
@@ -264,7 +262,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (!state.currentSchema) {
       return;
     }
-    setLoading(true);
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjects', {
@@ -623,32 +620,32 @@ export function Component() {
       <SchemaHistoryActions />
       <RealmSchemaSelect schemas={schemas} realms={realms} />
       {viewMode === 'data' ? (
-        // <div
-        //   style={{
-        //     border: '1px solid #e8e8e8',
-        //     borderRadius: ' 4px',
-        //     overflow: 'auto',
-        //     padding: '8px 24px',
-        //     height: '1000px',
-        //   }}
-        // >
-        //   <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
-        //     <ObjectAdder schema={currentSchema} />
-        //   </Layout.Horizontal>
-        //   <DataVisualizer
-        //     objects={objects}
-        //     schemas={schemas}
-        //     loading={loading}
-        //     currentSchema={currentSchema}
-        //     sortDirection={sortDirection}
-        //     sortingColumn={sortingColumn}
-        //   />
+        <div
+          style={{
+            border: '1px solid #e8e8e8',
+            borderRadius: ' 4px',
+            overflow: 'auto',
+            padding: '8px 24px',
+            height: '1000px',
+          }}
+        >
+          <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
+            <ObjectAdder schema={currentSchema} />
+          </Layout.Horizontal>
+          {/* <DataVisualizer
+            objects={objects}
+            schemas={schemas}
+            loading={loading}
+            currentSchema={currentSchema}
+            sortDirection={sortDirection}
+            sortingColumn={sortingColumn}>
+          /> */}
         <InfinityLoadingList
           objects={objects}
           currentSchema={currentSchema}
           columns={filledColumns}
-        />
-      ) : // </div>
+        /> 
+      </div> ) : 
       null}
       {viewMode === 'schemas' ? (
         <SchemaVisualizer

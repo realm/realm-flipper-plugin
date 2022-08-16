@@ -188,9 +188,6 @@ PropertyType) => {
     instance.getObjects();
     instance.setCurrentPage(1);
   };
-
-  let [scroll, setScroll] = useState("");
-
   // TODO: think about key as a property in the Realm DB
   return (
     <InfinityLoadingList

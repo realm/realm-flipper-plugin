@@ -1,6 +1,6 @@
 import { Table, message, Avatar, Spin, List } from 'antd';
 import { usePlugin, useValue } from 'flipper-plugin';
-import React from 'react';
+import React, { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { plugin } from '..';
 
@@ -10,6 +10,7 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   console.log('reload', objects);
   const handleInfiniteOnLoad = () => {
     console.log('more');
+    setLoading(true);
     if (state.objects.length >= state.totalObjects) {
       message.warning('Infinite List loaded all');
       return;
@@ -36,6 +37,8 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
     instance.setCurrentPage(1);
   };
 
+  const [loading, setLoading] = useState(false);
+  console.log("loading", loading);
   return (
     <div
       style={{
