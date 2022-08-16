@@ -70,18 +70,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
       //setLoading(false);
       return;
     }
+    const objects = data.objects;
+    const nextCursor = objects[objects.length-1];
+    const prevCursor = objects[0];
     pluginState.set({
       ...state,
       objects: [...state.objects, ...data.objects],
       filterCursor: state.sortingColumn
-        ? data.next_cursor[state.sortingColumn]
+        ? nextCursor[state.sortingColumn]
         : null,
-      cursorId: data.next_cursor._id,
+      cursorId: nextCursor._id,
       totalObjects: data.total,
       loading: false,
-      prev_page_cursorId: data.prev_cursor._id,
+      prev_page_cursorId: prevCursor._id,
       prev_page_filterCursor: state.sortingColumn
-        ? data.prev_cursor[state.sortingColumn]
+        ? prevCursor[state.sortingColumn]
         : null,
       hasMore: data.hasMore,
     });
@@ -97,13 +100,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('receivedCurrentQuery', {
       schema: state.currentSchema.name,
       realm: state.selectedRealm,
-      cursorId: state.cursorId,
-      filterCursor: state.filterCursor,
-      limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
-      prev_page_filterCursor: state.prev_page_filterCursor,
-      prev_page_cursorId: state.prev_page_cursorId,
     });
   });
 

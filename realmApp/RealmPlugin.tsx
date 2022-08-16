@@ -195,7 +195,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           objectsToListenTo.addListener(onObjectsChange);
           schemaToObjects.set(schema, objectsToListenTo);
 
-          let limit = obj.limit || DEFAULT_PAGE_SIZE;
+          let limit = 50;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
           if (obj.backwards) {
@@ -204,16 +204,11 @@ export default React.memo((props: {realms: Realm[]}) => {
             objects = getObjectsByPagination(obj, objects, limit);
           }
           let lastItem, firstItem;
-          if (objects.length) {
-            lastItem = objects[objects.length - 1];
-            firstItem = objects[0];
-          }
+          console.log(firstItem, lastItem);
           //base64 the next and prev cursors
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
-            next_cursor: lastItem,
-            prev_cursor: firstItem,
             hasMore: objects.length >= limit,
           });
         });
