@@ -1,5 +1,5 @@
 import { Table, message, Avatar, Spin, List } from 'antd';
-import { usePlugin, useValue } from 'flipper-plugin';
+import { Spinner, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { plugin } from '..';
@@ -37,13 +37,15 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
     instance.setCurrentPage(1);
   };
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   return (
     <div
       style={{
         borderRadius: ' 4px',
         overflow: 'auto',
         height: '1000px',
+        width:"100%",
+        textAlign: "center",
       }}
     >
       <InfiniteScroll
@@ -53,8 +55,8 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
         hasMore={!state.loading && state.hasMore}
         useWindow={false}
         loader={
-          <div className="loader" key={0}>
-            Loading ...
+          <div style={{ marginTop: "25px", marginBottom: "25px", display: "inline-block"}} key={0}>
+            <Spinner size={30}></Spinner>
           </div>
         }
       >
@@ -65,7 +67,7 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
             return record[currentSchema.primaryKey];
           }}
           scroll={{ scrollToFirstRowOnChange: false }}
-          //onChange={handleOnChange}
+          onChange={handleOnChange}
           pagination={false}
           //loading={state.loading}
         />

@@ -71,6 +71,7 @@ export type ObjectsMessage = {
   total: number;
   next_cursor: { [sortingField: string]: number };
   prev_cursor: { [sortingField: string]: number };
+  hasMore: boolean;
 };
 export type ObjectMessage = {
   object: RealmObject;
