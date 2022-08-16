@@ -18,7 +18,7 @@ type PropertyType = {
   sortingColumn: string | null;
 };
 
-export const DataVisualizer = ({
+const DataVisualizer = ({
   objects,
   schemas,
   currentSchema,
@@ -232,3 +232,5 @@ export const DataVisualizer = ({
     setInspectData(newInspectData);
   }
 };
+
+export default React.memo(DataVisualizer);

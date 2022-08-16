@@ -40,13 +40,11 @@ const RealmSchemaSelect = (props: {
     </Option>
   ));
 
-  const onRealmSelected = useCallback(
+  const onRealmSelected =
     (selected: string) => {
       instance.getSchemas(selected);
       instance.updateSelectedRealm(selected);
-    },
-    [instance]
-  );
+    }
   const realmOptions = realms.map((realm) => (
     <Option key={realm} value={realm}>
       {realm}

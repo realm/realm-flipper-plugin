@@ -2,13 +2,13 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { ReactElement, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import { plugin } from '..';
-import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
-import InfiniteLoadingList from './InfiniteLoadingList';
-
+import InfinityLoadingList from './InfiniteLoadingList';
 type ColumnType = {
   isOptional: boolean;
   name: string;
@@ -54,7 +54,6 @@ export const DataTable = ({
   schemas,
   currentSchema,
   sortDirection,
-  loading,
   sortingColumn,
   renderOptions,
 }: // rowSelection
@@ -118,7 +117,7 @@ PropertyType) => {
                   onClick={() => highlightRow(value[currentSchema.primaryKey])}
                   ghost
                 />
-                <Dropdown 
+                <Dropdown
                   overlay={renderOptions(row, property, currentSchema)}
                   trigger={[`contextMenu`]}
                 >
@@ -146,6 +145,31 @@ PropertyType) => {
     };
   });
 
+  const highlightRow = (key: string | number) => {
+    let newRowSelectionProp = {
+      ...rowSelectionProp,
+      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
+        key.toString(),
+      ]),
+    };
+    setRowSelectionProp(newRowSelectionProp);
+
+    setTimeout(
+      () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
+      5000
+    );
+  };
+
+
+  const handleInfiniteOnLoad = () => {
+    console.log('more');
+    if (state.objects.length >= state.totalObjects) {
+      //message.warning('Infinite List loaded all');
+      return;
+    }
+    instance.getObjects();
+  };
+
   const handleOnChange = (
     pagination: TablePaginationConfig,
     filters: Record<string, Key[] | null>,
@@ -165,35 +189,14 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  const highlightRow = (key: string | number) => {
-    let newRowSelectionProp = {
-      ...rowSelectionProp,
-      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
-        key.toString(),
-      ]),
-    };
-    setRowSelectionProp(newRowSelectionProp);
-
-    setTimeout(
-      () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
-      5000
-    );
-  };
+  let [scroll, setScroll] = useState("");
 
   // TODO: think about key as a property in the Realm DB
   return (
-    <InfiniteLoadingList objects= {objects} columns={filledColumns} />
-    // <Table
-    //   dataSource={objects}
-    //   rowSelection={rowSelectionProp}
-    //   rowKey={(record) => {
-    //     return record[currentSchema.primaryKey];
-    //   }}
-    //   columns={filledColumns}
-    //   onChange={handleOnChange}
-    //   pagination={false}
-    //   loading={loading}
-    //   size="middle"
-    // />
+    <InfinityLoadingList
+      currentSchema={currentSchema}
+      objects={objects}
+      columns={filledColumns}
+    />
   );
 };

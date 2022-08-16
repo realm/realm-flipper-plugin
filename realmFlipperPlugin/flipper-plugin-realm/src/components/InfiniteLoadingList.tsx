@@ -4,17 +4,36 @@ import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import { plugin } from '..';
 
-const InfinityLoadingList = ({ objects, columns }) => {
+const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  console.log("reload")
+  console.log('reload', objects);
   const handleInfiniteOnLoad = () => {
     console.log('more');
-    if (state.objects.length > state.totalObjects) {
+    if (state.objects.length >= state.totalObjects) {
       message.warning('Infinite List loaded all');
       return;
     }
     instance.getObjects();
+  };
+
+  const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
+    sorter: SorterResult<any> | SorterResult<any>[],
+    extra: any
+  ) => {
+    //TODO: make type of a field
+    if (extra.action === 'sort') {
+      if (state.sortingColumn !== sorter.field) {
+        instance.setSortingDirection('ascend');
+        instance.setSortingColumn(sorter.field);
+      } else {
+        instance.toggleSortDirection();
+      }
+    }
+    instance.getObjects();
+    instance.setCurrentPage(1);
   };
 
   return (
@@ -40,6 +59,9 @@ const InfinityLoadingList = ({ objects, columns }) => {
         <Table
           dataSource={objects}
           columns={columns}
+          rowKey={(record) => {
+            return record[currentSchema.primaryKey];
+          }}
           scroll={{ scrollToFirstRowOnChange: false }}
           //onChange={handleOnChange}
           pagination={false}

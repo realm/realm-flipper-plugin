@@ -26,7 +26,7 @@ import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
 import ViewModeTabs from './components/ViewModeTabs';
-import { DataVisualizer } from './pages/DataVisualizer';
+import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
