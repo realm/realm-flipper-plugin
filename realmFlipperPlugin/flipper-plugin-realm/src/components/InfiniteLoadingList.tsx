@@ -7,7 +7,6 @@ import { plugin } from '..';
 const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  console.log('reload', objects);
   const handleInfiniteOnLoad = () => {
     console.log('more');
     setLoading(true);
@@ -41,9 +40,7 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   return (
     <div
       style={{
-        borderRadius: ' 4px',
         overflow: 'auto',
-        height: '1000px',
         width:"100%",
         textAlign: "center",
       }}

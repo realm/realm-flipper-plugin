@@ -624,7 +624,7 @@ export function Component() {
             borderRadius: ' 4px',
             overflow: 'auto',
             padding: '8px 24px',
-            height: '1000px',
+            height: '100%',
           }}
         >
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
