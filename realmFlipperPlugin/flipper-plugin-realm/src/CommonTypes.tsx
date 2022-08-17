@@ -40,7 +40,6 @@ export type SchemaProperty = {
 };
 export type Events = {
   getObjects: ObjectsMessage;
-  getOneObject: ObjectMessage;
   getSchemas: SchemaMessage;
   liveObjectAdded: AddLiveObjectRequest;
   liveObjectDeleted: DeleteLiveObjectRequest;
@@ -51,10 +50,6 @@ export type Events = {
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
   getObjects: (data: getForwardsObjectsRequest) => Promise<RealmObject[]>;
-  getObjectsBackwards: (
-    data: getBackwardsObjectsRequest
-  ) => Promise<RealmObject[]>;
-  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
   getSchemas: (data: RealmRequest) => Promise<SchemaObject[]>;
   getRealms: () => Promise<string[]>;
   addObject: (object: AddObject) => Promise<RealmObject>;
@@ -93,15 +88,9 @@ type getForwardsObjectsRequest = {
   limit: number;
   sortingColumn: string | null;
   sortDirection: 'ascend' | 'descend' | null;
-};
-type getBackwardsObjectsRequest = {
-  schema: string;
-  realm: string;
   prev_page_filterCursor: string | number | null;
   prev_page_cursorId: number | null;
-  limit: number;
-  sortingColumn: string | null;
-  sortDirection: 'ascend' | 'descend' | null;
+  backwards: boolean;
 };
 
 export type ObjectRequest = {

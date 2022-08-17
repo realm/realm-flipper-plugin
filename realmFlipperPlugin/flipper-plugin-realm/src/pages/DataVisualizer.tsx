@@ -52,7 +52,6 @@ export const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
-
   // Return buttons + tableView
   return (
     <Layout.Container grow>

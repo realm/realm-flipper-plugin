@@ -7,26 +7,26 @@ import {
 } from 'flipper-plugin';
 
 import React, { useState } from 'react';
-import PaginationActionGroup from './components/PaginationActionGroup';
-import RealmSchemaSelect from './components/RealmSchemaSelect';
-import SchemaHistoryActions from './components/SchemaHistoryActions';
-import { DataVisualizer } from './pages/DataVisualizer';
-import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
-import SchemaVisualizer from './pages/SchemaVisualizer';
 import {
-  Events,
-  Methods,
-  RealmPluginState,
-  RealmsMessage,
-  ObjectsMessage,
-  ObjectMessage,
-  SchemaMessage,
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
+  Events,
+  Methods,
+  ObjectMessage,
+  ObjectsMessage,
+  RealmPluginState,
+  RealmsMessage,
+  SchemaMessage,
   SchemaObject,
 } from './CommonTypes';
+import PaginationActionGroup from './components/PaginationActionGroup';
+import RealmSchemaSelect from './components/RealmSchemaSelect';
+import SchemaHistoryActions from './components/SchemaHistoryActions';
 import ViewModeTabs from './components/ViewModeTabs';
+import { DataVisualizer } from './pages/DataVisualizer';
+import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
+import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
 import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
 
@@ -68,7 +68,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       0,
       Math.max(state.selectedPageSize, data.objects.length - 1)
     );
-    console.log('fetched objects', data);
     pluginState.set({
       ...state,
       objects: [...result],
@@ -90,15 +89,30 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({ ...state, singleObject: data.object });
   });
 
+  client.onMessage('getCurrentQuery', () => {
+    const state = pluginState.get();
+    client.send('receivedCurrentQuery', {
+      schema: state.currentSchema.name,
+      realm: state.selectedRealm,
+      cursorId: state.cursorId,
+      filterCursor: state.filterCursor,
+      limit: state.selectedPageSize,
+      sortingColumn: state.sortingColumn,
+      sortDirection: state.sortDirection,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      prev_page_cursorId: state.prev_page_cursorId,
+    });
+  });
+
   client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log('got schemas', data.schemas);
-    const newSchemas = data.schemas.map((schema) =>
+    console.log('schemas: ', data.schemas);
+    const newschemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newSchemas });
-    console.log('pluginState', pluginState);
+    pluginState.set({ ...state, schemas: newschemas });
+    // console.log('pluginState', pluginState);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -130,23 +144,99 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
-    const { newObject } = data;
-    pluginState.set({ ...state, objects: [...state.objects, newObject] });
+    const { newObject, index } = data;
+    const upperIndex = state.currentPage * state.selectedPageSize - 1;
+    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+    if (index > upperIndex || index < lowerIndex) {
+      return false;
+    }
+    let newObjects = state.objects;
+    newObjects.splice(
+      index - (state.currentPage - 1) * state.selectedPageSize,
+      0,
+      newObject
+    );
+    const newFirstObject = newObjects[0];
+    const newLastObject = newObjects[newObjects.length - 1];
+    pluginState.set({
+      ...state,
+      objects: [...newObjects],
+      totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._id,
+      filterCursor: state.sortingColumn
+        ? newLastObject[state.sortingColumn]
+        : null,
+      prev_page_cursorId: newFirstObject._id,
+      prev_page_filterCursor: state.sortingColumn
+        ? newFirstObject[state.sortingColumn]
+        : null,
+    });
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
+    console.log('DELETE');
     const state = pluginState.get();
-    const newObjects = [...state.objects];
-    newObjects.splice(data.index, 1);
-    pluginState.set({ ...state, objects: newObjects });
+    const { index } = data;
+    const upperIndex = state.currentPage * state.selectedPageSize - 1;
+    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+    if (index > upperIndex || index < lowerIndex) {
+      return false;
+    }
+    let newObjects = state.objects;
+    newObjects.splice(
+      index - (state.currentPage - 1) * state.selectedPageSize,
+      1
+    );
+
+    console.log('after', newObjects);
+    const newFirstObject = newObjects[0];
+    const newLastObject = newObjects[newObjects.length - 1];
+    console.log(newFirstObject, newLastObject);
+    pluginState.set({
+      ...state,
+      objects: [...newObjects],
+      totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._id,
+      filterCursor: state.sortingColumn
+        ? newLastObject[state.sortingColumn]
+        : null,
+      prev_page_cursorId: newFirstObject._id,
+      prev_page_filterCursor: state.sortingColumn
+        ? newFirstObject[state.sortingColumn]
+        : null,
+    });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
+    console.log('EDIT');
     const state = pluginState.get();
-    const { newObject } = data;
-    const newObjects = [...state.objects];
-    newObjects.splice(data.index, 1, newObject);
-    pluginState.set({ ...state, objects: newObjects });
+    const { newObject, index } = data;
+    const upperIndex = state.currentPage * state.selectedPageSize - 1;
+    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+    if (index > upperIndex || index < lowerIndex) {
+      return false;
+    }
+    let newObjects = state.objects;
+    newObjects.splice(
+      index - (state.currentPage - 1) * state.selectedPageSize,
+      1,
+      newObject
+    );
+    const newFirstObject = newObjects[0];
+    const newLastObject = newObjects[newObjects.length - 1];
+    pluginState.set({
+      ...state,
+      objects: [...newObjects],
+      totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._id,
+      filterCursor: state.sortingColumn
+        ? newLastObject[state.sortingColumn]
+        : null,
+      prev_page_cursorId: newFirstObject._id,
+      prev_page_filterCursor: state.sortingColumn
+        ? newFirstObject[state.sortingColumn]
+        : null,
+    });
   });
 
   client.addMenuEntry({
@@ -160,34 +250,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('getRealms', undefined);
   };
 
-  const getObjectsBackwards = (
+  const getObjects = (
     schema?: string | null,
-    realm?: string | null
+    realm?: string | null,
+    backwards?: boolean
   ) => {
     const state = pluginState.get();
-    setLoading(true);
     if (!state.currentSchema) {
       return;
     }
-    schema = schema ?? state.currentSchema.name;
-    realm = realm ?? state.selectedRealm;
-    client.send('getObjectsBackwards', {
-      schema: schema,
-      realm: realm,
-      prev_page_filterCursor: state.prev_page_filterCursor,
-      limit: state.selectedPageSize,
-      sortingColumn: state.sortingColumn,
-      sortDirection: state.sortDirection,
-      prev_page_cursorId: state.prev_page_cursorId,
-    });
-  };
-
-  const getObjectsForward = (schema?: string | null, realm?: string | null) => {
-    const state = pluginState.get();
     setLoading(true);
-    if (!state.currentSchema) {
-      return;
-    }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     client.send('getObjects', {
@@ -198,16 +270,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
-    });
-  };
-
-  const getOneObject = (event: { schema: string; primaryKey: string }) => {
-    const state = pluginState.get();
-    // console.log('myRealm', event);
-    client.send('getOneObject', {
-      schema: event.schema,
-      realm: state.selectedRealm,
-      primaryKey: event.primaryKey,
+      prev_page_filterCursor: state.prev_page_filterCursor,
+      prev_page_cursorId: state.prev_page_cursorId,
+      backwards: Boolean(backwards),
     });
   };
 
@@ -227,13 +292,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object);
+    console.log('addObject in index', object)
     if (!state.currentSchema) {
       return;
     }
     client.send('addObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: object,
     });
   };
@@ -254,6 +319,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
+      currentPage: 1,
     });
   };
 
@@ -305,6 +371,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       objects: [],
       sortingColumn: null,
+      sortDirection: null,
     });
   };
 
@@ -314,13 +381,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    // console.log('addObject in index', object)
-    if (!state.currentSchema) {
-      return;
-    }
+    console.log('modifyObject', newObject)
     client.send('modifyObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: state.currentSchema?.name,
       object: newObject,
     });
   };
@@ -384,6 +448,37 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  function updateIsInRange(
+    largerNeighbor: number,
+    smallerNeighbor: number,
+    firstObjectInMemory: number,
+    lastObjectInMemory: number,
+    state: RealmPluginState
+  ) {
+    console.log('here');
+    if (state.objects.length >= state.selectedPageSize) {
+      console.log('here', state.sortDirection);
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   const setSortingDirection = (direction: 'ascend' | 'descend' | null) => {
     const state = pluginState.get();
     pluginState.set({
@@ -396,15 +491,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
-  client.onConnect(async () => {
+  client.onConnect(() => {
     getRealms();
   });
 
   return {
     state: pluginState,
-    getObjectsForward,
-    getObjectsBackwards,
-    getOneObject,
+    getObjects,
     getSchemas,
     executeQuery,
     addObject,

@@ -49,18 +49,10 @@ const SchemaVisualizer = (props: {
   }
   const instance = usePlugin(plugin);
 
-  const onSchemaSelected = (selectedSchema: string) => {
-    const selectedSchemaObject = schemas.find(
-      (schema) => schema.name === selectedSchema
-    );
-
-    if (!selectedSchemaObject) {
-      return <div>Schema {selectedSchema} not found!</div>;
-    }
-
-    instance.getObjectsForward();
-    instance.updateSelectedSchema(selectedSchemaObject);
-  };
+    const onSchemaSelected = (selectedSchema: SchemaObject) => {
+      instance.getObjects();
+      instance.updateSelectedSchema(selectedSchema);
+    };
 
   function createColumnConfig(columns: string[]) {
     const columnObjs: DataTableColumn<{ [key: string]: Value }>[] = columns.map(

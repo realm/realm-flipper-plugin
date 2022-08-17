@@ -107,6 +107,8 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
     const type = schemaObj?.properties[value[0]];
     obj[value[0]] = convertRoot(value[1], type);
   });
+  // console.log('returning', obj);
+  // console.log('example:', new BSON.UUID());
   return obj;
 };
 
@@ -156,6 +158,7 @@ export default React.memo((props: {realms: Realm[]}) => {
 
   const {realms} = props;
   useEffect(() => {
+    let schemaToObjects = new Map<string, Realm.Results<Realm.Object>>();
     realms.forEach(realm => {
       realmsMap.set(realm.path, realm);
     });
@@ -164,7 +167,30 @@ export default React.memo((props: {realms: Realm[]}) => {
         return 'realm';
       },
       onConnect(connection) {
-        console.log('connecting', connection);
+        connection.send('getCurrentQuery');
+
+        connection.receive('receivedCurrentQuery', obj => {
+          console.log("received");
+          const realm = realmsMap.get(obj.realm);
+          if (schemaToObjects.has(obj.schema)) {
+            schemaToObjects.get(obj.schema).removeAllListeners();
+          }
+
+          let objects = realm?.objects(obj.schema);
+          let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
+            obj.schema,
+          );
+          if (obj.sortingColumn) {
+            objectsToListenTo = objects.sorted([
+              [`${obj.sortingColumn}`, false],
+              ['_id', false],
+            ]);
+          } else {
+            objectsToListenTo = objects.sorted('_id');
+          }
+          objectsToListenTo.addListener(onObjectsChange);
+          schemaToObjects.set(obj.schema, objectsToListenTo);
+        });
 
         connection.receive('getRealms', () => {
           connection.send('getRealms', {
@@ -178,52 +204,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          console.log('i got', obj, obj.filterCursor, obj.cursorId);
-          // JSON.parse()
-          let objects = realm.objects(schema); //optimize by just getting objects once
-          let copies = objects.toJSON();
-          modifyObjects(copies, schema, realm);
-          if (!objects.length) {
-            connection.send('getObjects', {
-              objects: copies,
-              total: null,
-              next_cursor: null,
-              prev_cursor: null,
-            });
-            return;
-          }
-          console.log('initially got objects', objects[0]);
-          let limit = obj.limit || DEFAULT_PAGE_SIZE;
-          limit < 1 ? (limit = 20) : {};
-          const objectsLength = objects.length;
-          objects = getObjectsByPagination(obj, objects, limit);
-          copies = objects.toJSON();
-          modifyObjects(copies, schema, realm);
-          let lastItem, firstItem;
-          if (objects.length) {
-            lastItem = objects[objects.length - 1]; //if this is null this is the last page
-            firstItem = objects[0]; //TODO: not sure about this
-          }
-          console.log('sending to client now');
-          //base64 the next and prev cursors
-          connection.send('getObjects', {
-            objects: copies,
-            total: objectsLength,
-            next_cursor: lastItem,
-            prev_cursor: firstItem,
-          });
-        });
-
-        connection.receive('getObjectsBackwards', obj => {
-          const realm = realmsMap.get(obj.realm);
-          const schema = obj.schema;
-          if (!realm) {
-            return;
-          }
-          console.log('BACKWARDS: i got', obj);
-          let objects = realm.objects(schema); //optimize by just getting objects once
-          modifyObjects(objects, schema, realm);
-
+          let objects = realm.objects(schema);
           if (!objects.length) {
             connection.send('getObjects', {
               objects: objects,
@@ -233,20 +214,36 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          console.log('initially got objects', objects[0]);
+          if (schemaToObjects.has(schema)) {
+            schemaToObjects.get(schema).removeAllListeners();
+          }
+          let objectsToListenTo: Realm.Results<Realm.Object> = objects;
+          if (obj.sortingColumn) {
+            objectsToListenTo = objects.sorted([
+              [`${obj.sortingColumn}`, false],
+              ['_id', false],
+            ]);
+          } else {
+            objectsToListenTo = objects.sorted('_id');
+          }
+          objectsToListenTo.addListener(onObjectsChange);
+          schemaToObjects.set(schema, objectsToListenTo);
+
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
-          objects = getObjectsByPaginationBackwards(obj, objects, limit);
-          modifyObjects(objects, schema, realm);
-
+          if (obj.backwards) {
+            objects = getPrevObjectsByPagination(obj, objects, limit);
+          } else {
+            objects = getObjectsByPagination(obj, objects, limit);
+          }
           let lastItem, firstItem;
           if (objects.length) {
-            lastItem = objects[objects.length - 1]; //if this is null this is the last page
-            firstItem = objects[0]; //TODO: not sure about this
+            lastItem = objects[objects.length - 1];
+            firstItem = objects[0];
           }
-          console.log('sending to client now');
           //base64 the next and prev cursors
+
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
@@ -255,34 +252,22 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive(
-          'getOneObject',
-          (obj: {realm: string; schema: string; primaryKey: string}) => {
-            const realm = realmsMap.get(obj.realm);
-
-            currentRealm = realm;
-
-            const schema = obj.schema;
-            if (!realm) {
-              return;
-            }
-
-            const object = realm.objectForPrimaryKey(schema, obj.primaryKey);
-            modifyObjects([object], schema, realm);
-
-            connection.send('getOneObject', {object: object});
-          },
-        );
-
         connection.receive('getSchemas', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
           const schemas = realm.schema;
-          for (let schema of realm.schema) {
-            realm.objects(schema.name).addListener(onObjectsChange);
-          }
+          // for (let schema of realm.schema) {
+          //   const objects = realm.objects(schema.name);
+          //   if (schemaToObjects.has(schema.name)) {
+          //     console.log('removing all listeners from ', schema.name);
+          //     schemaToObjects.get(schema.name).removeAllListeners();
+          //   }
+          //   console.log('adding listener to', schema.name);
+          //   objects.addListener(onObjectsChange);
+          //   schemaToObjects.set(schema.name, objects);
+          // }
           connection.send('getSchemas', {schemas: schemas});
         });
 
@@ -333,7 +318,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted);
+          console.log('converted', converted)
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
@@ -372,20 +357,24 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         const onObjectsChange = (objects, changes) => {
-          console.log('small listener fires');
           changes.deletions.forEach(index => {
             if (connection) {
-              connection.send('liveObjectDeleted', {index: index});
+              connection.send('liveObjectDeleted', {
+                index: index,
+              });
             }
           });
-          // Handle newly added Dog objects
+
           changes.insertions.forEach(index => {
             const inserted = objects[index];
             if (connection) {
-              connection.send('liveObjectAdded', {newObject: inserted});
+              connection.send('liveObjectAdded', {
+                newObject: inserted,
+                index: index,
+              });
             }
           });
-          // Handle Dog objects that were modified
+
           changes.modifications.forEach(index => {
             const modified = objects[index];
             if (connection) {
@@ -398,161 +387,198 @@ export default React.memo((props: {realms: Realm[]}) => {
         };
       },
       onDisconnect() {
+        for (let objects of schemaToObjects.values()) {
+          objects.removeAllListeners();
+        }
         console.log('Disconnected');
       },
     });
+    return () => {
+      for (let objects of schemaToObjects.values()) {
+        objects.removeAllListeners();
+      }
+    };
   });
-
-  // function useForceUpdate() {
-  //   const [value, setValue] = useState(0); // integer state
-  //   return () => setValue(value => value + 1); // update state to force render
-  //   // An function that increment 👆🏻 the previous state like here
-  //   // is better than directly setting `value + 1`
-  // }
-
   return <Text>dd</Text>;
 });
+
 function getObjectsByPagination(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  let filterCursor = null;
   const shouldSortDescending = obj.sortDirection === 'descend';
-  obj.cursorId =
+  const cursorId =
     obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
+  if (obj.sortingColumn) {
+    filterCursor =
+      obj.filterCursor ??
+      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+        obj.sortingColumn
+      ];
+  }
   if (shouldSortDescending) {
-    objects = getObjectsDescending(obj, objects, limit);
+    objects = getObjectsDescending(obj, cursorId, filterCursor, objects, limit);
   } else {
-    objects = getObjectsAscending(obj, objects, limit);
+    objects = getObjectsAscending(obj, cursorId, filterCursor, objects, limit);
   }
   return objects;
 }
 
-function getObjectsByPaginationBackwards(
+function getPrevObjectsByPagination(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+  let filterCursor = null;
   const shouldSortDescending = obj.sortDirection === 'descend';
-  obj.prev_page_cursorId =
+  if (obj.sortingColumn) {
+    filterCursor =
+      obj.prev_page_filterCursor ??
+      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+        obj.sortingColumn
+      ];
+  }
+  const prevPageCursorId =
     obj.prev_page_cursorId ??
     objects.sorted('_id', shouldSortDescending)[0]._id;
   if (shouldSortDescending) {
-    objects = getPrevObjectsDescending(obj, objects, limit);
+    objects = getPrevObjectsDescending(
+      obj,
+      prevPageCursorId,
+      filterCursor,
+      objects,
+      limit,
+    );
   } else {
-    objects = getPrevObjectsAscending(obj, objects, limit);
-  }
-  if (obj.prev_page_filterCursor) {
-    objects = objects.sorted([
-      [`${obj.sortingColumn}`, false],
-      ['_id', false],
-    ]);
-  } else if (obj.prev_page_cursorId) {
-    objects = objects.sorted('_id');
+    objects = getPrevObjectsAscending(
+      obj,
+      prevPageCursorId,
+      filterCursor,
+      objects,
+      limit,
+    );
   }
   return objects;
 }
 
 function getPrevObjectsDescending(
   obj: getObjectsQuery,
+  prevPageCursorId: number,
+  prevPageFilterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    obj.prev_page_filterCursor =
-      obj.prev_page_filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
-        ['_id', true],
+        [`${sortingColumn}`, false],
+        ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '<=' : '<'
-        } $1) LIMIT(${limit + 1})`,
-        obj.prev_page_filterCursor,
-        obj.prev_page_cursorId,
+        `${sortingColumn} ${
+          !obj.prev_page_filterCursor ? '>=' : '>'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.prev_page_cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit})`,
+        prevPageFilterCursor,
+        prevPageCursorId,
       );
   } else {
     objects = objects
-      .sorted('_id', true)
+      .sorted('_id', false)
       .filtered(
-        `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId,
+        `_id ${!obj.prev_page_cursorId ? '>=' : '>'} $0 LIMIT(${limit})`,
+        prevPageCursorId,
       );
-    if (obj.prev_page_cursorId) {
-      objects = objects.sorted('_id');
-    }
+  }
+  console.log(obj.prev_page_filterCursor);
+  if (obj.prev_page_filterCursor) {
+    objects = objects.sorted([
+      [`${sortingColumn}`, true],
+      ['_id', true],
+    ]);
+  } else if (obj.prev_page_cursorId) {
+    objects = objects.sorted('_id', true);
   }
   return objects;
 }
 
 function getPrevObjectsAscending(
   obj: getObjectsQuery,
+  prevPageCursorId: number,
+  prevPageFilterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    obj.prev_page_filterCursor =
-      obj.prev_page_filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  console.log('ascending previous');
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
+        [`${sortingColumn}`, true],
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.prev_page_cursorId ? '<=' : '<'
-        } $1) LIMIT(${limit + 1})`,
-        obj.prev_page_filterCursor,
-        obj.prev_page_cursorId,
+        `${sortingColumn} ${
+          !obj.prev_page_filterCursor ? '<=' : '<'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.prev_page_cursorId ? '<=' : '<'
+        } $1) LIMIT(${limit})`,
+        prevPageFilterCursor,
+        prevPageCursorId,
       );
   } else {
     objects = objects
       .sorted('_id', true)
       .filtered(
-        `_id ${obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId,
+        `_id ${!obj.prev_page_cursorId ? '<=' : '<'} $0 LIMIT(${limit})`,
+        prevPageCursorId,
       );
   }
+  if (obj.prev_page_filterCursor) {
+    objects = objects.sorted([
+      [`${sortingColumn}`, false],
+      ['_id', false],
+    ]);
+  } else if (obj.prev_page_cursorId) {
+    objects = objects.sorted('_id');
+  }
+
   return objects;
 }
 
 function getObjectsDescending(
   obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: number | string,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    obj.filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, true)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, true],
+        [`${sortingColumn}`, true],
         ['_id', true],
       ])
       .filtered(
-        `${obj.sortingColumn} < $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '<=' : '<'
-        } $1) LIMIT(${limit + 1})`,
-        obj.filterCursor,
-        obj.prev_page_cursorId ?? obj.cursorId,
+        `${sortingColumn} ${
+          !obj.filterCursor ? '<=' : '<'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.cursorId ? '<=' : '<'
+        } $1) LIMIT(${limit})`,
+        filterCursor,
+        cursorId,
       );
-    if (obj.prev_page_cursorId) {
-      objects = objects.sorted([
-        [`${obj.sortingColumn}`, false],
-        ['_id', false],
-      ]);
-    }
   } else {
     objects = objects
       .sorted('_id', true)
       .filtered(
-        `_id ${obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit + 1})`,
-        obj.prev_page_cursorId ?? obj.cursorId,
+        `_id ${!obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit})`,
+        cursorId,
       );
   }
   return objects;
@@ -560,31 +586,33 @@ function getObjectsDescending(
 
 function getObjectsAscending(
   obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: number | string | null,
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-  if (obj.sortingColumn) {
-    obj.filterCursor =
-      obj.filterCursor ??
-      objects.sorted(`${obj.sortingColumn}`, false)[0][obj.sortingColumn];
+  const {sortingColumn} = obj;
+  if (sortingColumn) {
     objects = objects
       .sorted([
-        [`${obj.sortingColumn}`, false],
+        [`${sortingColumn}`, false],
         ['_id', false],
       ])
       .filtered(
-        `${obj.sortingColumn} > $0 || (${obj.sortingColumn} == $0 && _id ${
-          obj.cursorId ? '>=' : '>'
-        } $1) LIMIT(${limit + 1})`,
-        obj.filterCursor,
-        obj.cursorId,
+        `${sortingColumn} ${
+          !obj.filterCursor ? '>=' : '>'
+        } $0 || (${sortingColumn} == $0 && _id ${
+          !obj.cursorId ? '>=' : '>'
+        } $1) LIMIT(${limit})`,
+        filterCursor,
+        cursorId,
       );
   } else {
     objects = objects
       .sorted('_id', false)
       .filtered(
-        `_id ${obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit + 1})`,
-        obj.cursorId,
+        `_id ${!obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit})`,
+        cursorId,
       );
   }
   return objects;

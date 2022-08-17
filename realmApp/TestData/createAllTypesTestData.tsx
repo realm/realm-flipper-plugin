@@ -43,8 +43,10 @@ export function createAllTypesTestData(realm: Realm) {
     console.log('created alltypes', new Uint8Array(t['data']));
   });
 
+  let uuid2 = new UUID();
+
   let AllTypes2 = {
-    _id: new UUID(),
+    _id: uuid2,
     bool: true,
     int: 2453,
     float: 6.51415,
@@ -172,5 +174,40 @@ export function createAllTypesTestData(realm: Realm) {
     realm.create('NoPrimaryKey', NoPrimaryKey1);
     realm.create('NoPrimaryKey', NoPrimaryKey2);
     realm.create('NoPrimaryKey', NoPrimaryKey3);
+  });
+
+  let AllTypes4 = {
+    _id: new UUID(),
+    bool: true,
+    int: 2453,
+    float: 6.51415,
+    double: 34.13215,
+    string: 'string',
+    decimal128: Decimal128.fromString('0.000000000000000000008901234567890'),
+    objectId: ObjectId.createFromHexString('507f191e810c19729de860ea'),
+    data: new ArrayBuffer(6),
+    date: new Date('2006-11-17T03:24:00'),
+    list: [1, 1, 2, 3, 5, 8, 13],
+    linkedBanana: realm.objectForPrimaryKey('Banana', banana1id),
+    ListDecimal128: [
+      Decimal128.fromString('1'),
+      Decimal128.fromString('1'),
+      Decimal128.fromString('2'),
+    ],
+    SetString: ['Vingegaard', 'Pogacar'],
+    linkingObjects: realm.objectForPrimaryKey('AllTypes', uuid2),
+    dictionary: {
+      windows: 5,
+      doors: 3,
+      color: 'red',
+      address: 'Summerhill St.',
+      price: 400123,
+    },
+    set: [1, 2, 3, 4],
+    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    uuid: new UUID(),
+  };
+  realm.write(() => {
+    realm.create('AllTypes', AllTypes4);
   });
 }

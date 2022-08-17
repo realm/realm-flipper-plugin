@@ -87,7 +87,7 @@ export const RealmDataInspector = ({
               <DataInspector
                 data={inspectData}
                 expandRoot={true}
-                collapsed={true}
+                collapsed={false}
                 onRenderName={(path, name) => {
                   let linkedSchema: SchemaObject | undefined = undefined;
                   if (
