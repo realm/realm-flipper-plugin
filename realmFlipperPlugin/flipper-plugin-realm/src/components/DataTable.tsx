@@ -1,27 +1,13 @@
 import { SearchOutlined } from '@ant-design/icons';
-import {
-  Badge,
-  Button,
-  Dropdown,
-  Space,
-  Table,
-  TableColumnsType,
-  Tooltip,
-} from 'antd';
-import { ColumnsType, SorterResult } from 'antd/lib/table/interface';
+import { Button, Dropdown, Table, Tooltip } from 'antd';
+import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { ReactElement, useRef, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { plugin } from '..';
-import {
-  RealmObject,
-  SchemaProperty,
-  SchemaObject,
-  ObjectRequest,
-} from '../CommonTypes';
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
+import { createColumns } from '../pages/DataVisualizer';
 import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
-import { UUID } from 'bson';
-import { createColumns } from '../pages/DataVisualizer';
 
 type ColumnType = {
   isOptional: boolean;
@@ -187,20 +173,20 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  const highlightRow = (key: string | number) => {
-    let newRowSelectionProp = {
-      ...rowSelectionProp,
-      selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
-        key.toString(),
-      ]),
-    };
-    setRowSelectionProp(newRowSelectionProp);
+  // const highlightRow = (key: string | number) => {
+  //   let newRowSelectionProp = {
+  //     ...rowSelectionProp,
+  //     selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
+  //       key.toString(),
+  //     ]),
+  //   };
+  //   setRowSelectionProp(newRowSelectionProp);
 
-    setTimeout(
-      () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
-      5000
-    );
-  };
+  //   setTimeout(
+  //     () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
+  //     5000
+  //   );
+  // };
 
   const expandRow = async (
     rowToExpandKey: any,
@@ -223,11 +209,12 @@ PropertyType) => {
     ) {
       const newRowExpansionProp = {
         ...rowExpansionProp,
-        expandedRowKeys: rowExpansionProp.expandedRowKeys.concat([
-          rowToExpandKey,
-        ]),
+        // expandedRowKeys: rowExpansionProp.expandedRowKeys.concat([
+        //   rowToExpandKey,
+        // ]),
+        expandedRowKeys: [rowToExpandKey],
         expandedRowRender: () =>
-          renderNestedTable({
+          NestedTable({
             columns: createColumns(linkedSchema),
             objects: [objectToRender],
             schemas: schemas,
@@ -243,11 +230,9 @@ PropertyType) => {
     } else {
       const newRowExpansionProp = {
         ...rowExpansionProp,
-        expandedRowKeys: rowExpansionProp.expandedRowKeys.filter(
-          (rowKey) => rowKey !== rowToExpandKey
-        ),
+        expandedRowKeys: [],
         expandedRowRender: () =>
-          renderNestedTable({
+          NestedTable({
             columns: createColumns(linkedSchema),
             objects: [objectToRender],
             schemas: schemas,
@@ -263,63 +248,6 @@ PropertyType) => {
     }
   };
 
-  // const getLinkedObject = (schema: string, primaryKey: any) => {
-  //   console.log('primaryKey', primaryKey);
-
-  //   try {
-  //     const returnValue = getOneObject(schema, primaryKey);
-  //     return returnValue;
-  //   } catch (err) {
-  //     console.log('Error while fetching single object.', err);
-  //     return err;
-  //   }
-  // };
-
-  // const createExpandedRowRenderFunction = (
-  //   schema: SchemaObject,
-  //   objectToRender: RealmObject
-  // ) => {
-  //   const columns = Object.keys(schema.properties).map((propKey) => {
-  //     return {
-  //       key: propKey,
-  //       text: propKey,
-  //       dataIndex: propKey,
-  //       width: 300,
-  //       // title: propKey,
-  //       title: createTitle({
-  //         isOptional: schema.properties[propKey].optional,
-  //         isPrimaryKey: schema.primaryKey === propKey,
-  //         name: propKey,
-  //         objectType: schema.properties[propKey].objectType,
-  //         propertyType: schema.properties[propKey].type,
-  //       }),
-  //     };
-  //   });
-  //   console.log('columns', columns);
-  //   console.log('objectToRender', objectToRender);
-  //   // eslint-disable-next-line react/display-name
-  //   return () => {
-  //     return (
-  //       <div
-  //         style={{
-  //           backgroundColor: '#00684A',
-  //           display: 'flex',
-  //           columnGap: '100px',
-  //           flexDirection: 'column',
-  //         }}
-  //       >
-  //         <div style={{ height: '10px' }} />
-  //         <Table
-  //           columns={columns}
-  //           dataSource={[objectToRender]}
-  //           pagination={false}
-  //         />
-  //         <div style={{ height: '10px' }} />
-  //       </div>
-  //     );
-  //   };
-  // };
-
   // TODO: think about key as a property in the Realm DB
   return (
     <Table
@@ -333,7 +261,7 @@ PropertyType) => {
       onChange={handleOnChange}
       pagination={false}
       loading={loading}
-      size="middle"
+      size="small"
     />
   );
 };
@@ -356,7 +284,7 @@ const createTitle = (column: {
   );
 };
 
-const renderNestedTable = ({
+const NestedTable = ({
   columns,
   objects,
   schemas,
