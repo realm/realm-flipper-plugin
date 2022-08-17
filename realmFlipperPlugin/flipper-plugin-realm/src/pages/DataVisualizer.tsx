@@ -1,14 +1,15 @@
-import React from 'react';
-import { Menu, Modal } from 'antd';
-import { Layout } from 'flipper-plugin';
-import { useState } from 'react';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { DataTable } from '../components/DataTable';
-import { RealmDataInspector } from '../components/RealmDataInspector';
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Menu, Modal, Tooltip } from 'antd';
+import { Layout, usePlugin } from 'flipper-plugin';
+import React, { useState } from 'react';
 import { plugin } from '..';
-import { usePlugin } from 'flipper-plugin';
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
+import InfiniteLoadingList from '../components/InfiniteLoadingList';
+import { RealmDataInspector } from '../components/RealmDataInspector';
 import { TypeInput } from '../components/types/TypeInput';
-
+import { parsePropToCell } from '../utils/Parser';
+import { ColumnTitle } from '../components/ColumnTitle';
+import { DataTable } from '../components/DataTable';
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
@@ -46,72 +47,6 @@ const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
-  const onOk = () => {
-    // execute update
-    console.log('row: ', editingCell);
-    const pairs = Object.entries(editingCell.row).map(
-      (value: [string, unknown]) => {
-        return [value[0], value[1].value];
-      }
-    );
-    console.log(pairs);
-    const obj = new Object();
-    pairs.forEach((val) => {
-      if (val[1] != undefined) {
-        obj[val[0]] = val[1];
-      }
-    });
-    console.log('real obj:', obj);
-    obj[editingCell?.schemaProperty.name] = editingState
-    modifyObject(obj);
-    onCancel();
-  };
-  const onCancel = () => {
-    setEditingCell(undefined);
-    setEditingState(undefined);
-  };
-  // Return buttons + tableView
-  return (
-    <>
-          <Modal
-            title={'Edit'}
-            visible={!!editingCell}
-            onOk={onOk}
-            onCancel={onCancel}
-            destroyOnClose
-          >
-            {editingCell ? (
-              <TypeInput
-                property={editingCell.schemaProperty}
-                defaultValue={editingState}
-                set={(val) => {
-                  console.log('set', val);
-                  setEditingState(val);
-                }}
-                extraProps={{ style: { width: '100%' } }}
-              ></TypeInput>
-            ) : null}
-          </Modal>
-          <TableView />
-          <RealmDataInspector
-            currentSchema={currentSchema}
-            schemas={schemas}
-            inspectData={inspectData}
-            setInspectData={setInspectData}
-            showSidebar={showSidebar}
-            setShowSidebar={setShowSidebar}
-            goBackStack={goBackStack}
-            setGoBackStack={setGoBackStack}
-            goForwardStack={goForwardStack}
-            setGoForwardStack={setGoForwardStack}
-            setNewInspectData={setNewInspectData}
-            view={inspectorView}
-          />
-    </>
-  );
-
-  function TableView() {
-
     const deleteRow = (row: RealmObject) => {
       removeObject(row);
     };
@@ -204,29 +139,89 @@ const DataVisualizer = ({
         isPrimaryKey: isPrimaryKey,
       };
     });
-    return (
-        <DataTable
+
+  const onOk = () => {
+    // execute update
+    console.log('row: ', editingCell);
+    const pairs = Object.entries(editingCell.row).map(
+      (value: [string, unknown]) => {
+        return [value[0], value[1].value];
+      }
+    );
+    console.log(pairs);
+    const obj = new Object();
+    pairs.forEach((val) => {
+      if (val[1] != undefined) {
+        obj[val[0]] = val[1];
+      }
+    });
+    console.log('real obj:', obj);
+    obj[editingCell?.schemaProperty.name] = editingState
+    modifyObject(obj);
+    onCancel();
+  };
+  const onCancel = () => {
+    setEditingCell(undefined);
+    setEditingState(undefined);
+  };
+  // Return buttons + tableView
+  return (
+    <>
+      <Modal
+        title={'Edit'}
+        visible={!!editingCell}
+        onOk={onOk}
+        onCancel={onCancel}
+        destroyOnClose
+      >
+        {editingCell ? (
+          <TypeInput
+            property={editingCell.schemaProperty}
+            defaultValue={editingState}
+            set={(val) => {
+              console.log('set', val);
+              setEditingState(val);
+            }}
+            extraProps={{ style: { width: '100%' } }}
+          ></TypeInput>
+        ) : null}
+      </Modal>
+
+      <DataTable
           columns={columns}
           objects={objects}
           schemas={schemas}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
           currentSchema={currentSchema}
-          loading={loading}
           renderOptions={dropDown}
         />
-    );
-  }
 
-  // update inspectData and push object to GoBackStack
-  function setNewInspectData(newInspectData: RealmObject) {
-    if (inspectData !== undefined) {
-      goBackStack.push(inspectData);
-      setGoBackStack(goBackStack);
-      setGoForwardStack([]);
+      <RealmDataInspector
+        currentSchema={currentSchema}
+        schemas={schemas}
+        inspectData={inspectData}
+        setInspectData={setInspectData}
+        showSidebar={showSidebar}
+        setShowSidebar={setShowSidebar}
+        goBackStack={goBackStack}
+        setGoBackStack={setGoBackStack}
+        goForwardStack={goForwardStack}
+        setGoForwardStack={setGoForwardStack}
+        setNewInspectData={setNewInspectData}
+        view={inspectorView}
+      />
+    </>
+  );
+
+    function setNewInspectData(newInspectData: RealmObject) {
+      if (inspectData !== undefined) {
+        goBackStack.push(inspectData);
+        setGoBackStack(goBackStack);
+        setGoForwardStack([]);
+      }
+      setInspectData(newInspectData);
     }
-    setInspectData(newInspectData);
-  }
 };
 
 export default DataVisualizer;

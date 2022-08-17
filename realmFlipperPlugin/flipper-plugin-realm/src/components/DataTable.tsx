@@ -23,7 +23,6 @@ type PropertyType = {
   schemas: SchemaObject[];
   currentSchema: SchemaObject;
   sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
   sortingColumn: string | null;
   renderOptions: (
     // for dropDown

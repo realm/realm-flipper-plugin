@@ -67,7 +67,6 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
           scroll={{ scrollToFirstRowOnChange: false }}
           onChange={handleOnChange}
           pagination={false}
-          //loading={state.loading}
         />
       </InfiniteScroll>
     </div>

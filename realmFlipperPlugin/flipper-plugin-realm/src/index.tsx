@@ -599,11 +599,6 @@ export function Component() {
             sortDirection={sortDirection}
             sortingColumn={sortingColumn}
           />
-        {/* <InfinityLoadingList
-          objects={objects}
-          currentSchema={currentSchema}
-          columns={filledColumns}
-        />  */}
       </div> ) : 
       null}
       {viewMode === 'schemas' ? (
