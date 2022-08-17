@@ -73,7 +73,6 @@ const DataVisualizer = ({
   // Return buttons + tableView
   return (
     <>
-        <Layout.Container>
           <Modal
             title={'Edit'}
             visible={!!editingCell}
@@ -108,7 +107,6 @@ const DataVisualizer = ({
             setNewInspectData={setNewInspectData}
             view={inspectorView}
           />
-        </Layout.Container>
     </>
   );
 
@@ -207,7 +205,6 @@ const DataVisualizer = ({
       };
     });
     return (
-      <Layout.Container>
         <DataTable
           columns={columns}
           objects={objects}
@@ -218,7 +215,6 @@ const DataVisualizer = ({
           loading={loading}
           renderOptions={dropDown}
         />
-      </Layout.Container>
     );
   }
 
@@ -233,4 +229,4 @@ const DataVisualizer = ({
   }
 };
 
-export default React.memo(DataVisualizer);
+export default DataVisualizer;

@@ -591,19 +591,19 @@ export function Component() {
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
             <ObjectAdder schema={currentSchema} />
           </Layout.Horizontal>
-          {/* <DataVisualizer
+          <DataVisualizer
             objects={objects}
             schemas={schemas}
             loading={loading}
             currentSchema={currentSchema}
             sortDirection={sortDirection}
-            sortingColumn={sortingColumn}>
-          /> */}
-        <InfinityLoadingList
+            sortingColumn={sortingColumn}
+          />
+        {/* <InfinityLoadingList
           objects={objects}
           currentSchema={currentSchema}
           columns={filledColumns}
-        /> 
+        />  */}
       </div> ) : 
       null}
       {viewMode === 'schemas' ? (
