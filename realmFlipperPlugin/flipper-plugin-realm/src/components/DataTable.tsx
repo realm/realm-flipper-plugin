@@ -64,19 +64,11 @@ PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-  const [rowSelectionProp, setRowSelectionProp] = useState({
-    selectedRowKeys: [],
-    hideSelectAll: true,
-    columnWidth: '0px',
-    renderCell: () => <></>,
-  });
-
-  const expandedRowRender = () => {
-    return <></>;
-  };
-
   const [rowExpansionProp, setRowExpansionProp] = useState({
-    expandedRowRender,
+    expandedRowRender: () => {
+      return;
+    },
+    expandIcon: () => null,
     expandedRowKeys: [],
   });
 
@@ -97,6 +89,7 @@ PropertyType) => {
         showTitle: false,
       },
       property,
+      // onCell : () => {}
       render: (value: RealmObject, row: RealmObject) => {
         if (property.objectType && value) {
           console.log('property.objectType', property.objectType);
@@ -118,7 +111,6 @@ PropertyType) => {
                   type="primary"
                   size="small"
                   icon={<SearchOutlined />}
-                  // onClick={() => highlightRow(value[currentSchema.primaryKey])}
                   onClick={() =>
                     expandRow(
                       row[currentSchema.primaryKey],
@@ -173,22 +165,7 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  // const highlightRow = (key: string | number) => {
-  //   let newRowSelectionProp = {
-  //     ...rowSelectionProp,
-  //     selectedRowKeys: rowSelectionProp.selectedRowKeys.concat([
-  //       key.toString(),
-  //     ]),
-  //   };
-  //   setRowSelectionProp(newRowSelectionProp);
-
-  //   setTimeout(
-  //     () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
-  //     5000
-  //   );
-  // };
-
-  const expandRow = async (
+  const expandRow = (
     rowToExpandKey: any,
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
@@ -209,22 +186,22 @@ PropertyType) => {
     ) {
       const newRowExpansionProp = {
         ...rowExpansionProp,
-        // expandedRowKeys: rowExpansionProp.expandedRowKeys.concat([
-        //   rowToExpandKey,
-        // ]),
         expandedRowKeys: [rowToExpandKey],
-        expandedRowRender: () =>
-          NestedTable({
-            columns: createColumns(linkedSchema),
-            objects: [objectToRender],
-            schemas: schemas,
-            currentSchema: linkedSchema,
-            sortDirection: sortDirection,
-            loading: false,
-            sortingColumn: null,
-            renderOptions: renderOptions,
-            getOneObject: getOneObject,
-          }),
+        expandedRowRender: () => {
+          return (
+            <NestedTable
+              columns={createColumns(linkedSchema)}
+              objects={[objectToRender]}
+              schemas={schemas}
+              currentSchema={linkedSchema}
+              sortDirection={sortDirection}
+              loading={false}
+              sortingColumn={null}
+              renderOptions={renderOptions}
+              getOneObject={getOneObject}
+            />
+          );
+        },
       };
       setRowExpansionProp(newRowExpansionProp);
     } else {
@@ -252,7 +229,6 @@ PropertyType) => {
   return (
     <Table
       dataSource={objects}
-      rowSelection={rowSelectionProp}
       rowKey={(record) => {
         return record[currentSchema.primaryKey];
       }}
@@ -262,6 +238,7 @@ PropertyType) => {
       pagination={false}
       loading={loading}
       size="small"
+      tableLayout="auto"
     />
   );
 };
@@ -296,15 +273,11 @@ const NestedTable = ({
   getOneObject,
 }: PropertyType) => {
   return (
-    <div
+    <Layout.Container
       style={{
-        backgroundColor: '#00684A',
-        display: 'flex',
-        columnGap: '100px',
-        flexDirection: 'column',
+        boxShadow: '20px 0px 50px grey',
       }}
     >
-      <div style={{ height: '10px' }} />
       <DataTable
         columns={columns}
         objects={objects}
@@ -315,8 +288,7 @@ const NestedTable = ({
         sortingColumn={sortingColumn}
         renderOptions={renderOptions}
         getOneObject={getOneObject}
-      ></DataTable>{' '}
-      <div style={{ height: '10px' }} />
-    </div>
+      ></DataTable>
+    </Layout.Container>
   );
 };
