@@ -32,6 +32,7 @@ type PropertyType = {
     schema: SchemaObject
   ) => ReactElement;
   getOneObject: (schema: string, primaryKey: string) => Promise<RealmObject>;
+  style: Object;
   // rowSelection?: TableRowSelection<RealmObject>;
 };
 
@@ -59,6 +60,7 @@ export const DataTable = ({
   sortingColumn,
   renderOptions,
   getOneObject,
+  style,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -68,8 +70,9 @@ PropertyType) => {
     expandedRowRender: () => {
       return;
     },
-    expandIcon: () => null,
+    // expandIcon: () => null,
     expandedRowKeys: [],
+    showExpandColumn: false,
   });
 
   if (!currentSchema) {
@@ -143,8 +146,8 @@ PropertyType) => {
           </Dropdown>
         );
       },
-      sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      sortOrder: sortingColumn === property.name ? sortDirection : null,
+      // sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
+      // sortOrder: sortingColumn === property.name ? sortDirection : null,
     };
   });
 
@@ -228,6 +231,7 @@ PropertyType) => {
   // TODO: think about key as a property in the Realm DB
   return (
     <Table
+      bordered={true}
       dataSource={objects}
       rowKey={(record) => {
         return record[currentSchema.primaryKey];
@@ -239,6 +243,7 @@ PropertyType) => {
       loading={loading}
       size="small"
       tableLayout="auto"
+      style={style}
     />
   );
 };
@@ -273,22 +278,27 @@ const NestedTable = ({
   getOneObject,
 }: PropertyType) => {
   return (
-    <Layout.Container
+    // <Layout.Container
+    //   style={{
+    //     boxShadow: '20px 0px 50px grey',
+    //     // marginLeft: '-35px'
+    //   }}
+    // >
+    <DataTable
+      columns={columns}
+      objects={objects}
+      schemas={schemas}
+      currentSchema={currentSchema}
+      sortDirection={sortDirection}
+      loading={loading}
+      sortingColumn={sortingColumn}
+      renderOptions={renderOptions}
+      getOneObject={getOneObject}
       style={{
         boxShadow: '20px 0px 50px grey',
+        marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
-    >
-      <DataTable
-        columns={columns}
-        objects={objects}
-        schemas={schemas}
-        currentSchema={currentSchema}
-        sortDirection={sortDirection}
-        loading={loading}
-        sortingColumn={sortingColumn}
-        renderOptions={renderOptions}
-        getOneObject={getOneObject}
-      ></DataTable>
-    </Layout.Container>
+    ></DataTable>
+    // </Layout.Container>
   );
 };
