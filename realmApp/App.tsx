@@ -23,6 +23,10 @@ import {
   NoPrimaryKey,
   DictSchema,
   SetsSchema,
+  Parcel,
+  ParcelService,
+  Delivery,
+  MailCarrier,
 } from './TestData/Schemas';
 
 import {
@@ -44,20 +48,25 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {createParcelTestData} from './TestData/parcelExample';
 
 // Open a Realm
 const realm = new Realm({
   schema: [
-    TaskSchema,
-    BananaSchema,
-    MaybeSchema,
-    AllTypesSchema,
-    NoPrimaryKey,
-    DictSchema,
-    SetsSchema,
+    // TaskSchema,
+    // BananaSchema,
+    // MaybeSchema,
+    // AllTypesSchema,
+    // NoPrimaryKey,
+    // DictSchema,
+    // SetsSchema,
+    Parcel,
+    ParcelService,
+    Delivery,
+    MailCarrier,
   ],
   path: 'main',
-  schemaVersion: 34,
+  schemaVersion: 35,
 });
 
 //realmPlugin.newfunc();
@@ -98,7 +107,7 @@ function deleteBanana() {
 
 function editBanana() {
   realm.write(() => {
-    realm.objects('Banana').sorted("_id")[0].name = 'Maximillian';
+    realm.objects('Banana').sorted('_id')[0].name = 'Maximillian';
   });
 }
 
@@ -166,6 +175,11 @@ const App: () => Node = () => {
           <Button
             title="Delete + create AllTypes Testdata"
             onPress={() => createAllTypesTestData(realm)}>
+            {' '}
+          </Button>
+          <Button
+            title="Delete + create Parcel Testdata"
+            onPress={() => createParcelTestData(realm)}>
             {' '}
           </Button>
           <Section title="See Your Changes">
