@@ -23,6 +23,7 @@ import {
   NoPrimaryKey,
   DictSchema,
   SetsSchema,
+  OptionalContainers,
 } from './TestData/Schemas';
 
 import {
@@ -55,6 +56,7 @@ const realm = new Realm({
     NoPrimaryKey,
     DictSchema,
     SetsSchema,
+    OptionalContainers
   ],
   path: 'main',
   schemaVersion: 34,

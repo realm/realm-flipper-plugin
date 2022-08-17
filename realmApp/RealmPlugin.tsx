@@ -47,14 +47,8 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
     console.log('convertLeaf', value, type);
-    // const schemaObj = realm.schema.find(schema => schema.name === typeName);
-    // let objectType;
-    // if (schemaObj) {
-    //   // if found the schema, then we are dealing with an object
-    //   typeName = 'object';
-    //   objectType = schemaObj.name;
-    // }
-    console.log(value);
+
+    // console.log(value);
     switch (type) {
       case 'object':
         return readObject(objectType as string, value);
@@ -62,11 +56,16 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
         return new BSON.UUID(value);
       case 'decimal128':
         return new BSON.Decimal128(value);
-      case 'objectID':
+      case 'objectId':
         return new BSON.ObjectId(value);
       case 'data':
-        const typedArray = Uint8Array.from(value);
-        return typedArray.buffer;
+        // console.log('data')
+        return new ArrayBuffer(6);
+        // const buffer = new ArrayBuffer()
+        // const typedArray = Uint8Array.from(value);
+        // return new BSON.Binary(typedArray);
+        // return typedArray.buffer;
+      // return typedArray.buffer;
       default:
         // console.log('returning default', value)
         return value;
@@ -75,8 +74,6 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
 
   // console.log('converting...', object);
   const convertRoot = (val: any, property: CanonicalObjectSchemaProperty) => {
-    console.log('convertRoot', val, property);
-
     if (val === null) {
       return null;
     }
@@ -108,14 +105,51 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   const obj = {};
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj?.properties[value[0]];
-    // console.log('type is', type, 'for key', value[0]);
-    // console.log('type is', type);
     obj[value[0]] = convertRoot(value[1], type);
-    // console.log('value for', value[0], ' is ', obj[value[0]]);
   });
   // console.log('returning', obj);
   // console.log('example:', new BSON.UUID());
   return obj;
+};
+
+const modifyObject = (object: any, schemaName: string, realm: Realm) => {
+  const schemaObj = realm.schema.find(
+    schema => schema.name === schemaName,
+  ) as CanonicalObjectSchema;
+  console.log('object before', schemaName);
+ 
+  Object.entries(object).forEach((value: [string, unknown]) => {
+    const type = schemaObj.properties[value[0]];
+    console.log('handling val: ', value, 'of type', type);
+    switch (type.name) {
+      case 'data':
+        const array = value[1] as ArrayBuffer;
+        console.log('array found is', array);
+        const view = new Uint8Array(array);
+        let result: number[] = [];
+        for (let i = 0; i < view.length; i++) {
+          result = [...result, view[i]];
+        }
+        object[value[0]] = result;
+        break;
+      case 'list':
+      case 'dictionary':
+      case 'set':
+      case 'object':
+        // TODO: handle recursive stuff
+        break;
+      default:
+        break;
+    }
+  });
+  // console.log('object after', object);
+};
+
+const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
+  console.log('modifying', objects.length, 'objects');
+  objects.forEach(obj => {
+    modifyObject(obj, schemaName, realm);
+  });
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
@@ -273,6 +307,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
 
           const objects = realm.objects(obj.schema);
+          modifyObjects(objects, obj.schema, realm);
           connection.send('getObjects', {objects: objects});
         });
         connection.receive('modifyObject', obj => {

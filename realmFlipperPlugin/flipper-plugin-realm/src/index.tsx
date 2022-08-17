@@ -20,7 +20,6 @@ import {
   SchemaMessage,
   SchemaObject,
 } from './CommonTypes';
-import ObjectAdder from './components/ObjectAdder';
 import PaginationActionGroup from './components/PaginationActionGroup';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
@@ -29,6 +28,7 @@ import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
+import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -540,7 +540,7 @@ export function Component() {
         <Layout.Container height={800}>
           <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
             {objects.length > 20 ? <PaginationActionGroup /> : null}
-            <ObjectAdder schema={currentSchema} />
+            {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
           </Layout.Horizontal>
           <DataVisualizer
             objects={objects}

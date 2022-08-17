@@ -10,11 +10,11 @@ export const IntInput = ({
   extraProps,
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [value, setValue] = useState<number | undefined>(defaultValue as number);
+  const [value, setValue] = useState<number | null>(defaultValue === undefined ? null : defaultValue as number);
   
-  useEffect(() => {
-    setValue(defaultValue as number);
-  }, [defaultValue]);
+  // useEffect(() => {
+  //   setValue(defaultValue as number);
+  // }, [defaultValue]);
 
   console.log('rendering intinput, value:', value)
   const onChange = (value: number) => {
@@ -31,8 +31,8 @@ export const IntInput = ({
       <Col flex="auto">
         <InputNumber
           {...extraProps}
-          value={value}
-          defaultValue={value}
+          value={value === null ? undefined : value}
+          defaultValue={value === null ? undefined : value}
           onChange={onChange}
           placeholder={property.optional && value === null ? 'null' : undefined}
         />
@@ -43,11 +43,10 @@ export const IntInput = ({
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);
-              setValue(undefined);
+              setValue(null);
               setReset((v) => v + 1);
             }}
           >
-            clear
           </Button>
         </Col>
       ) : null}
