@@ -55,7 +55,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
-    pluginState.set({ ...state, realms: data.realms });
+    pluginState.set({ ...state, realms: data.realms, selectedRealm: data.realms[0] });
+    getSchemas(data.realms[0]);
+
+    // client.send('getSchemas', { realm: });
   });
 
   client.onMessage('getObjects', (data: ObjectsMessage) => {
@@ -106,13 +109,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('schemas: ', data.schemas);
-    const newschemas = data.schemas.map((schema) =>
+    const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newschemas });
-    // console.log('pluginState', pluginState);
+    // load first schema nad objects
+    pluginState.set({ ...state, schemas: newSchemas, currentSchema: newSchemas[0] });
+    getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -201,35 +205,36 @@ export function plugin(client: PluginClient<Events, Methods>) {
           return false;
         }
       }
-    const { newObject, index } = data;
-    const upperIndex = state.currentPage * state.selectedPageSize - 1;
-    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
-    if (index > upperIndex || index < lowerIndex) {
-      return false;
+      const { newObject, index } = data;
+      const upperIndex = state.currentPage * state.selectedPageSize - 1;
+      const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+      if (index > upperIndex || index < lowerIndex) {
+        return false;
+      }
+      let newObjects = state.objects;
+      newObjects.splice(
+        index - (state.currentPage - 1) * state.selectedPageSize,
+        0,
+        newObject
+      );
+      const newFirstObject = newObjects[0];
+      const newLastObject = newObjects[newObjects.length - 1];
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects - 1,
+        cursorId: newLastObject._id,
+        filterCursor: state.sortingColumn
+          ? newLastObject[state.sortingColumn]
+          : null,
+        prev_page_cursorId: newFirstObject._id,
+        prev_page_filterCursor: state.sortingColumn
+          ? newFirstObject[state.sortingColumn]
+          : null,
+      });
     }
-    let newObjects = state.objects;
-    newObjects.splice(
-      index - (state.currentPage - 1) * state.selectedPageSize,
-      0,
-      newObject
-    );
-    const newFirstObject = newObjects[0];
-    const newLastObject = newObjects[newObjects.length - 1];
-    pluginState.set({
-      ...state,
-      objects: [...newObjects],
-      totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
-      prev_page_cursorId: newFirstObject._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? newFirstObject[state.sortingColumn]
-        : null,
-    });
-  }});
-  
+  });
+
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     console.log('DELETE');
     const state = pluginState.get();
@@ -335,12 +340,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const getOneObject = async (schema: string, primaryKey: any) => {
     const state = pluginState.get();
-    return client
-      .send('getOneObject', {
-        schema: schema,
-        realm: state.selectedRealm,
-        primaryKey: primaryKey,
-      });
+    return client.send('getOneObject', {
+      schema: schema,
+      realm: state.selectedRealm,
+      primaryKey: primaryKey,
+    });
   };
 
   const getSchemas = (realm: string) => {
@@ -445,6 +449,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onConnect(() => {
     getRealms();
+
   });
 
   const modifyObject = (newObject: Record<string, unknown>) => {
@@ -458,13 +463,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const removeObject = (object: Record<string, unknown>) => {
+    console.log('sending removeObject', object);
     const state = pluginState.get();
-    if (!state.currentSchema) {
+    const schema = state.currentSchema;
+    if (!schema) {
       return;
     }
     client.send('removeObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: schema.name,
       object: object,
     });
   };
@@ -595,7 +602,6 @@ export function Component() {
     sortDirection,
     sortingColumn,
     currentSchema,
-    selectedRealm
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<
@@ -633,7 +639,7 @@ export function Component() {
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
       {viewMode === 'schemaGraph' ? (
-        <SchemaGraph schemas={schemas} selectedRealm={selectedRealm}></SchemaGraph>
+        <SchemaGraph schemas={schemas}></SchemaGraph>
       ) : null}
     </Layout.Container>
   );

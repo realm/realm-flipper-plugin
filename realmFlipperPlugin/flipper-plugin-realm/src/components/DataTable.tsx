@@ -5,46 +5,42 @@ import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { ReactElement, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { createColumns } from '../pages/DataVisualizer';
 import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 
-type ColumnType = {
-  isOptional: boolean;
+export type ColumnType = {
+  optional: boolean;
   name: string;
-  objectType: string | undefined;
-  propertyType: string;
+  objectType?: string;
+  type: string;
   isPrimaryKey: boolean;
 };
 
-type PropertyType = {
+type type = {
   columns: ColumnType[];
   objects: RealmObject[];
   schemas: SchemaObject[];
   currentSchema: SchemaObject;
-  sortDirection: 'ascend' | 'descend' | null;
   loading: boolean;
   sortingColumn: string | null;
   renderOptions: (
-    // for dropDown
     row: RealmObject,
     schemaProperty: SchemaProperty,
     schema: SchemaObject
   ) => ReactElement;
-  getOneObject: (schema: string, primaryKey: string) => Promise<RealmObject>;
-  style: Object;
-  // rowSelection?: TableRowSelection<RealmObject>;
+  style?: Record<string, unknown>;
 };
 
-export const schemaObjToColumns = (schema: SchemaObject) => {
-  return schema.order.map((key) => {
-    const obj = schema.properties[key];
+// Receives a schema and returns column objects for the table.
+export const schemaObjToColumns = (schema: SchemaObject): ColumnType[] => {
+  return schema.order.map((propertyName) => {
+    const obj = schema.properties[propertyName];
     const isPrimaryKey = obj.name === schema.primaryKey;
     return {
       name: obj.name,
-      isOptional: obj.optional,
+      optional: obj.optional,
       objectType: obj.objectType,
-      propertyType: obj.type,
+      type: obj.type,
       isPrimaryKey: isPrimaryKey,
     };
   });
@@ -55,14 +51,11 @@ export const DataTable = ({
   objects,
   schemas,
   currentSchema,
-  sortDirection,
   loading,
-  sortingColumn,
   renderOptions,
-  getOneObject,
   style,
 }: // rowSelection
-PropertyType) => {
+type) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
@@ -79,10 +72,55 @@ PropertyType) => {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 
-  const sortableTypes = new Set(['string', 'int', 'uuid']);
-
   const filledColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
+
+    /*  A function that is applied for every cell to specify what to render in each cell
+      on top of the pure value specified in the 'dataSource' property of the antd table.*/
+    const render = (value: unknown, row: RealmObject) => {
+      const defaultCell = (
+        <Dropdown
+          overlay={renderOptions(row, property, currentSchema)}
+          trigger={[`contextMenu`]}
+        >
+          <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+            {parsePropToCell(value, property, currentSchema, schemas)}
+          </Tooltip>
+        </Dropdown>
+      );
+      const linkedSchema = schemas.find(
+        (schema) => schema.name === property.objectType
+      );
+      if (value !== null && linkedSchema) {
+        return (
+          <Layout.Container
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '5px',
+            }}
+          >
+            <Button
+              shape="circle"
+              type="primary"
+              size="small"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                expandRow(
+                  row[currentSchema.primaryKey],
+                  linkedSchema,
+                  value as RealmObject
+                )
+              }
+              ghost
+            />
+            {defaultCell}
+          </Layout.Container>
+        );
+      }
+      return defaultCell;
+    };
+
     return {
       title: createTitle(column),
       key: property.name,
@@ -92,65 +130,11 @@ PropertyType) => {
         showTitle: false,
       },
       property,
-      // onCell : () => {}
-      render: (value: RealmObject, row: RealmObject) => {
-        if (property.objectType && value) {
-          console.log('property.objectType', property.objectType);
-
-          const linkedSchema = schemas.find(
-            (schema) => schema.name === property.objectType
-          );
-          if (linkedSchema) {
-            return (
-              <Layout.Container
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: '5px',
-                }}
-              >
-                <Button
-                  shape="circle"
-                  type="primary"
-                  size="small"
-                  icon={<SearchOutlined />}
-                  onClick={() =>
-                    expandRow(
-                      row[currentSchema.primaryKey],
-                      linkedSchema,
-                      value
-                    )
-                  }
-                  ghost
-                />
-                <Dropdown
-                  overlay={renderOptions(row, property, currentSchema)}
-                  trigger={[`contextMenu`]}
-                >
-                  <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-                    {parsePropToCell(value, property, currentSchema, schemas)}
-                  </Tooltip>
-                </Dropdown>
-              </Layout.Container>
-            );
-          }
-        }
-        return (
-          <Dropdown
-            overlay={renderOptions(row, property, currentSchema)}
-            trigger={[`contextMenu`]}
-          >
-            <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-              {parsePropToCell(value, property, currentSchema, schemas)}
-            </Tooltip>
-          </Dropdown>
-        );
-      },
-      // sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      // sortOrder: sortingColumn === property.name ? sortDirection : null,
+      render,
     };
   });
 
+  //TODO: Fix unused properties.
   const handleOnChange = (
     pagination: TablePaginationConfig,
     filters: Record<string, Key[] | null>,
@@ -195,15 +179,13 @@ PropertyType) => {
         expandedRowRender: () => {
           return (
             <NestedTable
-              columns={createColumns(linkedSchema)}
+              columns={schemaObjToColumns(linkedSchema)}
               objects={[objectToRender]}
               schemas={schemas}
               currentSchema={linkedSchema}
-              sortDirection={sortDirection}
               loading={false}
               sortingColumn={null}
               renderOptions={renderOptions}
-              getOneObject={getOneObject}
             />
           );
         },
@@ -213,18 +195,19 @@ PropertyType) => {
       const newRowExpansionProp = {
         ...rowExpansionProp,
         expandedRowKeys: [],
-        expandedRowRender: () =>
-          NestedTable({
-            columns: createColumns(linkedSchema),
-            objects: [objectToRender],
-            schemas: schemas,
-            currentSchema: linkedSchema,
-            sortDirection: sortDirection,
-            loading: false,
-            sortingColumn: null,
-            renderOptions: renderOptions,
-            getOneObject: getOneObject,
-          }),
+        expandedRowRender: () => {
+          return (
+            <NestedTable
+              columns={schemaObjToColumns(linkedSchema)}
+              objects={[objectToRender]}
+              schemas={schemas}
+              currentSchema={linkedSchema}
+              loading={false}
+              sortingColumn={null}
+              renderOptions={renderOptions}
+            />
+          );
+        },
       };
       setRowExpansionProp(newRowExpansionProp);
     }
@@ -250,19 +233,13 @@ PropertyType) => {
   );
 };
 
-const createTitle = (column: {
-  isOptional: boolean;
-  isPrimaryKey: boolean;
-  name: string;
-  objectType?: string;
-  propertyType: string;
-}) => {
+const createTitle = (column: ColumnType) => {
   return (
     <ColumnTitle
-      isOptional={column.isOptional}
+      optional={column.optional}
       name={column.name}
       objectType={column.objectType}
-      propertyType={column.propertyType}
+      type={column.type}
       isPrimaryKey={column.isPrimaryKey}
     />
   );
@@ -273,28 +250,23 @@ const NestedTable = ({
   objects,
   schemas,
   currentSchema,
-  sortDirection,
   loading,
   sortingColumn,
   renderOptions,
-  getOneObject,
-}: PropertyType) => {
+}: type) => {
   return (
     <DataTable
       columns={columns}
       objects={objects}
       schemas={schemas}
       currentSchema={currentSchema}
-      sortDirection={sortDirection}
       loading={loading}
       sortingColumn={sortingColumn}
       renderOptions={renderOptions}
-      getOneObject={getOneObject}
       style={{
         boxShadow: '20px 0px 50px grey',
         marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
     ></DataTable>
-
   );
 };

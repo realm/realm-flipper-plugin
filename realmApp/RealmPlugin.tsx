@@ -61,10 +61,10 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'data':
         // console.log('data')
         return new ArrayBuffer(6);
-        // const buffer = new ArrayBuffer()
-        // const typedArray = Uint8Array.from(value);
-        // return new BSON.Binary(typedArray);
-        // return typedArray.buffer;
+      // const buffer = new ArrayBuffer()
+      // const typedArray = Uint8Array.from(value);
+      // return new BSON.Binary(typedArray);
+      // return typedArray.buffer;
       // return typedArray.buffer;
       default:
         // console.log('returning default', value)
@@ -116,6 +116,7 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
   const schemaObj = realm.schema.find(
     schema => schema.name === schemaName,
   ) as CanonicalObjectSchema;
+  
   console.log('object before', schemaName);
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
@@ -169,7 +170,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.send('getCurrentQuery');
 
         connection.receive('receivedCurrentQuery', obj => {
-          console.log("received");
+          console.log('received');
           const realm = realmsMap.get(obj.realm);
           if (schemaToObjects.has(obj.schema)) {
             schemaToObjects.get(obj.schema).removeAllListeners();
@@ -279,7 +280,10 @@ export default React.memo((props: {realms: Realm[]}) => {
             const realm = realmsMap.get(obj.realm);
             const schemaObj = realm?.schema.find(s => s.name === obj.schema);
             let pk;
-            console.log('schemaObj.properties[schemaObj.primaryKey].type',schemaObj.properties[schemaObj.primaryKey].type)
+            console.log(
+              'schemaObj.properties[schemaObj.primaryKey].type',
+              schemaObj.properties[schemaObj.primaryKey].type,
+            );
             switch (schemaObj.properties[schemaObj.primaryKey].type) {
               // case 'object':
               //   return readObject(objectType as string, value);
@@ -369,6 +373,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
           console.log('converted', converted);
+
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
@@ -385,6 +390,9 @@ export default React.memo((props: {realms: Realm[]}) => {
           const schema = realm.schema.find(
             schema => schema.name === obj.schema,
           );
+
+          const object = typeConverter(obj.object, realm, schema?.name);
+
           const primaryKey = schema?.primaryKey;
           if (!schema || !primaryKey) {
             return;
@@ -394,12 +402,12 @@ export default React.memo((props: {realms: Realm[]}) => {
             realm.write(() => {
               const realmObj = realm.objectForPrimaryKey(
                 schema.name,
-                obj.object[primaryKey],
+                object[primaryKey],
               );
               realm.delete(realmObj);
             });
           } catch (err) {
-            responder.error(err.message);
+            responder.error({error: err.message});
           }
 
           const objects = realm.objects(obj.schema);
@@ -565,7 +573,7 @@ function getPrevObjectsAscending(
 ) {
   const {sortingColumn} = obj;
   console.log('ascending previous');
-  
+
   if (sortingColumn) {
     objects = objects
       .sorted([
@@ -608,7 +616,6 @@ function getObjectsDescending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-
   const {sortingColumn} = obj;
   if (sortingColumn) {
     objects = objects
