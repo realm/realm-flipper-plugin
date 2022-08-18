@@ -3,7 +3,7 @@ import { BooleanValue } from '../components/BooleanValue';
 import React from 'react';
 
 export const parsePropToCell = (
-  value: string | number | Record<string, unknown>,
+  value: unknown,
   property: SchemaProperty,
   schema: SchemaObject,
   schemas: Array<SchemaObject>
@@ -95,7 +95,7 @@ function parseData(input) {
   // </>;
   return (
     <a href={blobUrl} target="_blank" rel="noreferrer" download="file">
-      aaa
+      {'[' + 0 + ' bytes]'}
     </a>
   );
   return anchor;

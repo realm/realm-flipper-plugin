@@ -3,7 +3,7 @@ import { Menu, Modal } from 'antd';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { DataTable } from '../components/DataTable';
+import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
@@ -140,28 +140,6 @@ export const DataVisualizer = ({
           Delete selected {schema.name}{' '}
         </Menu.Item>
         <Menu.Item
-          key={2}
-          onClick={() => {
-            setNewInspectData({ [schema.name]: schema });
-            setInspectorView('Inspector - Realm Schema');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Schema
-        </Menu.Item>
-        <Menu.Item
-          key={3}
-          onClick={() => {
-            setNewInspectData({
-              [schema.name + '.' + schemaProperty.name]: schemaProperty,
-            });
-            setInspectorView('Inspector - Realm Schema Property');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Schema Property
-        </Menu.Item>
-        <Menu.Item
           key={4}
           onClick={() => {
             const object = {};
@@ -191,7 +169,7 @@ export const DataVisualizer = ({
       </Menu>
     );
 
-    const columns = createColumns(currentSchema);
+    const columns = schemaObjToColumns(currentSchema);
     return (
       <Layout.Container height={800}>
         <DataTable
@@ -220,16 +198,16 @@ export const DataVisualizer = ({
   }
 };
 
-export const createColumns = (currentSchema) => {
-  return currentSchema.order.map((key) => {
-    const obj = currentSchema.properties[key];
-    const isPrimaryKey = obj.name === currentSchema.primaryKey;
-    return {
-      name: obj.name,
-      isOptional: obj.optional,
-      objectType: obj.objectType,
-      propertyType: obj.type,
-      isPrimaryKey: isPrimaryKey,
-    };
-  });
-};
+// export const createColumns = (currentSchema: SchemaObject) => {
+//   return currentSchema.order.map((key) => {
+//     const obj = currentSchema.properties[key];
+//     const isPrimaryKey = obj.name === currentSchema.primaryKey;
+//     return {
+//       name: obj.name,
+//       isOptional: obj.optional,
+//       objectType: obj.objectType,
+//       propertyType: obj.type,
+//       isPrimaryKey: isPrimaryKey,
+//     };
+//   });
+// };

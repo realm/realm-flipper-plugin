@@ -1,24 +1,18 @@
 import React from 'react';
 import { Tag } from 'antd';
-
-type PropertyType = {
-  isOptional: boolean;
-  name: string;
-  objectType?: string;
-  propertyType: string;
-  isPrimaryKey: boolean;
-};
+import { ColumnType } from '../components/DataTable';
 
 export const ColumnTitle = ({
-  isOptional,
+  optional,
   name,
   objectType,
-  propertyType,
+  type,
   isPrimaryKey,
-}: PropertyType) => {
+}: ColumnType) => {
+  console.log('columntitle', type, objectType, isPrimaryKey)
   let title;
 
-  switch (propertyType) {
+  switch (type) {
     case 'list':
     case 'set':
     case 'dictionary':
@@ -26,14 +20,14 @@ export const ColumnTitle = ({
       title = objectType;
       break;
     default:
-      title = propertyType;
+      title = type;
   }
 
-  if (isOptional) {
+  if (optional) {
     title += '?';
   }
 
-  switch (propertyType) {
+  switch (type) {
     case 'list':
       title += '[]';
       break;

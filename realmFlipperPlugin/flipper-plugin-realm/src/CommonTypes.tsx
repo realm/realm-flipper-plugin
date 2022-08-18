@@ -32,9 +32,9 @@ const typeList = [
   'data',
   'date',
 ];
-export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
-export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
-export type RealmObject = Record<string, RealmValueType>;
+// export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
+// export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
+export type RealmObject = Record<string, unknown>;
 
 export type SchemaObject = {
   name: string;

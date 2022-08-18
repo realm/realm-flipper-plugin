@@ -1,7 +1,7 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React, { useCallback } from 'react';
-import { RealmObject, SchemaObject } from '../CommonTypes';
+import { SchemaObject } from '../CommonTypes';
 import { plugin } from '../index';
 
 const { Option } = Select;

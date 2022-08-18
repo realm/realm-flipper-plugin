@@ -116,6 +116,7 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
   const schemaObj = realm.schema.find(
     schema => schema.name === schemaName,
   ) as CanonicalObjectSchema;
+  
   console.log('object before', schemaName);
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
@@ -372,6 +373,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
           console.log('converted', converted);
+
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
@@ -388,6 +390,9 @@ export default React.memo((props: {realms: Realm[]}) => {
           const schema = realm.schema.find(
             schema => schema.name === obj.schema,
           );
+
+          const object = typeConverter(obj.object, realm, schema?.name);
+
           const primaryKey = schema?.primaryKey;
           if (!schema || !primaryKey) {
             return;
@@ -397,12 +402,12 @@ export default React.memo((props: {realms: Realm[]}) => {
             realm.write(() => {
               const realmObj = realm.objectForPrimaryKey(
                 schema.name,
-                obj.object[primaryKey],
+                object[primaryKey],
               );
               realm.delete(realmObj);
             });
           } catch (err) {
-            responder.error(err.message);
+            responder.error({error: err.message});
           }
 
           const objects = realm.objects(obj.schema);

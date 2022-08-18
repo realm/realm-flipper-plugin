@@ -18,7 +18,8 @@
     "watch": "flipper-pkg bundle --watch",
     "test": "jest --no-watchman",
     "fix": "eslint --fix src/*",
-    "lint": "eslint"
+    "lint": "eslint",
+    "architecture": "depcruise --exclude \"src/components/objectManipulation/\" --include-only \"^src\" --output-type dot src | dot -T svg > dependencygraph.svg"
   },
   "peerDependencies": {
     "@emotion/styled": "latest",
@@ -40,6 +41,7 @@
     "@typescript-eslint/parser": "^5.32.0",
     "antd": "latest",
     "css-loader": "^6.7.1",
+    "dependency-cruiser": "^11.14.2",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -66,6 +68,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "bson": "^4.6.5",
+    "dot": "^1.1.3",
     "jest-environment-jsdom": "^28.1.3",
     "js-big-decimal": "^1.3.5",
     "mermaid": "^9.1.4",

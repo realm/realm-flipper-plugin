@@ -2,18 +2,16 @@ import { Table, Typography } from 'antd';
 import {
   DataTableColumn,
   Layout,
-  styled,
-  theme,
   useMemoize,
   usePlugin,
-  useValue,
 } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../index';
 import { SchemaProperty, SchemaObject } from '../CommonTypes';
 import { isPropertyLinked } from '../utils/linkedObject';
 import { BooleanValue } from '../components/BooleanValue';
-import { SchemaGraph } from './SchemaGraph';
+import {RealmObject} from '../CommonTypes';
+import { ColumnType } from 'antd/lib/table';
 const { Text } = Typography;
 const { Link } = Typography;
 
@@ -55,13 +53,13 @@ const SchemaVisualizer = (props: {
     };
 
   function createColumnConfig(columns: string[]) {
-    const columnObjs: DataTableColumn<{ [key: string]: Value }>[] = columns.map(
+    const columnObjs: ColumnType<RealmObject>[] = columns.map(
       (col) => ({
         key: col,
         title: col,
         dataIndex: col,
         onFilter: (value: string, record: any) => record[col].startsWith(value),
-        render: (text, record) =>
+        render: (text: string, record: unknown) =>
           renderTableCells(text, typeof text, col, record),
         filterSearch: true,
       })
@@ -69,29 +67,29 @@ const SchemaVisualizer = (props: {
     return columnObjs;
   }
   function renderTableCells(
-    value: string,
+    value: unknown,
     type: string,
     column: string,
-    record: any
+    record: any,
   ) {
     if (column === 'objectType' && isPropertyLinked(record)) {
-      return <Link onClick={() => onSchemaSelected(value)}>{value}</Link>;
+      return <Link onClick={() => onSchemaSelected(value as SchemaObject)}>{value}</Link>;
     }
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={value}>
-            {value.toString()}
+          <BooleanValue active={value as boolean}>
+            {(value as boolean).toString()}
           </BooleanValue>
         );
       case 'blob':
       case 'string':
-        return <Text>{value}</Text>;
+        return <Text>{value as string}</Text>;
       case 'integer':
       case 'float':
       case 'double':
       case 'number':
-        return <Text>{value}</Text>;
+        return <Text>{value as number}</Text>;
       case 'null':
         return <Text>NULL</Text>;
       case 'object':

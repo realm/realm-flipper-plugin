@@ -55,7 +55,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
-    pluginState.set({ ...state, realms: data.realms });
+    pluginState.set({ ...state, realms: data.realms, selectedRealm: data.realms[0] });
+    getSchemas(data.realms[0]);
+
+    // client.send('getSchemas', { realm: });
   });
 
   client.onMessage('getObjects', (data: ObjectsMessage) => {
@@ -106,13 +109,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('schemas: ', data.schemas);
-    const newschemas = data.schemas.map((schema) =>
+    const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newschemas });
-    // console.log('pluginState', pluginState);
+    // load first schema nad objects
+    pluginState.set({ ...state, schemas: newSchemas, currentSchema: newSchemas[0] });
+    getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -444,6 +448,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onConnect(() => {
     getRealms();
+
   });
 
   const modifyObject = (newObject: Record<string, unknown>) => {
@@ -466,9 +471,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('removeObject', {
       realm: state.selectedRealm,
       schema: schema.name,
-      object: {
-        [schema.primaryKey]: schema.primaryKey
-      },
+      object: object,
     });
   };
 
