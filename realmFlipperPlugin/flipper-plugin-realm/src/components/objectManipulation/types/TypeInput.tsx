@@ -13,10 +13,9 @@ import { SetInput } from './SetInput';
 import { StringInput } from './StringInput';
 import { UUIDInput } from './UUIDInput';
 import { UUID, ObjectId } from 'bson';
-import { SchemaProperty } from '../../../CommonTypes';
 
 export type TypeInputProps = {
-  property: SchemaProperty;
+  property: TypeDescription;
   defaultValue?: unknown;
   set: (val: unknown) => void;
   extraProps?: Record<string, unknown>;
@@ -25,6 +24,7 @@ export type TypeInputProps = {
 type TypeDescription = {
   type: string;
   optional: boolean;
+  objectType?: string;
 }
 
 export const getDefault = (property: TypeDescription) => {
@@ -61,7 +61,6 @@ export const getDefault = (property: TypeDescription) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
-  console.log('typeInput', props.property.name, props.defaultValue)
   switch (props.property.type) {
     case 'int':
     case 'float':

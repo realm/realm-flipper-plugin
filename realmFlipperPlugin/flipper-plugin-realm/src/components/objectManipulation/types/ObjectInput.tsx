@@ -29,7 +29,7 @@ export const ObjectInput = ({
   }
 
   const renderChosen = () => {
-    const val = value[targetSchema.primaryKey].text;
+    const val = value[targetSchema.primaryKey];
     const content = `${targetSchema?.primaryKey}: ${val}`;
     return (
       <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">

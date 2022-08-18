@@ -117,7 +117,6 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
     schema => schema.name === schemaName,
   ) as CanonicalObjectSchema;
   console.log('object before', schemaName);
- 
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
     console.log('handling val: ', value, 'of type', type);

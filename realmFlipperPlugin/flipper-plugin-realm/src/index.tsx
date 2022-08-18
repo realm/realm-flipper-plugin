@@ -526,6 +526,7 @@ export function Component() {
     sortDirection,
     sortingColumn,
     currentSchema,
+    selectedRealm
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<
@@ -563,7 +564,7 @@ export function Component() {
         <RealmQueryLanguage schema={currentSchema} />
       ) : null}
       {viewMode === 'schemaGraph' ? (
-        <SchemaGraph schemas={schemas}></SchemaGraph>
+        <SchemaGraph schemas={schemas} selectedRealm={selectedRealm}></SchemaGraph>
       ) : null}
     </Layout.Container>
   );
