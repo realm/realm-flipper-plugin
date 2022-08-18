@@ -52,7 +52,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
         cancelText="Cancel"
         destroyOnClose
       >
-        <PropertiesModify schema={schema} initialObject={values} />
+        <PropertiesModify schema={schema} value={values} setValue={setValues}/>
       </Modal>
     </Layout.Horizontal>
   );

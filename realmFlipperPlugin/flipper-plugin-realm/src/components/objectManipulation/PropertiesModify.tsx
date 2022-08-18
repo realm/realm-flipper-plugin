@@ -1,20 +1,15 @@
 import React from 'react';
-import { useState } from 'react';
 import { RealmObject, SchemaObject } from '../../CommonTypes';
 import { PropertyRender } from './PropertyRender';
 import { getDefault } from './types/TypeInput';
 
-
-
 type InputType = {
   schema: SchemaObject;
-  initialObject: RealmObject;
+  value: RealmObject;
+  setValue: (v: RealmObject) => void;
 };
 
-export const PropertiesModify = ({ schema, initialObject }: InputType) => {
-  const [value] = useState<RealmObject>(initialObject || {});
-    // console.log('len:', value.length);
-
+export const PropertiesModify = ({ schema, value, setValue }: InputType) => {
   if (Object.keys(value).length === 0) {
     // console.log('inputType, here')
     schema.order.forEach((propertyName: string) => {
@@ -27,7 +22,13 @@ export const PropertiesModify = ({ schema, initialObject }: InputType) => {
     <>
       {schema.order.map((propertyName: string, index: number) => {
         const set = (val: unknown) => {
-          value[propertyName] = val;
+          console.log('setting', propertyName, 'to', val)
+          setValue({
+            ...value,
+            [propertyName]: val,
+          })
+          // value[propertyName] = val;
+          console.log('after set', value)
         };
         return (
           <PropertyRender

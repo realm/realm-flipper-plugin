@@ -228,8 +228,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
         ? newFirstObject[state.sortingColumn]
         : null,
     });
-  });
-
+  }});
+  
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     console.log('DELETE');
     const state = pluginState.get();
@@ -368,6 +368,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: state.currentSchema?.name,
       object: object,
     });
+    // getObjects(state.currentSchema.name, state.selectedRealm);
   };
 
   const updateSelectedSchema = (schema: SchemaObject) => {

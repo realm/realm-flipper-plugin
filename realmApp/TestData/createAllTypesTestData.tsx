@@ -66,7 +66,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
@@ -144,7 +144,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
@@ -204,7 +204,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
   realm.write(() => {
