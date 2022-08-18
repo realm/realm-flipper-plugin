@@ -271,6 +271,57 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getSchemas', {schemas: schemas});
         });
 
+        connection.receive(
+          'getOneObject',
+          (
+            obj: {realm: string; schema: string; primaryKey: string},
+            responder,
+          ) => {
+            const realm = realmsMap.get(obj.realm);
+            const schemaObj = realm?.schema.find(s => s.name === obj.schema);
+            let pk;
+            console.log('schemaObj.properties[schemaObj.primaryKey].type',schemaObj.properties[schemaObj.primaryKey].type)
+            switch (schemaObj.properties[schemaObj.primaryKey].type) {
+              // case 'object':
+              //   return readObject(objectType as string, value);
+              case 'uuid':
+                pk = new BSON.UUID(obj.primaryKey);
+                break;
+              case 'decimal128':
+                pk = new BSON.Decimal128(obj.primaryKey);
+                break;
+
+              case 'objectID':
+                pk = new BSON.ObjectId(obj.primaryKey);
+                break;
+
+              // case 'data':
+              //   const typedArray = Uint8Array.from(obj.primaryKey);
+              //   pk = typedArray.buffer;
+              //   break;
+
+              default:
+                // console.log('returning default', value)
+                pk = obj.primaryKey;
+            }
+
+            if (!realm) {
+              return;
+            }
+            console.log('obj.primaryKey', pk);
+            try {
+              const object = realm.objectForPrimaryKey(
+                obj.schema,
+                // new BSON.UUID(obj.primaryKey),
+                pk,
+              );
+              responder.success(object);
+            } catch (err) {
+              responder.error({message: err.message});
+            }
+          },
+        );
+
         connection.receive('executeQuery', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
@@ -318,7 +369,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted)
+          console.log('converted', converted);
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');
           });
@@ -515,6 +566,7 @@ function getPrevObjectsAscending(
 ) {
   const {sortingColumn} = obj;
   console.log('ascending previous');
+  
   if (sortingColumn) {
     objects = objects
       .sorted([
@@ -557,6 +609,7 @@ function getObjectsDescending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
+
   const {sortingColumn} = obj;
   if (sortingColumn) {
     objects = objects

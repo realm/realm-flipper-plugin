@@ -106,6 +106,58 @@ export const SetsSchema = {
   primaryKey: '_id',
 };
 
+export const MailCarrier = {
+  name: 'MailCarrier',
+  properties: {
+    _id: 'uuid',
+    name: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    phoneNumber: 'string',
+  },
+  primaryKey: '_id',
+};
+
+export const ParcelService = {
+  name: 'ParcelService',
+  properties: {
+    _id: 'uuid',
+    name: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    mailCarrier: 'MailCarrier',
+  },
+  primaryKey: '_id',
+};
+
+export const Parcel = {
+  name: 'Parcel',
+  properties: {
+    _id: 'uuid',
+    length: 'int',
+    width: 'int',
+    height: 'int',
+    weight: 'int',
+  },
+  primaryKey: '_id',
+};
+
+export const Delivery = {
+  name: 'Delivery',
+  properties: {
+    _id: 'uuid',
+    receiver: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    parcel: 'Parcel',
+    parcelService: 'ParcelService',
+
 export const OptionalContainers = {
   name: 'OptionalContainers',
   properties: {
