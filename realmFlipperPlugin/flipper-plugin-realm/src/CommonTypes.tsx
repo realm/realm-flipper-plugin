@@ -1,3 +1,5 @@
+import { Decimal128, ObjectId, UUID } from "bson";
+
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
@@ -18,8 +20,21 @@ export type RealmPluginState = {
   prev_page_cursorId: number | null;
   prev_page_filterCursor: number | null;
 };
-
-export type RealmObject = Record<string, unknown>;
+const typeList = [
+  'objectId',
+  'uuid',
+  'bool',
+  'int',
+  'float',
+  'double',
+  'decimal128',
+  'string',
+  'data',
+  'date',
+];
+export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
+export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
+export type RealmObject = Record<string, RealmValueType>;
 
 export type SchemaObject = {
   name: string;

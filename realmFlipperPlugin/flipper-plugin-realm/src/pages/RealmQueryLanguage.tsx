@@ -18,18 +18,20 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
   const [queryResult, setQueryResult] = useState<Record<string, unknown>[]>([]);
   const [query, setQuery] = useState('');
+  const [favourites, setFavourites] = useState<string[]>(JSON.parse(
+    localStorage.getItem('favourites') || '{"favourites":[]}'
+  ).favourites || []);
+    console.log('favs', favourites)
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-  queryFavourites = JSON.parse(
-    localStorage.getItem('favourites') || '{"favourites":[]}'
-  ).favourites;
   queryHistory = JSON.parse(
     localStorage.getItem('history') || '{ "history": [] }'
   ).history;
   if (queryHistory === undefined) {
     queryHistory = [];
   }
+
   useEffect(() => {
     if (schema) executeQuery('');
   }, [state.selectedRealm, schema]);
@@ -37,6 +39,20 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   if (!schema) {
     return <>Please select a schema.</>;
   }
+
+  const addToFavorites = () => {
+    let favourites2 = favourites;
+  
+    if (!favourites.includes(query) && query !== '') {
+      favourites2 = [...favourites2, query];
+    }
+    // console.log('setting fabourites to', favourites);
+    setFavourites(favourites2);
+    localStorage.setItem(
+      'favourites',
+      JSON.stringify({ favourites: favourites2 })
+    );
+  };
 
   const executeQuery = async (query: string) => {
     try {
@@ -91,12 +107,11 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
                 },
                 {
                   label: 'Favourites',
-                  options: queryFavourites
+                  options: favourites
                     .map((val, id) => wrapItem(val, 2 * id + 1))
                     .reverse(),
                 },
               ]}
-              backfill={true}
             />
           </Col>
           <Col>
@@ -132,18 +147,7 @@ const wrapItem = (query: string, id: number) => ({
   value: query,
   key: id,
 });
-let queryFavourites: Array<string>, queryHistory: Array<string>;
-
-const addToFavorites = () => {
-  const state = instance.state.get();
-  if (!queryFavourites.includes(state.query) && state.query !== '') {
-    queryFavourites = [...queryFavourites, state.query];
-  }
-  localStorage.setItem(
-    'favourites',
-    JSON.stringify({ favourites: queryFavourites })
-  );
-};
+let queryHistory: Array<string>;
 
 export const addToHistory = (query: string) => {
   let history = queryHistory;

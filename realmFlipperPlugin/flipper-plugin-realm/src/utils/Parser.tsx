@@ -1,8 +1,6 @@
 import { SchemaObject, SchemaProperty } from '../CommonTypes';
 import { BooleanValue } from '../components/BooleanValue';
 import React from 'react';
-import { Button } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
 
 export const parsePropToCell = (
   value: string | number | Record<string, unknown>,
@@ -13,10 +11,6 @@ export const parsePropToCell = (
   if (value === null) {
     return 'null';
   }
-
-  // if (!value) {
-  //   return value;
-  // }
 
   let returnValue: JSX.Element | string | number = '';
 
