@@ -79,14 +79,14 @@ type) => {
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
       const defaultCell = (
-        <Dropdown
-          overlay={renderOptions(row, property, currentSchema)}
-          trigger={[`contextMenu`]}
-        >
-          <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-            {parsePropToCell(value, property, currentSchema, schemas)}
-          </Tooltip>
-        </Dropdown>
+        // <Dropdown
+        //   overlay={renderOptions(row, property, currentSchema)}
+        //   trigger={[`contextMenu`]}
+        // >
+        <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+          {parsePropToCell(value, property, currentSchema, schemas)}
+        </Tooltip>
+        // </Dropdown>
       );
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
@@ -131,6 +131,19 @@ type) => {
       },
       property,
       render,
+      onCell: (record, rowIndex) => {
+        return {
+          onContextMenu: (env) => {
+            console.log('env', env);
+            console.log('record', record);
+            console.log('rowIndex', rowIndex);
+            console.log('currentSchema', currentSchema);
+            console.log('property', property);
+
+            return renderOptions(record, property, currentSchema);
+          },
+        };
+      },
     };
   });
 
@@ -229,6 +242,14 @@ type) => {
       size="small"
       tableLayout="auto"
       style={style}
+      // onCell={(record, rowIndex) => {
+      //   return {
+      //     onClick: (event) => {
+      //       console.log('record', record);
+      //       console.log('rowIndex', rowIndex);
+      //     },
+      //   };
+      // }}
     />
   );
 };
