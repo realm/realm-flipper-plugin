@@ -130,15 +130,6 @@ export const DataVisualizer = ({
       schema: SchemaObject
     ) => (
       <Menu>
-        <Menu.Item key={-1} onClick={() => editField(row, schemaProperty)}>
-          Edit property
-        </Menu.Item>
-        <Menu.Item key={0} onClick={() => editObject(row)}>
-          Edit object
-        </Menu.Item>
-        <Menu.Item key={1} onClick={() => deleteRow(row)}>
-          Delete selected {schema.name}{' '}
-        </Menu.Item>
         <Menu.Item
           key={4}
           onClick={() => {
@@ -151,10 +142,10 @@ export const DataVisualizer = ({
             showSidebar ? null : setShowSidebar(true);
           }}
         >
-          Inspect Row
+          Inspect Object
         </Menu.Item>
         <Menu.Item
-          key={5}
+          key={1}
           onClick={() => {
             setNewInspectData({
               [schema.name + '.' + schemaProperty.name]:
@@ -164,7 +155,17 @@ export const DataVisualizer = ({
             showSidebar ? null : setShowSidebar(true);
           }}
         >
-          Inspect Cell
+          Inspect Property
+        </Menu.Item>
+        <Menu.Item key={2} onClick={() => editObject(row)}>
+          Edit Object
+        </Menu.Item>
+        <Menu.Item key={3} onClick={() => editField(row, schemaProperty)}>
+          Edit Property
+        </Menu.Item>
+
+        <Menu.Item key={4} onClick={() => deleteRow(row)}>
+          Delete Object
         </Menu.Item>
       </Menu>
     );
