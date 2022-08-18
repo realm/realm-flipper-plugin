@@ -52,6 +52,7 @@ export const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
+
   // Return buttons + tableView
   return (
     <Layout.Container grow>
@@ -190,17 +191,7 @@ export const DataVisualizer = ({
       </Menu>
     );
 
-    const columns = currentSchema.order.map((key) => {
-      const obj = currentSchema.properties[key];
-      const isPrimaryKey = obj.name === currentSchema.primaryKey;
-      return {
-        name: obj.name,
-        isOptional: obj.optional,
-        objectType: obj.objectType,
-        propertyType: obj.type,
-        isPrimaryKey: isPrimaryKey,
-      };
-    });
+    const columns = createColumns(currentSchema);
     return (
       <Layout.Container height={800}>
         <DataTable
@@ -212,6 +203,7 @@ export const DataVisualizer = ({
           currentSchema={currentSchema}
           loading={loading}
           renderOptions={dropDown}
+          getOneObject={getOneObject}
         />
       </Layout.Container>
     );
@@ -226,4 +218,18 @@ export const DataVisualizer = ({
     }
     setInspectData(newInspectData);
   }
+};
+
+export const createColumns = (currentSchema) => {
+  return currentSchema.order.map((key) => {
+    const obj = currentSchema.properties[key];
+    const isPrimaryKey = obj.name === currentSchema.primaryKey;
+    return {
+      name: obj.name,
+      isOptional: obj.optional,
+      objectType: obj.objectType,
+      propertyType: obj.type,
+      isPrimaryKey: isPrimaryKey,
+    };
+  });
 };

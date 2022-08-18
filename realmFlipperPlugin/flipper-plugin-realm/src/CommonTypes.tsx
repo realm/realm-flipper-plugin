@@ -61,6 +61,7 @@ export type Events = {
   liveObjectEdited: EditLiveObjectRequest;
   getRealms: RealmsMessage;
   executeQuery: QueryResult;
+  getOneObject: ObjectMessage;
 };
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
@@ -70,6 +71,7 @@ export type Methods = {
   addObject: (object: AddObject) => Promise<RealmObject>;
   modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
+  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
 };
 
 export type AddObject = {

@@ -144,6 +144,63 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
+    const { newObject, index, smallerNeighbor, largerNeighbor } = data;
+    // console.log(newObject);
+    // console.log('objects in state', state.objects);
+    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
+    const firstObjectInMemory = state.objects[0]?._id;
+    // console.log(
+    //   'neighbors',
+    //   smallerNeighbor,
+    //   largerNeighbor,
+    //   firstObjectInMemory
+    // );
+    // console.log('sortDirection', state.sortDirection, state.currentPage);
+    // console.log('last object new', state.objects[state.objects.length - 1]);
+    if (
+      state.currentPage === 1 &&
+      state.objects.length >= state.selectedPageSize &&
+      !smallerNeighbor
+    ) {
+      let newObjects = [newObject, ...state.objects];
+      newObjects = newObjects.slice(0, state.selectedPageSize);
+      // console.log(
+      //   'set cursorId to',
+      //   state.objects[state.objects.length - 1]._id
+      // );
+
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects + 1,
+        cursorId: state.objects[state.objects.length - 1]._id,
+        filterCursor: state.sortingColumn
+          ? state.objects[state.objects.length - 1][state.sortingColumn]
+          : null,
+        prev_page_cursorId: newObject._id,
+        prev_page_filterCursor: state.sortingColumn
+          ? newObject[state.sortingColumn]
+          : null,
+      });
+      return;
+    }
+    if (state.objects.length >= state.selectedPageSize) {
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
+          return false;
+        }
+      }
     const { newObject, index } = data;
     const upperIndex = state.currentPage * state.selectedPageSize - 1;
     const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
@@ -276,6 +333,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const getOneObject = async (schema: string, primaryKey: any) => {
+    const state = pluginState.get();
+    return client
+      .send('getOneObject', {
+        schema: schema,
+        realm: state.selectedRealm,
+        primaryKey: primaryKey,
+      });
+  };
+
   const getSchemas = (realm: string) => {
     client.send('getSchemas', { realm: realm });
   };
@@ -292,7 +359,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object)
+    console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
@@ -381,7 +448,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject)
+    console.log('modifyObject', newObject);
     client.send('modifyObject', {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
@@ -513,6 +580,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     toggleSortDirection,
     setSortingDirection,
     refreshState,
+    getOneObject,
   };
 }
 
