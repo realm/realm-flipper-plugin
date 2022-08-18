@@ -278,12 +278,6 @@ const NestedTable = ({
   getOneObject,
 }: PropertyType) => {
   return (
-    // <Layout.Container
-    //   style={{
-    //     boxShadow: '20px 0px 50px grey',
-    //     // marginLeft: '-35px'
-    //   }}
-    // >
     <DataTable
       columns={columns}
       objects={objects}
@@ -299,6 +293,6 @@ const NestedTable = ({
         marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
     ></DataTable>
-    // </Layout.Container>
+
   );
 };
