@@ -224,6 +224,7 @@ PropertyType) => {
             sortingColumn: null,
             renderOptions: renderOptions,
             getOneObject: getOneObject,
+            style: {}
           }),
       };
       setRowExpansionProp(newRowExpansionProp);

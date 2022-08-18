@@ -61,10 +61,10 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'data':
         // console.log('data')
         return new ArrayBuffer(6);
-        // const buffer = new ArrayBuffer()
-        // const typedArray = Uint8Array.from(value);
-        // return new BSON.Binary(typedArray);
-        // return typedArray.buffer;
+      // const buffer = new ArrayBuffer()
+      // const typedArray = Uint8Array.from(value);
+      // return new BSON.Binary(typedArray);
+      // return typedArray.buffer;
       // return typedArray.buffer;
       default:
         // console.log('returning default', value)
@@ -169,7 +169,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.send('getCurrentQuery');
 
         connection.receive('receivedCurrentQuery', obj => {
-          console.log("received");
+          console.log('received');
           const realm = realmsMap.get(obj.realm);
           if (schemaToObjects.has(obj.schema)) {
             schemaToObjects.get(obj.schema).removeAllListeners();
@@ -279,7 +279,10 @@ export default React.memo((props: {realms: Realm[]}) => {
             const realm = realmsMap.get(obj.realm);
             const schemaObj = realm?.schema.find(s => s.name === obj.schema);
             let pk;
-            console.log('schemaObj.properties[schemaObj.primaryKey].type',schemaObj.properties[schemaObj.primaryKey].type)
+            console.log(
+              'schemaObj.properties[schemaObj.primaryKey].type',
+              schemaObj.properties[schemaObj.primaryKey].type,
+            );
             switch (schemaObj.properties[schemaObj.primaryKey].type) {
               // case 'object':
               //   return readObject(objectType as string, value);
@@ -565,7 +568,7 @@ function getPrevObjectsAscending(
 ) {
   const {sortingColumn} = obj;
   console.log('ascending previous');
-  
+
   if (sortingColumn) {
     objects = objects
       .sorted([
@@ -608,7 +611,6 @@ function getObjectsDescending(
   objects: Realm.Results<Realm.Object>,
   limit: number,
 ) {
-
   const {sortingColumn} = obj;
   if (sortingColumn) {
     objects = objects

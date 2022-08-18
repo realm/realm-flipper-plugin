@@ -80,7 +80,7 @@ const SchemaVisualizer = (props: {
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={value.toString()}>
+          <BooleanValue active={value}>
             {value.toString()}
           </BooleanValue>
         );

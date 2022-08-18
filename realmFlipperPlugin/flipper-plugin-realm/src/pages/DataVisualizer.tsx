@@ -43,7 +43,7 @@ export const DataVisualizer = ({
     editing: false,
   });
 
-  const { removeObject } = usePlugin(plugin);
+  const { removeObject, getOneObject } = usePlugin(plugin);
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;

@@ -157,7 +157,9 @@ export const Delivery = {
     houseNumber: 'string',
     parcel: 'Parcel',
     parcelService: 'ParcelService',
-
+  },
+  primaryKey: '_id',
+};
 export const OptionalContainers = {
   name: 'OptionalContainers',
   properties: {
