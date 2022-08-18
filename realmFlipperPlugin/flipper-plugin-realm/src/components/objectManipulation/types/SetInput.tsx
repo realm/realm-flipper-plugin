@@ -4,13 +4,16 @@ import React, { useEffect, useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
 export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
-  const [reset, setReset] = useState(0);
+  const [_, setReset] = useState(0);
   const [arr, setArr] = useState<any[]>(defaultValue as any[]);
   const [occurences] = useState(new Map<any, number>());
+  const [deleteOffset, setDeleteOffset] = useState(0);
 
-  const [container, setContainer] = useState(new Set());
+  const [container] = useState(new Set());
   useEffect(() => {
-    setArr(defaultValue as any[])
+    (defaultValue as any[]).forEach(val => {
+      occurences.set(val, 1);
+    })
   }, [defaultValue]);  
   const typePointed = property.objectType;
   if (!typePointed) {
@@ -22,7 +25,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
     name: "",
     indexed: false,
     mapTo: "",
-    optional: false,
+    optional: property.optional,
   };
   console.log('innerProp', innerProp);
   const setRow = (val: any, index: number) => {
@@ -53,7 +56,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
   };
 
   const deleteRow = (index: number) => {
-    console.log('deleteRow', occurences);
+    // console.log('deleteRow', occurences);
     const prevValue = arr[index];
     if (prevValue !== null) {
       occurences.set(prevValue, (occurences.get(prevValue) || 0) - 1);
@@ -63,20 +66,18 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
       }
     }
     setArr(arr.filter((_, i) => i !== index));
-    console.log('deleteRow', occurences);
+    // console.log('deleteRow', occurences);
   };
 
   return (
     <Layout>
       {arr.map((value: any, index: number) => {
         const count = occurences.get(value) || 0;
-        console.log('index:', index, ' count is', count)
-        // const count = occurences.get(index) > 1;
+        // console.log('index:', index, ' count is', count)
         return (
           <Row key={index} style={{ backgroundColor: 'white' }}>
             <Col flex="auto">
             <TypeInput
-              // extraProps={{ style: { width: "calc(100% - 50px)" }, status: (count != undefined && count > 1 ? 'error' : '')}}
               property={innerProp}
               set={(val) => {
                 setRow(val, index);
@@ -84,6 +85,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
               }}
               defaultValue={value}
               extraProps={{style: { width: '100%' }, status: (count < 2 ? '' : 'error') }}
+              key={deleteOffset + index}
             ></TypeInput>
             </Col>
             <Col>
@@ -93,9 +95,8 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
               icon={<DeleteOutlined />}
               // remove ith element
               onClick={() => {
-                // console.log('before', arr)
+                setDeleteOffset(v => v + arr.length)
                 deleteRow(index);
-                // console.log('after', arr)
                 setReset((v) => v + arr.length + 2);
               }}
             />

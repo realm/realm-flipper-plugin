@@ -95,7 +95,11 @@ export const SetsSchema = {
     _id: 'uuid',
     intSet: 'int<>',
     setsSet: 'Sets<>',
-    decimalSet: 'decimal128<>',
+    // decimalSet: 'decimal128<>',
+    decimalSet: {
+      type: 'set',
+      objectType: 'decimal128',
+    },
     mixedSet: 'mixed<>',
     objectSet: 'AllTypes<>',
   },
@@ -153,6 +157,17 @@ export const Delivery = {
     houseNumber: 'string',
     parcel: 'Parcel',
     parcelService: 'ParcelService',
+
+export const OptionalContainers = {
+  name: 'OptionalContainers',
+  properties: {
+    list: 'int?[]',
+    listt: {
+      type: 'list',
+      objectType: 'int',
+      optional: true,
+    },
+    _id: 'uuid',
   },
   primaryKey: '_id',
 };

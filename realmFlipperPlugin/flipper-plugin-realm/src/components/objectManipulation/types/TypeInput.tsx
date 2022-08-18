@@ -1,7 +1,4 @@
-import moment from 'moment';
 import React from 'react';
-import uuid from 'react-native-uuid';
-import { SchemaProperty } from '../../CommonTypes';
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';
@@ -16,6 +13,7 @@ import { SetInput } from './SetInput';
 import { StringInput } from './StringInput';
 import { UUIDInput } from './UUIDInput';
 import { UUID, ObjectId } from 'bson';
+import { SchemaProperty } from '../../../CommonTypes';
 
 export type TypeInputProps = {
   property: SchemaProperty;
@@ -63,6 +61,7 @@ export const getDefault = (property: TypeDescription) => {
 };
 
 export const TypeInput = (props: TypeInputProps) => {
+  console.log('typeInput', props.property.name, props.defaultValue)
   switch (props.property.type) {
     case 'int':
     case 'float':
@@ -97,6 +96,5 @@ export const TypeInput = (props: TypeInputProps) => {
       props.property.objectType = props.property.type;
       props.property.type = 'object';
       return <ObjectInput {...props} />;
-      // return <>Input for {props.property.type} not implemented!</>;
   }
 };

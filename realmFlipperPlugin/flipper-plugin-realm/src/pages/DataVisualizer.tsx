@@ -7,7 +7,8 @@ import { DataTable } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
-import { TypeInput } from '../components/types/TypeInput';
+import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
+import { FieldEdit } from '../components/objectManipulation/FieldEdit';
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -31,13 +32,18 @@ export const DataVisualizer = ({
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
-  const [editingCell, setEditingCell] = useState<{
-    row: RealmObject;
-    schemaProperty: SchemaProperty;
-  }>();
 
-  const [editingState, setEditingState] = useState<RealmObject>();
-  const { removeObject, modifyObject, getOneObject } = usePlugin(plugin);
+  const [editingObject, setEditingObject] = useState<{
+    editing: boolean;
+    object?: unknown;
+    // schemaProperty?: SchemaProperty;
+    type?: 'field' | 'object';
+    fieldName?: string;
+  }>({
+    editing: false,
+  });
+
+  const { removeObject } = usePlugin(plugin);
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;
@@ -46,54 +52,38 @@ export const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
-  const onOk = () => {
-    // execute update
-    console.log('row: ', editingCell);
-    const pairs = Object.entries(editingCell.row).map(
-      (value: [string, unknown]) => {
-        return [value[0], value[1].value];
-      }
-    );
-    console.log(pairs);
-    const obj = new Object();
-    pairs.forEach((val) => {
-      if (val[1] != undefined) {
-        obj[val[0]] = val[1];
-      }
-    });
-    console.log('real obj:', obj);
-    obj[editingCell?.schemaProperty.name] = editingState;
-    modifyObject(obj);
-    onCancel();
-  };
-  const onCancel = () => {
-    setEditingCell(undefined);
-    setEditingState(undefined);
-  };
+
   // Return buttons + tableView
   return (
     <Layout.Container grow>
       <Layout.ScrollContainer>
         <Layout.Container>
-          <Modal
-            title={'Edit'}
-            visible={!!editingCell}
-            onOk={onOk}
-            onCancel={onCancel}
-            destroyOnClose
-          >
-            {editingCell ? (
-              <TypeInput
-                property={editingCell.schemaProperty}
-                defaultValue={editingState}
-                set={(val) => {
-                  console.log('set', val);
-                  setEditingState(val);
-                }}
-                extraProps={{ style: { width: '100%' } }}
-              ></TypeInput>
-            ) : null}
-          </Modal>
+          {editingObject.editing && editingObject.type === 'object' ? (
+            <ObjectEdit
+              schema={currentSchema}
+              initialObject={editingObject.object as RealmObject}
+              setVisible={(val: boolean) => {
+                setEditingObject((obj) => ({
+                  ...obj,
+                  editing: val,
+                }));
+              }}
+              visible={editingObject.editing}
+            ></ObjectEdit>
+          ) : editingObject.editing && editingObject.type === 'field' ? (
+            <FieldEdit
+              schema={currentSchema}
+              fieldName={editingObject.fieldName as string}
+              setVisible={(val: boolean) => {
+                setEditingObject((obj) => ({
+                  ...obj,
+                  editing: val,
+                }));
+              }}
+              visible={editingObject.editing}
+              value={editingObject.object}
+            />
+          ) : null}
           <TableView />
           <RealmDataInspector
             currentSchema={currentSchema}
@@ -119,26 +109,31 @@ export const DataVisualizer = ({
       removeObject(row);
     };
 
-    const editProperty = (row: RealmObject, schemaProperty: SchemaProperty) => {
-      // console.log('row is', row)
-      // console.log('value is', row[schemaProperty.name])
-      setEditingState(row[schemaProperty.name].value);
-      setEditingCell({
-        row,
-        schemaProperty,
+    const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
+      setEditingObject({
+        editing: true,
+        object: row[schemaProperty.name],
+        type: 'field',
+        fieldName: schemaProperty.name,
       });
     };
-
+    const editObject = (row: RealmObject) => {
+      setEditingObject({
+        editing: true,
+        object: row,
+        type: 'object',
+      });
+    };
     const dropDown = (
       row: RealmObject,
       schemaProperty: SchemaProperty,
       schema: SchemaObject
     ) => (
       <Menu>
-        <Menu.Item key={-1} onClick={() => editProperty(row, schemaProperty)}>
+        <Menu.Item key={-1} onClick={() => editField(row, schemaProperty)}>
           Edit property
         </Menu.Item>
-        <Menu.Item key={0} onClick={() => {}}>
+        <Menu.Item key={0} onClick={() => editObject(row)}>
           Edit object
         </Menu.Item>
         <Menu.Item key={1} onClick={() => deleteRow(row)}>

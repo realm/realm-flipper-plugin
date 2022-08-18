@@ -37,7 +37,7 @@ type PropertyType = {
 };
 
 export const schemaObjToColumns = (schema: SchemaObject) => {
-  return Object.keys(schema.properties).map((key) => {
+  return schema.order.map((key) => {
     const obj = schema.properties[key];
     const isPrimaryKey = obj.name === schema.primaryKey;
     return {
@@ -152,6 +152,8 @@ PropertyType) => {
   });
 
   const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {

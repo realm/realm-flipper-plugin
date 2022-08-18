@@ -53,13 +53,13 @@ import {createParcelTestData} from './TestData/parcelExample';
 // Open a Realm
 const realm = new Realm({
   schema: [
-    // TaskSchema,
-    // BananaSchema,
-    // MaybeSchema,
-    // AllTypesSchema,
-    // NoPrimaryKey,
-    // DictSchema,
-    // SetsSchema,
+    TaskSchema,
+    BananaSchema,
+    MaybeSchema,
+    AllTypesSchema,
+    NoPrimaryKey,
+    DictSchema,
+    SetsSchema,
     Parcel,
     ParcelService,
     Delivery,
@@ -88,7 +88,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 290,
+      _id: Math.floor(Math.random()*10000000),
       name: 'Jack',
       color: 'yellow',
       length: 40,
@@ -101,7 +101,7 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objects('Banana').sorted('_id')[0]);
+    realm.delete(realm.objectForPrimaryKey('Banana', 320));
   });
 }
 

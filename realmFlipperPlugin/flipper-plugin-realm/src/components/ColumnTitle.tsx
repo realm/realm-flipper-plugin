@@ -20,14 +20,8 @@ export const ColumnTitle = ({
 
   switch (propertyType) {
     case 'list':
-      title = objectType + '[]';
-      break;
     case 'set':
-      title = objectType + '<>';
-      break;
     case 'dictionary':
-      title = objectType + '{}';
-      break;
     case 'object':
       title = objectType;
       break;
@@ -35,7 +29,21 @@ export const ColumnTitle = ({
       title = propertyType;
   }
 
-  isOptional ? (title = title + '?') : null;
+  if (isOptional) {
+    title += '?';
+  }
+
+  switch (propertyType) {
+    case 'list':
+      title += '[]';
+      break;
+    case 'set':
+      title += '<>';
+      break;
+    case 'dictionary':
+      title += '{}';
+      break;
+  }
 
   return isPrimaryKey ? (
     <div>
