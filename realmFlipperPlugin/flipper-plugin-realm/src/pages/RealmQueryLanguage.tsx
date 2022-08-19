@@ -131,7 +131,6 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
             objects={queryResult}
             schemas={state.schemas}
             currentSchema={schema}
-            generateMenuItems={renderOptions ? renderOptions : () => <></>}
             // rowSelection={rowSelection}
           />
         </Layout.ScrollContainer>

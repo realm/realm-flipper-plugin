@@ -28,7 +28,7 @@ type PropertyType = {
   currentSchema: SchemaObject;
   loading: boolean;
   sortingColumn: string | null;
-  generateMenuItems: MenuItemGenerator;
+  generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
 };
 
@@ -99,14 +99,9 @@ PropertyType) => {
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
       const defaultCell = (
-        // <Dropdown
-        //   overlay={renderOptions(row, property, currentSchema)}
-        //   trigger={[`contextMenu`]}
-        // >
         <Tooltip placement="topLeft" title={JSON.stringify(value)}>
           {parsePropToCell(value, property, currentSchema, schemas)}
         </Tooltip>
-        // </Dropdown>
       );
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
@@ -152,7 +147,7 @@ PropertyType) => {
       property,
       render,
       onCell: (object: RealmObject) => {
-        return {
+        if (generateMenuItems) {return {
           onContextMenu: (env: Event) => {
             console.log(env);
             env.preventDefault();
@@ -169,7 +164,7 @@ PropertyType) => {
               y: env.clientY - 190,
             });
           },
-        };
+        };}
       },
     };
   });
