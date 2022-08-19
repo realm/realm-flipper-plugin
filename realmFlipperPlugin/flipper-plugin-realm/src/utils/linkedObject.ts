@@ -18,7 +18,7 @@ export const isPropertyLinked = (property: SchemaProperty) => {
   ]);
 
   return (
-    property.type === 'object' &&
+    property.objectType &&
     !primitiveTypes.has(property.objectType as string)
   );
 };
