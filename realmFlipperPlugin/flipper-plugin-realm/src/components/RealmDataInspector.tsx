@@ -8,7 +8,7 @@ import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
 import React from 'react';
 import { RealmObject, SchemaObject } from '../CommonTypes';
-import { BoldSpan } from '../components/RealmSchemaSelect';
+import { BoldSpan } from './SchemaSelect';
 
 type PropertyType = {
   currentSchema: SchemaObject;

@@ -21,14 +21,13 @@ import {
   SchemaObject,
 } from './CommonTypes';
 import PaginationActionGroup from './components/PaginationActionGroup';
-import RealmSchemaSelect from './components/RealmSchemaSelect';
-import SchemaHistoryActions from './components/SchemaHistoryActions';
-import ViewModeTabs from './components/ViewModeTabs';
 import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
 import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
+import { CommonHeader } from './components/common/CommonHeader';
+import SchemaSelect from './components/SchemaSelect';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -39,7 +38,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     objects: [],
     schemas: [],
     schemaHistory: [],
-    schemaHistoryIndex: 1,
+    schemaHistoryIndex: 0,
     cursorId: null,
     filterCursor: 0,
     selectedPageSize: 100,
@@ -55,7 +54,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
-    pluginState.set({ ...state, realms: data.realms, selectedRealm: data.realms[0] });
+    pluginState.set({
+      ...state,
+      realms: data.realms,
+      selectedRealm: data.realms[0],
+    });
     getSchemas(data.realms[0]);
 
     // client.send('getSchemas', { realm: });
@@ -115,7 +118,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
     const state = pluginState.get();
     // load first schema nad objects
-    pluginState.set({ ...state, schemas: newSchemas, currentSchema: newSchemas[0] });
+    pluginState.set({
+      ...state,
+      schemas: newSchemas,
+      // currentSchema: newSchemas[0],
+    });
+
+    updateSelectedSchema(newSchemas[0]);
     getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
@@ -372,15 +381,25 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: state.currentSchema?.name,
       object: object,
     });
+    // getObjects(state.currentSchema.name, state.selectedRealm);
   };
 
   const updateSelectedSchema = (schema: SchemaObject) => {
     const state = pluginState.get();
+
+    // target schema is already selected
+    if (state.currentSchema?.name === schema.name) {
+      return;
+    }
+
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
+
     newHistory.splice(index + 1);
     newHistory.push(schema);
+
     const length = newHistory.length - 1;
+
     pluginState.set({
       ...state,
       schemaHistory: [...newHistory],
@@ -448,7 +467,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onConnect(() => {
     getRealms();
-
   });
 
   const modifyObject = (newObject: Record<string, unknown>) => {
@@ -565,10 +583,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
-  client.onConnect(() => {
-    getRealms();
-  });
-
   return {
     state: pluginState,
     getObjects,
@@ -608,31 +622,41 @@ export function Component() {
   >('data');
   return (
     <Layout.Container grow>
-      <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
-      <SchemaHistoryActions />
-      <RealmSchemaSelect schemas={schemas} realms={realms} />
+      <CommonHeader
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        realms={realms}
+      />
       {viewMode === 'data' ? (
-        <Layout.Container height={800}>
-          <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
-            {objects.length > 20 ? <PaginationActionGroup /> : null}
-            {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
-          </Layout.Horizontal>
-          <DataVisualizer
-            objects={objects}
-            schemas={schemas}
-            loading={loading}
-            currentSchema={currentSchema}
-            sortDirection={sortDirection}
-            sortingColumn={sortingColumn}
-          />
-          <PaginationActionGroup />
-        </Layout.Container>
+        <>
+          <SchemaSelect schemas={schemas} />
+          <Layout.Container height={800}>
+            <Layout.Horizontal
+              style={{ alignItems: 'center', display: 'flex' }}
+            >
+              {objects.length > 20 ? <PaginationActionGroup /> : null}
+              {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
+            </Layout.Horizontal>
+            <DataVisualizer
+              objects={objects}
+              schemas={schemas}
+              loading={loading}
+              currentSchema={currentSchema}
+              sortDirection={sortDirection}
+              sortingColumn={sortingColumn}
+            />
+            <PaginationActionGroup />
+          </Layout.Container>
+        </>
       ) : null}
       {viewMode === 'schemas' ? (
-        <SchemaVisualizer
-          schemas={schemas}
-          currentSchema={currentSchema}
-        ></SchemaVisualizer>
+        <>
+          <SchemaSelect schemas={schemas} />
+          <SchemaVisualizer
+            schemas={schemas}
+            currentSchema={currentSchema}
+          ></SchemaVisualizer>
+        </>
       ) : null}
       {viewMode === 'RQL' ? (
         <RealmQueryLanguage schema={currentSchema} />

@@ -160,6 +160,7 @@ export const Delivery = {
   },
   primaryKey: '_id',
 };
+
 export const OptionalContainers = {
   name: 'OptionalContainers',
   properties: {
@@ -170,6 +171,15 @@ export const OptionalContainers = {
       optional: true,
     },
     _id: 'uuid',
+  },
+  primaryKey: '_id',
+};
+
+export const DataSchema = {
+  name: 'DataSchema',
+  properties: {
+    _id: 'uuid',
+    keyName: 'data',
   },
   primaryKey: '_id',
 };

@@ -13,6 +13,15 @@ export function createAllTypesTestData(realm: Realm) {
   for (let i = 0; i < 6; i++) {
     view[i] = i;
   }
+
+  let data1 = {
+    _id: new UUID(),
+    keyName: view,
+  };
+  realm.write(() => {
+    realm.create('DataSchema', data1);
+  })
+
   let AllTypes1 = {
     _id: uuid,
     bool: true,
@@ -66,7 +75,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
@@ -144,7 +153,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
@@ -204,7 +213,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    mixed: realm.objectForPrimaryKey('AllTypes', uuid2),
     uuid: new UUID(),
   };
   realm.write(() => {

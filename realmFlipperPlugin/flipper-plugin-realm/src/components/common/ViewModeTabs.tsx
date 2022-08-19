@@ -13,7 +13,6 @@ const ViewModeTabs = (props: {
   viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph';
 }) => {
   return (
-    <Toolbar position="top">
       <Radio.Group value={props.viewMode}>
         <Radio.Button value="data" onClick={() => props.setViewMode('data')}>
           <TableOutlined style={{ marginRight: 5 }} />
@@ -32,10 +31,9 @@ const ViewModeTabs = (props: {
         </Radio.Button>
         <Radio.Button onClick={() => props.setViewMode('schemaGraph')} value="schemaGraph">
         <RadarChartOutlined style={{ marginRight: 5 }}/>
-          <Typography.Text>Schemas Graph</Typography.Text>
+          <Typography.Text>Schemas graph</Typography.Text>
         </Radio.Button>
       </Radio.Group>
-    </Toolbar>
   );
 };
 

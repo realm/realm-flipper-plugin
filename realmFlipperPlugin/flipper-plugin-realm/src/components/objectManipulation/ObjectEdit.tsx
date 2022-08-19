@@ -18,7 +18,7 @@ export const ObjectEdit = ({
   setVisible,
   visible,
 }: InputType) => {
-  const [value] = useState(initialObject);
+  const [value, setValue] = useState(initialObject);
   const { modifyObject } = usePlugin(plugin);
 
   const onOk = () => {
@@ -40,7 +40,8 @@ export const ObjectEdit = ({
     >
       <PropertiesModify
         schema={schema}
-        initialObject={value}
+        value={value}
+        setValue={setValue}
       ></PropertiesModify>
     </Modal>
   );

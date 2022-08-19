@@ -1,4 +1,4 @@
-import { ClearOutlined } from '@ant-design/icons';
+import { ClearOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Input, Row } from 'antd';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
@@ -48,8 +48,8 @@ export const UUIDInput = ({
             set(newVal);
             setReset((v) => v + 1);
           }}
+          icon={<ReloadOutlined />}
         >
-          refresh
         </Button>
         {property.optional ? (
           <Button
