@@ -1,26 +1,20 @@
 import { Table, Typography } from 'antd';
-import {
-  DataTableColumn,
-  Layout,
-  useMemoize,
-  usePlugin,
-} from 'flipper-plugin';
+import { Layout, useMemoize, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../index';
 import { SchemaProperty, SchemaObject } from '../CommonTypes';
 import { isPropertyLinked } from '../utils/linkedObject';
 import { BooleanValue } from '../components/BooleanValue';
-import {RealmObject} from '../CommonTypes';
-import { ColumnType } from 'antd/lib/table';
+import { RealmObject } from '../CommonTypes';
+
 const { Text } = Typography;
 const { Link } = Typography;
 
-export function createRows(
+const createRows = (
   properties: { [key: string]: SchemaProperty },
   primaryKey: string
-): RealmObject[] {
+): RealmObject[] => {
   const newRows: RealmObject[] = [];
-  console.log('properties', properties);
   Object.values(properties).forEach((value: SchemaProperty, index: number) => {
     newRows.push({
       ...value,
@@ -30,16 +24,16 @@ export function createRows(
   });
 
   return newRows;
-}
-const SchemaVisualizer = (props: {
+};
+
+type InputType = {
   schemas: Array<SchemaObject>;
   currentSchema: SchemaObject | null;
-}) => {
-  const { schemas, currentSchema } = props;
-  console.log('SchemaVisualizerCurrentSchema', currentSchema);
+};
 
+const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   if (!currentSchema) {
-    return <div>Please select a schema.</div>;
+    return <div> Please select a schema.</div>;
   }
 
   if (!schemas || !schemas.length) {
@@ -47,33 +41,40 @@ const SchemaVisualizer = (props: {
   }
   const instance = usePlugin(plugin);
 
-    const onSchemaSelected = (selectedSchema: SchemaObject) => {
-      instance.getObjects();
-      instance.updateSelectedSchema(selectedSchema);
-    };
+  const onSchemaSelected = (selectedSchema: SchemaObject) => {
+    // instance.getObjects();
+    instance.updateSelectedSchema(selectedSchema);
+  };
+  
 
   function createColumnConfig(columns: string[]) {
-    const columnObjs: ColumnType<RealmObject>[] = columns.map(
-      (col) => ({
-        key: col,
-        title: col,
-        dataIndex: col,
-        onFilter: (value: string, record: any) => record[col].startsWith(value),
-        render: (text: string, record: unknown) =>
-          renderTableCells(text, typeof text, col, record),
-        filterSearch: true,
-      })
-    );
+    const columnObjs = columns.map((columnName) => ({
+      key: columnName,
+      title: columnName,
+      dataIndex: columnName,
+      // onFilter: (value: string, record: any) => record[col].startsWith(value),
+      render: (cellContent: string, record: SchemaProperty) =>
+        renderTableCells(cellContent, typeof cellContent, columnName, record),
+      // filterSearch: true,
+    }));
+  
     return columnObjs;
   }
-  function renderTableCells(
+  
+  const renderTableCells = (
     value: unknown,
     type: string,
     column: string,
-    record: any,
-  ) {
+    record: SchemaProperty
+  ) => {
+    console.log('rendering, ', value, type, column, record)
     if (column === 'objectType' && isPropertyLinked(record)) {
-      return <Link onClick={() => onSchemaSelected(value as SchemaObject)}>{value}</Link>;
+      const targetSchema = schemas.find(schema => schema.name === record.objectType);
+      return (
+        <Link onClick={() => onSchemaSelected(targetSchema as SchemaObject)}>
+          {value}
+        </Link>
+      );
     }
     switch (type) {
       case 'boolean':

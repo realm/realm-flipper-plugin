@@ -385,13 +385,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const updateSelectedSchema = (schema: SchemaObject) => {
-    console.log('updateSelectedSchema', schema)
     const state = pluginState.get();
+
+    // target schema is already selected
+    if (state.currentSchema?.name === schema.name) {
+      return;
+    }
+
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
+
     newHistory.splice(index + 1);
     newHistory.push(schema);
+
     const length = newHistory.length - 1;
+
     pluginState.set({
       ...state,
       schemaHistory: [...newHistory],
