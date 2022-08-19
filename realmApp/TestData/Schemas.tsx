@@ -174,3 +174,12 @@ export const OptionalContainers = {
   },
   primaryKey: '_id',
 };
+
+export const DataSchema = {
+  name: 'DataSchema',
+  properties: {
+    _id: 'uuid',
+    keyName: 'data',
+  },
+  primaryKey: '_id',
+};

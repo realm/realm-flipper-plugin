@@ -10,15 +10,23 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [chosenType, setChosenType] = useState('string');
+  const [chosenType, setChosenType] = useState(
+    // stores type or objectType if it's an object
+    defaultValue === null ? 'string' : defaultValue?.type,
+  );
+
   const [value, setValue] = useState<unknown | undefined>(
-    defaultValue === null ? undefined : defaultValue
+    defaultValue === null ? undefined : defaultValue?.value
   );
   const { state } = usePlugin(plugin);
   const { schemas } = useValue(state);
 
   const addObject = () => {
-    set(value);
+    set({
+      type: chosenType,
+      value
+    });
+    
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -47,7 +55,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
   };
 
   const renderChosen = () => {
-    console.log('renderChosen', value);
+    // console.log('renderChosen', value);
     const objectType = schemas.find(schema => schema.name === chosenType);
     let type;
     if (objectType) {
@@ -88,7 +96,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
       'string',
       'data',
       'date',
-    ];
+    ].reverse();
 
     return (
       <Layout>

@@ -5,8 +5,9 @@ import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { ReactElement, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { parsePropToCell } from '../utils/Parser';
+// import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
+import { renderValue } from '../utils/Renderer';
 
 export type ColumnType = {
   optional: boolean;
@@ -84,7 +85,7 @@ type) => {
           trigger={[`contextMenu`]}
         >
           <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-            {parsePropToCell(value, property, currentSchema, schemas)}
+            {renderValue(schemas, value, property)}
           </Tooltip>
         </Dropdown>
       );
