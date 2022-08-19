@@ -82,7 +82,6 @@ PropertyType) => {
 
   useEffect(() => {
     const closeDropdown = () => {
-      console.log('closeDropdown', closeDropdown);
       setdropdownProp({ ...dropdownProp, visible: false });
     };
     document.body.addEventListener('click', closeDropdown);

@@ -34,37 +34,6 @@ export const DataVisualizer = ({
   const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
   const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
 
-  const DataTableRef = createRef();
-  console.log('DataVisualizerRef', DataTableRef);
-
-  // const x = DataTableRef.current.offsetLeft;
-  // const y = DataTableRef.current.offsetTop;
-
-  //  // X
-  //  const [x, setX] = useState();
-
-  //  // Y
-  //  const [y, setY] = useState();
-
-  //  // This function calculate X and Y
-  //  const getPosition = () => {
-  //    const x = DataVisualizerRef.current.offsetLeft;
-  //    setX(x);
-
-  //    const y = DataVisualizerRef.current.offsetTop;
-  //    setY(y);
-  //  };
-
-  //  // Get the position of the red box in the beginning
-  //  useEffect(() => {
-  //    getPosition();
-  //  }, []);
-
-  //  // Re-calculate X and Y of the red box when the window is resized by the user
-  //  useEffect(() => {
-  //    window.addEventListener("resize", getPosition);
-  //  }, []);
-
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
     object?: unknown;
@@ -217,7 +186,6 @@ export const DataVisualizer = ({
           loading={loading}
           generateMenuItems={generateMenuItems}
           getOneObject={getOneObject}
-          ref={DataTableRef}
         />
       </Layout.Container>
     );
