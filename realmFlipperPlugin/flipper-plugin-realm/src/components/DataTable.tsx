@@ -252,11 +252,16 @@ PropertyType) => {
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
+    console.log("ON CHANGE",pagination, filters, sorter, extra);
     //TODO: make type of a field
     if (extra.action === 'sort') {
       if (state.sortingColumn !== sorter.field) {
+
         instance.setSortingDirection('ascend');
-        instance.setSortingColumn(sorter.field);
+        instance.setSortingColumnAndType(
+          sorter.field,
+          state.currentSchema?.properties[sorter.field].type
+        );
       } else {
         instance.toggleSortDirection();
       }
