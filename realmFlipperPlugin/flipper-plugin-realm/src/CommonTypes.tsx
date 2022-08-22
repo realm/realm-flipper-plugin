@@ -15,9 +15,9 @@ export type RealmPluginState = {
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
-  loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
+  hasMore: boolean;
   prev_page_filterCursor: number | null;
 };
 const typeList = [
@@ -87,6 +87,7 @@ export type ObjectsMessage = {
   total: number;
   next_cursor: { [sortingField: string]: number };
   prev_cursor: { [sortingField: string]: number };
+  hasMore: boolean;
 };
 export type ObjectMessage = {
   object: RealmObject;

@@ -1,18 +1,19 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
-import { Layout, usePlugin, useValue } from 'flipper-plugin';
+import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
+import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import {
   CustomDropdown,
   DropdownPropertyType,
-  MenuItemGenerator,
+  MenuItemGenerator
 } from './CustomDropdown';
-import { renderValue } from '../utils/Renderer';
+import InfiniteScroll from 'react-infinite-scroller';
 
 export type ColumnType = {
   optional: boolean;
@@ -27,7 +28,7 @@ type PropertyType = {
   objects: RealmObject[];
   schemas: SchemaObject[];
   currentSchema: SchemaObject;
-  loading: boolean;
+  sortDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
@@ -53,13 +54,16 @@ export const DataTable = ({
   objects,
   schemas,
   currentSchema,
-  loading,
   generateMenuItems,
   style,
 }: // rowSelection
 PropertyType) => {
+
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
+
+  const [loading, setLoading] = useState(true);
+    const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
@@ -169,26 +173,10 @@ PropertyType) => {
           };
         }
       },
+      sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
+      sortOrder: state.sortingColumn === property.name ? state.sortDirection : null,
     };
   });
-
-  //TODO: Fix unused properties.
-  const handleOnChange = (
-    sorter: SorterResult<any> | SorterResult<any>[],
-    extra: any
-  ) => {
-    //TODO: make type of a field
-    if (extra.action === 'sort') {
-      if (state.sortingColumn !== sorter.field) {
-        instance.setSortingDirection('ascend');
-        instance.setSortingColumn(sorter.field);
-      } else {
-        instance.toggleSortDirection();
-      }
-    }
-    instance.getObjects();
-    instance.setCurrentPage(1);
-  };
 
   const expandRow = (
     rowToExpandKey: any,
@@ -219,7 +207,6 @@ PropertyType) => {
               objects={[objectToRender]}
               schemas={schemas}
               currentSchema={linkedSchema}
-              loading={false}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
             />
@@ -238,7 +225,6 @@ PropertyType) => {
               objects={[objectToRender]}
               schemas={schemas}
               currentSchema={linkedSchema}
-              loading={false}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
             />
@@ -249,25 +235,79 @@ PropertyType) => {
     }
   };
 
+  const handleInfiniteOnLoad = () => {
+    console.log("more")
+    setLoading(true);
+    if (state.objects.length >= state.totalObjects) {
+      message.warning('Infinite List loaded all');
+      return;
+    }
+    instance.getObjects();
+    console.log("objects in state", state.objects)
+  };
+
+  const handleOnChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, Key[] | null>,
+    sorter: SorterResult<any> | SorterResult<any>[],
+    extra: any
+  ) => {
+    //TODO: make type of a field
+    if (extra.action === 'sort') {
+      if (state.sortingColumn !== sorter.field) {
+        instance.setSortingDirection('ascend');
+        instance.setSortingColumn(sorter.field);
+      } else {
+        instance.toggleSortDirection();
+      }
+    }
+    instance.getObjects();
+    instance.setCurrentPage(1);
+  };
   // TODO: think about key as a property in the Realm DB
   return (
-    <div>
-      <Table
-        bordered={true}
-        dataSource={objects}
-        rowKey={(record) => {
-          return record[currentSchema.primaryKey];
-        }}
-        expandable={rowExpansionProp}
-        columns={filledColumns}
-        onChange={handleOnChange}
-        pagination={false}
-        loading={loading}
-        size="small"
-        tableLayout="auto"
-        style={style}
-      />
-
+    <div
+      style={{
+        overflow: 'auto',
+        height: '100%',
+        width: '100%',
+        textAlign: 'center',
+      }}
+    >
+      <InfiniteScroll
+        initialLoad={false}
+        pageStart={0}
+        loadMore={handleInfiniteOnLoad}
+        hasMore={state.hasMore}
+        useWindow={false}
+        loader={
+          <div
+            style={{
+              marginTop: '25px',
+              marginBottom: '25px',
+              display: 'inline-block',
+            }}
+            key={0}
+          >
+            <Spinner size={30}></Spinner>
+          </div>
+        }
+      >
+        <Table
+          bordered={true}
+          dataSource={objects}
+          rowKey={(record) => {
+            return record[currentSchema.primaryKey];
+          }}
+          expandable={rowExpansionProp}
+          columns={filledColumns}
+          onChange={handleOnChange}
+          pagination={false}
+          scroll={{ scrollToFirstRowOnChange: false }}
+          tableLayout="auto"
+          style={style}
+        />
+      </InfiniteScroll>
       <CustomDropdown {...dropdownProp} />
     </div>
   );
@@ -290,7 +330,6 @@ const NestedTable = ({
   objects,
   schemas,
   currentSchema,
-  loading,
   sortingColumn,
   generateMenuItems,
 }: PropertyType) => {
@@ -300,7 +339,6 @@ const NestedTable = ({
       objects={objects}
       schemas={schemas}
       currentSchema={currentSchema}
-      loading={loading}
       sortingColumn={sortingColumn}
       generateMenuItems={generateMenuItems}
       style={{

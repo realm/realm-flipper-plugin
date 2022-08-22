@@ -280,8 +280,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
-            next_cursor: lastItem,
-            prev_cursor: firstItem,
+            hasMore: objects.length >= limit,
           });
         });
 
@@ -456,6 +455,7 @@ export default React.memo((props: {realms: Realm[]}) => {
               connection.send('liveObjectDeleted', {
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -466,6 +466,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: inserted,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -476,6 +477,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: modified,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
         };

@@ -1,31 +1,27 @@
-import React from 'react';
 import { Alert } from 'antd';
-import { Layout } from 'flipper-plugin';
-import { useState } from 'react';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { DataTable, schemaObjToColumns } from '../components/DataTable';
-import { RealmDataInspector } from '../components/RealmDataInspector';
+import { Layout, usePlugin } from 'flipper-plugin';
+import React, { useState } from 'react';
 import { plugin } from '..';
-import { usePlugin } from 'flipper-plugin';
-import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
-import { FieldEdit } from '../components/objectManipulation/FieldEdit';
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { MenuItemGenerator } from '../components/CustomDropdown';
+import { DataTable, schemaObjToColumns } from '../components/DataTable';
+import { FieldEdit } from '../components/objectManipulation/FieldEdit';
+import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
+import { RealmDataInspector } from '../components/RealmDataInspector';
 
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
   currentSchema: SchemaObject | null;
   sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
   sortingColumn: string | null;
 };
 
-export const DataVisualizer = ({
+const DataVisualizer = ({
   objects,
   schemas,
   currentSchema,
   sortDirection,
-  loading,
   sortingColumn,
 }: PropertyType) => {
   const [inspectData, setInspectData] = useState<RealmObject>();
@@ -55,129 +51,120 @@ export const DataVisualizer = ({
     return <div>No schemas found. Check selected Realm.</div>;
   }
 
+  const deleteRow = (row: RealmObject) => {
+    removeObject(row);
+  };
+
+  const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
+    setEditingObject({
+      editing: true,
+      object: row[schemaProperty.name],
+      type: 'field',
+      fieldName: schemaProperty.name,
+    });
+  };
+  const editObject = (row: RealmObject) => {
+    setEditingObject({
+      editing: true,
+      object: row,
+      type: 'object',
+    });
+  };
+
+  // Generate MenuItem objects for the context menu with all necessary data and functions.
+  const generateMenuItems: MenuItemGenerator = (
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => [
+    {
+      key: 1,
+      text: 'Inspect Object',
+      onClick: () => {
+        const object = {};
+        Object.keys(row).forEach((key) => {
+          object[key] = row[key];
+        });
+        setInspectorView('Inspector - Realm Object');
+        setNewInspectData({ [schema.name]: object });
+        showSidebar ? null : setShowSidebar(true);
+      },
+    },
+    {
+      key: 2,
+      text: 'Inspect Property',
+      onClick: () => {
+        setNewInspectData({
+          [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+        });
+        setInspectorView('Inspector - Realm Object Property');
+        showSidebar ? null : setShowSidebar(true);
+      },
+    },
+    {
+      key: 3,
+      text: 'Edit Object',
+      onClick: () => editObject(row),
+    },
+    {
+      key: 4,
+      text: 'Edit Property',
+      onClick: () => editField(row, schemaProperty),
+    },
+    {
+      key: 5,
+      text: 'Delete Object',
+      onClick: () => deleteRow(row),
+    },
+  ];
+
+  const columns = schemaObjToColumns(currentSchema);
+
   const errorMsg = state.get().errorMsg;
   return (
-    <Layout.Container grow>
-      {errorMsg ? <Alert message={errorMsg} type="error" closable onClose={() => { clearError() }}></Alert> : null}
-      <Layout.ScrollContainer>
-        <Layout.Container>
-          {editingObject.editing && editingObject.type === 'object' ? (
-            <ObjectEdit
-              schema={currentSchema}
-              initialObject={editingObject.object as RealmObject}
-              setVisible={(val: boolean) => {
-                setEditingObject((obj) => ({
-                  ...obj,
-                  editing: val,
-                }));
-              }}
-              visible={editingObject.editing}
-            ></ObjectEdit>
-          ) : editingObject.editing && editingObject.type === 'field' ? (
-            <FieldEdit
-              schema={currentSchema}
-              fieldName={editingObject.fieldName as string}
-              setVisible={(val: boolean) => {
-                setEditingObject((obj) => ({
-                  ...obj,
-                  editing: val,
-                }));
-              }}
-              visible={editingObject.editing}
-              value={editingObject.object}
-            />
-          ) : null}
-          <TableView />
-          <RealmDataInspector
-            currentSchema={currentSchema}
-            schemas={schemas}
-            inspectData={inspectData}
-            setInspectData={setInspectData}
-            showSidebar={showSidebar}
-            setShowSidebar={setShowSidebar}
-            goBackStack={goBackStack}
-            setGoBackStack={setGoBackStack}
-            goForwardStack={goForwardStack}
-            setGoForwardStack={setGoForwardStack}
-            setNewInspectData={setNewInspectData}
-            view={inspectorView}
+    <>
+      {errorMsg ? (
+        <Alert
+          message={errorMsg}
+          type="error"
+          closable
+          onClose={() => {
+            clearError();
+          }}
+        ></Alert>
+      ) : null}
+      <div
+        style={{
+          overflow: 'auto',
+          height: '100%',
+        }}
+      >
+        {editingObject.editing && editingObject.type === 'object' ? (
+          <ObjectEdit
+            schema={currentSchema}
+            initialObject={editingObject.object as RealmObject}
+            setVisible={(val: boolean) => {
+              setEditingObject((obj) => ({
+                ...obj,
+                editing: val,
+              }));
+            }}
+            visible={editingObject.editing}
+          ></ObjectEdit>
+        ) : editingObject.editing && editingObject.type === 'field' ? (
+          <FieldEdit
+            schema={currentSchema}
+            fieldName={editingObject.fieldName as string}
+            setVisible={(val: boolean) => {
+              setEditingObject((obj) => ({
+                ...obj,
+                editing: val,
+              }));
+            }}
+            visible={editingObject.editing}
+            value={editingObject.object}
           />
-        </Layout.Container>
-      </Layout.ScrollContainer>
-    </Layout.Container>
-  );
-
-  function TableView() {
-    const deleteRow = (row: RealmObject) => {
-      removeObject(row);
-    };
-
-    const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
-      setEditingObject({
-        editing: true,
-        object: row[schemaProperty.name],
-        type: 'field',
-        fieldName: schemaProperty.name,
-      });
-    };
-    const editObject = (row: RealmObject) => {
-      setEditingObject({
-        editing: true,
-        object: row,
-        type: 'object',
-      });
-    };
-
-    // Generate MenuItem objects for the context menu with all necessary data and functions.
-    const generateMenuItems: MenuItemGenerator = (
-      row: RealmObject,
-      schemaProperty: SchemaProperty,
-      schema: SchemaObject
-    ) => [
-      {
-        key: 1,
-        text: 'Inspect Object',
-        onClick: () => {
-          const object = {};
-          Object.keys(row).forEach((key) => {
-            object[key] = row[key];
-          });
-          setInspectorView('Inspector - Realm Object');
-          setNewInspectData({ [schema.name]: object });
-          showSidebar ? null : setShowSidebar(true);
-        },
-      },
-      {
-        key: 2,
-        text: 'Inspect Property',
-        onClick: () => {
-          setNewInspectData({
-            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
-          });
-          setInspectorView('Inspector - Realm Object Property');
-          showSidebar ? null : setShowSidebar(true);
-        },
-      },
-      {
-        key: 3,
-        text: 'Edit Object',
-        onClick: () => editObject(row),
-      },
-      {
-        key: 4,
-        text: 'Edit Property',
-        onClick: () => editField(row, schemaProperty),
-      },
-      {
-        key: 5,
-        text: 'Delete Object',
-        onClick: () => deleteRow(row),
-      },
-    ];
-
-    const columns = schemaObjToColumns(currentSchema);
-    return (
-      <Layout.Container height={800}>
+        ) : null}
         <DataTable
           columns={columns}
           objects={objects}
@@ -185,14 +172,26 @@ export const DataVisualizer = ({
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
           currentSchema={currentSchema}
-          loading={loading}
           generateMenuItems={generateMenuItems}
           getOneObject={getOneObject}
         />
-      </Layout.Container>
-    );
-  }
-
+        <RealmDataInspector
+          currentSchema={currentSchema}
+          schemas={schemas}
+          inspectData={inspectData}
+          setInspectData={setInspectData}
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          goBackStack={goBackStack}
+          setGoBackStack={setGoBackStack}
+          goForwardStack={goForwardStack}
+          setGoForwardStack={setGoForwardStack}
+          setNewInspectData={setNewInspectData}
+          view={inspectorView}
+        />
+      </div>
+    </>
+  );
   // update inspectData and push object to GoBackStack
   function setNewInspectData(newInspectData: RealmObject) {
     if (inspectData !== undefined) {
@@ -217,3 +216,5 @@ export const DataVisualizer = ({
 //     };
 //   });
 // };
+
+export default DataVisualizer;
