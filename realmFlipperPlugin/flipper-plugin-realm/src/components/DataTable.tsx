@@ -1,12 +1,17 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Table, Tooltip } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { ReactElement, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
+import {
+  CustomDropdown,
+  DropdownPropertyType,
+  MenuItemGenerator,
+} from './CustomDropdown';
 import { renderValue } from '../utils/Renderer';
 
 export type ColumnType = {
@@ -17,18 +22,14 @@ export type ColumnType = {
   isPrimaryKey: boolean;
 };
 
-type type = {
+type PropertyType = {
   columns: ColumnType[];
   objects: RealmObject[];
   schemas: SchemaObject[];
   currentSchema: SchemaObject;
   loading: boolean;
   sortingColumn: string | null;
-  renderOptions: (
-    row: RealmObject,
-    schemaProperty: SchemaProperty,
-    schema: SchemaObject
-  ) => ReactElement;
+  generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
 };
 
@@ -53,10 +54,10 @@ export const DataTable = ({
   schemas,
   currentSchema,
   loading,
-  renderOptions,
+  generateMenuItems,
   style,
 }: // rowSelection
-type) => {
+PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
@@ -69,6 +70,25 @@ type) => {
     showExpandColumn: false,
   });
 
+  // Utilities for opening and closing the context menu.
+  const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
+    generateMenuItems,
+    record: {},
+    schemaProperty: null,
+    currentSchema: currentSchema,
+    visible: false,
+    x: 100,
+    y: 100,
+  });
+
+  useEffect(() => {
+    const closeDropdown = () => {
+      setdropdownProp({ ...dropdownProp, visible: false });
+    };
+    document.body.addEventListener('click', closeDropdown);
+    return () => document.body.removeEventListener('click', closeDropdown);
+  }, []);
+
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
@@ -80,14 +100,9 @@ type) => {
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
       const defaultCell = (
-        <Dropdown
-          overlay={renderOptions(row, property, currentSchema)}
-          trigger={[`contextMenu`]}
-        >
-          <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-            {renderValue(value, property, schemas)}
-          </Tooltip>
-        </Dropdown>
+        <Tooltip placement="topLeft" title={JSON.stringify(value)}>
+          {renderValue(value, property, schemas)}{' '}
+        </Tooltip>
       );
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
@@ -132,13 +147,33 @@ type) => {
       },
       property,
       render,
+      onCell: (object: RealmObject) => {
+        if (generateMenuItems) {
+          return {
+            onContextMenu: (env: Event) => {
+              console.log(env);
+              env.preventDefault();
+              setdropdownProp({
+                ...dropdownProp,
+                record: object,
+                schemaProperty: property,
+                currentSchema: currentSchema,
+                visible: true,
+                // TODO: Fix this ugly hardcoded offset
+                //@ts-ignore
+                x: env.clientX - 290,
+                //@ts-ignore
+                y: env.clientY - 160,
+              });
+            },
+          };
+        }
+      },
     };
   });
 
   //TODO: Fix unused properties.
   const handleOnChange = (
-    pagination: TablePaginationConfig,
-    filters: Record<string, Key[] | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
@@ -186,7 +221,7 @@ type) => {
               currentSchema={linkedSchema}
               loading={false}
               sortingColumn={null}
-              renderOptions={renderOptions}
+              generateMenuItems={generateMenuItems}
             />
           );
         },
@@ -205,7 +240,7 @@ type) => {
               currentSchema={linkedSchema}
               loading={false}
               sortingColumn={null}
-              renderOptions={renderOptions}
+              generateMenuItems={generateMenuItems}
             />
           );
         },
@@ -216,21 +251,25 @@ type) => {
 
   // TODO: think about key as a property in the Realm DB
   return (
-    <Table
-      bordered={true}
-      dataSource={objects}
-      rowKey={(record) => {
-        return record[currentSchema.primaryKey];
-      }}
-      expandable={rowExpansionProp}
-      columns={filledColumns}
-      onChange={handleOnChange}
-      pagination={false}
-      loading={loading}
-      size="small"
-      tableLayout="auto"
-      style={style}
-    />
+    <div>
+      <Table
+        bordered={true}
+        dataSource={objects}
+        rowKey={(record) => {
+          return record[currentSchema.primaryKey];
+        }}
+        expandable={rowExpansionProp}
+        columns={filledColumns}
+        onChange={handleOnChange}
+        pagination={false}
+        loading={loading}
+        size="small"
+        tableLayout="auto"
+        style={style}
+      />
+
+      <CustomDropdown {...dropdownProp} />
+    </div>
   );
 };
 
@@ -253,8 +292,8 @@ const NestedTable = ({
   currentSchema,
   loading,
   sortingColumn,
-  renderOptions,
-}: type) => {
+  generateMenuItems,
+}: PropertyType) => {
   return (
     <DataTable
       columns={columns}
@@ -263,7 +302,7 @@ const NestedTable = ({
       currentSchema={currentSchema}
       loading={loading}
       sortingColumn={sortingColumn}
-      renderOptions={renderOptions}
+      generateMenuItems={generateMenuItems}
       style={{
         boxShadow: '20px 0px 50px grey',
         marginLeft: '-35px', //hacky but necessary to avoid weird indentation
