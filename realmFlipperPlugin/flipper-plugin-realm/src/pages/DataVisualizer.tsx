@@ -1,5 +1,4 @@
-import React, { createRef, useEffect, useRef } from 'react';
-import { Menu, Modal } from 'antd';
+import React from 'react';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
+import { theme } from 'flipper-plugin';
 
 export type DropdownPropertyType = {
   generateMenuItems: MenuItemGenerator;
@@ -23,11 +24,23 @@ export type MenuItemGenerator = (
   schema: SchemaObject
 ) => Array<MenuItem>;
 
-const generateListItems = (menuItems: Array<MenuItem>) => {
-  return menuItems.map((menuItem) => (
+const listItem = (menuItem) => {
+  const [hover, setHover] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHover(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHover(false);
+  };
+
+  return (
     <li
       onClick={menuItem.onClick}
       key={menuItem.key}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       style={{
         clear: 'both',
         color: 'rgba(0, 0, 0, 0.65)',
@@ -38,12 +51,13 @@ const generateListItems = (menuItems: Array<MenuItem>) => {
         margin: 0,
         padding: '5px 12px',
         whiteSpace: 'nowrap',
+        backgroundColor: hover ? theme.primaryColor : 'white',
       }}
     >
       {' '}
-      {menuItem.text}
+      <div style={{ color: hover ? 'white' : 'black' }}>{menuItem.text}</div>
     </li>
-  ));
+  );
 };
 
 export const CustomDropdown = ({
@@ -56,7 +70,6 @@ export const CustomDropdown = ({
   y,
 }: DropdownPropertyType) => {
   if (visible && schemaProperty) {
-    console.log('schemaProperty', schemaProperty);
     const menuItems = generateMenuItems(record, schemaProperty, currentSchema);
     return (
       <ul
@@ -77,7 +90,7 @@ export const CustomDropdown = ({
           overflow: 'hidden',
         }}
       >
-        {generateListItems(menuItems)}
+        {menuItems.map((menuItem) => listItem(menuItem))}
       </ul>
     );
   } else return <></>;

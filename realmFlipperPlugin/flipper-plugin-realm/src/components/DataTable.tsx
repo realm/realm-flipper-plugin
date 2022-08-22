@@ -147,24 +147,26 @@ PropertyType) => {
       property,
       render,
       onCell: (object: RealmObject) => {
-        if (generateMenuItems) {return {
-          onContextMenu: (env: Event) => {
-            console.log(env);
-            env.preventDefault();
-            setdropdownProp({
-              ...dropdownProp,
-              record: object,
-              schemaProperty: property,
-              currentSchema: currentSchema,
-              visible: true,
-              // TODO: Fix this ugly hardcoded offset
-              //@ts-ignore
-              x: env.clientX - 290,
-              //@ts-ignore
-              y: env.clientY - 190,
-            });
-          },
-        };}
+        if (generateMenuItems) {
+          return {
+            onContextMenu: (env: Event) => {
+              console.log(env);
+              env.preventDefault();
+              setdropdownProp({
+                ...dropdownProp,
+                record: object,
+                schemaProperty: property,
+                currentSchema: currentSchema,
+                visible: true,
+                // TODO: Fix this ugly hardcoded offset
+                //@ts-ignore
+                x: env.clientX - 290,
+                //@ts-ignore
+                y: env.clientY - 190,
+              });
+            },
+          };
+        }
       },
     };
   });
