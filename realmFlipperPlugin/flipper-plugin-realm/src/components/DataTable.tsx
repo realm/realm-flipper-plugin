@@ -63,6 +63,8 @@ PropertyType) => {
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(true);
+    const sortableTypes = new Set(['string', 'int', 'uuid']);
+
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
       return;
@@ -171,6 +173,8 @@ PropertyType) => {
           };
         }
       },
+      sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
+      sortOrder: state.sortingColumn === property.name ? state.sortDirection : null,
     };
   });
 
