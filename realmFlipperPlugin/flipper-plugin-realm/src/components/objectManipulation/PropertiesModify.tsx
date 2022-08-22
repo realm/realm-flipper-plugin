@@ -1,3 +1,4 @@
+import { Col, Row } from 'antd';
 import React from 'react';
 import { RealmObject, SchemaObject } from '../../CommonTypes';
 import { PropertyRender } from './PropertyRender';
@@ -19,7 +20,7 @@ export const PropertiesModify = ({ schema, value, setValue }: InputType) => {
   }
   // console.log('inputType value', value == {} )
   return (
-    <>
+    <Row gutter={[16, 48]}>
       {schema.order.map((propertyName: string, index: number) => {
         const set = (val: unknown) => {
           console.log('setting', propertyName, 'to', val)
@@ -31,15 +32,16 @@ export const PropertiesModify = ({ schema, value, setValue }: InputType) => {
           console.log('after set', value)
         };
         return (
-          <PropertyRender
-            key={index}
-            property={schema.properties[propertyName]}
-            isPrimary={propertyName === schema.primaryKey}
-            set={set}
-            initialValue={value[propertyName]}
-          />
+          <Col key={index} span={24}>
+            <PropertyRender
+              // key={index}
+              property={schema.properties[propertyName]}
+              isPrimary={propertyName === schema.primaryKey}
+              set={set}
+              initialValue={value[propertyName]} />
+          </Col>
         );
       })}
-    </>
+    </Row>
   );
 };

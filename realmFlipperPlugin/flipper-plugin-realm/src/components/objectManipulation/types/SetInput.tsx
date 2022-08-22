@@ -75,7 +75,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
         const count = occurences.get(value) || 0;
         // console.log('index:', index, ' count is', count)
         return (
-          <Row key={index} style={{ backgroundColor: 'white' }}>
+          <Row key={index}>
             <Col flex="auto">
             <TypeInput
               property={innerProp}

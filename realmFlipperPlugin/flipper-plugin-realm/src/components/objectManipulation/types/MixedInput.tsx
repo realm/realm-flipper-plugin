@@ -65,7 +65,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
       type = chosenType;
     }
     return (
-      <Row style={{ backgroundColor: 'white' }} align="middle">
+      <Row align="middle">
         <Col flex="auto">
           <Tag color="success">{chosenType}</Tag>
           {renderValue(value, { type, objectType: objectType?.name }, schemas)}
@@ -117,7 +117,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
           cancelText="Cancel"
         >
           <Layout>
-            <div style={{ backgroundColor: 'white' }}>Select a type:</div>
+            <div>Select a type:</div>
             <Select
               defaultValue={'string'}
               onChange={onChangeSelect}

@@ -32,7 +32,7 @@ export const ObjectInput = ({
     const val = value[targetSchema.primaryKey];
     const content = `${targetSchema?.primaryKey}: ${val}`;
     return (
-      <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">
+      <Row style={{ width: '100%' }} align="middle">
         <Col>
           <Tag color="success">{targetSchema?.name}</Tag>
         </Col>

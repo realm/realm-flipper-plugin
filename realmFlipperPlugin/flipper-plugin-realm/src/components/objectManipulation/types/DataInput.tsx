@@ -1,5 +1,5 @@
 import { UploadOutlined } from "@ant-design/icons";
-import { Button, Layout, Upload } from 'antd';
+import { Button, Col, Upload } from 'antd';
 import { UploadChangeParam, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
@@ -53,15 +53,14 @@ export const DataInput = ({ set }: TypeInputProps) => {
   };
 
   return (
-    <Layout style={{ backgroundColor: 'white' }}>
+    <Col span={24}>
       <Upload
         fileList={state.selectedFileList}
         customRequest={(options) => options.onSuccess?.("ok")}
         onChange={onChange}
-        // style={{ backgroundColor: 'white' }}
       >
         <Button><UploadOutlined/>Select a file</Button>
       </Upload>
-    </Layout>
+    </Col>
   );
 };

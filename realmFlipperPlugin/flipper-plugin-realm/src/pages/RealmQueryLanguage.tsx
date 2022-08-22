@@ -85,7 +85,7 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
         />
       ) : null}
       <Layout.Container grow style={{ minHeight: '500px' }}>
-        <Row style={{ backgroundColor: 'white' }}>
+        <Row>
           <Col flex="auto">
             <AutoComplete
               style={{ width: '100%' }}

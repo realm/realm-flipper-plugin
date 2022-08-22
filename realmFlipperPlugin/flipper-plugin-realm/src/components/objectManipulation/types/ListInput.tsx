@@ -20,15 +20,11 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
   };
 
   return (
-    <Layout.Container grow>
+    <Row>
       {array.map((value: unknown, index: number) => {
         return (
-          <Layout.Container
-            grow
-            key={index}
-            style={{ backgroundColor: 'white' }}
-          >
-            <Row align="middle">
+          <Col span={24} key={index}>
+             <Row align="middle">
               <Col flex="auto">
                 <TypeInput
                   extraProps={{ style: { width: '100%' } }}
@@ -58,16 +54,24 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
                 />
               </Col>
             </Row>
-          </Layout.Container>
+          </Col>
+            // grow
+            // key={index}
+          
+           
         );
       })}
+      <Col span={24}>
       <Button onClick={() => {
         const newArray = [...array, getDefault(innerProp)]
         setArray(newArray)
         set(newArray);
-      }}>
+      }}
+      style={{ width: '100%' }}>
         Add {property.objectType}
       </Button>
-    </Layout.Container>
+      </Col>
+
+    </Row>
   );
 };
