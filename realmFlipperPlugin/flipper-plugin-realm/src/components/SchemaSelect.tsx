@@ -26,6 +26,7 @@ const SchemaSelect = ({
   const onSchemaSelected = (selected: string) => {
     let selectedSchemaObject: SchemaObject;
     schemas.forEach((schema) => {
+      console.log('in here?,', schema)
       if (schema.name === selected) {
         selectedSchemaObject = schema;
         return;

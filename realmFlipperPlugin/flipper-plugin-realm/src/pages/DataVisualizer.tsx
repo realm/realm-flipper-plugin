@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Modal } from 'antd';
+import { Alert, Menu, Modal } from 'antd';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
@@ -43,7 +43,8 @@ export const DataVisualizer = ({
     editing: false,
   });
 
-  const { removeObject, getOneObject } = usePlugin(plugin);
+  const pluginState = usePlugin(plugin);
+  const { removeObject, getOneObject, state, clearError } = pluginState;
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;
@@ -53,9 +54,10 @@ export const DataVisualizer = ({
     return <div>No schemas found. Check selected Realm.</div>;
   }
 
-  // Return buttons + tableView
+  const errorMsg = state.get().errorMsg;
   return (
     <Layout.Container grow>
+      {errorMsg ? <Alert message={errorMsg} type="error" closable onClose={() => { clearError() }}></Alert> : null}
       <Layout.ScrollContainer>
         <Layout.Container>
           {editingObject.editing && editingObject.type === 'object' ? (

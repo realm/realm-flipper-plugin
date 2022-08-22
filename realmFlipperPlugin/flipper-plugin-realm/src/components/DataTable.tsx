@@ -85,7 +85,7 @@ type) => {
           trigger={[`contextMenu`]}
         >
           <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-            {renderValue(schemas, value, property)}
+            {renderValue(value, property, schemas)}
           </Tooltip>
         </Dropdown>
       );

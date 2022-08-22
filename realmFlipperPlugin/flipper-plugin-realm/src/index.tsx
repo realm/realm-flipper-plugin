@@ -112,6 +112,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('schemas: ', data.schemas);
+
     const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
@@ -156,6 +157,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+
     const state = pluginState.get();
     const { newObject, index, smallerNeighbor, largerNeighbor } = data;
     // console.log(newObject);
@@ -372,16 +374,19 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object);
+    // console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
-    client.send('addObject', {
-      realm: state.selectedRealm,
-      schema: state.currentSchema?.name,
-      object: object,
-    });
-    // getObjects(state.currentSchema.name, state.selectedRealm);
+    client
+      .send('addObject', {
+        realm: state.selectedRealm,
+        schema: state.currentSchema?.name,
+        object: object,
+      })
+      .catch((reason) => {
+        pluginState.set({...state, errorMsg: reason.error});
+      });
   };
 
   const updateSelectedSchema = (schema: SchemaObject) => {
@@ -583,6 +588,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
+  const clearError = () => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      errorMsg: undefined,
+    })
+  }
+
   return {
     state: pluginState,
     getObjects,
@@ -602,6 +615,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     setSortingDirection,
     refreshState,
     getOneObject,
+    clearError,
   };
 }
 

@@ -381,21 +381,24 @@ export default React.memo((props: {realms: Realm[]}) => {
           // responder.error(res);
           // connection.send('executeQuery', res);
         });
-        connection.receive('addObject', obj => {
+        connection.receive('addObject', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
           const converted = typeConverter(obj.object, realm, obj.schema);
           console.log('trying to create:', converted);
-          realm.write(() => {
-            let t = realm.create(obj.schema, converted);
-            console.log('created', t);
-          });
-
-          const objects = realm.objects(obj.schema);
-          modifyObjects(objects, obj.schema, realm);
-          connection.send('getObjects', {objects: objects});
+          try {
+            realm.write(() => {
+              realm.create(obj.schema, converted);
+            });
+          } catch (err) {
+            responder.error({
+              error: err.message,
+            });
+            return;
+          }
+          responder.success(undefined);
         });
         connection.receive('modifyObject', obj => {
           // console.log('modify', obj)
