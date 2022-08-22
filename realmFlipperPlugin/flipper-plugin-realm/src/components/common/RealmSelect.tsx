@@ -15,7 +15,7 @@ export const RealmSelect = ({ realms }: InputType) => {
     const onRealmSelected = useCallback(
         (selected: string) => {
           instance.getSchemas(selected);
-          instance.updateSelectedRealm(selected);
+          instance.setSelectedRealm(selected);
         },
         [instance]
       );

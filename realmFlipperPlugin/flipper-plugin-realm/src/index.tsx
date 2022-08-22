@@ -118,7 +118,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       // currentSchema: newSchemas[0],
     });
 
-    updateSelectedSchema(newSchemas[0]);
+    setSelectedSchema(newSchemas[0]);
     getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
@@ -323,7 +323,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       });
   };
 
-  const updateSelectedSchema = (schema: SchemaObject) => {
+  const setSelectedSchema = (schema: SchemaObject) => {
     const state = pluginState.get();
 
     // target schema is already selected
@@ -379,7 +379,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateSelectedRealm = (realm: string) => {
+  const setSelectedRealm = (realm: string) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
@@ -390,7 +390,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const updateSelectedPageSize = (
+  const setSelectedPageSize = (
     pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
     const state = pluginState.get();
@@ -499,13 +499,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     getSchemas,
     executeQuery,
     addObject,
-    updateSelectedSchema,
-    updateSelectedRealm,
+    setSelectedSchema,
+    setSelectedRealm,
     modifyObject,
     removeObject,
     goBackSchemaHistory,
     goForwardSchemaHistory,
-    updateSelectedPageSize,
+    setSelectedPageSize,
     setCurrentPage,
     setSortingColumnAndType,
     toggleSortDirection,

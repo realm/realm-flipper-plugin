@@ -4,7 +4,7 @@ import React from 'react';
 const { Option } = Select;
 
 const PageSizeSelect = (props: {
-  updateSelectedPageSize: (
+  setSelectedPageSize: (
     pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => void;
   getObjects: (
@@ -18,7 +18,7 @@ const PageSizeSelect = (props: {
   const onPageSizeSelect = (
     selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
   ) => {
-    props.updateSelectedPageSize(selectedPageSize);
+    props.setSelectedPageSize(selectedPageSize);
     props.getObjects();
     props.setCurrentPage(1);
   };

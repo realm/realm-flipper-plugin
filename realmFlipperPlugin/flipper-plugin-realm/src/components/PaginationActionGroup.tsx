@@ -30,7 +30,7 @@ const PaginationGroup = () => {
         setCurrentPage={instance.setCurrentPage}
       />
       <PageSizeSelect
-        updateSelectedPageSize={instance.updateSelectedPageSize}
+        setSelectedPageSize={instance.setSelectedPageSize}
         getObjects={instance.getObjects}
         setCurrentPage={instance.setCurrentPage}
         selectedPageSize={state.selectedPageSize}
