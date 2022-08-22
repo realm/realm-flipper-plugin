@@ -9,9 +9,9 @@ type TypeDescription = {
 };
 
 export const renderValue = (
-  schemas: SchemaObject[],
   value: unknown,
-  property: TypeDescription
+  property: TypeDescription,
+  schemas: SchemaObject[],
 ) => {
   if (value === null) {
     return <Typography.Text disabled>null</Typography.Text>;
@@ -37,7 +37,7 @@ export const renderValue = (
     case 'list':
     case 'set': //@ts-ignore
       //@ts-ignore
-      returnValue = parseSetOrList(schemas, value);
+      returnValue = parseSetOrList(value, property, schemas);
       break;
     case 'data': //@ts-ignore
       returnValue = parseData(value);
@@ -66,10 +66,19 @@ function parseSimpleData(input: string | number): string | number {
   return input;
 }
 
-function parseSetOrList(schemas: SchemaObject[], input: any[]): string {
-  const output = input.map((value) => {
-    // return renderValue()
-    return parseJavaScriptTypes(schemas, value);
+function parseSetOrList(input: unknown, property: TypeDescription, schemas: SchemaObject[]): string {
+  const output = input.map((value: unknown) => {
+    // check if the container holds objects
+    if (schemas.some(schema => schema.name === property.objectType)) {
+      return renderValue(value, {
+        type: 'object',
+        objectType: property.objectType,
+      }, schemas);
+    }
+
+    return renderValue(value, {
+      type: property.objectType as string,
+    }, schemas);
   });
 
   return '[' + output + ']';
@@ -91,7 +100,7 @@ function parseData(input) {
   anchor.download = 'file';
   return (
     <a href={blobUrl} target="_blank" rel="noreferrer" download="file">
-      ccc
+      download
     </a>
   );
   // return anchor;
@@ -131,6 +140,7 @@ function parseMixed(
   input: any,
   schemas: SchemaObject[]
 ): string | JSX.Element | number {
+  return JSON.stringify(input);
   const type = input.type;
   const value = input.value;
   // console.log('schemas got:', schemas)
@@ -138,45 +148,13 @@ function parseMixed(
   // console.log('rendering ')
   if (schema) {
     // we are dealing with a linked object
-    return renderValue(schemas, value, {
+    return renderValue(value, {
       type: 'object',
       objectType: schema.name,
-    });
+    }, schemas);
   } else {
-    return renderValue(schemas, value, {
+    return renderValue(value, {
       type,
-    });
-  }
-  return JSON.stringify(input);
-}
-
-function parseJavaScriptTypes(
-  schemas: SchemaObject[],
-  input: any
-): string | number | JSX.Element {
-  const type = typeof input;
-
-  switch (type) {
-    case 'string':
-    case 'number':
-    case 'symbol':
-      return parseSimpleData(input);
-    case 'boolean':
-      return parseBoolean(input);
-    case 'object':
-      if (Array.isArray(input)) {
-        return parseSetOrList(schemas, input);
-      }
-      //else if ('$numberDecimal' in input) {
-      //   return input.$numberDecimal;
-      //}
-      else {
-        return parseMixed(input, schemas);
-      }
-    case 'undefined':
-    case 'bigint':
-    case 'function':
-    default:
-      return input;
+    }, schemas);
   }
 }

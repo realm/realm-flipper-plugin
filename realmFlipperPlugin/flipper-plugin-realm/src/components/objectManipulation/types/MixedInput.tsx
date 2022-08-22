@@ -68,7 +68,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
       <Row style={{ backgroundColor: 'white' }} align="middle">
         <Col flex="auto">
           <Tag color="success">{chosenType}</Tag>
-          {renderValue(schemas, value, { type, objectType: objectType?.name })}
+          {renderValue(value, { type, objectType: objectType?.name }, schemas)}
         </Col>
         <Col>
           <Button
