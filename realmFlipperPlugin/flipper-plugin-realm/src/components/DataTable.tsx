@@ -1,10 +1,7 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Table, Tooltip } from 'antd';
-import { SorterResult } from 'antd/lib/table/interface';
-import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { ReactElement, useEffect, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
-import { plugin } from '..';
+import { Button, Dropdown, Tooltip } from 'antd';
+import { Layout } from 'flipper-plugin';
+import React, { ReactElement, useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
@@ -57,9 +54,6 @@ export const DataTable = ({
   renderOptions,
 }: // rowSelection
 PropertyType) => {
-  const instance = usePlugin(plugin);
-  const state = useValue(instance.state);
-
   const [rowSelectionProp, setRowSelectionProp] = useState({
     selectedRowKeys: [],
     hideSelectAll: true,
@@ -157,35 +151,6 @@ PropertyType) => {
       () => setRowSelectionProp({ ...rowSelectionProp, selectedRowKeys: [] }),
       5000
     );
-  };
-
-
-  const handleInfiniteOnLoad = () => {
-    console.log('more');
-    if (state.objects.length >= state.totalObjects) {
-      //message.warning('Infinite List loaded all');
-      return;
-    }
-    instance.getObjects();
-  };
-
-  const handleOnChange = (
-    pagination: TablePaginationConfig,
-    filters: Record<string, Key[] | null>,
-    sorter: SorterResult<any> | SorterResult<any>[],
-    extra: any
-  ) => {
-    //TODO: make type of a field
-    if (extra.action === 'sort') {
-      if (state.sortingColumn !== sorter.field) {
-        instance.setSortingDirection('ascend');
-        instance.setSortingColumn(sorter.field);
-      } else {
-        instance.toggleSortDirection();
-      }
-    }
-    instance.getObjects();
-    instance.setCurrentPage(1);
   };
   // TODO: think about key as a property in the Realm DB
   return (

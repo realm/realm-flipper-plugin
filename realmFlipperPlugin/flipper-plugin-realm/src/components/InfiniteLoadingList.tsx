@@ -8,7 +8,6 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
   const handleInfiniteOnLoad = () => {
-    console.log('more');
     setLoading(true);
     if (state.objects.length >= state.totalObjects) {
       message.warning('Infinite List loaded all');
@@ -42,8 +41,8 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
       style={{
         overflow: 'auto',
         height: '100%',
-        width:"100%",
-        textAlign: "center",
+        width: '100%',
+        textAlign: 'center',
       }}
     >
       <InfiniteScroll
@@ -53,7 +52,14 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
         hasMore={!state.loading && state.hasMore}
         useWindow={false}
         loader={
-          <div style={{ marginTop: "25px", marginBottom: "25px", display: "inline-block"}} key={0}>
+          <div
+            style={{
+              marginTop: '25px',
+              marginBottom: '25px',
+              display: 'inline-block',
+            }}
+            key={0}
+          >
             <Spinner size={30}></Spinner>
           </div>
         }

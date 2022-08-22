@@ -3,15 +3,12 @@ import {
   Layout,
   PluginClient,
   usePlugin,
-  useValue
+  useValue,
 } from 'flipper-plugin';
 
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Tooltip } from 'antd';
-import React, {useState } from 'react';
-import { RealmObject, SchemaProperty } from './CommonTypes';
-import { parsePropToCell } from './utils/Parser';
-import { ColumnTitle } from './components/ColumnTitle';
+import React, { useState } from 'react';
 import {
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,
@@ -20,20 +17,23 @@ import {
   Methods,
   ObjectMessage,
   ObjectsMessage,
+  RealmObject,
   RealmPluginState,
   RealmsMessage,
   SchemaMessage,
-  SchemaObject
+  SchemaObject,
+  SchemaProperty,
 } from './CommonTypes';
-import InfinityLoadingList from './components/InfiniteLoadingList';
+import { ColumnTitle } from './components/ColumnTitle';
+import ObjectAdder from './components/ObjectAdder';
 import RealmSchemaSelect from './components/RealmSchemaSelect';
 import SchemaHistoryActions from './components/SchemaHistoryActions';
 import ViewModeTabs from './components/ViewModeTabs';
+import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
-import DataVisualizer from './pages/DataVisualizer';
-import ObjectAdder from './components/ObjectAdder';
+import { parsePropToCell } from './utils/Parser';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -51,7 +51,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     totalObjects: 0,
     currentPage: 1,
     sortingColumn: null,
-    loading: false,
     sortDirection: null,
     prev_page_cursorId: null,
     prev_page_filterCursor: null,
@@ -67,11 +66,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getObjects', (data: ObjectsMessage) => {
     const state = pluginState.get();
     if (!data.objects.length) {
-      //setLoading(false);
       return;
     }
     const objects = data.objects;
-    const nextCursor = objects[objects.length-1];
+    const nextCursor = objects[objects.length - 1];
     const prevCursor = objects[0];
     pluginState.set({
       ...state,
@@ -81,7 +79,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
         : null,
       cursorId: nextCursor._id,
       totalObjects: data.total,
-      loading: false,
       prev_page_cursorId: prevCursor._id,
       prev_page_filterCursor: state.sortingColumn
         ? prevCursor[state.sortingColumn]
@@ -483,92 +480,10 @@ export function Component() {
     realms,
     objects,
     schemas,
-    loading,
     sortDirection,
     sortingColumn,
     currentSchema,
   } = useValue(state);
-    const columns = currentSchema?.order.map((key) => {
-      const obj = currentSchema.properties[key];
-      const isPrimaryKey = obj.name === currentSchema.primaryKey;
-      return {
-        name: obj.name,
-        isOptional: obj.optional,
-        objectType: obj.objectType,
-        propertyType: obj.type,
-        isPrimaryKey: isPrimaryKey,
-      };
-    });
-  const filledColumns = columns?.map((column) => {
-    const property: SchemaProperty = currentSchema.properties[column.name];
-    return {
-      title: () => (
-        <ColumnTitle
-          isOptional={column.isOptional}
-          name={column.name}
-          objectType={column.objectType}
-          propertyType={column.propertyType}
-          isPrimaryKey={column.isPrimaryKey}
-        />
-      ),
-      key: property.name,
-      dataIndex: property.name,
-      width: 300,
-      ellipsis: {
-        showTitle: false,
-      },
-      property,
-      render: (value: RealmObject, row: RealmObject) => {
-        if (property.objectType && value) {
-          console.log('property.objectType', property.objectType);
-
-          const linkedSchema = schemas.find(
-            (schema) => schema.name === property.objectType
-          );
-          if (linkedSchema) {
-            return (
-              <Layout.Container
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: '5px',
-                }}
-              >
-                <Button
-                  shape="circle"
-                  type="primary"
-                  size="small"
-                  icon={<SearchOutlined />}
-                  //onClick={() => highlightRow(value[currentSchema.primaryKey])}
-                  ghost
-                />
-                <Dropdown
-                  //overlay={renderOptions(row, property, currentSchema)}
-                  trigger={[`contextMenu`]}
-                >
-                  <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-                    {parsePropToCell(value, property, currentSchema, schemas)}
-                  </Tooltip>
-                </Dropdown>
-              </Layout.Container>
-            );
-          }
-        }
-        return (
-          <Dropdown
-            //overlay={renderOptions(row, property, currentSchema)}
-            trigger={[`contextMenu`]}
-          >
-            <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-              {parsePropToCell(value, property, currentSchema, schemas)}
-            </Tooltip>
-          </Dropdown>
-        );
-      },
-      //sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      sortOrder: sortingColumn === property.name ? sortDirection : null,
-    };
-  });
 
   const [viewMode, setViewMode] = useState<
     'data' | 'schemas' | 'RQL' | 'schemaGraph'
@@ -594,13 +509,12 @@ export function Component() {
           <DataVisualizer
             objects={objects}
             schemas={schemas}
-            loading={loading}
             currentSchema={currentSchema}
             sortDirection={sortDirection}
             sortingColumn={sortingColumn}
           />
-      </div> ) : 
-      null}
+        </div>
+      ) : null}
       {viewMode === 'schemas' ? (
         <SchemaVisualizer
           schemas={schemas}

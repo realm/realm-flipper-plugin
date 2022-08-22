@@ -13,7 +13,6 @@ export type RealmPluginState = {
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
-  loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
   hasMore: boolean;

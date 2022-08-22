@@ -1,21 +1,16 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Menu, Modal, Tooltip } from 'antd';
-import { Layout, usePlugin } from 'flipper-plugin';
+import { Menu, Modal } from 'antd';
+import { usePlugin } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import InfiniteLoadingList from '../components/InfiniteLoadingList';
+import { DataTable } from '../components/DataTable';
 import { RealmDataInspector } from '../components/RealmDataInspector';
 import { TypeInput } from '../components/types/TypeInput';
-import { parsePropToCell } from '../utils/Parser';
-import { ColumnTitle } from '../components/ColumnTitle';
-import { DataTable } from '../components/DataTable';
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
   currentSchema: SchemaObject | null;
   sortDirection: 'ascend' | 'descend' | null;
-  loading: boolean;
   sortingColumn: string | null;
 };
 
@@ -24,7 +19,6 @@ const DataVisualizer = ({
   schemas,
   currentSchema,
   sortDirection,
-  loading,
   sortingColumn,
 }: PropertyType) => {
   const [inspectData, setInspectData] = useState<RealmObject>();
@@ -47,98 +41,97 @@ const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
-    const deleteRow = (row: RealmObject) => {
-      removeObject(row);
-    };
+  const deleteRow = (row: RealmObject) => {
+    removeObject(row);
+  };
 
-    const editProperty = (row: RealmObject, schemaProperty: SchemaProperty) => {
-      // console.log('row is', row)
-      // console.log('value is', row[schemaProperty.name])
-      setEditingState(row[schemaProperty.name].value);
-      setEditingCell({
-        row,
-        schemaProperty,
-      });
-    };
-
-    const dropDown = (
-      row: RealmObject,
-      schemaProperty: SchemaProperty,
-      schema: SchemaObject
-    ) => (
-      <Menu>
-        <Menu.Item key={-1} onClick={() => editProperty(row, schemaProperty)}>
-          Edit property
-        </Menu.Item>
-        <Menu.Item key={0} onClick={() => {}}>
-          Edit object
-        </Menu.Item>
-        <Menu.Item key={1} onClick={() => deleteRow(row)}>
-          Delete selected {schema.name}{' '}
-        </Menu.Item>
-        <Menu.Item
-          key={2}
-          onClick={() => {
-            setNewInspectData({ [schema.name]: schema });
-            setInspectorView('Inspector - Realm Schema');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Schema
-        </Menu.Item>
-        <Menu.Item
-          key={3}
-          onClick={() => {
-            setNewInspectData({
-              [schema.name + '.' + schemaProperty.name]: schemaProperty,
-            });
-            setInspectorView('Inspector - Realm Schema Property');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Schema Property
-        </Menu.Item>
-        <Menu.Item
-          key={4}
-          onClick={() => {
-            const object = {};
-            Object.keys(row).forEach((key) => {
-              object[key] = row[key];
-            });
-            setInspectorView('Inspector - Realm Object');
-            setNewInspectData({ [schema.name]: object });
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Row
-        </Menu.Item>
-        <Menu.Item
-          key={5}
-          onClick={() => {
-            setNewInspectData({
-              [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name],
-            });
-            setInspectorView('Inspector - Realm Object Property');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Cell
-        </Menu.Item>
-      </Menu>
-    );
-
-    const columns = currentSchema.order.map((key) => {
-      const obj = currentSchema.properties[key];
-      const isPrimaryKey = obj.name === currentSchema.primaryKey;
-      return {
-        name: obj.name,
-        isOptional: obj.optional,
-        objectType: obj.objectType,
-        propertyType: obj.type,
-        isPrimaryKey: isPrimaryKey,
-      };
+  const editProperty = (row: RealmObject, schemaProperty: SchemaProperty) => {
+    // console.log('row is', row)
+    // console.log('value is', row[schemaProperty.name])
+    setEditingState(row[schemaProperty.name].value);
+    setEditingCell({
+      row,
+      schemaProperty,
     });
+  };
+
+  const dropDown = (
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => (
+    <Menu>
+      <Menu.Item key={-1} onClick={() => editProperty(row, schemaProperty)}>
+        Edit property
+      </Menu.Item>
+      <Menu.Item key={0} onClick={() => {}}>
+        Edit object
+      </Menu.Item>
+      <Menu.Item key={1} onClick={() => deleteRow(row)}>
+        Delete selected {schema.name}{' '}
+      </Menu.Item>
+      <Menu.Item
+        key={2}
+        onClick={() => {
+          setNewInspectData({ [schema.name]: schema });
+          setInspectorView('Inspector - Realm Schema');
+          showSidebar ? null : setShowSidebar(true);
+        }}
+      >
+        Inspect Schema
+      </Menu.Item>
+      <Menu.Item
+        key={3}
+        onClick={() => {
+          setNewInspectData({
+            [schema.name + '.' + schemaProperty.name]: schemaProperty,
+          });
+          setInspectorView('Inspector - Realm Schema Property');
+          showSidebar ? null : setShowSidebar(true);
+        }}
+      >
+        Inspect Schema Property
+      </Menu.Item>
+      <Menu.Item
+        key={4}
+        onClick={() => {
+          const object = {};
+          Object.keys(row).forEach((key) => {
+            object[key] = row[key];
+          });
+          setInspectorView('Inspector - Realm Object');
+          setNewInspectData({ [schema.name]: object });
+          showSidebar ? null : setShowSidebar(true);
+        }}
+      >
+        Inspect Row
+      </Menu.Item>
+      <Menu.Item
+        key={5}
+        onClick={() => {
+          setNewInspectData({
+            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+          });
+          setInspectorView('Inspector - Realm Object Property');
+          showSidebar ? null : setShowSidebar(true);
+        }}
+      >
+        Inspect Cell
+      </Menu.Item>
+    </Menu>
+  );
+
+  const columns = currentSchema.order.map((key) => {
+    const obj = currentSchema.properties[key];
+    const isPrimaryKey = obj.name === currentSchema.primaryKey;
+    return {
+      name: obj.name,
+      isOptional: obj.optional,
+      objectType: obj.objectType,
+      propertyType: obj.type,
+      isPrimaryKey: isPrimaryKey,
+    };
+  });
 
   const onOk = () => {
     // execute update
@@ -156,7 +149,7 @@ const DataVisualizer = ({
       }
     });
     console.log('real obj:', obj);
-    obj[editingCell?.schemaProperty.name] = editingState
+    obj[editingCell?.schemaProperty.name] = editingState;
     modifyObject(obj);
     onCancel();
   };
@@ -188,14 +181,14 @@ const DataVisualizer = ({
       </Modal>
 
       <DataTable
-          columns={columns}
-          objects={objects}
-          schemas={schemas}
-          sortDirection={sortDirection}
-          sortingColumn={sortingColumn}
-          currentSchema={currentSchema}
-          renderOptions={dropDown}
-        />
+        columns={columns}
+        objects={objects}
+        schemas={schemas}
+        sortDirection={sortDirection}
+        sortingColumn={sortingColumn}
+        currentSchema={currentSchema}
+        renderOptions={dropDown}
+      />
 
       <RealmDataInspector
         currentSchema={currentSchema}
@@ -214,14 +207,14 @@ const DataVisualizer = ({
     </>
   );
 
-    function setNewInspectData(newInspectData: RealmObject) {
-      if (inspectData !== undefined) {
-        goBackStack.push(inspectData);
-        setGoBackStack(goBackStack);
-        setGoForwardStack([]);
-      }
-      setInspectData(newInspectData);
+  function setNewInspectData(newInspectData: RealmObject) {
+    if (inspectData !== undefined) {
+      goBackStack.push(inspectData);
+      setGoBackStack(goBackStack);
+      setGoForwardStack([]);
     }
+    setInspectData(newInspectData);
+  }
 };
 
 export default DataVisualizer;
