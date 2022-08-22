@@ -11,7 +11,7 @@ import { ColumnTitle } from './ColumnTitle';
 import {
   CustomDropdown,
   DropdownPropertyType,
-  MenuItemGenerator
+  MenuItemGenerator,
 } from './CustomDropdown';
 import InfiniteScroll from 'react-infinite-scroller';
 
@@ -58,12 +58,11 @@ export const DataTable = ({
   style,
 }: // rowSelection
 PropertyType) => {
-
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(true);
-    const sortableTypes = new Set(['string', 'int', 'uuid']);
+  const sortableTypes = new Set(['string', 'int', 'uuid']);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
@@ -174,7 +173,8 @@ PropertyType) => {
         }
       },
       sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
-      sortOrder: state.sortingColumn === property.name ? state.sortDirection : null,
+      sortOrder:
+        state.sortingColumn === property.name ? state.sortDirection : null,
     };
   });
 
@@ -236,14 +236,14 @@ PropertyType) => {
   };
 
   const handleInfiniteOnLoad = () => {
-    console.log("more")
+    console.log('more');
     setLoading(true);
     if (state.objects.length >= state.totalObjects) {
       message.warning('Infinite List loaded all');
       return;
     }
     instance.getObjects();
-    console.log("objects in state", state.objects)
+    console.log('objects in state', state.objects);
   };
 
   const handleOnChange = (
@@ -294,6 +294,7 @@ PropertyType) => {
         }
       >
         <Table
+          sticky={true}
           bordered={true}
           dataSource={objects}
           rowKey={(record) => {
