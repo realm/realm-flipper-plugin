@@ -9,7 +9,6 @@ export const ColumnTitle = ({
   type,
   isPrimaryKey,
 }: ColumnType) => {
-  console.log('columntitle', type, objectType, isPrimaryKey)
   let title;
 
   switch (type) {

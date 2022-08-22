@@ -1,5 +1,4 @@
 import React from 'react';
-import { Menu, Modal } from 'antd';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
@@ -9,6 +8,7 @@ import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
+import { MenuItemGenerator } from '../components/CustomDropdown';
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -124,50 +124,53 @@ export const DataVisualizer = ({
         type: 'object',
       });
     };
-    const dropDown = (
+
+    // Generate MenuItem objects for the context menu with all necessary data and functions.
+    const generateMenuItems: MenuItemGenerator = (
       row: RealmObject,
       schemaProperty: SchemaProperty,
       schema: SchemaObject
-    ) => (
-      <Menu>
-        <Menu.Item key={-1} onClick={() => editField(row, schemaProperty)}>
-          Edit property
-        </Menu.Item>
-        <Menu.Item key={0} onClick={() => editObject(row)}>
-          Edit object
-        </Menu.Item>
-        <Menu.Item key={1} onClick={() => deleteRow(row)}>
-          Delete selected {schema.name}{' '}
-        </Menu.Item>
-        <Menu.Item
-          key={4}
-          onClick={() => {
-            const object = {};
-            Object.keys(row).forEach((key) => {
-              object[key] = row[key];
-            });
-            setInspectorView('Inspector - Realm Object');
-            setNewInspectData({ [schema.name]: object });
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Row
-        </Menu.Item>
-        <Menu.Item
-          key={5}
-          onClick={() => {
-            setNewInspectData({
-              [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name],
-            });
-            setInspectorView('Inspector - Realm Object Property');
-            showSidebar ? null : setShowSidebar(true);
-          }}
-        >
-          Inspect Cell
-        </Menu.Item>
-      </Menu>
-    );
+    ) => [
+      {
+        key: 1,
+        text: 'Inspect Object',
+        onClick: () => {
+          const object = {};
+          Object.keys(row).forEach((key) => {
+            object[key] = row[key];
+          });
+          setInspectorView('Inspector - Realm Object');
+          setNewInspectData({ [schema.name]: object });
+          showSidebar ? null : setShowSidebar(true);
+        },
+      },
+      {
+        key: 2,
+        text: 'Inspect Property',
+        onClick: () => {
+          setNewInspectData({
+            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+          });
+          setInspectorView('Inspector - Realm Object Property');
+          showSidebar ? null : setShowSidebar(true);
+        },
+      },
+      {
+        key: 3,
+        text: 'Edit Object',
+        onClick: () => editObject(row),
+      },
+      {
+        key: 4,
+        text: 'Edit Property',
+        onClick: () => editField(row, schemaProperty),
+      },
+      {
+        key: 5,
+        text: 'Delete Object',
+        onClick: () => deleteRow(row),
+      },
+    ];
 
     const columns = schemaObjToColumns(currentSchema);
     return (
@@ -180,7 +183,7 @@ export const DataVisualizer = ({
           sortingColumn={sortingColumn}
           currentSchema={currentSchema}
           loading={loading}
-          renderOptions={dropDown}
+          generateMenuItems={generateMenuItems}
           getOneObject={getOneObject}
         />
       </Layout.Container>
