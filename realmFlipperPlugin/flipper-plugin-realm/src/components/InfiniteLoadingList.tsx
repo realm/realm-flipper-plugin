@@ -65,6 +65,8 @@ const InfinityLoadingList = ({ objects, columns, currentSchema }) => {
         }
       >
         <Table
+          bordered={true}
+
           dataSource={objects}
           columns={columns}
           rowKey={(record) => {
