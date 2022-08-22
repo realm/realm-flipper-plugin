@@ -1,5 +1,4 @@
 export const TaskSchema = {
-
   name: 'Task',
   properties: {
     _id: 'int',
@@ -96,10 +95,91 @@ export const SetsSchema = {
     _id: 'uuid',
     intSet: 'int<>',
     setsSet: 'Sets<>',
-    decimalSet: 'decimal128<>',
+    // decimalSet: 'decimal128<>',
+    decimalSet: {
+      type: 'set',
+      objectType: 'decimal128',
+    },
     mixedSet: 'mixed<>',
     objectSet: 'AllTypes<>',
   },
-  primaryKey: '_id'
+  primaryKey: '_id',
 };
 
+export const MailCarrier = {
+  name: 'MailCarrier',
+  properties: {
+    _id: 'uuid',
+    name: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    phoneNumber: 'string',
+  },
+  primaryKey: '_id',
+};
+
+export const ParcelService = {
+  name: 'ParcelService',
+  properties: {
+    _id: 'uuid',
+    name: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    mailCarrier: 'MailCarrier',
+  },
+  primaryKey: '_id',
+};
+
+export const Parcel = {
+  name: 'Parcel',
+  properties: {
+    _id: 'uuid',
+    length: 'int',
+    width: 'int',
+    height: 'int',
+    weight: 'int',
+  },
+  primaryKey: '_id',
+};
+
+export const Delivery = {
+  name: 'Delivery',
+  properties: {
+    _id: 'uuid',
+    receiver: 'string',
+    city: 'string',
+    zipCode: 'string',
+    street: 'string',
+    houseNumber: 'string',
+    parcel: 'Parcel',
+    parcelService: 'ParcelService',
+  },
+  primaryKey: '_id',
+};
+
+export const OptionalContainers = {
+  name: 'OptionalContainers',
+  properties: {
+    list: 'int?[]',
+    listt: {
+      type: 'list',
+      objectType: 'int',
+      optional: true,
+    },
+    _id: 'uuid',
+  },
+  primaryKey: '_id',
+};
+
+export const DataSchema = {
+  name: 'DataSchema',
+  properties: {
+    _id: 'uuid',
+    keyName: 'data',
+  },
+  primaryKey: '_id',
+};

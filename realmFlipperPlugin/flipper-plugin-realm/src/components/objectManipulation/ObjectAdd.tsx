@@ -1,34 +1,29 @@
 import { Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { AddObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { RealmObject, SchemaObject } from '../../CommonTypes';
 
 import React from 'react';
-import { PropertyRender } from './PropertyRender';
-import { plugin } from '..';
+import { plugin } from '../..';
 import { Layout, usePlugin } from 'flipper-plugin';
+import { PropertiesModify } from './PropertiesModify';
 
 type PropertyType = {
-  schema: SchemaObject | null;
+  schema: SchemaObject;
 };
-const ObjectAdder = ({ schema }: PropertyType) => {
+
+export const ObjectAdd = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
-  const empty: { [prop: string]: any } = {};
-  const [values, setValues] = useState(empty);
+  const [values, setValues] = useState<RealmObject>({});
   const [visible, setVisible] = useState(false);
-  const [inputReset, setInputReset] = useState(0);
-
-  const refresh = () => setInputReset((v) => v + 1);
 
   const showModal = () => {
-    refresh();
     setValues({});
     setVisible(true);
   };
 
   const hideModal = () => {
     setValues({});
-    refresh();
     setVisible(false);
   };
 
@@ -38,7 +33,7 @@ const ObjectAdder = ({ schema }: PropertyType) => {
   };
 
   if (!schema) {
-    return;
+    return <></>;
   }
 
   return (
@@ -57,22 +52,10 @@ const ObjectAdder = ({ schema }: PropertyType) => {
         cancelText="Cancel"
         destroyOnClose
       >
-        {schema?.order?.map((property, index) => (
-          <PropertyRender
-            values={values}
-            property={schema.properties[property]}
-            isPrimary={property == schema.primaryKey}
-            key={
-              inputReset *
-                Object.keys(schema.properties).length *
-                Object.keys(schema.properties).length +
-              index
-            }
-          />
-        ))}
+        <PropertiesModify schema={schema} value={values} setValue={setValues}/>
       </Modal>
     </Layout.Horizontal>
   );
 };
 
-export default React.memo(ObjectAdder);
+// export default React.memo(ObjectAdd);

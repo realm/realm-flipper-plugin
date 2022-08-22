@@ -1,7 +1,4 @@
-import moment from 'moment';
 import React from 'react';
-import uuid from 'react-native-uuid';
-import { SchemaProperty } from '../../CommonTypes';
 import { BoolInput } from './BoolInput';
 import { DataInput } from './DataInput';
 import { DateInput } from './DateInput';
@@ -18,7 +15,7 @@ import { UUIDInput } from './UUIDInput';
 import { UUID, ObjectId } from 'bson';
 
 export type TypeInputProps = {
-  property: SchemaProperty;
+  property: TypeDescription;
   defaultValue?: unknown;
   set: (val: unknown) => void;
   extraProps?: Record<string, unknown>;
@@ -27,10 +24,11 @@ export type TypeInputProps = {
 type TypeDescription = {
   type: string;
   optional: boolean;
+  objectType?: string;
 }
 
 export const getDefault = (property: TypeDescription) => {
-  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
+  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set' && property.type != 'dictionary') return null;
 
   const type = property.type;
   switch (type) {
@@ -97,6 +95,5 @@ export const TypeInput = (props: TypeInputProps) => {
       props.property.objectType = props.property.type;
       props.property.type = 'object';
       return <ObjectInput {...props} />;
-      // return <>Input for {props.property.type} not implemented!</>;
   }
 };

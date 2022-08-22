@@ -23,6 +23,11 @@ import {
   NoPrimaryKey,
   DictSchema,
   SetsSchema,
+  Parcel,
+  ParcelService,
+  Delivery,
+  MailCarrier,
+  DataSchema,
 } from './TestData/Schemas';
 
 import {
@@ -44,6 +49,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {createParcelTestData} from './TestData/parcelExample';
 
 // Open a Realm
 const realm = new Realm({
@@ -55,9 +61,14 @@ const realm = new Realm({
     NoPrimaryKey,
     DictSchema,
     SetsSchema,
+    Parcel,
+    ParcelService,
+    Delivery,
+    MailCarrier,
+    DataSchema,
   ],
   path: 'main',
-  schemaVersion: 34,
+  schemaVersion: 35,
 });
 
 //realmPlugin.newfunc();
@@ -170,6 +181,11 @@ const App: () => Node = () => {
           <Button
             title="Delete + create AllTypes Testdata"
             onPress={() => createAllTypesTestData(realm)}>
+            {' '}
+          </Button>
+          <Button
+            title="Delete + create Parcel Testdata"
+            onPress={() => createParcelTestData(realm)}>
             {' '}
           </Button>
           <Section title="See Your Changes">

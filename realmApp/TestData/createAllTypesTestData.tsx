@@ -8,6 +8,19 @@ export function createAllTypesTestData(realm: Realm) {
   });
 
   let uuid = new UUID('aa79b9ed-fbc0-4038-8f16-31f4da3efb9e');
+  const buffer = new ArrayBuffer(6);
+  const view = new Uint8Array(buffer);
+  for (let i = 0; i < 6; i++) {
+    view[i] = i;
+  }
+
+  let data1 = {
+    _id: new UUID(),
+    keyName: view,
+  };
+  realm.write(() => {
+    realm.create('DataSchema', data1);
+  })
 
   let AllTypes1 = {
     _id: uuid,
@@ -18,7 +31,7 @@ export function createAllTypesTestData(realm: Realm) {
     string: 'string',
     decimal128: Decimal128.fromString('123456.123456789012345678901234567890'),
     //objectId: 'objectId',
-    data: new ArrayBuffer(6),
+    data: view,
     date: new Date('1995-12-17T03:24:00'),
     list: [1, 1, 2, 3, 5, 8, 13],
     //linkingObjects: 'linkingObjects',
@@ -33,9 +46,10 @@ export function createAllTypesTestData(realm: Realm) {
     mixed: new Date('August 17, 2020'),
     uuid: new UUID(),
   };
-
+  // console.log(buffer);
   realm.write(() => {
-    realm.create('AllTypes', AllTypes1);
+    const t = realm.create('AllTypes', AllTypes1);
+    console.log('created alltypes', new Uint8Array(t['data']));
   });
 
   let uuid2 = new UUID();
@@ -49,7 +63,7 @@ export function createAllTypesTestData(realm: Realm) {
     string: 'string',
     decimal128: Decimal128.fromString('0.000000000000000000008901234567890'),
     objectId: ObjectId.createFromHexString('507f191e810c19729de860ea'),
-    data: new ArrayBuffer(6),
+    data: buffer,
     date: new Date('2006-11-17T03:24:00'),
     list: [1, 1, 2, 3, 5, 8, 13],
     linkingObjects: realm.objectForPrimaryKey('AllTypes', uuid),
@@ -61,7 +75,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
@@ -93,7 +107,7 @@ export function createAllTypesTestData(realm: Realm) {
     string: 'string',
     decimal128: Decimal128.fromString('0.000000000000000000008901234567890'),
     objectId: ObjectId.createFromHexString('507f191e810c19729de860ea'),
-    data: new ArrayBuffer(6),
+    data: buffer,
     date: new Date('2006-11-17T03:24:00'),
     list: [1, 1, 2, 3, 5, 8, 13],
     linkedBanana: realm.objectForPrimaryKey('Banana', banana1id),
@@ -139,12 +153,13 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    // mixed: realm.objectForPrimaryKey('AllTypes', uuid),
     uuid: new UUID(),
   };
 
   realm.write(() => {
     realm.create('AllTypes', AllTypes3);
+    // console.log('create object', t)
   });
 
   let NoPrimaryKey1 = {
@@ -198,7 +213,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: realm.objectForPrimaryKey('AllTypes', uuid),
+    mixed: realm.objectForPrimaryKey('AllTypes', uuid2),
     uuid: new UUID(),
   };
   realm.write(() => {

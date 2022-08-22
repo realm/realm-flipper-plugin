@@ -1,8 +1,9 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React, { useCallback } from 'react';
-import { RealmObject, SchemaObject } from '../CommonTypes';
+import { SchemaObject } from '../CommonTypes';
 import { plugin } from '../index';
+import SchemaHistoryActions from './SchemaHistoryActions';
 
 const { Option } = Select;
 
@@ -12,18 +13,20 @@ export const BoldSpan = styled.span({
   fontWeight: 'bold',
   textTransform: 'uppercase',
 });
-
-const RealmSchemaSelect = (props: {
+type InputType = {
   schemas: SchemaObject[];
-  realms: string[];
-}) => {
+}
+
+const SchemaSelect = ({
+  schemas,
+}: InputType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-  const { schemas, realms } = props;
 
   const onSchemaSelected = (selected: string) => {
     let selectedSchemaObject: SchemaObject;
     schemas.forEach((schema) => {
+      console.log('in here?,', schema)
       if (schema.name === selected) {
         selectedSchemaObject = schema;
         return;
@@ -31,7 +34,6 @@ const RealmSchemaSelect = (props: {
     });
     instance.updateSelectedSchema(selectedSchemaObject);
     instance.getObjects();
-    //instance.executeQuery('');
   };
 
   const schemaOptions = schemas.map((schema) => (
@@ -40,29 +42,10 @@ const RealmSchemaSelect = (props: {
     </Option>
   ));
 
-  const onRealmSelected =
-    (selected: string) => {
-      instance.getSchemas(selected);
-      instance.updateSelectedRealm(selected);
-    }
-  const realmOptions = realms.map((realm) => (
-    <Option key={realm} value={realm}>
-      {realm}
-    </Option>
-  ));
 
   return (
     <Toolbar position="top">
-      <BoldSpan>Realm</BoldSpan>
-      <Select
-        showSearch
-        value={state.selectedRealm}
-        onChange={onRealmSelected}
-        style={{ width: '30%' }}
-        dropdownMatchSelectWidth={false}
-      >
-        {realmOptions}
-      </Select>
+      <SchemaHistoryActions />
       <BoldSpan>Object type</BoldSpan>
       <Select
         showSearch
@@ -80,4 +63,4 @@ const RealmSchemaSelect = (props: {
   );
 };
 
-export default React.memo(RealmSchemaSelect);
+export default React.memo(SchemaSelect);

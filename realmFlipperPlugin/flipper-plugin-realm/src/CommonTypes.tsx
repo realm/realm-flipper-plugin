@@ -1,3 +1,5 @@
+import { Decimal128, ObjectId, UUID } from "bson";
+
 export type RealmPluginState = {
   realms: string[];
   selectedRealm: string;
@@ -18,7 +20,20 @@ export type RealmPluginState = {
   hasMore: boolean;
   prev_page_filterCursor: number | null;
 };
-
+const typeList = [
+  'objectId',
+  'uuid',
+  'bool',
+  'int',
+  'float',
+  'double',
+  'decimal128',
+  'string',
+  'data',
+  'date',
+];
+// export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
+// export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
 export type RealmObject = Record<string, unknown>;
 
 export type SchemaObject = {
@@ -46,6 +61,7 @@ export type Events = {
   liveObjectEdited: EditLiveObjectRequest;
   getRealms: RealmsMessage;
   executeQuery: QueryResult;
+  getOneObject: ObjectMessage;
 };
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
@@ -55,6 +71,7 @@ export type Methods = {
   addObject: (object: AddObject) => Promise<RealmObject>;
   modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
+  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
 };
 
 export type AddObject = {

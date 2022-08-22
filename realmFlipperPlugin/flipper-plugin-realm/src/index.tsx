@@ -25,15 +25,14 @@ import {
   SchemaProperty,
 } from './CommonTypes';
 import { ColumnTitle } from './components/ColumnTitle';
-import ObjectAdder from './components/ObjectAdder';
-import RealmSchemaSelect from './components/RealmSchemaSelect';
-import SchemaHistoryActions from './components/SchemaHistoryActions';
-import ViewModeTabs from './components/ViewModeTabs';
 import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import { parsePropToCell } from './utils/Parser';
+import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
+import { CommonHeader } from './components/common/CommonHeader';
+import SchemaSelect from './components/SchemaSelect';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -44,7 +43,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     objects: [],
     schemas: [],
     schemaHistory: [],
-    schemaHistoryIndex: 1,
+    schemaHistoryIndex: 0,
     cursorId: null,
     filterCursor: 0,
     selectedPageSize: 100,
@@ -60,7 +59,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getRealms', (data: RealmsMessage) => {
     const state = pluginState.get();
-    pluginState.set({ ...state, realms: data.realms });
+    pluginState.set({
+      ...state,
+      realms: data.realms,
+      selectedRealm: data.realms[0],
+    });
+    getSchemas(data.realms[0]);
+
+    // client.send('getSchemas', { realm: });
   });
 
   client.onMessage('getObjects', (data: ObjectsMessage) => {
@@ -104,13 +110,21 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('getSchemas', (data: SchemaMessage) => {
     console.log('schemas: ', data.schemas);
-    const newschemas = data.schemas.map((schema) =>
+
+    const newSchemas = data.schemas.map((schema) =>
       sortSchemaProperties(schema)
     );
 
     const state = pluginState.get();
-    pluginState.set({ ...state, schemas: newschemas });
-    // console.log('pluginState', pluginState);
+    // load first schema nad objects
+    pluginState.set({
+      ...state,
+      schemas: newSchemas,
+      // currentSchema: newSchemas[0],
+    });
+
+    updateSelectedSchema(newSchemas[0]);
+    getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -141,34 +155,93 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+
     const state = pluginState.get();
-    const { newObject, index } = data;
-    const upperIndex = state.currentPage * state.selectedPageSize - 1;
-    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
-    if (index > upperIndex || index < lowerIndex) {
-      return false;
+    const { newObject, index, smallerNeighbor, largerNeighbor } = data;
+    // console.log(newObject);
+    // console.log('objects in state', state.objects);
+    const lastObjectInMemory = state.objects[state.objects.length - 1]?._id;
+    const firstObjectInMemory = state.objects[0]?._id;
+    // console.log(
+    //   'neighbors',
+    //   smallerNeighbor,
+    //   largerNeighbor,
+    //   firstObjectInMemory
+    // );
+    // console.log('sortDirection', state.sortDirection, state.currentPage);
+    // console.log('last object new', state.objects[state.objects.length - 1]);
+    if (
+      state.currentPage === 1 &&
+      state.objects.length >= state.selectedPageSize &&
+      !smallerNeighbor
+    ) {
+      let newObjects = [newObject, ...state.objects];
+      newObjects = newObjects.slice(0, state.selectedPageSize);
+      // console.log(
+      //   'set cursorId to',
+      //   state.objects[state.objects.length - 1]._id
+      // );
+
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects + 1,
+        cursorId: state.objects[state.objects.length - 1]._id,
+        filterCursor: state.sortingColumn
+          ? state.objects[state.objects.length - 1][state.sortingColumn]
+          : null,
+        prev_page_cursorId: newObject._id,
+        prev_page_filterCursor: state.sortingColumn
+          ? newObject[state.sortingColumn]
+          : null,
+      });
+      return;
     }
-    let newObjects = state.objects;
-    newObjects.splice(
-      index - (state.currentPage - 1) * state.selectedPageSize,
-      0,
-      newObject
-    );
-    const newFirstObject = newObjects[0];
-    const newLastObject = newObjects[newObjects.length - 1];
-    pluginState.set({
-      ...state,
-      objects: [...newObjects],
-      totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
-      prev_page_cursorId: newFirstObject._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? newFirstObject[state.sortingColumn]
-        : null,
-    });
+    if (state.objects.length >= state.selectedPageSize) {
+      if (state.sortDirection === 'descend') {
+        console.log('descending');
+        if (
+          largerNeighbor > firstObjectInMemory ||
+          smallerNeighbor < lastObjectInMemory
+        ) {
+          return false;
+        }
+      } else {
+        if (
+          smallerNeighbor < firstObjectInMemory ||
+          largerNeighbor > lastObjectInMemory
+        ) {
+          return false;
+        }
+      }
+      const { newObject, index } = data;
+      const upperIndex = state.currentPage * state.selectedPageSize - 1;
+      const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
+      if (index > upperIndex || index < lowerIndex) {
+        return false;
+      }
+      let newObjects = state.objects;
+      newObjects.splice(
+        index - (state.currentPage - 1) * state.selectedPageSize,
+        0,
+        newObject
+      );
+      const newFirstObject = newObjects[0];
+      const newLastObject = newObjects[newObjects.length - 1];
+      pluginState.set({
+        ...state,
+        objects: [...newObjects],
+        totalObjects: state.totalObjects - 1,
+        cursorId: newLastObject._id,
+        filterCursor: state.sortingColumn
+          ? newLastObject[state.sortingColumn]
+          : null,
+        prev_page_cursorId: newFirstObject._id,
+        prev_page_filterCursor: state.sortingColumn
+          ? newFirstObject[state.sortingColumn]
+          : null,
+      });
+    }
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
@@ -273,6 +346,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const getOneObject = async (schema: string, primaryKey: any) => {
+    const state = pluginState.get();
+    return client.send('getOneObject', {
+      schema: schema,
+      realm: state.selectedRealm,
+      primaryKey: primaryKey,
+    });
+  };
+
   const getSchemas = (realm: string) => {
     client.send('getSchemas', { realm: realm });
   };
@@ -293,20 +375,33 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (!state.currentSchema) {
       return;
     }
-    client.send('addObject', {
-      realm: state.selectedRealm,
-      schema: state.currentSchema?.name,
-      object: object,
-    });
+    client
+      .send('addObject', {
+        realm: state.selectedRealm,
+        schema: state.currentSchema?.name,
+        object: object,
+      })
+      .catch((reason) => {
+        pluginState.set({...state, errorMsg: reason.error});
+      });
   };
 
   const updateSelectedSchema = (schema: SchemaObject) => {
     const state = pluginState.get();
+
+    // target schema is already selected
+    if (state.currentSchema?.name === schema.name) {
+      return;
+    }
+
     const newHistory = Array.from(state.schemaHistory);
     const index = state.schemaHistoryIndex;
+
     newHistory.splice(index + 1);
     newHistory.push(schema);
+
     const length = newHistory.length - 1;
+
     pluginState.set({
       ...state,
       schemaHistory: [...newHistory],
@@ -387,13 +482,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const removeObject = (object: Record<string, unknown>) => {
+    console.log('sending removeObject', object);
     const state = pluginState.get();
-    if (!state.currentSchema) {
+    const schema = state.currentSchema;
+    if (!schema) {
       return;
     }
     client.send('removeObject', {
       realm: state.selectedRealm,
-      schema: state.currentSchema.name,
+      schema: schema.name,
       object: object,
     });
   };
@@ -449,9 +546,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //refresh
   };
 
-  client.onConnect(() => {
-    getRealms();
-  });
+  const clearError = () => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      errorMsg: undefined,
+    })
+  }
 
   return {
     state: pluginState,
@@ -471,6 +572,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     toggleSortDirection,
     setSortingDirection,
     refreshState,
+    getOneObject,
+    clearError,
   };
 }
 
@@ -490,11 +593,15 @@ export function Component() {
   >('data');
   return (
     <>
-      <ViewModeTabs viewMode={viewMode} setViewMode={setViewMode} />
-      <SchemaHistoryActions />
-      <RealmSchemaSelect schemas={schemas} realms={realms} />
+      <CommonHeader
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        realms={realms}
+      />
       {viewMode === 'data' ? (
-        <div
+        <>
+          <SchemaSelect schemas={schemas} />
+         <div
           style={{
             border: '1px solid #e8e8e8',
             borderRadius: ' 4px',
@@ -503,23 +610,29 @@ export function Component() {
             height: '100%',
           }}
         >
-          <Layout.Horizontal style={{ alignItems: 'center', display: 'flex' }}>
-            <ObjectAdder schema={currentSchema} />
-          </Layout.Horizontal>
-          <DataVisualizer
-            objects={objects}
-            schemas={schemas}
-            currentSchema={currentSchema}
-            sortDirection={sortDirection}
-            sortingColumn={sortingColumn}
-          />
-        </div>
+            <Layout.Horizontal
+              style={{ alignItems: 'center', display: 'flex' }}
+            >
+              {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
+            </Layout.Horizontal>
+            <DataVisualizer
+              objects={objects}
+              schemas={schemas}
+              currentSchema={currentSchema}
+              sortDirection={sortDirection}
+              sortingColumn={sortingColumn}
+            />
+          </div>
+        </>
       ) : null}
       {viewMode === 'schemas' ? (
-        <SchemaVisualizer
-          schemas={schemas}
-          currentSchema={currentSchema}
-        ></SchemaVisualizer>
+        <>
+          <SchemaSelect schemas={schemas} />
+          <SchemaVisualizer
+            schemas={schemas}
+            currentSchema={currentSchema}
+          ></SchemaVisualizer>
+        </>
       ) : null}
       {viewMode === 'RQL' ? (
         <RealmQueryLanguage schema={currentSchema} />
