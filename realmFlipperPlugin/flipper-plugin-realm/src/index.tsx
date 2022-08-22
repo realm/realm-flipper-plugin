@@ -48,6 +48,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     prev_page_cursorId: null,
     prev_page_filterCursor: null,
     hasMore: false,
+    sortingColumnType: null,
     currentSchema: null,
   });
 
@@ -274,6 +275,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: state.filterCursor,
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
+      sortingColumnType: state.sortingColumnType,
       sortDirection: state.sortDirection,
       prev_page_filterCursor: state.prev_page_filterCursor,
       prev_page_cursorId: state.prev_page_cursorId,
@@ -346,6 +348,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
+      sortingColumnType: schema.properties["_id"].type,
       currentPage: 1,
     });
   };
@@ -438,12 +441,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumn = (sortingColumn: string | null) => {
+  const setSortingColumnAndType = (sortingColumn: string | null, sortingColumnType: string | null) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
       sortingColumn: sortingColumn,
+      sortingColumnType: sortingColumnType ? sortingColumnType : state.currentSchema?.properties["_id"].type,
       filterCursor: null,
       cursorId: null,
     });
@@ -458,7 +462,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       newSortingDirection = 'descend';
     } else {
       newSortingDirection = null;
-      setSortingColumn(null);
+      setSortingColumnAndType(null, null);
     }
     state = pluginState.get();
     pluginState.set({
@@ -503,7 +507,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     goForwardSchemaHistory,
     updateSelectedPageSize,
     setCurrentPage,
-    setSortingColumn,
+    setSortingColumnAndType,
     toggleSortDirection,
     setSortingDirection,
     refreshState,

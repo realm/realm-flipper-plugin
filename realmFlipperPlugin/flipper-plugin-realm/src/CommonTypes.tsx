@@ -19,6 +19,7 @@ export type RealmPluginState = {
   prev_page_cursorId: number | null;
   hasMore: boolean;
   prev_page_filterCursor: number | null;
+  sortingColumnType: string | null;
 };
 const typeList = [
   'objectId',
@@ -105,6 +106,7 @@ type getForwardsObjectsRequest = {
   cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
+  sortingColumnType: string | null;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_filterCursor: string | number | null;
   prev_page_cursorId: number | null;
