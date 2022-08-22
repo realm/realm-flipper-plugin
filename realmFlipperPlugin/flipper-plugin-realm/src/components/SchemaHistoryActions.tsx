@@ -24,6 +24,7 @@ const SchemaHistoryActions = () => {
     instance.goForwardSchemaHistory(newSelectedSchema);
     instance.getObjects();
   }, [state.currentSchema]);
+  console.log('current state of stuff is:', state.schemaHistoryIndex, 'and length: ', state.schemaHistory.length);
   return (
       <span style={{ display:'flex', justifyContent: 'flex-end', gap: '5px', padding:'5px' }}>
       <Button

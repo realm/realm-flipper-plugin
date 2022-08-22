@@ -5,6 +5,7 @@ import Realm, {
   CanonicalObjectSchema,
   CanonicalObjectSchemaProperty,
 } from 'realm';
+import {convertObjects} from './ConvertFunctions';
 
 const {BSON} = Realm;
 // config: Configuration,
@@ -116,7 +117,7 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
   const schemaObj = realm.schema.find(
     schema => schema.name === schemaName,
   ) as CanonicalObjectSchema;
-  
+
   console.log('object before', schemaName);
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
@@ -243,7 +244,39 @@ export default React.memo((props: {realms: Realm[]}) => {
             firstItem = objects[0];
           }
           //base64 the next and prev cursors
+          // const replacer = (key, value) => {
+          //   // if (!key) {
+          //   //   return value;
+          //   // }
+          //   console.log(
+          //     'im here with key:',
+          //     key,
+          //     'value of type:',
+          //     typeof value,
+          //     ':',
+          //     JSON.stringify(value),
+          //   );
+          //   if (
+          //     typeof value === 'object' &&
+          //     JSON.stringify(value) === '{}' &&
+          //     (value as ArrayBuffer).byteLength
+          //   ) {
+          //     return (value as ArrayBuffer).byteLength;
+          //   }
+          //   // else if (typeof value === 'object') {
 
+          //   // }
+          //   return value;
+          // };
+          // const stringified = JSON.stringify(objects[0], replacer);
+          // console.log(
+            convertObjects(
+              objects,
+              realm.schema.find(schemaa => schemaa.name === schema),
+              realm.schema,
+            )
+          // );
+          // console.log
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,

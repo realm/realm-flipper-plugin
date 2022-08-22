@@ -10,23 +10,18 @@ type PropertyType = {
   set: (value: unknown) => void;
 };
 
-export const PropertyRender = ({
-  initialValue,
-  property,
-  isPrimary,
-  set,
-}: PropertyType) => {
-  let title;
+export const typeToString = (property: SchemaProperty): string => {
+  let title = '';
   
   switch (property.type) {
     case 'list':
     case 'set':
     case 'dictionary':
     case 'object':
-      title = property.objectType;
+      title += property.objectType;
       break;
     default:
-      title = property.type;
+      title += property.type;
   }
   
   if (property.optional) {
@@ -44,6 +39,17 @@ export const PropertyRender = ({
       title += '{}';
       break;
   }
+
+  return title;
+}
+
+export const PropertyRender = ({
+  initialValue,
+  property,
+  isPrimary,
+  set,
+}: PropertyType) => {
+  const title = typeToString(property);
 
   return (
     <Layout>

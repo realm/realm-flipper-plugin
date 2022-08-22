@@ -27,6 +27,7 @@ import {
   ParcelService,
   Delivery,
   MailCarrier,
+  DataSchema,
 } from './TestData/Schemas';
 
 import {
@@ -64,6 +65,7 @@ const realm = new Realm({
     ParcelService,
     Delivery,
     MailCarrier,
+    DataSchema,
   ],
   path: 'main',
   schemaVersion: 35,

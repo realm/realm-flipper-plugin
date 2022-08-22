@@ -28,7 +28,7 @@ type TypeDescription = {
 }
 
 export const getDefault = (property: TypeDescription) => {
-  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set') return null;
+  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set' && property.type != 'dictionary') return null;
 
   const type = property.type;
   switch (type) {

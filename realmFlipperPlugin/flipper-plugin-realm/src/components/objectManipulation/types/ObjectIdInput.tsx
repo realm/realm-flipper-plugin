@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 import { ObjectId } from 'bson';
 import { Button, Col, Input, Row } from 'antd';
-import { ClearOutlined } from '@ant-design/icons';
+import { ClearOutlined, ReloadOutlined } from '@ant-design/icons';
 
 // TODO: use Realm.BSON ObjectId
 
@@ -48,8 +48,8 @@ export const ObjectIdInput = ({
             set(newVal);
             setReset((v) => v + 1);
           }}
+          icon={<ReloadOutlined />}
         >
-          refresh
         </Button>
         {property.optional ? (
           <Button
