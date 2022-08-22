@@ -62,7 +62,7 @@ PropertyType) => {
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(true);
-  const sortableTypes = new Set(['string', 'int', 'uuid']);
+  const sortableTypes = new Set(['string', 'int', 'uuid', 'date', 'decimal128', 'decimal', 'float']);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {

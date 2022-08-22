@@ -173,24 +173,17 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.receive('receivedCurrentQuery', obj => {
           console.log('received');
           const realm = realmsMap.get(obj.realm);
-          if (schemaToObjects.has(obj.schema)) {
-            schemaToObjects.get(obj.schema).removeAllListeners();
+          if (!realm || !obj.schema) {
+            return;
           }
-
-          let objects = realm?.objects(obj.schema);
-          let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
+          schemaToObjects = handleAddListener(
+            schemaToObjects,
             obj.schema,
+            realm.objects(obj.schema),
+            obj.sortingColumn,
+            obj.sortDirection,
+            onObjectsChange,
           );
-          if (obj.sortingColumn) {
-            objectsToListenTo = objects.sorted([
-              [`${obj.sortingColumn}`, false],
-              ['_id', false],
-            ]);
-          } else {
-            objectsToListenTo = objects.sorted('_id');
-          }
-          objectsToListenTo.addListener(onObjectsChange);
-          schemaToObjects.set(obj.schema, objectsToListenTo);
         });
 
         connection.receive('getRealms', () => {
@@ -215,20 +208,14 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          if (schemaToObjects.has(schema)) {
-            schemaToObjects.get(schema).removeAllListeners();
-          }
-          let objectsToListenTo: Realm.Results<Realm.Object> = objects;
-          if (obj.sortingColumn) {
-            objectsToListenTo = objects.sorted([
-              [`${obj.sortingColumn}`, false],
-              ['_id', false],
-            ]);
-          } else {
-            objectsToListenTo = objects.sorted('_id');
-          }
-          objectsToListenTo.addListener(onObjectsChange);
-          schemaToObjects.set(schema, objectsToListenTo);
+          schemaToObjects = handleAddListener(
+            schemaToObjects,
+            schema,
+            objects,
+            obj.sortingColumn,
+            obj.sortDirection,
+            onObjectsChange,
+          );
 
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
@@ -237,11 +224,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             objects = getPrevObjectsByPagination(obj, objects, limit);
           } else {
             objects = getObjectsByPagination(obj, objects, limit);
-          }
-          let lastItem, firstItem;
-          if (objects.length) {
-            lastItem = objects[objects.length - 1];
-            firstItem = objects[0];
           }
           //base64 the next and prev cursors
           // const replacer = (key, value) => {
@@ -270,11 +252,11 @@ export default React.memo((props: {realms: Realm[]}) => {
           // };
           // const stringified = JSON.stringify(objects[0], replacer);
           // console.log(
-            convertObjects(
-              objects,
-              realm.schema.find(schemaa => schemaa.name === schema),
-              realm.schema,
-            )
+          convertObjects(
+            objects,
+            realm.schema.find(schemaa => schemaa.name === schema),
+            realm.schema,
+          );
           // );
           // console.log
           connection.send('getObjects', {
@@ -290,16 +272,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           const schemas = realm.schema;
-          // for (let schema of realm.schema) {
-          //   const objects = realm.objects(schema.name);
-          //   if (schemaToObjects.has(schema.name)) {
-          //     console.log('removing all listeners from ', schema.name);
-          //     schemaToObjects.get(schema.name).removeAllListeners();
-          //   }
-          //   console.log('adding listener to', schema.name);
-          //   objects.addListener(onObjectsChange);
-          //   schemaToObjects.set(schema.name, objects);
-          // }
           connection.send('getSchemas', {schemas: schemas});
         });
 
@@ -497,6 +469,33 @@ export default React.memo((props: {realms: Realm[]}) => {
   });
   return <Text>dd</Text>;
 });
+
+function handleAddListener(
+  schemaToObjects: Map<string, Realm.Results<Realm.Object>>,
+  schema: string,
+  objects: Realm.Results<Realm.Object>,
+  sortingColumn: string,
+  sortDirection: 'ascend' | 'descend' | null,
+  onObjectsChange: (objects: any, changes: any) => void,
+) {
+  if (schemaToObjects.has(schema)) {
+    schemaToObjects.get(schema).removeAllListeners();
+  }
+  let objectsToListenTo: Realm.Results<Realm.Object> = objects;
+  const shouldSortDescending = sortDirection === 'descend';
+  if (sortingColumn) {
+    objectsToListenTo = objects.sorted([
+      [`${sortingColumn}`, shouldSortDescending],
+      ['_id', shouldSortDescending],
+    ]);
+  } else {
+    objectsToListenTo = objects.sorted('_id', shouldSortDescending);
+  }
+  objectsToListenTo.addListener(onObjectsChange);
+  schemaToObjects.set(schema, objectsToListenTo);
+
+  return schemaToObjects;
+}
 
 function getObjectsByPagination(
   obj: getObjectsQuery,
