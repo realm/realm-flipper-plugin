@@ -101,7 +101,7 @@ PropertyType) => {
     const render = (value: unknown, row: RealmObject) => {
       const defaultCell = (
         <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-          {parsePropToCell(value, property, currentSchema, schemas)}
+          {renderValue(schemas, value, property)}{' '}
         </Tooltip>
       );
       const linkedSchema = schemas.find(
@@ -163,7 +163,7 @@ PropertyType) => {
                 //@ts-ignore
                 x: env.clientX - 290,
                 //@ts-ignore
-                y: env.clientY - 190,
+                y: env.clientY - 160,
               });
             },
           };
