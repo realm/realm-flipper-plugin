@@ -6,10 +6,12 @@ export type DropdownPropertyType = {
   generateMenuItems: MenuItemGenerator;
   record: RealmObject;
   schemaProperty: SchemaProperty | null;
-  currentSchema: SchemaObject;
+  currentSchema?: SchemaObject;
   visible: boolean;
   x: number;
   y: number;
+  scrollX: number;
+  scrollY: number;
 };
 
 type MenuItem = {
@@ -68,6 +70,8 @@ export const CustomDropdown = ({
   visible,
   x,
   y,
+  scrollX,
+  scrollY
 }: DropdownPropertyType) => {
   if (visible && schemaProperty) {
     const menuItems = generateMenuItems(record, schemaProperty, currentSchema);
@@ -75,8 +79,8 @@ export const CustomDropdown = ({
       <ul
         className="popup"
         style={{
-          left: `${x}px`,
-          top: `${y}px`,
+          left: `${x + scrollX}px`,
+          top: `${y + scrollY}px`,
           position: 'absolute',
           backgroundClip: 'padding-box',
           backgroundColor: '#fff',

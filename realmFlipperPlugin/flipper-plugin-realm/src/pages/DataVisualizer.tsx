@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Layout } from 'flipper-plugin';
 import { useState } from 'react';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
@@ -8,7 +8,11 @@ import { plugin } from '..';
 import { usePlugin } from 'flipper-plugin';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
-import { MenuItemGenerator } from '../components/CustomDropdown';
+import {
+  CustomDropdown,
+  DropdownPropertyType,
+  MenuItemGenerator,
+} from '../components/CustomDropdown';
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -43,7 +47,98 @@ export const DataVisualizer = ({
     editing: false,
   });
 
+  const scrollX = useRef(0);
+  const scrollY = useRef(0);
+
   const { removeObject, getOneObject } = usePlugin(plugin);
+
+  // Generate MenuItem objects for the context menu with all necessary data and functions.
+  const generateMenuItems: MenuItemGenerator = (
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => [
+    {
+      key: 1,
+      text: 'Inspect Object',
+      onClick: () => {
+        const object = {};
+        Object.keys(row).forEach((key) => {
+          object[key] = row[key];
+        });
+        setInspectorView('Inspector - Realm Object');
+        setNewInspectData({ [schema.name]: object });
+        showSidebar ? null : setShowSidebar(true);
+      },
+    },
+    {
+      key: 2,
+      text: 'Inspect Property',
+      onClick: () => {
+        setNewInspectData({
+          [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+        });
+        setInspectorView('Inspector - Realm Object Property');
+        showSidebar ? null : setShowSidebar(true);
+      },
+    },
+    {
+      key: 3,
+      text: 'Edit Object',
+      onClick: () => editObject(row),
+    },
+    {
+      key: 4,
+      text: 'Edit Property',
+      onClick: () => editField(row, schemaProperty),
+    },
+    {
+      key: 5,
+      text: 'Delete Object',
+      onClick: () => deleteRow(row),
+    },
+  ];
+
+  // Utilities for opening and closing the context menu.
+  const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
+    generateMenuItems,
+    record: {},
+    schemaProperty: null,
+    // currentSchema: currentSchema,
+    visible: false,
+    x: 100,
+    y: 100,
+    scrollX: 0,
+    scrollY: 0,
+  });
+
+  useEffect(() => {
+    const closeDropdown = () => {
+      setdropdownProp({ ...dropdownProp, visible: false });
+    };
+    document.body.addEventListener('click', closeDropdown);
+    return () => document.body.removeEventListener('click', closeDropdown);
+  }, []);
+
+  const deleteRow = (row: RealmObject) => {
+    removeObject(row);
+  };
+
+  const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
+    setEditingObject({
+      editing: true,
+      object: row[schemaProperty.name],
+      type: 'field',
+      fieldName: schemaProperty.name,
+    });
+  };
+  const editObject = (row: RealmObject) => {
+    setEditingObject({
+      editing: true,
+      object: row,
+      type: 'object',
+    });
+  };
 
   if (!currentSchema) {
     return <div>Please select a schema.</div>;
@@ -53,10 +148,22 @@ export const DataVisualizer = ({
     return <div>No schemas found. Check selected Realm.</div>;
   }
 
+  const handleScroll = (event) => {
+    // console.log(event), console.log(window);
+    const { scrollLeft, scrollTop } = event.target;
+
+    // console.log(scrollTop);
+    scrollX.current = scrollLeft;
+    scrollY.current = scrollTop;
+
+    // console.log('scrollX.current', scrollX.current);
+    // console.log('scrollY.current', scrollY.current);
+  };
+
   // Return buttons + tableView
   return (
     <Layout.Container grow>
-      <Layout.ScrollContainer>
+      <Layout.ScrollContainer onScroll={handleScroll}>
         <Layout.Container>
           {editingObject.editing && editingObject.type === 'object' ? (
             <ObjectEdit
@@ -105,72 +212,7 @@ export const DataVisualizer = ({
   );
 
   function TableView() {
-    const deleteRow = (row: RealmObject) => {
-      removeObject(row);
-    };
-
-    const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
-      setEditingObject({
-        editing: true,
-        object: row[schemaProperty.name],
-        type: 'field',
-        fieldName: schemaProperty.name,
-      });
-    };
-    const editObject = (row: RealmObject) => {
-      setEditingObject({
-        editing: true,
-        object: row,
-        type: 'object',
-      });
-    };
-
-    // Generate MenuItem objects for the context menu with all necessary data and functions.
-    const generateMenuItems: MenuItemGenerator = (
-      row: RealmObject,
-      schemaProperty: SchemaProperty,
-      schema: SchemaObject
-    ) => [
-      {
-        key: 1,
-        text: 'Inspect Object',
-        onClick: () => {
-          const object = {};
-          Object.keys(row).forEach((key) => {
-            object[key] = row[key];
-          });
-          setInspectorView('Inspector - Realm Object');
-          setNewInspectData({ [schema.name]: object });
-          showSidebar ? null : setShowSidebar(true);
-        },
-      },
-      {
-        key: 2,
-        text: 'Inspect Property',
-        onClick: () => {
-          setNewInspectData({
-            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
-          });
-          setInspectorView('Inspector - Realm Object Property');
-          showSidebar ? null : setShowSidebar(true);
-        },
-      },
-      {
-        key: 3,
-        text: 'Edit Object',
-        onClick: () => editObject(row),
-      },
-      {
-        key: 4,
-        text: 'Edit Property',
-        onClick: () => editField(row, schemaProperty),
-      },
-      {
-        key: 5,
-        text: 'Delete Object',
-        onClick: () => deleteRow(row),
-      },
-    ];
+    const prop = { ...dropdownProp, generateMenuItems, scrollX : scrollX.current, scrollY:scrollY.current };
 
     const columns = schemaObjToColumns(currentSchema);
     return (
@@ -185,7 +227,10 @@ export const DataVisualizer = ({
           loading={loading}
           generateMenuItems={generateMenuItems}
           getOneObject={getOneObject}
+          setdropdownProp={setdropdownProp}
+          dropdownProp={dropdownProp}
         />
+        <CustomDropdown {...prop} />
       </Layout.Container>
     );
   }

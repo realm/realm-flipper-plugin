@@ -2,14 +2,12 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Button, Table, Tooltip } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import { ColumnTitle } from './ColumnTitle';
 import {
-  CustomDropdown,
-  DropdownPropertyType,
   MenuItemGenerator,
 } from './CustomDropdown';
 import { renderValue } from '../utils/Renderer';
@@ -31,6 +29,8 @@ type PropertyType = {
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
+  setdropdownProp: Function;
+  dropdownProp: Object;
 };
 
 // Receives a schema and returns column objects for the table.
@@ -56,6 +56,8 @@ export const DataTable = ({
   loading,
   generateMenuItems,
   style,
+  setdropdownProp,
+  dropdownProp,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -63,31 +65,11 @@ PropertyType) => {
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
-      return;
+      return <></>;
     },
-    // expandIcon: () => null,
     expandedRowKeys: [],
     showExpandColumn: false,
   });
-
-  // Utilities for opening and closing the context menu.
-  const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-    generateMenuItems,
-    record: {},
-    schemaProperty: null,
-    currentSchema: currentSchema,
-    visible: false,
-    x: 100,
-    y: 100,
-  });
-
-  useEffect(() => {
-    const closeDropdown = () => {
-      setdropdownProp({ ...dropdownProp, visible: false });
-    };
-    document.body.addEventListener('click', closeDropdown);
-    return () => document.body.removeEventListener('click', closeDropdown);
-  }, []);
 
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -151,7 +133,15 @@ PropertyType) => {
         if (generateMenuItems) {
           return {
             onContextMenu: (env: Event) => {
-              console.log(env);
+              // console.log(env);
+              // console.log('pageX', env.pageX);
+              // console.log('pageY', env.pageY);
+              // console.log('pageX', env.clientX);
+              // console.log('pageY', env.clientY);
+              // console.log('window.pageYOffset', window.pageYOffset);
+              // console.log('window.pageXOffset', window.pageXOffset);
+              // console.log('window', window);
+
               env.preventDefault();
               setdropdownProp({
                 ...dropdownProp,
@@ -190,19 +180,11 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  const expandRow = (
+  const expandRow =  (
     rowToExpandKey: any,
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
-    console.log('objectToRender', objectToRender);
-
-    // const fetchedObject = await getLinkedObject(
-    //   linkedSchema.name,
-    //   objectToRender[linkedSchema.primaryKey]
-    // );
-
-    // console.log('fetchedObject', fetchedObject);
 
     if (
       !rowExpansionProp.expandedRowKeys.find(
@@ -211,7 +193,6 @@ PropertyType) => {
     ) {
       const newRowExpansionProp = {
         ...rowExpansionProp,
-        expandedRowKeys: [rowToExpandKey],
         expandedRowRender: () => {
           return (
             <NestedTable
@@ -225,8 +206,12 @@ PropertyType) => {
             />
           );
         },
+        expandedRowKeys: [rowToExpandKey],
       };
-      setRowExpansionProp(newRowExpansionProp);
+
+       setRowExpansionProp(newRowExpansionProp);
+      // console.log(newRowExpansionProp);
+      
     } else {
       const newRowExpansionProp = {
         ...rowExpansionProp,
@@ -267,8 +252,6 @@ PropertyType) => {
         tableLayout="auto"
         style={style}
       />
-
-      <CustomDropdown {...dropdownProp} />
     </div>
   );
 };
@@ -294,6 +277,8 @@ const NestedTable = ({
   sortingColumn,
   generateMenuItems,
 }: PropertyType) => {
+
+  console.log('NestedTable', objects)
   return (
     <DataTable
       columns={columns}
