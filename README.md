@@ -15,4 +15,6 @@ This is a plugin for Flipper to debug Realm databases in react-native applicatio
 
 # Code of Conduct
 
+# License
+
 # Feedback
