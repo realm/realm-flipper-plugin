@@ -1,4 +1,7 @@
-![logo](https://user-images.githubusercontent.com/95337621/186097758-ccd284d1-480d-432c-95f5-35d82a255a28.svg)
+<picture>
+    <source srcset="./logo-dark.svg" media="(prefers-color-scheme: dark)" alt="realm by MongoDB">
+    <img src="./logo.svg" alt="realm by MongoDB">
+</picture>
 
 # Realm Flipper Plugin
 This is a plugin for Flipper to debug Realm databases in react-native applications.
