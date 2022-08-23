@@ -90,7 +90,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 95,
+      _id: 14,
       name: 'Jack',
       color: 'yellow',
       length: 40,
@@ -107,7 +107,7 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objectForPrimaryKey('Banana', 70));
+    realm.delete(realm.objectForPrimaryKey('Banana', 8));
   });
 }
 
