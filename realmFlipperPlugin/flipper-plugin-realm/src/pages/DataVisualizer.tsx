@@ -52,7 +52,7 @@ export const DataVisualizer = ({
 
   const { removeObject, getOneObject } = usePlugin(plugin);
 
-  // Generate MenuItem objects for the context menu with all necessary data and functions.
+  /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
   const generateMenuItems: MenuItemGenerator = (
     row: RealmObject,
     schemaProperty: SchemaProperty,
@@ -99,19 +99,19 @@ export const DataVisualizer = ({
     },
   ];
 
-  // Utilities for opening and closing the context menu.
+  /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
     generateMenuItems,
     record: {},
     schemaProperty: null,
-    // currentSchema: currentSchema,
     visible: false,
-    x: 100,
-    y: 100,
+    pointerX: 0,
+    pointerY: 0,
     scrollX: 0,
     scrollY: 0,
   });
 
+  /** Hook to close the dropdown when clicked outside of it. */
   useEffect(() => {
     const closeDropdown = () => {
       setdropdownProp({ ...dropdownProp, visible: false });
@@ -119,6 +119,13 @@ export const DataVisualizer = ({
     document.body.addEventListener('click', closeDropdown);
     return () => document.body.removeEventListener('click', closeDropdown);
   }, []);
+
+  /** Handler to keep track of the current x and y position of the scrollcontainer. This is needed to render the dropdown in the correct place when scrolled. */
+  const handleScroll = (event: React.BaseSyntheticEvent) => {
+    const { scrollLeft, scrollTop } = event.target;
+    scrollX.current = scrollLeft;
+    scrollY.current = scrollTop;
+  };
 
   const deleteRow = (row: RealmObject) => {
     removeObject(row);
@@ -132,6 +139,7 @@ export const DataVisualizer = ({
       fieldName: schemaProperty.name,
     });
   };
+
   const editObject = (row: RealmObject) => {
     setEditingObject({
       editing: true,
@@ -140,24 +148,18 @@ export const DataVisualizer = ({
     });
   };
 
-  if (!currentSchema) {
-    return <div>Please select a schema.</div>;
-  }
-
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
 
-  const handleScroll = (event) => {
-    // console.log(event), console.log(window);
-    const { scrollLeft, scrollTop } = event.target;
+  const columns = schemaObjToColumns(currentSchema);
 
-    // console.log(scrollTop);
-    scrollX.current = scrollLeft;
-    scrollY.current = scrollTop;
-
-    // console.log('scrollX.current', scrollX.current);
-    // console.log('scrollY.current', scrollY.current);
+  /** Take the current dropdownProp and update it with the current x and y scroll values.
+   This cannot be done with useState because it would cause too many rerenders.*/
+  const updatedDropdownProp = {
+    ...dropdownProp,
+    scrollX: scrollX.current,
+    scrollY: scrollY.current,
   };
 
   // Return buttons + tableView
@@ -191,7 +193,22 @@ export const DataVisualizer = ({
               value={editingObject.object}
             />
           ) : null}
-          <TableView />
+          <Layout.Container height={800}>
+            <DataTable
+              columns={columns}
+              objects={objects}
+              schemas={schemas}
+              sortDirection={sortDirection}
+              sortingColumn={sortingColumn}
+              currentSchema={currentSchema}
+              loading={loading}
+              generateMenuItems={generateMenuItems}
+              getOneObject={getOneObject}
+              setdropdownProp={setdropdownProp}
+              dropdownProp={dropdownProp}
+            />
+            <CustomDropdown {...updatedDropdownProp} />
+          </Layout.Container>
           <RealmDataInspector
             currentSchema={currentSchema}
             schemas={schemas}
@@ -211,31 +228,7 @@ export const DataVisualizer = ({
     </Layout.Container>
   );
 
-  function TableView() {
-    const prop = { ...dropdownProp, generateMenuItems, scrollX : scrollX.current, scrollY:scrollY.current };
-
-    const columns = schemaObjToColumns(currentSchema);
-    return (
-      <Layout.Container height={800}>
-        <DataTable
-          columns={columns}
-          objects={objects}
-          schemas={schemas}
-          sortDirection={sortDirection}
-          sortingColumn={sortingColumn}
-          currentSchema={currentSchema}
-          loading={loading}
-          generateMenuItems={generateMenuItems}
-          getOneObject={getOneObject}
-          setdropdownProp={setdropdownProp}
-          dropdownProp={dropdownProp}
-        />
-        <CustomDropdown {...prop} />
-      </Layout.Container>
-    );
-  }
-
-  // update inspectData and push object to GoBackStack
+  /** Setter to update the data for for the DataInspector */
   function setNewInspectData(newInspectData: RealmObject) {
     if (inspectData !== undefined) {
       goBackStack.push(inspectData);
@@ -245,17 +238,3 @@ export const DataVisualizer = ({
     setInspectData(newInspectData);
   }
 };
-
-// export const createColumns = (currentSchema: SchemaObject) => {
-//   return currentSchema.order.map((key) => {
-//     const obj = currentSchema.properties[key];
-//     const isPrimaryKey = obj.name === currentSchema.primaryKey;
-//     return {
-//       name: obj.name,
-//       isOptional: obj.optional,
-//       objectType: obj.objectType,
-//       propertyType: obj.type,
-//       isPrimaryKey: isPrimaryKey,
-//     };
-//   });
-// };

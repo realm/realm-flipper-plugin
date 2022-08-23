@@ -63,9 +63,10 @@ PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
+  /* Specify which rows to expand and what to render in the expanded row */
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
-      return <></>;
+      return;
     },
     expandedRowKeys: [],
     showExpandColumn: false,
@@ -78,17 +79,21 @@ PropertyType) => {
   const filledColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
 
-    /*  A function that is applied for every cell to specify what to render in each cell
+    /* A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
       const defaultCell = (
         <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-          {parsePropToCell(value, property, currentSchema, schemas)}
+          {renderValue(schemas, value, property)}
         </Tooltip>
       );
+
+      /* Identify if the current object has a schema in the schema list */
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
+
+      /** If a schema is found render extra a button to expand the row. */
       if (value !== null && linkedSchema) {
         return (
           <Layout.Container
@@ -132,16 +137,7 @@ PropertyType) => {
       onCell: (object: RealmObject) => {
         if (generateMenuItems) {
           return {
-            onContextMenu: (env: Event) => {
-              // console.log(env);
-              // console.log('pageX', env.pageX);
-              // console.log('pageY', env.pageY);
-              // console.log('pageX', env.clientX);
-              // console.log('pageY', env.clientY);
-              // console.log('window.pageYOffset', window.pageYOffset);
-              // console.log('window.pageXOffset', window.pageXOffset);
-              // console.log('window', window);
-
+            onContextMenu: (env: React.BaseSyntheticEvent) => {
               env.preventDefault();
               setdropdownProp({
                 ...dropdownProp,
@@ -149,11 +145,10 @@ PropertyType) => {
                 schemaProperty: property,
                 currentSchema: currentSchema,
                 visible: true,
-                // TODO: Fix this ugly hardcoded offset
                 //@ts-ignore
-                x: env.clientX - 290,
+                pointerX: env.clientX - 290,
                 //@ts-ignore
-                y: env.clientY - 190,
+                pointerY: env.clientY - 190,
               });
             },
           };
@@ -180,11 +175,14 @@ PropertyType) => {
     instance.setCurrentPage(1);
   };
 
-  const expandRow =  (
+  const expandRow = (
     rowToExpandKey: any,
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
+    /*
+    If the row is not expanded yet add its key to the list of rows to be expanded and define render function for the nested table.
+    */
 
     if (
       !rowExpansionProp.expandedRowKeys.find(
@@ -209,13 +207,15 @@ PropertyType) => {
         expandedRowKeys: [rowToExpandKey],
       };
 
-       setRowExpansionProp(newRowExpansionProp);
-      // console.log(newRowExpansionProp);
-      
+      setRowExpansionProp(newRowExpansionProp);
+      console.log('newRowExpansionProp', newRowExpansionProp);
+      console.log('rowExpansionProp', rowExpansionProp);
     } else {
+      /*If the row to be extended is already expanded remove all keys from list of expanded rows.*/
       const newRowExpansionProp = {
         ...rowExpansionProp,
         expandedRowKeys: [],
+
         expandedRowRender: () => {
           return (
             <NestedTable
@@ -277,8 +277,7 @@ const NestedTable = ({
   sortingColumn,
   generateMenuItems,
 }: PropertyType) => {
-
-  console.log('NestedTable', objects)
+  console.log('NestedTable', objects);
   return (
     <DataTable
       columns={columns}
