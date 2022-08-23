@@ -196,6 +196,8 @@ PropertyType) => {
               currentSchema={linkedSchema}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
+              setdropdownProp={setdropdownProp}
+              dropdownProp={dropdownProp}
             />
           );
         },
@@ -214,6 +216,8 @@ PropertyType) => {
               currentSchema={linkedSchema}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
+              setdropdownProp={setdropdownProp}
+              dropdownProp={dropdownProp}
             />
           );
         },
@@ -324,6 +328,8 @@ const NestedTable = ({
   currentSchema,
   sortingColumn,
   generateMenuItems,
+  setdropdownProp,
+  dropdownProp
 }: PropertyType) => {
   return (
     <DataTable
@@ -337,6 +343,8 @@ const NestedTable = ({
         boxShadow: '20px 0px 50px grey',
         marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
+      setdropdownProp ={setdropdownProp}
+      dropdownProp ={dropdownProp}
     ></DataTable>
   );
 };

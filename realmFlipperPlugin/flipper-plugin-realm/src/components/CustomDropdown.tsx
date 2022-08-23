@@ -93,6 +93,7 @@ export const CustomDropdown = ({
           padding: 0,
           textAlign: 'left',
           overflow: 'hidden',
+          zIndex: '10'
         }}
       >
         {menuItems.map((menuItem) => listItem(menuItem))}
