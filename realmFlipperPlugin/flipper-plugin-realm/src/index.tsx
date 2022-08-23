@@ -1,3 +1,4 @@
+import { ContainerFilled } from '@ant-design/icons';
 import {
   createState,
   Layout,
@@ -40,7 +41,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemaHistoryIndex: 0,
     cursorId: null,
     filterCursor: 0,
-    selectedPageSize: 100,
+    selectedPageSize: 50,
     totalObjects: 0,
     currentPage: 1,
     sortingColumn: null,
@@ -362,6 +363,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      sortingColumnType: schema.properties["_id"].type,
       currentSchema: schema,
     });
   };
@@ -375,6 +377,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
+      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -401,6 +404,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       objects: [],
       sortingColumn: null,
+      sortingColumnType: state.currentSchema?.properties["_id"].type ?? null,
       sortDirection: null,
     });
   };
@@ -531,6 +535,9 @@ export function Component() {
     'data' | 'schemas' | 'RQL' | 'schemaGraph'
   >('data');
 
+const hello = null;
+console.log("hello", hello)
+type ScrollAxis = 'x' | 'y' | 'both';
 
   return (
     <>
@@ -544,18 +551,27 @@ export function Component() {
           <SchemaSelect schemas={schemas} />
           <div
             style={{
+              flex: `1 1 0`,
+              boxSizing: 'border-box',
+              position: 'relative',
               overflow: 'auto',
-              height: '100%',
             }}
           >
-            {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
-            <DataVisualizer
-              objects={objects}
-              schemas={schemas}
-              currentSchema={currentSchema}
-              sortDirection={sortDirection}
-              sortingColumn={sortingColumn}
-            />
+            <div
+              style={{
+                position: 'absolute',
+                height: '100%',
+              }}
+            >
+              {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
+              <DataVisualizer
+                objects={objects}
+                schemas={schemas}
+                currentSchema={currentSchema}
+                sortDirection={sortDirection}
+                sortingColumn={sortingColumn}
+              />
+            </div>
           </div>
         </>
       ) : null}
