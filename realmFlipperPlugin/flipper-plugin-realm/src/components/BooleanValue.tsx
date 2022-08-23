@@ -2,6 +2,9 @@ import { Typography } from 'antd';
 import { styled, theme } from 'flipper-plugin';
 const { Text } = Typography;
 
+// Warning: Received `true` for a non-boolean attribute `active`.
+// ^ happens here
+
 const NonWrappingText = styled(Text)({
   overflow: 'hidden',
   textOverflow: 'ellipsis',

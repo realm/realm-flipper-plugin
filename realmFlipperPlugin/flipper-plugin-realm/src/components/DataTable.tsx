@@ -5,14 +5,10 @@ import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-// import { parsePropToCell } from '../utils/Parser';
-import { ColumnTitle } from './ColumnTitle';
-import {
-  CustomDropdown,
-  DropdownPropertyType,
-  MenuItemGenerator,
-} from './CustomDropdown';
 import { renderValue } from '../utils/Renderer';
+import { ColumnTitle } from './ColumnTitle';
+import { MenuItemGenerator, DropdownPropertyType, CustomDropdown } from './CustomDropdown';
+
 
 export type ColumnType = {
   optional: boolean;

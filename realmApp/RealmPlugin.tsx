@@ -8,6 +8,7 @@ import Realm, {
 import {convertObjects} from './ConvertFunctions';
 
 const {BSON} = Realm;
+const {EJSON} = BSON;
 // config: Configuration,
 //     realms: Realm[],
 //     connection: Flipper.FlipperConnection,
@@ -47,7 +48,7 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    console.log('convertLeaf', value, type);
+    // console.log('convertLeaf', value, type);
 
     // console.log(value);
     switch (type) {
@@ -154,6 +155,7 @@ const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
+// export class RealmPlugin(realms: Realm[])
   const DEFAULT_PAGE_SIZE = 100; //research right size for 0.5 second load time or possibly use a different variable.
   let realmsMap = new Map<string, Realm>();
 
@@ -206,6 +208,21 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           let objects = realm.objects(schema);
+          console.log('before parsing:', objects[0]);
+          const prop = objects[0]._id;
+          console.log(prop instanceof BSON.UUID);
+          let objj = JSON.stringify(objects[0], (key: string, value: any) => {
+            if (value instanceof BSON.UUID) {
+              // console.l
+              return value.toString();
+            }
+            return value;
+          });
+          console.log('obj:', objj);
+          let parsedObjects = EJSON.stringify(objj, {
+            relaxed: false,
+          });
+          console.log('parsed objects:', parsedObjects);
           if (!objects.length) {
             connection.send('getObjects', {
               objects: objects,
@@ -270,11 +287,11 @@ export default React.memo((props: {realms: Realm[]}) => {
           // };
           // const stringified = JSON.stringify(objects[0], replacer);
           // console.log(
-            convertObjects(
-              objects,
-              realm.schema.find(schemaa => schemaa.name === schema),
-              realm.schema,
-            )
+          convertObjects(
+            objects,
+            realm.schema.find(schemaa => schemaa.name === schema),
+            realm.schema,
+          );
           // );
           // console.log
           connection.send('getObjects', {
@@ -387,7 +404,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('trying to create:', converted);
+          // console.log('trying to create:', converted);
           try {
             realm.write(() => {
               realm.create(obj.schema, converted);
@@ -406,9 +423,9 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          console.log('got', obj.object);
+          // console.log('got', obj.object);
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted', converted);
+          // console.log('converted', converted);
 
           realm.write(() => {
             realm.create(obj.schema, converted, 'modified');

@@ -13,7 +13,7 @@ import type {Node} from 'react';
 
 import {createAllTypesTestData} from './TestData/createAllTypesTestData';
 
-const {UUID} = Realm.BSON;
+// const {UUID} = Realm.BSON;
 
 import {
   BananaSchema,

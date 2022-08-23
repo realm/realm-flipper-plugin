@@ -1,15 +1,14 @@
 import React from 'react';
-import { Alert } from 'antd';
-import { Layout } from 'flipper-plugin';
+import { Layout, usePlugin } from 'flipper-plugin';
 import { useState } from 'react';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
-import { DataTable, schemaObjToColumns } from '../components/DataTable';
-import { RealmDataInspector } from '../components/RealmDataInspector';
 import { plugin } from '..';
-import { usePlugin } from 'flipper-plugin';
-import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
-import { FieldEdit } from '../components/objectManipulation/FieldEdit';
+import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { MenuItemGenerator } from '../components/CustomDropdown';
+import { DataTable, schemaObjToColumns } from '../components/DataTable';
+import { FieldEdit } from '../components/objectManipulation/FieldEdit';
+import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
+import { RealmDataInspector } from '../components/RealmDataInspector';
+
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -58,7 +57,8 @@ export const DataVisualizer = ({
   const errorMsg = state.get().errorMsg;
   return (
     <Layout.Container grow>
-      {errorMsg ? <Alert message={errorMsg} type="error" closable onClose={() => { clearError() }}></Alert> : null}
+      {/* {errorMsg ? <Alert message={errorMsg} type="error" closable onClose={() => { clearError() }}></Alert> : null} */}
+
       <Layout.ScrollContainer>
         <Layout.Container>
           {editingObject.editing && editingObject.type === 'object' ? (

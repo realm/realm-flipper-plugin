@@ -28,7 +28,11 @@ type TypeDescription = {
 }
 
 export const getDefault = (property: TypeDescription) => {
-  if (property.optional && property.type != "dictionary" && property.type != 'list' && property.type != 'set' && property.type != 'dictionary') return null;
+  const isContainer = (type: string) => {
+    return ["dictionary", "list", "set"].includes(type); 
+  };
+
+  if (property.optional && !isContainer(property.type)) return null;
 
   const type = property.type;
   switch (type) {

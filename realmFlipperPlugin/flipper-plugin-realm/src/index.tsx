@@ -20,14 +20,12 @@ import {
   SchemaMessage,
   SchemaObject,
 } from './CommonTypes';
-import PaginationActionGroup from './components/PaginationActionGroup';
-import { DataVisualizer } from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 import { SchemaGraph } from './pages/SchemaGraph';
-import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
 import { CommonHeader } from './components/common/CommonHeader';
 import SchemaSelect from './components/SchemaSelect';
+import { DataVisualizerWrapper } from './components/DataVisualizerWrapper';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -157,7 +155,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
-
     const state = pluginState.get();
     const { newObject, index, smallerNeighbor, largerNeighbor } = data;
     // console.log(newObject);
@@ -385,7 +382,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         object: object,
       })
       .catch((reason) => {
-        pluginState.set({...state, errorMsg: reason.error});
+        pluginState.set({ ...state, errorMsg: reason.error });
       });
   };
 
@@ -593,8 +590,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       errorMsg: undefined,
-    })
-  }
+    });
+  };
 
   return {
     state: pluginState,
@@ -642,26 +639,14 @@ export function Component() {
         realms={realms}
       />
       {viewMode === 'data' ? (
-        <>
-          <SchemaSelect schemas={schemas} />
-          <Layout.Container height={800}>
-            <Layout.Horizontal
-              style={{ alignItems: 'center', display: 'flex' }}
-            >
-              {objects.length > 20 ? <PaginationActionGroup /> : null}
-              {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
-            </Layout.Horizontal>
-            <DataVisualizer
-              objects={objects}
-              schemas={schemas}
-              loading={loading}
-              currentSchema={currentSchema}
-              sortDirection={sortDirection}
-              sortingColumn={sortingColumn}
-            />
-            <PaginationActionGroup />
-          </Layout.Container>
-        </>
+        <DataVisualizerWrapper
+          schemas={schemas}
+          loading={loading}
+          objects={objects}
+          currentSchema={currentSchema}
+          sortDirection={sortDirection}
+          sortingColumn={sortingColumn}
+        />
       ) : null}
       {viewMode === 'schemas' ? (
         <>
