@@ -181,12 +181,20 @@ const DataVisualizer = ({
         ></Alert>
       ) : null}
       <div
-        onScroll={handleScroll}
-        style={{
-          overflow: 'auto',
-          height: '100%',
-        }}
-      >
+          onScroll={handleScroll}
+            style={{
+              flex: `1 1 0`,
+              boxSizing: 'border-box',
+              position: 'relative',
+              overflow: 'auto',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                height: '100%',
+              }}
+            >
         {editingObject.editing && editingObject.type === 'object' ? (
           <ObjectEdit
             schema={currentSchema}
@@ -242,6 +250,7 @@ const DataVisualizer = ({
           setNewInspectData={setNewInspectData}
           view={inspectorView}
         />
+      </div>
       </div>
     </>
   );

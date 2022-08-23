@@ -535,10 +535,6 @@ export function Component() {
     'data' | 'schemas' | 'RQL' | 'schemaGraph'
   >('data');
 
-const hello = null;
-console.log("hello", hello)
-type ScrollAxis = 'x' | 'y' | 'both';
-
   return (
     <>
       <CommonHeader
@@ -549,20 +545,6 @@ type ScrollAxis = 'x' | 'y' | 'both';
       {viewMode === 'data' ? (
         <>
           <SchemaSelect schemas={schemas} />
-          <div
-            style={{
-              flex: `1 1 0`,
-              boxSizing: 'border-box',
-              position: 'relative',
-              overflow: 'auto',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                height: '100%',
-              }}
-            >
               {currentSchema ? <ObjectAdd schema={currentSchema} /> : null}
               <DataVisualizer
                 objects={objects}
@@ -571,8 +553,6 @@ type ScrollAxis = 'x' | 'y' | 'both';
                 sortDirection={sortDirection}
                 sortingColumn={sortingColumn}
               />
-            </div>
-          </div>
         </>
       ) : null}
       {viewMode === 'schemas' ? (
