@@ -28,7 +28,7 @@ type PropertyType = {
   objects: RealmObject[];
   schemas: SchemaObject[];
   currentSchema: SchemaObject;
-  sortDirection: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
@@ -161,7 +161,7 @@ PropertyType) => {
       },
       sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
       sortOrder:
-        state.sortingColumn === property.name ? state.sortDirection : null,
+        state.sortingColumn === property.name ? state.sortingDirection : null,
     };
   });
 
@@ -254,7 +254,7 @@ PropertyType) => {
           state.currentSchema?.properties[sorter.field].type
         );
       } else {
-        instance.toggleSortDirection();
+        instance.toggleSortingDirection();
       }
     }
     instance.getObjects();

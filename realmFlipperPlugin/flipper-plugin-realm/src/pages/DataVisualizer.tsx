@@ -17,7 +17,7 @@ type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
   currentSchema: SchemaObject | null;
-  sortDirection: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
 };
 
@@ -25,7 +25,7 @@ const DataVisualizer = ({
   objects,
   schemas,
   currentSchema,
-  sortDirection,
+  sortingDirection,
   sortingColumn,
 }: PropertyType) => {
   const [inspectData, setInspectData] = useState<RealmObject>();
@@ -225,7 +225,7 @@ const DataVisualizer = ({
           columns={columns}
           objects={objects}
           schemas={schemas}
-          sortDirection={sortDirection}
+          sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
           currentSchema={currentSchema}
           generateMenuItems={generateMenuItems}

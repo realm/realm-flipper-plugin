@@ -1,4 +1,5 @@
 import { Typography } from 'antd';
+import React from 'react';
 import { styled, theme } from 'flipper-plugin';
 const { Text } = Typography;
 
@@ -8,17 +9,24 @@ const NonWrappingText = styled(Text)({
   whiteSpace: 'nowrap',
 });
 
-export const BooleanValue = styled(NonWrappingText)<{ active?: boolean }>(
-  (props) => ({
-    '&::before': {
-      content: '""',
-      display: 'inline-block',
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: props.active ? theme.successColor : theme.errorColor,
-      marginRight: 5,
-      marginTop: 1,
-    },
-  })
-);
+const BooleanValue = (props: { active?: boolean; value: string }) => {
+  return (
+    <>
+      <NonWrappingText
+        style={{
+          content: '""',
+          display: 'inline-block',
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: props.active ? theme.successColor : theme.errorColor,
+          marginRight: 7,
+          marginTop: 1,
+        }}
+      ></NonWrappingText>
+      <span>{props.value}</span>
+    </>
+  );
+};
+
+export default BooleanValue;
