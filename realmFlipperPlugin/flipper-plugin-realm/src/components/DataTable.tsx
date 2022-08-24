@@ -32,6 +32,8 @@ type PropertyType = {
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
+  setdropdownProp: Function;
+  dropdownProp: Object;
 };
 
 // Receives a schema and returns column objects for the table.
@@ -56,6 +58,10 @@ export const DataTable = ({
   currentSchema,
   generateMenuItems,
   style,
+  setdropdownProp,
+  dropdownProp,
+  scrollX,
+  scrollY
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -72,25 +78,6 @@ PropertyType) => {
     expandedRowKeys: [],
     showExpandColumn: false,
   });
-
-  // Utilities for opening and closing the context menu.
-  const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-    generateMenuItems,
-    record: {},
-    schemaProperty: null,
-    currentSchema: currentSchema,
-    visible: false,
-    x: 100,
-    y: 100,
-  });
-
-  useEffect(() => {
-    const closeDropdown = () => {
-      setdropdownProp({ ...dropdownProp, visible: false });
-    };
-    document.body.addEventListener('click', closeDropdown);
-    return () => document.body.removeEventListener('click', closeDropdown);
-  }, []);
 
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -154,7 +141,6 @@ PropertyType) => {
         if (generateMenuItems) {
           return {
             onContextMenu: (env: Event) => {
-              console.log(env);
               env.preventDefault();
               setdropdownProp({
                 ...dropdownProp,
@@ -162,11 +148,12 @@ PropertyType) => {
                 schemaProperty: property,
                 currentSchema: currentSchema,
                 visible: true,
-                // TODO: Fix this ugly hardcoded offset
                 //@ts-ignore
-                x: env.clientX - 290,
+                pointerX: env.clientX - 290,
                 //@ts-ignore
-                y: env.clientY - 160,
+                pointerY: env.clientY - 160,
+                scrollX,
+                scrollY
               });
             },
           };
@@ -209,6 +196,8 @@ PropertyType) => {
               currentSchema={linkedSchema}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
+              setdropdownProp={setdropdownProp}
+              dropdownProp={dropdownProp}
             />
           );
         },
@@ -227,6 +216,8 @@ PropertyType) => {
               currentSchema={linkedSchema}
               sortingColumn={null}
               generateMenuItems={generateMenuItems}
+              setdropdownProp={setdropdownProp}
+              dropdownProp={dropdownProp}
             />
           );
         },
@@ -314,7 +305,6 @@ PropertyType) => {
           style={style}
         />
       </InfiniteScroll>
-      <CustomDropdown {...dropdownProp} />
     </div>
   );
 };
@@ -338,6 +328,8 @@ const NestedTable = ({
   currentSchema,
   sortingColumn,
   generateMenuItems,
+  setdropdownProp,
+  dropdownProp
 }: PropertyType) => {
   return (
     <DataTable
@@ -351,6 +343,8 @@ const NestedTable = ({
         boxShadow: '20px 0px 50px grey',
         marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
+      setdropdownProp ={setdropdownProp}
+      dropdownProp ={dropdownProp}
     ></DataTable>
   );
 };
