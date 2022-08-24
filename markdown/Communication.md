@@ -57,7 +57,7 @@ When an object is edited from the Realm, an event is sent to the desktop plugin,
 The plugin uses Realm Collection listeners to keep an updated view on the desktop plugin, as a key feature of Realm Databases is Live Objects. The event listeners `liveObjectDeleted` and `liveObjectEdited`, send an index in the database to delete or edit. Consequently, it's crucial that the listener constantly reflects what the user is currently viewing. For this purpose, the app implements two events, `getCurrentQuery` and `receivedCurrentQuery` who work together to keep the application updated on what the desktop plugin views, indenpendently of what is happening on the React Native app. This means that the user can (hot) reload the React Native app without the Realm Collection listeners becoming stale in regards to what the desktop plugin is showing. A typical roundtrip consists of:
 
 1. The React Native app `connection.send('getCurrentQuery')`s to the plugin.
-2. The desktop plugin listens for `'getCurrentQuery'`, and `client.send('receivedCurrentQuery')`s back the current query state, consisting of the current schema, realm, sortingColumn and sortDirection.
+2. The desktop plugin listens for `'getCurrentQuery'`, and `client.send('receivedCurrentQuery')`s back the current query state, consisting of the current schema, realm, sortingColumn and sortingDirection.
 3. The app listens for `'receivedCurrentQuery'` and attaches a new listener according to the received information.
 ### `getCurrentQuery`
 The desktop plugin listens for `getCurrentQuery` as to send back the current query state to the app.

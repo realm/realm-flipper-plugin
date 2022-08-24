@@ -7,6 +7,7 @@ import Realm, {
 } from 'realm';
 import {convertObjects} from './ConvertFunctions';
 import {Listener} from './Listener';
+import {Query} from './Query';
 const {BSON} = Realm;
 // config: Configuration,
 //     realms: Realm[],
@@ -23,6 +24,7 @@ type getObjectsQuery = {
   cursorId: number;
   filterCursor: number | string;
   limit: number;
+  sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
   sortingColumnType: string;
 };
@@ -155,7 +157,7 @@ const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
 export default React.memo((props: {realms: Realm[]}) => {
   const DEFAULT_PAGE_SIZE = 50;
   let realmsMap = new Map<string, Realm>();
-  let listener: Listener;
+  let listenerHandler: Listener;
   const {realms} = props;
   useEffect(() => {
     let schemaToObjects = new Map<string, Realm.Results<Realm.Object>>();
@@ -176,15 +178,15 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
 
-          listener = new Listener(
+          listenerHandler = new Listener(
             schemaToObjects,
             obj.schema,
             realm.objects(obj.schema),
             obj.sortingColumn,
-            obj.sortDirection,
+            obj.sortingDirection,
             connection,
           );
-          listener.handleAddListener();
+          listenerHandler.handleAddListener();
         });
 
         connection.receive('getRealms', (_, responder) => {
@@ -195,31 +197,32 @@ export default React.memo((props: {realms: Realm[]}) => {
 
         connection.receive('getObjects', (req, responder) => {
           const realm = realmsMap.get(req.realm);
-          const schema = req.schema;
           if (!realm) {
             responder.error({message: 'No realm found'});
             return;
           }
+          const {schema, sortingColumn, sortingDirection, limit} = req;
           let objects = realm.objects(schema);
           if (!objects.length) {
             responder.error({message: 'No objects found in the schema'});
             return;
           }
-          listener = new Listener(
+          listenerHandler = new Listener(
             schemaToObjects,
             schema,
             objects,
-            req.sortingColumn,
-            req.sortDirection,
+            sortingColumn,
+            sortingDirection,
             connection,
           );
-          listener.handleAddListener();
-          let limit = req.limit ?? DEFAULT_PAGE_SIZE;
-          const objectsLength = objects.length;
+          listenerHandler.handleAddListener();
+          const totalObjects = objects.length;
           console.log('received', req);
-          objects = getObjectsByPagination(req, objects, limit, responder);
+          let queryHandler = new Query(req, objects);
+          objects = queryHandler.getObjectsByPagination();
           if (!objects) {
             responder.error({message: 'No objects found'});
+            return;
           }
           convertObjects(
             objects,
@@ -228,7 +231,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           responder.success({
             objects: objects,
-            total: objectsLength,
+            total: totalObjects,
             hasMore: objects.length >= limit,
           });
         });
@@ -390,12 +393,17 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
       },
       onDisconnect() {
-        listener.removeAllListeners();
-        console.log('Disconnected');
+        if (listenerHandler) {
+          listenerHandler.removeAllListeners();
+          console.log('Disconnected');
+        }
       },
     });
     return () => {
-      listener.removeAllListeners();
+      if (listenerHandler) {
+        listenerHandler.removeAllListeners();
+        console.log('Disconnected');
+      }
     };
   });
   return <></>;
@@ -407,7 +415,7 @@ function getObjectsByPagination(
   responder: Flipper.FlipperResponder,
 ) {
   let filterCursor: string | number | null = null;
-  const shouldSortDescending = obj.sortDirection === 'descend';
+  const shouldSortDescending = obj.sortingDirection === 'descend';
   const cursorId =
     obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
   if (obj.sortingColumn) {

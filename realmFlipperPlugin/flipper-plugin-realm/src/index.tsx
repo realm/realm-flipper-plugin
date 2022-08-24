@@ -45,7 +45,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     totalObjects: 0,
     currentPage: 1,
     sortingColumn: null,
-    sortDirection: null,
+    sortingDirection: null,
     hasMore: false,
     sortingColumnType: null,
     currentSchema: null,
@@ -62,7 +62,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: state.currentSchema.name,
       realm: state.selectedRealm,
       sortingColumn: state.sortingColumn,
-      sortDirection: state.sortDirection,
+      sortingDirection: state.sortingDirection,
     });
   });
 
@@ -227,7 +227,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       limit: state.selectedPageSize,
       sortingColumn: state.sortingColumn,
       sortingColumnType: state.sortingColumnType,
-      sortDirection: state.sortDirection,
+      sortingDirection: state.sortingDirection,
     }).then((response: RealmsMessage) => {
       const state = pluginState.get();
       if (!response.objects && response.objects.length) {
@@ -380,7 +380,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       sortingColumnType: state.currentSchema?.properties['_id'].type ?? null,
-      sortDirection: null,
+      sortingDirection: null,
     });
   };
 
@@ -437,12 +437,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const toggleSortDirection = () => {
+  const toggleSortingDirection = () => {
     let state = pluginState.get();
     let newSortingDirection: 'ascend' | 'descend' | null = null;
-    if (state.sortDirection === null) {
+    if (state.sortingDirection === null) {
       newSortingDirection = 'ascend';
-    } else if (state.sortDirection === 'ascend') {
+    } else if (state.sortingDirection === 'ascend') {
       newSortingDirection = 'descend';
     } else {
       newSortingDirection = null;
@@ -451,7 +451,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     state = pluginState.get();
     pluginState.set({
       ...state,
-      sortDirection: newSortingDirection,
+      sortingDirection: newSortingDirection,
       filterCursor: null,
       objects: [],
     });
@@ -461,7 +461,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      sortDirection: direction,
+      sortingDirection: direction,
     });
   };
 
@@ -492,7 +492,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     setSelectedPageSize,
     setCurrentPage,
     setSortingColumnAndType,
-    toggleSortDirection,
+    toggleSortingDirection,
     setSortingDirection,
     refreshState,
     getOneObject,
@@ -506,7 +506,7 @@ export function Component() {
     realms,
     objects,
     schemas,
-    sortDirection,
+    sortingDirection,
     sortingColumn,
     currentSchema,
   } = useValue(state);
@@ -530,7 +530,7 @@ export function Component() {
                 objects={objects}
                 schemas={schemas}
                 currentSchema={currentSchema}
-                sortDirection={sortDirection}
+                sortingDirection={sortingDirection}
                 sortingColumn={sortingColumn}
               />
         </>
