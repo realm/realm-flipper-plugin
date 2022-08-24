@@ -1,4 +1,3 @@
-import { Decimal128, ObjectId, UUID } from "bson";
 
 export type RealmPluginState = {
   realms: string[];
@@ -18,6 +17,8 @@ export type RealmPluginState = {
   sortDirection: 'ascend' | 'descend' | null;
   hasMore: boolean;
   sortingColumnType: string | null;
+  query: string;
+  errorMessage: string;
 };
 const typeList = [
   'objectId',
@@ -106,6 +107,7 @@ type getForwardsObjectsRequest = {
   sortingColumn: string | null;
   sortingColumnType: string | null;
   sortDirection: 'ascend' | 'descend' | null;
+  query: string;
 };
 
 export type ObjectRequest = {

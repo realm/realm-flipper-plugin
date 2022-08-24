@@ -194,6 +194,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         connection.receive('getObjects', (req, responder) => {
+          console.log('message: ', req);
           const realm = realmsMap.get(req.realm);
           const schema = req.schema;
           if (!realm) {
@@ -231,8 +232,15 @@ export default React.memo((props: {realms: Realm[]}) => {
           let limit = req.limit ?? DEFAULT_PAGE_SIZE;
           const objectsLength = objects.length;
           console.log('received', req);
-          objects = getObjectsByPagination(req, objects, limit, responder);
+          objects = getObjectsByPagination(
+            req,
+            objects,
+            limit,
+            req.query,
+            responder,
+          );
           if (!objects) {
+            return;
             responder.error({message: 'No objects found'});
           }
           convertObjects(
@@ -265,7 +273,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           ) => {
             const realm = realmsMap.get(obj.realm);
             if (!realm) {
-              responder.error({message: "No realm found."})
+              responder.error({message: 'No realm found.'});
             }
             const schemaObj = realm.schema.find(s => s.name === obj.schema);
             let pk;
@@ -310,30 +318,30 @@ export default React.memo((props: {realms: Realm[]}) => {
           },
         );
 
-        connection.receive('executeQuery', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
-          if (!realm) {
-            responder.error({message: "No realm found."})
-            return;
-          }
-          const objs = realm.objects(obj.schema);
-          if (obj.query === '') {
-            responder.success(objs);
-            // connection.send('executeQuery', {result: objs});
-            return;
-          }
+        // connection.receive('executeQuery', (obj, responder) => {
+        //   const realm = realmsMap.get(obj.realm);
+        //   if (!realm) {
+        //     responder.error({message: 'No realm found.'});
+        //     return;
+        //   }
+        //   const objs = realm.objects(obj.schema);
+        //   if (obj.query === '') {
+        //     responder.success(objs);
+        //     // connection.send('executeQuery', {result: objs});
+        //     return;
+        //   }
 
-          let res;
-          try {
-            res = objs.filtered(obj.query);
-            responder.success(res);
-          } catch (err) {
-            responder.error({message: err.message});
-            // res = {result: err.message};
-          }
-          // responder.error(res);
-          // connection.send('executeQuery', res);
-        });
+        //   let res;
+        //   try {
+        //     res = objs.filtered(obj.query);
+        //     responder.success(res);
+        //   } catch (err) {
+        //     responder.error({message: err.message});
+        //     // res = {result: err.message};
+        //   }
+        //   // responder.error(res);
+        //   // connection.send('executeQuery', res);
+        // });
         connection.receive('addObject', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
@@ -483,6 +491,7 @@ function getObjectsByPagination(
   obj: getObjectsQuery,
   objects: Realm.Results<Realm.Object>,
   limit: number,
+  query: string,
   responder: Flipper.FlipperResponder,
 ) {
   let filterCursor: string | number | null = null;
@@ -512,6 +521,7 @@ function getObjectsByPagination(
       filterCursor,
       objects,
       limit,
+      query,
       responder,
     );
   }
@@ -557,8 +567,21 @@ function getObjectsAscending(
   filterCursor: number | string | null,
   objects: Realm.Results<Realm.Object>,
   limit: number,
+  query: string,
+  responder: Flipper.FlipperResponder,
 ) {
   const {sortingColumn} = obj;
+  if (query) {
+    try {
+      objects = objects.filtered(query);
+    } catch (e) {
+      console.log('error, returning:', e.message);
+      responder.error({
+        message: e.message,
+      });
+      return;
+    }
+  }
   if (sortingColumn) {
     console.log('cursorId is', cursorId);
     objects = objects

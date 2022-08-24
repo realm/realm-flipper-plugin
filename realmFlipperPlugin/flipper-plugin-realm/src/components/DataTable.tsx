@@ -301,7 +301,7 @@ PropertyType) => {
           onChange={handleOnChange}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
-          tableLayout="auto"
+          // tableLayout="auto"
           style={style}
         />
       </InfiniteScroll>

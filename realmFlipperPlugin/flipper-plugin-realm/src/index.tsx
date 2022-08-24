@@ -1,7 +1,5 @@
-import { ContainerFilled } from '@ant-design/icons';
 import {
   createState,
-  Layout,
   PluginClient,
   usePlugin,
   useValue,
@@ -15,7 +13,7 @@ import {
   Events,
   Methods,
   ObjectMessage,
-  ObjectsMessage,
+  RealmObject,
   RealmPluginState,
   RealmsMessage,
   SchemaMessage,
@@ -23,10 +21,8 @@ import {
 } from './CommonTypes';
 import { CommonHeader } from './components/common/CommonHeader';
 import { DataVisualizerWrapper } from './components/DataVisualizerWrapper';
-import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
 import SchemaSelect from './components/SchemaSelect';
-import DataVisualizer from './pages/DataVisualizer';
-import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
+import { RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
 
@@ -50,6 +46,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     hasMore: false,
     sortingColumnType: null,
     currentSchema: null,
+    query: '',
+    errorMessage: ''
   });
 
   client.onMessage('getOneObject', (data: ObjectMessage) => {
@@ -213,6 +211,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjects = (
     schema?: string | null,
     realm?: string | null,
+    toRestore?: RealmObject[],
   ) => {
     const state = pluginState.get();
     if (!state.currentSchema) {
@@ -229,6 +228,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortingColumn: state.sortingColumn,
       sortingColumnType: state.sortingColumnType,
       sortDirection: state.sortDirection,
+      query: state.query,
     }).then((response: RealmsMessage) => {
       const state = pluginState.get();
       if (!response.objects && response.objects.length) {
@@ -246,6 +246,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
         totalObjects: response.total,
         hasMore: response.hasMore,
       });
+    }).catch(reason => {
+      pluginState.set({
+        ...state,
+        errorMessage: reason.message,
+        objects: toRestore ? toRestore : [],
+      })
     });
   };
 
@@ -273,14 +279,33 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const executeQuery = async (query: string, schema: string) => {
+  const executeQuery = async (query: string) => {
     const state = pluginState.get();
-    addToHistory(query);
-    return client.send('executeQuery', {
+    // addToHistory(query);
+    // clear pagination...
+    const prevObjects = Array.from(state.objects);
+    pluginState.set({
+      ...state,
+      schemaHistoryIndex: length,
+      filterCursor: null,
+      cursorId: null,
+      sortingColumn: null,
+      sortingColumnType: state.currentSchema.properties['_id'].type,
+      currentPage: 1,
       query: query,
-      realm: state.selectedRealm,
-      schema: schema,
+      objects: [],
     });
+    getObjects(state.currentSchema?.name, state.selectedRealm, prevObjects);
+
+    // handle case when the query was unsuccessful - restore previous objects
+    // console.log('previous objects', prevObjects, res)
+    // if (!res) {
+    //   pluginState.set({
+    //     ...pluginState.get(),
+    //     objects: prevObjects
+    //   });
+    //   console.log('after set:', pluginState);
+    // }
   };
 
   const addObject = (object: Record<string, unknown>) => {

@@ -9,6 +9,8 @@ import {
   Row,
 } from 'antd';
 import React, { useState } from 'react';
+import { usePlugin } from 'flipper-plugin';
+import { plugin } from '..';
 
 type InputType = {
   execute: (query: string) => undefined | 'string';
@@ -21,32 +23,33 @@ const wrapItem = (query: string, id: number) => ({
 });
 
 export const RealmQueryInput = ({ execute }: InputType) => {
+  const { state } = usePlugin(plugin);
   const [query, setQuery] = useState('');
-  const [errorMsg, setErrorMsg] = useState<string>('');
+  // const [errorMsg, setErrorMsg] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(true);
 
   const executeQuery = () => {
     console.log('execute query');
-    const res = execute(query);
-    if (res === undefined) {
-      // success
-      setErrorMsg('');
-    } else {
-      setErrorMsg(res);
-    }
+    execute(query);
+    // if (res === undefined) {
+    //   // success
+    //   setErrorMsg('');
+    // } else {
+    //   setErrorMsg(res);
+    // }
   };
   const queryHistory = [' hist1', 'hist2'];
   const favourites = ['fav1'];
   return (
     <>
-      {errorMsg ? (
+      {state.get().errorMessage ? (
         <Alert
           message="Error"
-          description={errorMsg}
+          description={state.get().errorMessage}
           type="error"
           showIcon
           banner
-          onClose={() => setErrorMsg('')}
+          // onClose={{}}
         />
       ) : null}
       <Row gutter={[2, 0]} align="middle">

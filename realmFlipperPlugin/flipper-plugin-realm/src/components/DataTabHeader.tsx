@@ -1,5 +1,7 @@
 import { Col, Row } from 'antd';
+import { usePlugin } from 'flipper-plugin';
 import React from 'react';
+import { plugin } from '..';
 import { SchemaObject } from '../CommonTypes';
 import { ObjectAdd } from './objectManipulation/ObjectAdd';
 import { RealmQueryInput } from './Query';
@@ -9,15 +11,13 @@ type InputType = {
 };
 
 export const DataTabHeader = ({ currentSchema }: InputType) => {
+  const { executeQuery } = usePlugin(plugin);
   return (
     <Row gutter={[8, 8]}>
       <ObjectAdd schema={currentSchema} />
       <Col span={24}>
         <RealmQueryInput
-          execute={(query) => {
-            console.log('supposed to execute query: ' + query);
-            return undefined;
-          }}
+          execute={executeQuery}
         />
       </Col>
     </Row>
