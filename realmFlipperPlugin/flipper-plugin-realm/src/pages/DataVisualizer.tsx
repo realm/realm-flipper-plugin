@@ -1,12 +1,15 @@
 import { Alert } from 'antd';
-import { Layout, usePlugin } from 'flipper-plugin';
+import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
-import { RealmDataInspector } from '../components/RealmDataInspector';
+import {
+  RealmDataInspector,
+  InspectionDataType,
+} from '../components/RealmDataInspector';
 import {
   CustomDropdown,
   DropdownPropertyType,
@@ -28,11 +31,12 @@ const DataVisualizer = ({
   sortDirection,
   sortingColumn,
 }: PropertyType) => {
-  const [inspectData, setInspectData] = useState<RealmObject>();
-  const [inspectorView, setInspectorView] = useState<string>();
+  const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
-  const [goBackStack, setGoBackStack] = useState<Array<RealmObject>>([]);
-  const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
+  const [goBackStack, setGoBackStack] = useState<Array<InspectionDataType>>([]);
+  const [goForwardStack, setGoForwardStack] = useState<
+    Array<InspectionDataType>
+  >([]);
 
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
@@ -50,13 +54,9 @@ const DataVisualizer = ({
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
-  const handleDataInspector = (
-    inspectorView: string,
-    inspectData: Record<string, unknown>
-  ) => {
+  const handleDataInspector = (inspectionData: InspectionDataType) => {
     showSidebar ? null : setShowSidebar(true);
-    setNewInspectData(inspectData, inspectorView);
-     setInspectorView(inspectorView)
+    setNewInspectionData(inspectionData);
   };
 
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
@@ -73,28 +73,24 @@ const DataVisualizer = ({
         Object.keys(row).forEach((key) => {
           object[key] = row[key];
         });
-        handleDataInspector('Inspector - Realm Object', {
-          [schema.name]: object,
+        handleDataInspector({
+          data: {
+            [schema.name]: object,
+          },
+          view: 'object',
         });
-
-        // setInspectorView('Inspector - Realm Object');
-        // setNewInspectData({ [schema.name]: object });
-        // showSidebar ? null : setShowSidebar(true);
       },
     },
     {
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
-        handleDataInspector('Inspector - Realm Object Property', {
-          [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+        handleDataInspector({
+          data: {
+            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+          },
+          view: 'property',
         });
-
-        // setNewInspectData({
-        //   [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
-        // });
-        // setInspectorView('Inspector - Realm Object Property');
-        // showSidebar ? null : setShowSidebar(true);
       },
     },
     {
@@ -257,44 +253,29 @@ const DataVisualizer = ({
           <RealmDataInspector
             currentSchema={currentSchema}
             schemas={schemas}
-            inspectData={inspectData}
-            setInspectData={setInspectData}
+            inspectionData={inspectionData}
+            setInspectionData={setInspectionData}
             showSidebar={showSidebar}
             setShowSidebar={setShowSidebar}
             goBackStack={goBackStack}
             setGoBackStack={setGoBackStack}
             goForwardStack={goForwardStack}
             setGoForwardStack={setGoForwardStack}
-            setNewInspectData={setNewInspectData}
-          view={inspectorView}
+            setNewInspectionData={setNewInspectionData}
           />
         </div>
       </div>
     </>
   );
-  // update inspectData and push object to GoBackStack
-  function setNewInspectData(newInspectData: RealmObject) {
-    if (inspectData !== undefined) {
-      goBackStack.push(inspectData);
+  // update inspectionData and push object to GoBackStack
+  function setNewInspectionData(newInspectionData: InspectionDataType) {
+    if (inspectionData !== undefined) {
+      goBackStack.push(inspectionData);
       setGoBackStack(goBackStack);
       setGoForwardStack([]);
     }
-    setInspectData(newInspectData);
+    setInspectionData(newInspectionData);
   }
 };
-
-// export const createColumns = (currentSchema: SchemaObject) => {
-//   return currentSchema.order.map((key) => {
-//     const obj = currentSchema.properties[key];
-//     const isPrimaryKey = obj.name === currentSchema.primaryKey;
-//     return {
-//       name: obj.name,
-//       isOptional: obj.optional,
-//       objectType: obj.objectType,
-//       propertyType: obj.type,
-//       isPrimaryKey: isPrimaryKey,
-//     };
-//   });
-// };
 
 export default DataVisualizer;

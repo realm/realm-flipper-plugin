@@ -1,20 +1,18 @@
-import { EnterOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Table, Tooltip } from 'antd';
+import { EnterOutlined } from '@ant-design/icons';
+import { Button, Table } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import {
-  CustomDropdown,
-  DropdownPropertyType,
   MenuItemGenerator,
 } from './CustomDropdown';
+import { InspectionDataType } from '../components/RealmDataInspector';
 import InfiniteScroll from 'react-infinite-scroller';
-import Link from 'antd/lib/typography/Link';
 
 export type ColumnType = {
   optional: boolean;
@@ -37,10 +35,7 @@ type PropertyType = {
   dropdownProp: Object;
   scrollX: number;
   scrollY: number;
-  handleDataInspector: (
-    string: string,
-    inspectData: Record<string, unknown>
-  ) => void;
+  handleDataInspector: (inspectionData: InspectionDataType) => void;
 };
 
 // Receives a schema and returns column objects for the table.
@@ -103,12 +98,14 @@ PropertyType) => {
     displayText: string;
     addThreeDots: boolean;
     value: Record<string, unknown>;
+    inspectorView: 'object' | 'property'
   };
 
   const ClickableText = ({
     displayText,
     addThreeDots,
     value,
+    inspectorView
   }: ClickableTextType) => {
     const [isHovering, setHovering] = useState(false);
     return (
@@ -118,7 +115,7 @@ PropertyType) => {
             display: 'inline',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
-          onClick={() => handleDataInspector('Inspector - Realm Object', value)}
+          onClick={() => handleDataInspector({ data: value, view: inspectorView})}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
@@ -149,16 +146,6 @@ PropertyType) => {
         schemas
       );
 
-      if (typeof cellValue === 'string' && cellValue.length > 70) {
-        return (
-          <ClickableText
-            value={value}
-            displayText={cellValue.substring(0, 70)}
-            addThreeDots={true}
-          />
-        );
-      }
-
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
@@ -185,12 +172,26 @@ PropertyType) => {
               }
               ghost
             />
-            { <ClickableText
-            value={value}
-            displayText={cellValue}
-            addThreeDots={false}
-          />}
+            {
+              <ClickableText
+                value={value}
+                displayText={cellValue}
+                addThreeDots={false}
+                inspectorView='object'
+              />
+            }
           </Layout.Container>
+        );
+      }
+
+      if (typeof cellValue === 'string' && cellValue.length > 70) {
+        return (
+          <ClickableText
+            value={value}
+            displayText={cellValue.substring(0, 70)}
+            addThreeDots={true}
+            inspectorView="property"
+          />
         );
       }
       return cellValue;
@@ -409,7 +410,6 @@ const NestedTable = ({
       generateMenuItems={generateMenuItems}
       style={{
         boxShadow: '20px 0px 50px grey',
-       
       }}
       setdropdownProp={setdropdownProp}
       dropdownProp={dropdownProp}
