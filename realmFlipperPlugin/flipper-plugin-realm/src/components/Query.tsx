@@ -6,8 +6,6 @@ import {
   Button,
   Checkbox,
   Col,
-  Layout,
-  Radio,
   Row,
 } from 'antd';
 import React, { useState } from 'react';

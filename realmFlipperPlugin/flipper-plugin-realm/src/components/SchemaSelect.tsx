@@ -32,7 +32,7 @@ const SchemaSelect = ({
         return;
       }
     });
-    instance.updateSelectedSchema(selectedSchemaObject);
+    instance.setSelectedSchema(selectedSchemaObject);
     instance.getObjects();
   };
 

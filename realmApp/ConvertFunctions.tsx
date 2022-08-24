@@ -24,12 +24,12 @@ const convertObject = (
       return value;
     }
     if (property.type === 'mixed') {
-      console.log('got mixed:', value, 'with type:', typeof value);
-      //   console.log('value is', value instanceof Date, ' a Date');
-      console.log(
-        'methods:',
-        value !== null ? Object.getOwnPropertyNames(value) : undefined,
-      );
+      // console.log('got mixed:', value, 'with type:', typeof value);
+      // //   console.log('value is', value instanceof Date, ' a Date');
+      // console.log(
+      //   'methods:',
+      //   value !== null ? Object.getOwnPropertyNames(value) : undefined,
+      // );
       return value;
     } else {
       return value;

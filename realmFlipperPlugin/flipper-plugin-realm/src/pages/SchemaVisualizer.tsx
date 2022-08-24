@@ -91,7 +91,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
 
   const onSchemaSelected = (selectedSchema: SchemaObject) => {
     // instance.getObjects();
-    instance.updateSelectedSchema(selectedSchema);
+    instance.setSelectedSchema(selectedSchema);
   };
 
   function createColumnConfig() {

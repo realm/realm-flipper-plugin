@@ -82,14 +82,14 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
     // console.log('got type', type);
     switch (property.type) {
       case 'set':
-        console.log('received set:', val);
+        //console.log('received set:', val);
         // due to a problem with serialization, Set is being passed over as a list
         const realVal = (val as any[]).map(value => {
           return convertLeaf(value, property.objectType);
         });
         return realVal;
       case 'list':
-        console.log('prop:', property, ' val:', val);
+        // console.log('prop:', property, ' val:', val);
         return val.map(obj => {
           return convertLeaf(obj, property.objectType as string);
         });
@@ -119,10 +119,10 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
     schema => schema.name === schemaName,
   ) as CanonicalObjectSchema;
 
-  console.log('object before', schemaName);
+  //console.log('object before', schemaName);
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
-    console.log('handling val: ', value, 'of type', type);
+    // console.log('handling val: ', value, 'of type', type);
     switch (type.name) {
       case 'data':
         const array = value[1] as ArrayBuffer;
@@ -175,24 +175,17 @@ export default React.memo((props: {realms: Realm[]}) => {
         connection.receive('receivedCurrentQuery', obj => {
           console.log('received');
           const realm = realmsMap.get(obj.realm);
-          if (schemaToObjects.has(obj.schema)) {
-            schemaToObjects.get(obj.schema).removeAllListeners();
+          if (!realm || !obj.schema) {
+            return;
           }
-
-          let objects = realm?.objects(obj.schema);
-          let objectsToListenTo: Realm.Results<Realm.Object> = realm?.objects(
+          schemaToObjects = handleAddListener(
+            schemaToObjects,
             obj.schema,
+            realm.objects(obj.schema),
+            obj.sortingColumn,
+            obj.sortDirection,
+            onObjectsChange,
           );
-          if (obj.sortingColumn) {
-            objectsToListenTo = objects.sorted([
-              [`${obj.sortingColumn}`, false],
-              ['_id', false],
-            ]);
-          } else {
-            objectsToListenTo = objects.sorted('_id');
-          }
-          objectsToListenTo.addListener(onObjectsChange);
-          schemaToObjects.set(obj.schema, objectsToListenTo);
         });
 
         connection.receive('getRealms', () => {
@@ -232,33 +225,23 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          if (schemaToObjects.has(schema)) {
-            schemaToObjects.get(schema).removeAllListeners();
-          }
-          let objectsToListenTo: Realm.Results<Realm.Object> = objects;
-          if (obj.sortingColumn) {
-            objectsToListenTo = objects.sorted([
-              [`${obj.sortingColumn}`, false],
-              ['_id', false],
-            ]);
-          } else {
-            objectsToListenTo = objects.sorted('_id');
-          }
-          objectsToListenTo.addListener(onObjectsChange);
-          schemaToObjects.set(schema, objectsToListenTo);
+          schemaToObjects = handleAddListener(
+            schemaToObjects,
+            schema,
+            objects,
+            obj.sortingColumn,
+            obj.sortDirection,
+            onObjectsChange,
+          );
 
           let limit = obj.limit || DEFAULT_PAGE_SIZE;
           limit < 1 ? (limit = 20) : {};
           const objectsLength = objects.length;
+          console.log('received', obj);
           if (obj.backwards) {
             objects = getPrevObjectsByPagination(obj, objects, limit);
           } else {
             objects = getObjectsByPagination(obj, objects, limit);
-          }
-          let lastItem, firstItem;
-          if (objects.length) {
-            lastItem = objects[objects.length - 1];
-            firstItem = objects[0];
           }
           //base64 the next and prev cursors
           // const replacer = (key, value) => {
@@ -297,8 +280,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           connection.send('getObjects', {
             objects: objects,
             total: objectsLength,
-            next_cursor: lastItem,
-            prev_cursor: firstItem,
+            hasMore: objects.length >= limit,
           });
         });
 
@@ -308,16 +290,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           const schemas = realm.schema;
-          // for (let schema of realm.schema) {
-          //   const objects = realm.objects(schema.name);
-          //   if (schemaToObjects.has(schema.name)) {
-          //     console.log('removing all listeners from ', schema.name);
-          //     schemaToObjects.get(schema.name).removeAllListeners();
-          //   }
-          //   console.log('adding listener to', schema.name);
-          //   objects.addListener(onObjectsChange);
-          //   schemaToObjects.set(schema.name, objects);
-          // }
           connection.send('getSchemas', {schemas: schemas});
         });
 
@@ -473,6 +445,7 @@ export default React.memo((props: {realms: Realm[]}) => {
               connection.send('liveObjectDeleted', {
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -483,6 +456,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: inserted,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
 
@@ -493,6 +467,7 @@ export default React.memo((props: {realms: Realm[]}) => {
                 newObject: modified,
                 index: index,
               });
+              connection.send('getCurrentQuery');
             }
           });
         };
@@ -512,6 +487,33 @@ export default React.memo((props: {realms: Realm[]}) => {
   });
   return <Text>dd</Text>;
 });
+
+function handleAddListener(
+  schemaToObjects: Map<string, Realm.Results<Realm.Object>>,
+  schema: string,
+  objects: Realm.Results<Realm.Object>,
+  sortingColumn: string,
+  sortDirection: 'ascend' | 'descend' | null,
+  onObjectsChange: (objects: any, changes: any) => void,
+) {
+  if (schemaToObjects.has(schema)) {
+    schemaToObjects.get(schema).removeAllListeners();
+  }
+  let objectsToListenTo: Realm.Results<Realm.Object> = objects;
+  const shouldSortDescending = sortDirection === 'descend';
+  if (sortingColumn) {
+    objectsToListenTo = objects.sorted([
+      [`${sortingColumn}`, shouldSortDescending],
+      ['_id', shouldSortDescending],
+    ]);
+  } else {
+    objectsToListenTo = objects.sorted('_id', shouldSortDescending);
+  }
+  objectsToListenTo.addListener(onObjectsChange);
+  schemaToObjects.set(schema, objectsToListenTo);
+
+  return schemaToObjects;
+}
 
 function getObjectsByPagination(
   obj: getObjectsQuery,
@@ -670,29 +672,26 @@ function getObjectsDescending(
   limit: number,
 ) {
   const {sortingColumn} = obj;
-  if (sortingColumn) {
-    objects = objects
-      .sorted([
-        [`${sortingColumn}`, true],
-        ['_id', true],
-      ])
-      .filtered(
-        `${sortingColumn} ${
-          !obj.filterCursor ? '<=' : '<'
-        } $0 || (${sortingColumn} == $0 && _id ${
-          !obj.cursorId ? '<=' : '<'
-        } $1) LIMIT(${limit})`,
-        filterCursor,
-        cursorId,
-      );
-  } else {
-    objects = objects
-      .sorted('_id', true)
-      .filtered(
-        `_id ${!obj.cursorId ? '<=' : '<'} $0 LIMIT(${limit})`,
-        cursorId,
-      );
-  }
+  objects = objects
+    .sorted([
+      [`${sortingColumn}`, true],
+      ['_id', true],
+    ])
+    .filtered(
+      `${sortingColumn} ${!obj.filterCursor ? '<=' : '<'} ${
+        obj.sortingColumnType === 'uuid'
+          ? `uuid(${filterCursor})`
+          : `${cursorId}`
+      } || (${sortingColumn} == ${
+        obj.sortingColumnType === 'uuid'
+          ? `uuid(${filterCursor})`
+          : `${cursorId}`
+      } && _id ${!obj.cursorId ? '<=' : '<'} ${
+        obj.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+      }) LIMIT(${limit})`,
+      filterCursor,
+      cursorId,
+    );
   return objects;
 }
 
@@ -705,25 +704,31 @@ function getObjectsAscending(
 ) {
   const {sortingColumn} = obj;
   if (sortingColumn) {
+    console.log('cursorId is', cursorId);
     objects = objects
       .sorted([
         [`${sortingColumn}`, false],
         ['_id', false],
       ])
       .filtered(
-        `${sortingColumn} ${
-          !obj.filterCursor ? '>=' : '>'
-        } $0 || (${sortingColumn} == $0 && _id ${
-          !obj.cursorId ? '>=' : '>'
-        } $1) LIMIT(${limit})`,
+        `${sortingColumn} ${!obj.filterCursor ? '>=' : '>'} ${
+          obj.sortingColumnType === 'uuid'
+            ? `uuid(${filterCursor})`
+            : `${filterCursor}`
+        } || (${sortingColumn} == $0 && _id ${!obj.cursorId ? '>=' : '>'} ${
+          obj.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+        }) LIMIT(${limit})`,
         filterCursor,
         cursorId,
       );
   } else {
+    console.log('cursorId is', cursorId);
     objects = objects
       .sorted('_id', false)
       .filtered(
-        `_id ${!obj.cursorId ? '>=' : '>'} $0 LIMIT(${limit})`,
+        `_id ${!obj.cursorId ? '>=' : '>'} ${
+          obj.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+        } LIMIT(${limit})`,
         cursorId,
       );
   }

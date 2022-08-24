@@ -6,10 +6,12 @@ export type DropdownPropertyType = {
   generateMenuItems: MenuItemGenerator;
   record: RealmObject;
   schemaProperty: SchemaProperty | null;
-  currentSchema: SchemaObject;
+  currentSchema?: SchemaObject;
   visible: boolean;
-  x: number;
-  y: number;
+  pointerX: number;
+  pointerY: number;
+  scrollX: number;
+  scrollY: number;
 };
 
 type MenuItem = {
@@ -52,6 +54,7 @@ const listItem = (menuItem) => {
         padding: '5px 12px',
         whiteSpace: 'nowrap',
         backgroundColor: hover ? theme.primaryColor : 'white',
+        zIndex: 99
       }}
     >
       {' '}
@@ -66,8 +69,10 @@ export const CustomDropdown = ({
   schemaProperty,
   currentSchema,
   visible,
-  x,
-  y,
+  pointerX,
+  pointerY,
+  scrollX,
+  scrollY
 }: DropdownPropertyType) => {
   if (visible && schemaProperty) {
     const menuItems = generateMenuItems(record, schemaProperty, currentSchema);
@@ -75,8 +80,8 @@ export const CustomDropdown = ({
       <ul
         className="popup"
         style={{
-          left: `${x}px`,
-          top: `${y}px`,
+          left: `${pointerX + scrollX}px`,
+          top: `${pointerY + scrollY}px`,
           position: 'absolute',
           backgroundClip: 'padding-box',
           backgroundColor: '#fff',
@@ -88,6 +93,7 @@ export const CustomDropdown = ({
           padding: 0,
           textAlign: 'left',
           overflow: 'hidden',
+          zIndex: '10'
         }}
       >
         {menuItems.map((menuItem) => listItem(menuItem))}

@@ -1,7 +1,7 @@
 import { Layout } from 'flipper-plugin';
 import React from 'react';
 import { SchemaObject, RealmObject } from '../CommonTypes';
-import { DataVisualizer } from '../pages/DataVisualizer';
+import DataVisualizer from '../pages/DataVisualizer';
 
 import { DataTabHeader } from './DataTabHeader';
 import PaginationActionGroup from './PaginationActionGroup';
@@ -11,7 +11,6 @@ type InputType = {
   schemas: SchemaObject[];
   objects: RealmObject[];
   currentSchema: SchemaObject;
-  loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
 };
@@ -20,7 +19,6 @@ export const DataVisualizerWrapper = ({
   schemas,
   objects,
   currentSchema,
-  loading,
   sortDirection,
   sortingColumn,
 }: InputType) => {
@@ -32,7 +30,6 @@ export const DataVisualizerWrapper = ({
         <DataVisualizer
           objects={objects}
           schemas={schemas}
-          loading={loading}
           currentSchema={currentSchema}
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}

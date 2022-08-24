@@ -15,10 +15,11 @@ export type RealmPluginState = {
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
-  loading: boolean;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_cursorId: number | null;
+  hasMore: boolean;
   prev_page_filterCursor: number | null;
+  sortingColumnType: string | null;
 };
 const typeList = [
   'objectId',
@@ -87,6 +88,7 @@ export type ObjectsMessage = {
   total: number;
   next_cursor: { [sortingField: string]: number };
   prev_cursor: { [sortingField: string]: number };
+  hasMore: boolean;
 };
 export type ObjectMessage = {
   object: RealmObject;
@@ -104,6 +106,7 @@ type getForwardsObjectsRequest = {
   cursorId: number | null;
   limit: number;
   sortingColumn: string | null;
+  sortingColumnType: string | null;
   sortDirection: 'ascend' | 'descend' | null;
   prev_page_filterCursor: string | number | null;
   prev_page_cursorId: number | null;
