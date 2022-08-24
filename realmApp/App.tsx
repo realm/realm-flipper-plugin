@@ -107,13 +107,13 @@ function createBanana() {
 
 function deleteBanana() {
   realm.write(() => {
-    realm.delete(realm.objectForPrimaryKey('Banana', 8));
+    realm.delete(realm.objectForPrimaryKey('Banana', 0));
   });
 }
 
 function editBanana() {
   realm.write(() => {
-    realm.objectForPrimaryKey('Banana', 140).name = 'Maximillian';
+    realm.objectForPrimaryKey('Banana', 343754).color = 'Blue';
   });
 }
 

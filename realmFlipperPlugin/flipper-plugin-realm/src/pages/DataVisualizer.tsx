@@ -20,7 +20,7 @@ type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
   currentSchema: SchemaObject | null;
-  sortDirection: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
 };
 
@@ -28,7 +28,7 @@ const DataVisualizer = ({
   objects,
   schemas,
   currentSchema,
-  sortDirection,
+  sortingDirection,
   sortingColumn,
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
@@ -249,8 +249,23 @@ const DataVisualizer = ({
             scrollY={scrollY.current}
             handleDataInspector={handleDataInspector}
           />
-          <CustomDropdown {...updatedDropdownProp} />
-          <RealmDataInspector
+        ) : null}
+        <DataTable
+          columns={columns}
+          objects={objects}
+          schemas={schemas}
+          sortingDirection={sortingDirection}
+          sortingColumn={sortingColumn}
+          currentSchema={currentSchema}
+          generateMenuItems={generateMenuItems}
+          getOneObject={getOneObject}
+          setdropdownProp={setdropdownProp}
+          dropdownProp={dropdownProp}
+          scrollX={scrollX.current}
+          scrollY={scrollY.current}
+        />
+        <CustomDropdown {...updatedDropdownProp} />
+        <RealmDataInspector
             currentSchema={currentSchema}
             schemas={schemas}
             inspectionData={inspectionData}
@@ -263,7 +278,7 @@ const DataVisualizer = ({
             setGoForwardStack={setGoForwardStack}
             setNewInspectionData={setNewInspectionData}
           />
-        </div>
+      </div>
       </div>
     </>
   );

@@ -7,16 +7,19 @@
 This is a plugin for Flipper to debug Realm databases in react-native applications.
 
 # Features
-Live Objects: See objects in real time.
-Schema Dependency Graph: View schemas and their relationships.
-Make changes: Create, modify and delete objects
-Query: Query the database using [RQL](https://www.mongodb.com/docs/realm/realm-query-language/)
+**Live Objects:** See objects in real time.
+
+**Schema Dependency Graph:** View schemas and their relationships.
+
+**Make changes:** Create, modify and delete objects
+
+**Query:** Query the database using [RQL](https://www.mongodb.com/docs/realm/realm-query-language/)
 
 # Getting Started
 
 # Documentation
 
-- Communication
+- [Communication](/markdown/Communication.md)
 - Architecture
 
 # Template Apps
