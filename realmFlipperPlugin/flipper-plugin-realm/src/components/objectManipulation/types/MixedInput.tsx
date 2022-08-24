@@ -16,20 +16,14 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
   );
 
   const [value, setValue] = useState<unknown | undefined>(
-    defaultValue === null ? undefined : {
-      type: null, 
-      value: defaultValue?.value
-    }
+    defaultValue === null ? undefined : defaultValue
   );
   const { state } = usePlugin(plugin);
   const { schemas } = useValue(state);
 
   const addObject = () => {
-    set({
-      type: chosenType,
-      value,
-    });
-
+    set(value);
+    // setChosenType()
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -55,10 +49,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
       optional: false,
     };
     const defaultValue = getDefault(typeObj);
-    setValue({
-      typeObj,
-      value: defaultValue,
-    });
+    setValue(defaultValue);
   };
 
   const renderChosen = () => {
@@ -92,16 +83,16 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
 
   const renderSelector = () => {
     const typeList = [
-      'objectId',
-      'uuid',
+      // 'objectId',
+      // 'uuid',
       'bool',
       'int',
       'float',
       'double',
       'decimal128',
       'string',
-      'data',
-      'date',
+      // 'data',
+      // 'date',
     ].reverse();
 
     return (
@@ -138,6 +129,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
                   );
                 })}
               </Select.OptGroup>
+{/*           not supported for now
               <Select.OptGroup label="Link types">
                 {schemas.map((item, index) => {
                   return (
@@ -149,7 +141,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
                     </Select.Option>
                   );
                 })}
-              </Select.OptGroup>
+              </Select.OptGroup> */}
             </Select>
             <TypeInput
               property={{

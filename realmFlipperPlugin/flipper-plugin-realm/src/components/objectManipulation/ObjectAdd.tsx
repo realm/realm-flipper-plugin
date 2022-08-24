@@ -41,12 +41,11 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
     <Layout.Horizontal
       style={{ justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
     >
-      <Radio.Group size="large">
+      <Radio.Group>
         <Radio.Button type="primary" onClick={showModal}>
           {<PlusOutlined />} Create {schema.name}
         </Radio.Button>
       </Radio.Group>
-
       <Modal
         title={'Create ' + schema.name}
         visible={visible}

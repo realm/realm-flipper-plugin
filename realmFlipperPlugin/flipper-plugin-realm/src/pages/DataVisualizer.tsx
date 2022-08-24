@@ -50,6 +50,26 @@ const DataVisualizer = ({
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
+  const deleteRow = (row: RealmObject) => {
+    removeObject(row);
+  };
+
+  const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
+    setEditingObject({
+      editing: true,
+      object: row,
+      type: 'field',
+      fieldName: schemaProperty.name,
+    });
+  };
+  const editObject = (row: RealmObject) => {
+    setEditingObject({
+      editing: true,
+      object: row,
+      type: 'object',
+    });
+  };
+
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
   const generateMenuItems: MenuItemGenerator = (
     row: RealmObject,
@@ -135,26 +155,6 @@ const DataVisualizer = ({
   if (!schemas || !schemas.length) {
     return <div>No schemas found. Check selected Realm.</div>;
   }
-
-  const deleteRow = (row: RealmObject) => {
-    removeObject(row);
-  };
-
-  const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
-    setEditingObject({
-      editing: true,
-      object: row[schemaProperty.name],
-      type: 'field',
-      fieldName: schemaProperty.name,
-    });
-  };
-  const editObject = (row: RealmObject) => {
-    setEditingObject({
-      editing: true,
-      object: row,
-      type: 'object',
-    });
-  };
 
   /** Take the current dropdownProp and update it with the current x and y scroll values.
    This cannot be done with useState because it would cause too many rerenders.*/

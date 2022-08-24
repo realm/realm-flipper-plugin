@@ -78,6 +78,7 @@ export type AddObject = {
   schema?: string;
   realm?: string;
   object: RealmObject;
+  propsChanged?: Set<string>;
 };
 export type RealmsMessage = {
   realms: string[];

@@ -5,7 +5,7 @@ import { ObjectEdit } from './ObjectEdit';
 type InputType = {
   schema: SchemaObject;
   fieldName: string;
-  value: unknown;
+  value: RealmObject;
   setVisible: (value: boolean) => void;
   visible: boolean;
 };
@@ -29,7 +29,7 @@ export const FieldEdit = ({
   return (
     <ObjectEdit
       schema={mockSchema}
-      initialObject={{ [fieldName]: value }}
+      initialObject={value}
       setVisible={setVisible}
       visible={visible}
     />

@@ -8,22 +8,27 @@ type InputType = {
   schema: SchemaObject;
   value: RealmObject;
   setValue: (v: RealmObject) => void;
+  setPropsChanges?: (v: any) => void;
 };
 
-export const PropertiesModify = ({ schema, value, setValue }: InputType) => {
+export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: InputType) => {
+  // if no default value provided => we should init the new object
   if (Object.keys(value).length === 0) {
-    // console.log('inputType, here')
     schema.order.forEach((propertyName: string) => {
       const property = schema.properties[propertyName];
       value[propertyName] = getDefault(property);
     });
   }
-  // console.log('inputType value', value == {} )
   return (
     <Row gutter={[16, 48]}>
       {schema.order.map((propertyName: string, index: number) => {
         const set = (val: unknown) => {
-          console.log('setting', propertyName, 'to', val)
+          if (setPropsChanges) {
+            setPropsChanges((old: Set<string>) => {
+              return old.add(propertyName);
+            })
+          }
+          // console.log('setting', propertyName, 'to', val)
           setValue({
             ...value,
             [propertyName]: val,

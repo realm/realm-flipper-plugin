@@ -63,11 +63,6 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'data':
         // console.log('data')
         return new ArrayBuffer(6);
-      // const buffer = new ArrayBuffer()
-      // const typedArray = Uint8Array.from(value);
-      // return new BSON.Binary(typedArray);
-      // return typedArray.buffer;
-      // return typedArray.buffer;
       default:
         // console.log('returning default', value)
         return value;
@@ -241,7 +236,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           if (!objects) {
             return;
-            responder.error({message: 'No objects found'});
+            // responder.error({message: 'No objects found'});
           }
           convertObjects(
             objects,
@@ -367,12 +362,33 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          // console.log('got', obj.object);
-          const converted = typeConverter(obj.object, realm, obj.schema);
-          // console.log('converted', converted);
+          const propsChanged = obj.propsChanged;
+          const schema = realm.schema.find(
+            schemaObj => schemaObj.name === obj.schema,
+          ) as CanonicalObjectSchema;
 
+          const converted = typeConverter(obj.object, realm, obj.schema);
+          console.log('converted obj is:', converted);
+          // load the values to be modified
+          const newObject = {};
+          propsChanged.forEach(propName => {
+            newObject[propName] = converted[propName];
+          });
+
+          // load all the rest values from the existing realm object
+          const primaryKey = converted[schema.primaryKey];
+          console.log('primary key: ' + primaryKey);
+          const realmObj = realm.objectForPrimaryKey(schema.name, primaryKey);
+          console.log('keys:', Object.keys(realmObj));
+          Object.keys(schema.properties).forEach(key => {
+            if (!propsChanged.find(val => val === key)) {
+              newObject[key] = realmObj[key];
+            }
+          });
+
+          // console.error('object after modifications:', newObject);
           realm.write(() => {
-            realm.create(obj.schema, converted, 'modified');
+            realm.create(obj.schema, newObject, 'modified');
           });
 
           const objects = realm.objects(obj.schema);

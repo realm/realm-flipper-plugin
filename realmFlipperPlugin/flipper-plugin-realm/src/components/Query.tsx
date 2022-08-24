@@ -25,7 +25,6 @@ const wrapItem = (query: string, id: number) => ({
 export const RealmQueryInput = ({ execute }: InputType) => {
   const { state } = usePlugin(plugin);
   const [query, setQuery] = useState('');
-  // const [errorMsg, setErrorMsg] = useState<string>('');
   const [showSuggestions, setShowSuggestions] = useState(true);
 
   const executeQuery = () => {
@@ -38,7 +37,9 @@ export const RealmQueryInput = ({ execute }: InputType) => {
     //   setErrorMsg(res);
     // }
   };
-  const queryHistory = [' hist1', 'hist2'];
+  queryHistory = JSON.parse(
+    localStorage.getItem('history') || '{ "history": [] }'
+  ).history;
   const favourites = ['fav1'];
   return (
     <>
@@ -49,7 +50,10 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           type="error"
           showIcon
           banner
-          // onClose={{}}
+          closable
+          onClose={() => {
+            state.get().errorMessage = '';
+          }}
         />
       ) : null}
       <Row gutter={[2, 0]} align="middle">
@@ -119,4 +123,20 @@ export const RealmQueryInput = ({ execute }: InputType) => {
       </Row>
     </>
   );
+};
+
+let queryHistory: Array<string> = [];
+
+export const addToHistory = (query: string) => {
+  if (
+    query !== '' &&
+    (queryHistory.length == 0 || queryHistory[queryHistory.length - 1] != query)
+  ) {
+    if (queryHistory.length + 1 > 10) {
+      queryHistory.shift();
+    }
+    queryHistory = [...queryHistory, query];
+  }
+
+  localStorage.setItem('history', JSON.stringify({ history: queryHistory }));
 };
