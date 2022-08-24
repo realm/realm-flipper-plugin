@@ -4,7 +4,7 @@ import {
   Layout,
   PluginClient,
   usePlugin,
-  useValue
+  useValue,
 } from 'flipper-plugin';
 
 import React, { useState } from 'react';
@@ -19,7 +19,7 @@ import {
   RealmPluginState,
   RealmsMessage,
   SchemaMessage,
-  SchemaObject
+  SchemaObject,
 } from './CommonTypes';
 import { CommonHeader } from './components/common/CommonHeader';
 import { ObjectAdd } from './components/objectManipulation/ObjectAdd';
@@ -46,47 +46,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     currentPage: 1,
     sortingColumn: null,
     sortDirection: null,
-    prev_page_cursorId: null,
-    prev_page_filterCursor: null,
     hasMore: false,
     sortingColumnType: null,
     currentSchema: null,
-  });
-
-  client.onMessage('getRealms', (data: RealmsMessage) => {
-    const state = pluginState.get();
-    pluginState.set({
-      ...state,
-      realms: data.realms,
-      selectedRealm: data.realms[0],
-    });
-    getSchemas(data.realms[0]);
-
-    // client.send('getSchemas', { realm: });
-  });
-
-  client.onMessage('getObjects', (data: ObjectsMessage) => {
-    const state = pluginState.get();
-    if (!data.objects.length) {
-      return;
-    }
-    const objects = data.objects;
-    const nextCursor = objects[objects.length - 1];
-    const prevCursor = objects[0];
-    pluginState.set({
-      ...state,
-      objects: [...state.objects, ...data.objects],
-      filterCursor: state.sortingColumn
-        ? nextCursor[state.sortingColumn]
-        : null,
-      cursorId: nextCursor._id,
-      totalObjects: data.total,
-      prev_page_cursorId: prevCursor._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? prevCursor[state.sortingColumn]
-        : null,
-      hasMore: data.hasMore,
-    });
   });
 
   client.onMessage('getOneObject', (data: ObjectMessage) => {
@@ -102,25 +64,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortingColumn: state.sortingColumn,
       sortDirection: state.sortDirection,
     });
-  });
-
-  client.onMessage('getSchemas', (data: SchemaMessage) => {
-    console.log('schemas: ', data.schemas);
-
-    const newSchemas = data.schemas.map((schema) =>
-      sortSchemaProperties(schema)
-    );
-
-    const state = pluginState.get();
-    // load first schema nad objects
-    pluginState.set({
-      ...state,
-      schemas: newSchemas,
-      // currentSchema: newSchemas[0],
-    });
-
-    setSelectedSchema(newSchemas[0]);
-    getObjects(newSchemas[0].name, state.selectedRealm);
   });
 
   const sortSchemaProperties = (schema: SchemaObject) => {
@@ -255,13 +198,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   const getRealms = () => {
-    client.send('getRealms', undefined);
+    client.send('getRealms', undefined).then((realms: RealmsMessage) => {
+      const state = pluginState.get();
+      pluginState.set({
+        ...state,
+        realms: realms.realms,
+        selectedRealm: realms.realms[0],
+      });
+      getSchemas(realms.realms[0]);
+    });
   };
 
   const getObjects = (
     schema?: string | null,
     realm?: string | null,
-    backwards?: boolean
   ) => {
     const state = pluginState.get();
     if (!state.currentSchema) {
@@ -278,9 +228,23 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortingColumn: state.sortingColumn,
       sortingColumnType: state.sortingColumnType,
       sortDirection: state.sortDirection,
-      prev_page_filterCursor: state.prev_page_filterCursor,
-      prev_page_cursorId: state.prev_page_cursorId,
-      backwards: Boolean(backwards),
+    }).then((response: RealmsMessage) => {
+      const state = pluginState.get();
+      if (!response.objects && response.objects.length) {
+        return;
+      }
+      const objects = response.objects;
+      const nextCursor = objects[objects.length - 1];
+      pluginState.set({
+        ...state,
+        objects: [...state.objects, ...response.objects],
+        filterCursor: state.sortingColumn
+          ? nextCursor[state.sortingColumn]
+          : null,
+        cursorId: nextCursor._id,
+        totalObjects: response.total,
+        hasMore: response.hasMore,
+      });
     });
   };
 
@@ -294,7 +258,18 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const getSchemas = (realm: string) => {
-    client.send('getSchemas', { realm: realm });
+    client.send('getSchemas', { realm: realm }).then((schemaResult: SchemaMessage) => {
+      const newSchemas = schemaResult.schemas.map((schema) =>
+        sortSchemaProperties(schema)
+      );
+      const state = pluginState.get();
+      pluginState.set({
+        ...state,
+        schemas: newSchemas,
+      });
+      setSelectedSchema(newSchemas[0]);
+      getObjects(newSchemas[0].name, state.selectedRealm);
+    });
   };
 
   const executeQuery = async (query: string, schema: string) => {
@@ -349,7 +324,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
-      sortingColumnType: schema.properties["_id"].type,
+      sortingColumnType: schema.properties['_id'].type,
       currentPage: 1,
     });
   };
@@ -363,7 +338,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: schema.properties["_id"].type,
+      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -404,7 +379,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: state.currentSchema?.properties["_id"].type ?? null,
+      sortingColumnType: state.currentSchema?.properties['_id'].type ?? null,
       sortDirection: null,
     });
   };
@@ -445,13 +420,18 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumnAndType = (sortingColumn: string | null, sortingColumnType: string | null) => {
+  const setSortingColumnAndType = (
+    sortingColumn: string | null,
+    sortingColumnType: string | null
+  ) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
       sortingColumn: sortingColumn,
-      sortingColumnType: sortingColumnType ? sortingColumnType : state.currentSchema?.properties["_id"].type,
+      sortingColumnType: sortingColumnType
+        ? sortingColumnType
+        : state.currentSchema?.properties['_id'].type,
       filterCursor: null,
       cursorId: null,
     });
