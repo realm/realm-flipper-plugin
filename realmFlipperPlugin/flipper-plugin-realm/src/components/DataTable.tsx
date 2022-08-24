@@ -1,18 +1,17 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Table, Tooltip } from 'antd';
+import { EnterOutlined } from '@ant-design/icons';
+import { Button, Table } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import {
-  CustomDropdown,
-  DropdownPropertyType,
   MenuItemGenerator,
 } from './CustomDropdown';
+import { InspectionDataType } from '../components/RealmDataInspector';
 import InfiniteScroll from 'react-infinite-scroller';
 
 export type ColumnType = {
@@ -34,6 +33,9 @@ type PropertyType = {
   style?: Record<string, unknown>;
   setdropdownProp: Function;
   dropdownProp: Object;
+  scrollX: number;
+  scrollY: number;
+  handleDataInspector: (inspectionData: InspectionDataType) => void;
 };
 
 // Receives a schema and returns column objects for the table.
@@ -61,14 +63,23 @@ export const DataTable = ({
   setdropdownProp,
   dropdownProp,
   scrollX,
-  scrollY
+  scrollY,
+  handleDataInspector,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(true);
-  const sortableTypes = new Set(['string', 'int', 'uuid', 'date', 'decimal128', 'decimal', 'float']);
+  const sortableTypes = new Set([
+    'string',
+    'int',
+    'uuid',
+    'date',
+    'decimal128',
+    'decimal',
+    'float',
+  ]);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
@@ -83,17 +94,58 @@ PropertyType) => {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 
+  type ClickableTextType = {
+    displayText: string;
+    addThreeDots: boolean;
+    value: Record<string, unknown>;
+    inspectorView: 'object' | 'property'
+  };
+
+  const ClickableText = ({
+    displayText,
+    addThreeDots,
+    value,
+    inspectorView
+  }: ClickableTextType) => {
+    const [isHovering, setHovering] = useState(false);
+    return (
+      <div>
+        <div
+          style={{
+            display: 'inline',
+            textDecoration: isHovering ? 'underline' : undefined,
+          }}
+          onClick={() => handleDataInspector({ data: value, view: inspectorView})}
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
+        >
+          {displayText}
+        </div>
+        {addThreeDots ? (
+          <div
+            style={{
+              display: 'inline',
+            }}
+          >
+            ...
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   const filledColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
 
     /*  A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
-      const defaultCell = (
-        <Tooltip placement="topLeft" title={JSON.stringify(value)}>
-          {renderValue(value, property, schemas)}{' '}
-        </Tooltip>
+      const cellValue: string | number | JSX.Element = renderValue(
+        value,
+        property,
+        schemas
       );
+
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
@@ -110,7 +162,7 @@ PropertyType) => {
               shape="circle"
               type="primary"
               size="small"
-              icon={<SearchOutlined />}
+              icon={<EnterOutlined />}
               onClick={() =>
                 expandRow(
                   row[currentSchema.primaryKey],
@@ -120,11 +172,29 @@ PropertyType) => {
               }
               ghost
             />
-            {defaultCell}
+            {
+              <ClickableText
+                value={value}
+                displayText={cellValue}
+                addThreeDots={false}
+                inspectorView='object'
+              />
+            }
           </Layout.Container>
         );
       }
-      return defaultCell;
+
+      if (typeof cellValue === 'string' && cellValue.length > 70) {
+        return (
+          <ClickableText
+            value={value}
+            displayText={cellValue.substring(0, 70)}
+            addThreeDots={true}
+            inspectorView="property"
+          />
+        );
+      }
+      return cellValue;
     };
 
     return {
@@ -153,7 +223,7 @@ PropertyType) => {
                 //@ts-ignore
                 pointerY: env.clientY - 160,
                 scrollX,
-                scrollY
+                scrollY,
               });
             },
           };
@@ -243,11 +313,10 @@ PropertyType) => {
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
-    console.log("ON CHANGE",pagination, filters, sorter, extra);
+    console.log('ON CHANGE', pagination, filters, sorter, extra);
     //TODO: make type of a field
     if (extra.action === 'sort') {
       if (state.sortingColumn !== sorter.field) {
-
         instance.setSortingDirection('ascend');
         instance.setSortingColumnAndType(
           sorter.field,
@@ -301,7 +370,7 @@ PropertyType) => {
           onChange={handleOnChange}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
-          tableLayout="auto"
+          // tableLayout="auto"
           style={style}
         />
       </InfiniteScroll>
@@ -329,7 +398,7 @@ const NestedTable = ({
   sortingColumn,
   generateMenuItems,
   setdropdownProp,
-  dropdownProp
+  dropdownProp,
 }: PropertyType) => {
   return (
     <DataTable
@@ -341,10 +410,9 @@ const NestedTable = ({
       generateMenuItems={generateMenuItems}
       style={{
         boxShadow: '20px 0px 50px grey',
-        marginLeft: '-35px', //hacky but necessary to avoid weird indentation
       }}
-      setdropdownProp ={setdropdownProp}
-      dropdownProp ={dropdownProp}
+      setdropdownProp={setdropdownProp}
+      dropdownProp={dropdownProp}
     ></DataTable>
   );
 };

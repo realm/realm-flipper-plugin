@@ -10,36 +10,41 @@ import React from 'react';
 import { RealmObject, SchemaObject } from '../CommonTypes';
 import { BoldSpan } from './SchemaSelect';
 
+export type InspectionDataType = {
+  data: RealmObject;
+  view: 'object' | 'schema' | 'property';
+};
+
 type PropertyType = {
   currentSchema: SchemaObject;
   schemas: SchemaObject[];
-  inspectData?: RealmObject;
-  setInspectData: (value: RealmObject) => void;
+  inspectionData: InspectionDataType;
+  setInspectionData: (value: RealmObject) => void;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
   goBackStack: Array<RealmObject>;
   setGoBackStack: (value: Array<RealmObject>) => void;
   goForwardStack: Array<RealmObject>;
   setGoForwardStack: (value: Array<RealmObject>) => void;
-  setNewInspectData: (value: RealmObject) => void;
-  view: string;
+  setNewInspectionData: (newInspectionData: InspectionDataType) => void;
 };
 
 export const RealmDataInspector = ({
   currentSchema,
   schemas,
-  inspectData,
-  setInspectData,
+  inspectionData,
+  setInspectionData,
   showSidebar,
   setShowSidebar,
   goBackStack,
   setGoBackStack,
   goForwardStack,
   setGoForwardStack,
-  setNewInspectData,
-  view,
+  setNewInspectionData,
 }: PropertyType) => {
-  if (!showSidebar) return null;
+  if (!showSidebar || inspectionData === undefined) return null;
+
+console.log('inspectionData',inspectionData)
 
   console.log('goForwardStack');
   console.log(goForwardStack);
@@ -53,7 +58,9 @@ export const RealmDataInspector = ({
           <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
             <Row gutter={16}>
               <Col span={24} offset={1}>
-                <BoldSpan>{view} </BoldSpan>
+                <BoldSpan>
+                  {'Inspector - Realm ' + inspectionData.view}{' '}
+                </BoldSpan>
               </Col>
             </Row>
             <Row gutter={8}>
@@ -85,7 +92,7 @@ export const RealmDataInspector = ({
           <Row>
             <Col offset={1} span={22}>
               <DataInspector
-                data={inspectData}
+                data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
@@ -108,9 +115,10 @@ export const RealmDataInspector = ({
                   }
 
                   // If the current field is named objectType find the SchemaObject corresponding to its value (if there is one) and assign it to linkedSchema.
-                  // Assigning inspectData to linkedSchemaName and then traverse it using path to get the linkedSchemaName.
-                  if (name === 'objectType' && inspectData) {
-                    let linkedSchemaName: string | RealmObject = inspectData;
+                  // Assigning inspectionData to linkedSchemaName and then traverse it using path to get the linkedSchemaName.
+                  if (name === 'objectType' && inspectionData.data) {
+                    let linkedSchemaName: string | RealmObject =
+                      inspectionData.data;
                     path.forEach(
                       //@ts-ignore
                       (key) => (linkedSchemaName = linkedSchemaName[key])
@@ -136,8 +144,11 @@ export const RealmDataInspector = ({
                               ghost
                               onClick={() => {
                                 console.log(linkedSchema);
-                                setNewInspectData({
-                                  [linkedSchema.name]: linkedSchema,
+                                setNewInspectionData({
+                                  data: {
+                                    [linkedSchema.name]: linkedSchema,
+                                  },
+                                  view: 'schema',
                                 });
                               }}
                             />
@@ -157,11 +168,14 @@ export const RealmDataInspector = ({
                             icon={<SearchOutlined />}
                             ghost
                             onClick={() => {
-                              let object = inspectData;
+                              let object = inspectionData.data;
                               path.forEach((key) => (object = object[key]));
                               console.log(object);
-                              setNewInspectData({
-                                [linkedSchema.name]: object,
+                              setNewInspectionData({
+                                data: {
+                                  [linkedSchema.name]: object,
+                                },
+                                view: 'object',
                               });
                             }}
                           />
@@ -185,8 +199,8 @@ export const RealmDataInspector = ({
   function goBackInspector() {
     const data = goBackStack.pop();
     if (data !== undefined) {
-      inspectData === undefined ? null : goForwardStack.push(inspectData);
-      setInspectData(data);
+      inspectionData === undefined ? null : goForwardStack.push(inspectionData);
+      setInspectionData(data);
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
@@ -201,8 +215,8 @@ export const RealmDataInspector = ({
   function goForwardInspector() {
     const data = goForwardStack.pop();
     if (data !== undefined) {
-      inspectData === undefined ? null : goBackStack.push(inspectData);
-      setInspectData(data);
+      inspectionData === undefined ? null : goBackStack.push(inspectionData);
+      setInspectionData(data);
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
