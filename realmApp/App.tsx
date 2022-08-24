@@ -13,7 +13,7 @@ import type {Node} from 'react';
 
 import {createAllTypesTestData} from './TestData/createAllTypesTestData';
 
-const {UUID} = Realm.BSON;
+// const {UUID} = Realm.BSON;
 
 import {
   BananaSchema,
@@ -41,7 +41,7 @@ import {
   Button,
 } from 'react-native';
 
-import RealmPlugin from './RealmPlugin';
+import {RealmFlipperPlugin} from './plugin/RealmPlugin';
 import {
   Colors,
   DebugInstructions,
@@ -50,9 +50,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import {createParcelTestData} from './TestData/parcelExample';
+import {addPlugin} from 'react-native-flipper';
 
-// Open a Realm
-const realm = new Realm({
+const config = {
   schema: [
     TaskSchema,
     BananaSchema,
@@ -69,7 +69,10 @@ const realm = new Realm({
   ],
   path: 'main',
   schemaVersion: 35,
-});
+};
+
+// Open a Realm
+const realm = new Realm(config);
 
 //realmPlugin.newfunc();
 // Write a ToDo with random ID to database
@@ -100,10 +103,6 @@ function createBanana() {
     i++;
   });
 }
-
-// for (let i = 0; i<1000000; i++) {
-//   createBanana();
-// }
 
 function deleteBanana() {
   realm.write(() => {
@@ -143,6 +142,8 @@ const Section = ({children, title}): Node => {
   );
 };
 
+addPlugin(new RealmFlipperPlugin([config]));
+
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -152,7 +153,6 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <RealmPlugin realms={[realm]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"

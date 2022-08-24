@@ -1,3 +1,4 @@
+import { UUID } from 'bson';
 import {
   createState,
   Layout,
@@ -27,6 +28,7 @@ import DataVisualizer from './pages/DataVisualizer';
 import { addToHistory, RealmQueryLanguage } from './pages/RealmQueryLanguage';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
+import { convertObjects } from './TypeConvert';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -69,12 +71,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (!data.objects.length) {
       return;
     }
-    const objects = data.objects;
+    const objectsBefore = data.objects;
+    console.log('printing before:', objectsBefore[0])
+    const objects = convertObjects(objectsBefore);
+    console.log('printing,', objects[0]);
     const nextCursor = objects[objects.length - 1];
     const prevCursor = objects[0];
     pluginState.set({
       ...state,
-      objects: [...state.objects, ...data.objects],
+      objects: [...state.objects, ...objects],
       filterCursor: state.sortingColumn
         ? nextCursor[state.sortingColumn]
         : null,
