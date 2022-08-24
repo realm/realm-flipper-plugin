@@ -59,33 +59,49 @@ export class Query {
   }
 
   getObjectsDescending(cursorId, filterCursor) {
-    this.objects = this.objects
-      .sorted([
-        [`${this.sortingColumn}`, true],
-        ['_id', true],
-      ])
-      .filtered(
-        `${this.sortingColumn} ${!this.reqFilterCursor ? '<=' : '<'} ${
-          this.sortingColumnType === 'uuid'
-            ? `uuid(${filterCursor})`
-            : `${cursorId}`
-        } || (${this.sortingColumn} == ${
-          this.sortingColumnType === 'uuid'
-            ? `uuid(${filterCursor})`
-            : `${cursorId}`
-        } && _id ${!this.reqCursorId ? '<=' : '<'} ${
-          this.sortingColumnType === 'uuid'
-            ? `uuid(${cursorId})`
-            : `${cursorId}`
-        }) LIMIT(${this.limit})`,
-        filterCursor,
-        cursorId,
-      );
-    return this.objects;
+    console.log(
+      this.sortingColumn,
+      this.sortingColumnType,
+      filterCursor,
+      cursorId,
+    );
+
+    console.log(
+      `${this.sortingColumn} ${!this.reqFilterCursor ? '<=' : '<'} ${
+        this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+      } || (${this.sortingColumn} == ${
+        this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+      } && _id ${!this.reqCursorId ? '<=' : '<'} ${
+        this.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+      }) LIMIT(${this.limit})`,
+    );
+    this.objects = this.objects.sorted([
+      [`${this.sortingColumn}`, true],
+      ['_id', true],
+    ]);
+    this.objects.filtered(
+      `${this.sortingColumn} ${!this.reqFilterCursor ? '<=' : '<'} ${
+        this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+      } || (${this.sortingColumn} == ${
+        this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+      } && _id ${!this.reqCursorId ? '<=' : '<'} ${
+        this.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+      }) LIMIT(50)`,
+      filterCursor,
+    );
+    console.log('we got ', this.objects.length);
+    return this.objects.slice(0,50); //TODO: fix LIMIT(?), its not doing anything
   }
 
   getObjectsAscending(cursorId: number, filterCursor: number | string | null) {
     if (this.sortingColumn) {
+      console.log(
+        this.sortingColumn,
+        this.sortingColumnType,
+        filterCursor,
+        cursorId,
+      );
+
       this.objects = this.objects
         .sorted([
           [`${this.sortingColumn}`, false],
@@ -93,16 +109,15 @@ export class Query {
         ])
         .filtered(
           `${this.sortingColumn} ${!this.reqFilterCursor ? '>=' : '>'} ${
-            this.sortingColumnType === 'uuid'
-              ? `uuid(${filterCursor})`
-              : `${filterCursor}`
-          } || (${this.sortingColumn} == ${filterCursor} && _id ${
-            !this.reqCursorId ? '>=' : '>'
-          } ${
+            this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+          } || (${this.sortingColumn} == ${
+            this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
+          } && _id ${!this.reqCursorId ? '>=' : '>'} ${
             this.sortingColumnType === 'uuid'
               ? `uuid(${cursorId})`
               : `${cursorId}`
           }) LIMIT(${this.limit})`,
+          filterCursor,
         );
     } else {
       this.objects = this.objects

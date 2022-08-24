@@ -229,6 +229,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             realm.schema.find(schemaa => schemaa.name === schema),
             realm.schema,
           );
+          console.log("sending back!")
           responder.success({
             objects: objects,
             total: totalObjects,

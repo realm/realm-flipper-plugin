@@ -234,6 +234,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         return;
       }
       const objects = response.objects;
+      console.log("recevied objects", objects)
       const nextCursor = objects[objects.length - 1];
       pluginState.set({
         ...state,
