@@ -16,7 +16,7 @@ Query: Query the database using [RQL](https://www.mongodb.com/docs/realm/realm-q
 
 # Documentation
 
-- Communication
+- [Communication](/markdown/Communication.md)
 - Architecture
 
 # Template Apps
