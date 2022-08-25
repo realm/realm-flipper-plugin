@@ -13,7 +13,7 @@
   "icon": "apps",
   "title": "Realm",
   "scripts": {
-    "prepack": "flipper-pkg lint && flipper-pkg bundle",
+    "prepack": "flipper-pkg bundle",
     "build": "flipper-pkg bundle",
     "watch": "flipper-pkg bundle --watch",
     "test": "jest --no-watchman",
