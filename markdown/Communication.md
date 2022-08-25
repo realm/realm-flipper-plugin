@@ -1,7 +1,7 @@
 # Communication
 The desktop plugin communicates with the React Native application through an RPC communication established by WebSockets. The plugin uses the [Client Plugin API](https://fbflipper.com/docs/extending/create-plugin/) defined by Flipper. The architecture of using Flipper with React Native is further documented under [Architecture](https://fbflipper.com/docs/extending/arch/) in the Flipper Docs.
 
-A typical round-trip consists of the plugin making a request to the app by calling `client.send('eventName')`, thus emitting an event from the desktop the app. The event is received by the app by `connection.receive('eventName', () => {})`, where the callback usually calls a function on the Realm and sends back the result using `responder.success({result})` or `connection.send({result})`. The roundtrip can be visualized:
+A typical round-trip consists of the plugin making a request to the app by calling `client.send('eventName')`, thus emitting an event from the desktop the app. The event is received by the app by `connection.receive('eventName', () => {})`, where the callback usually calls a function on the Realm (using the RealmJS SDK) and sends back the result using `responder.success({result})` or `connection.send({result})`. The roundtrip can be visualized:
 
 ![A diagram of the Realm Flipper Plugin communication archictecture](/realmFlipperPlugin/communicationDiagram.png "Realm Flipper Plugin communication archictecture")
 ## Event API
