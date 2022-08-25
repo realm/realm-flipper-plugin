@@ -5,7 +5,6 @@ A typical round-trip consists of the plugin making a request to the app by calli
 
 ![A diagram of the Realm Flipper Plugin communication archictecture](/realmFlipperPlugin/communicationDiagram.png "Realm Flipper Plugin communication archictecture")
 ## Event API
-___
 The plugin and app listens for events emitted bi-directionally, to faciliate data sharing over the wire. Specifically, the Realm Flipper Plugin communicates with the React Native application through the following methods:
 
 ### App events
@@ -59,5 +58,4 @@ The desktop plugin listens for `getCurrentQuery` as to send back the current que
 The app listens for `receivedCurrentQuery` as to attach an updated Realm collection listener.
 
 ## Conclusion
----
 These functions define the communication between the plugin and the API, and are necessary for supporting the required functionality.
