@@ -4,7 +4,7 @@ import React from 'react';
 import { plugin } from '../index';
 import { SchemaProperty, SchemaObject } from '../CommonTypes';
 import { isPropertyLinked } from '../utils/linkedObject';
-import { BooleanValue } from '../components/BooleanValue';
+import BooleanValue from '../components/BooleanValue';
 
 const { Text } = Typography;
 const { Link } = Typography;
@@ -144,9 +144,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={!!value as boolean}>
-            {(value as boolean).toString()}
-          </BooleanValue>
+          <BooleanValue active={!!value as boolean} value={value.toString()} />
         );
       case 'string':
         return <Text>{value as string}</Text>;

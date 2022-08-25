@@ -22,7 +22,6 @@ export const IntInput = ({
       return;
     }
     set(value);
-    setValue(value);
     setReset((v) => v + 1);
   };
 

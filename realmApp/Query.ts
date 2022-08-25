@@ -92,7 +92,6 @@ export class Query {
         return;
       }
     }
-
     this.objects = this.objects.sorted([
       [`${this.sortingColumn}`, true],
       ['_id', true],

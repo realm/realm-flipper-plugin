@@ -199,6 +199,7 @@ PropertyType) => {
     };
 
     return {
+      minWidth: 20000,
       title: createTitle(column),
       key: property.name,
       dataIndex: property.name,

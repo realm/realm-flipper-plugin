@@ -45,7 +45,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: '',
     errorMessage: '',
   });
-
+  console.log(client);
   client.onMessage('getOneObject', (data: ObjectMessage) => {
     const state = pluginState.get();
     pluginState.set({ ...state, singleObject: data.object });
@@ -232,15 +232,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
           return;
         }        
         console.log('got objects:', response.objects);
-        const object = response.objects[0];
-        if (object) {
-          console.log(object.data instanceof ArrayBuffer);
-          const view = new Uint8Array(object.data);
-          console.log(view);
-        }
         const state = pluginState.get();
         const objects = response.objects;
         const nextCursor = objects[objects.length - 1];
+
+        if (state.currentSchema.name !== schema) {
+          return;
+        }
         pluginState.set({
           ...state,
           objects: [...state.objects, ...response.objects],
@@ -563,7 +561,7 @@ export function Component() {
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<
-    'data' | 'schemas' | 'RQL' | 'schemaGraph'
+    'data' | 'schemas' | 'schemaGraph'
   >('data');
 
   return (

@@ -16,6 +16,9 @@ export const renderValue = (
   if (value === null) {
     return <Typography.Text disabled>null</Typography.Text>;
   }
+  if (value === undefined) {
+    return <Typography.Text disabled>undefined</Typography.Text>;
+  }
   let schema;
   let returnValue: JSX.Element | string | number = '';
 
