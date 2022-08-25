@@ -248,6 +248,7 @@ const DataVisualizer = ({
               scrollX={scrollX.current}
               scrollY={scrollY.current}
               handleDataInspector={handleDataInspector}
+              enableSort={true}
             />
             <CustomDropdown {...updatedDropdownProp} />
             <RealmDataInspector

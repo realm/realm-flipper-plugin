@@ -2,15 +2,13 @@ import { EnterOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
-import React, {  useState } from 'react';
+import React, { useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
-import {
-  MenuItemGenerator,
-} from './CustomDropdown';
+import { MenuItemGenerator } from './CustomDropdown';
 import { InspectionDataType } from '../components/RealmDataInspector';
 import InfiniteScroll from 'react-infinite-scroller';
 
@@ -35,6 +33,7 @@ type PropertyType = {
   dropdownProp: Object;
   scrollX: number;
   scrollY: number;
+  enableSort: boolean;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
 };
 
@@ -59,12 +58,12 @@ export const DataTable = ({
   schemas,
   currentSchema,
   generateMenuItems,
-  style,
   setdropdownProp,
   dropdownProp,
   scrollX,
   scrollY,
   handleDataInspector,
+  enableSort
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -98,14 +97,14 @@ PropertyType) => {
     displayText: string;
     addThreeDots: boolean;
     value: Record<string, unknown>;
-    inspectorView: 'object' | 'property'
+    inspectorView: 'object' | 'property';
   };
 
   const ClickableText = ({
     displayText,
     addThreeDots,
     value,
-    inspectorView
+    inspectorView,
   }: ClickableTextType) => {
     const [isHovering, setHovering] = useState(false);
     return (
@@ -115,7 +114,9 @@ PropertyType) => {
             display: 'inline',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
-          onClick={() => handleDataInspector({ data: value, view: inspectorView})}
+          onClick={() =>
+            handleDataInspector({ data: value, view: inspectorView })
+          }
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
@@ -177,7 +178,7 @@ PropertyType) => {
                 value={value}
                 displayText={cellValue}
                 addThreeDots={false}
-                inspectorView='object'
+                inspectorView="object"
               />
             }
           </Layout.Container>
@@ -229,7 +230,7 @@ PropertyType) => {
           };
         }
       },
-      sorter: sortableTypes.has(property.type), //TODO: false if object, list, set
+      sorter: enableSort && sortableTypes.has(property.type), //TODO: false if object, list, set
       sortOrder:
         state.sortingColumn === property.name ? state.sortingDirection : null,
     };
@@ -370,8 +371,7 @@ PropertyType) => {
           onChange={handleOnChange}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
-          // tableLayout="auto"
-          style={style}
+          tableLayout="auto"
         />
       </InfiniteScroll>
     </div>
@@ -413,6 +413,7 @@ const NestedTable = ({
       }}
       setdropdownProp={setdropdownProp}
       dropdownProp={dropdownProp}
+      enableSort={false}
     ></DataTable>
   );
 };
