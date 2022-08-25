@@ -4,7 +4,6 @@ import { SchemaObject, RealmObject } from '../CommonTypes';
 import DataVisualizer from '../pages/DataVisualizer';
 
 import { DataTabHeader } from './DataTabHeader';
-import PaginationActionGroup from './PaginationActionGroup';
 import SchemaSelect from './SchemaSelect';
 
 type InputType = {
@@ -34,7 +33,6 @@ export const DataVisualizerWrapper = ({
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
         />
-        <PaginationActionGroup />
       </Layout.Container>
     </>
   );

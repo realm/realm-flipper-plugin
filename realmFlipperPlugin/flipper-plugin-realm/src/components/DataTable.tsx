@@ -315,7 +315,6 @@ PropertyType) => {
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
-    console.log('ON CHANGE', pagination, filters, sorter, extra);
     //TODO: make type of a field
     if (extra.action === 'sort') {
       if (state.sortingColumn !== sorter.field) {
