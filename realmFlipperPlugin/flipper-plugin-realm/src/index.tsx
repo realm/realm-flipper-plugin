@@ -228,12 +228,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       })
       .then((response: RealmsMessage) => {
         console.log('got objects:', response.objects);
-        const object = response.objects[0];
-        if (object) {
-          console.log(object.data instanceof ArrayBuffer);
-          const view = new Uint8Array(object.data);
-          console.log(view);
-        }
         const state = pluginState.get();
         if (!response.objects && response.objects.length) {
           return;

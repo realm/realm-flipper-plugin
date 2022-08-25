@@ -20,7 +20,7 @@ export function createAllTypesTestData(realm: Realm) {
   };
   realm.write(() => {
     realm.create('DataSchema', data1);
-  })
+  });
 
   let AllTypes1 = {
     _id: uuid,
@@ -98,8 +98,10 @@ export function createAllTypesTestData(realm: Realm) {
     console.log(`created one banana: ${banana1.name} with id ${banana1._id}`);
   });
 
+  const uuid3 = new UUID();
+
   let AllTypes3 = {
-    _id: new UUID(),
+    _id: uuid3,
     bool: true,
     int: 2453,
     float: 6.51415,
@@ -116,34 +118,7 @@ export function createAllTypesTestData(realm: Realm) {
       Decimal128.fromString('1'),
       Decimal128.fromString('2'),
     ],
-    // SetDecimal128: [Decimal128.fromString('1'), Decimal128.fromString('2')],
     SetString: ['Vingegaard', 'Pogacar'],
-    // ObjectList: [
-    //   {
-    //     name: 'Jonas',
-    //     surname: 'Vingegaard',
-    //     age: 26,
-    //     tourWins: [2022, 2023, 2024, 2025],
-    //   },
-    //   {
-    //     name: 'Jonas',
-    //     surname: 'Vingegaard',
-    //     age: 26,
-    //     tourWins: [2022, 2023, 2024, 2025],
-    //   },
-    //   {name: 'Tadej', surname: 'Pogacar', age: 27, tourWins: [2019, 2020]},
-    // ],
-
-    // ObjectSet: [
-    //   {
-    //     name: 'Jonas',
-    //     surname: 'Vingegaard',
-    //     age: 26,
-    //     tourWins: [2022, 2023, 2024, 2025],
-    //   },
-
-    //   {name: 'Tadej', surname: 'Pogacar', age: 27, tourWins: [2019, 2020]},
-    // ],
     linkingObjects: realm.objectForPrimaryKey('AllTypes', uuid),
     dictionary: {
       windows: 5,
@@ -214,6 +189,10 @@ export function createAllTypesTestData(realm: Realm) {
     },
     set: [1, 2, 3, 4],
     mixed: realm.objectForPrimaryKey('AllTypes', uuid2),
+    listLinkedAlltypes: [
+      realm.objectForPrimaryKey('AllTypes', uuid2),
+      realm.objectForPrimaryKey('AllTypes', uuid3),
+    ],
     uuid: new UUID(),
   };
   realm.write(() => {

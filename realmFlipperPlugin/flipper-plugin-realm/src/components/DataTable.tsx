@@ -222,7 +222,7 @@ PropertyType) => {
                 //@ts-ignore
                 pointerX: env.clientX - 290,
                 //@ts-ignore
-                pointerY: env.clientY - 160,
+                pointerY: env.clientY - 195,
                 scrollX,
                 scrollY,
               });

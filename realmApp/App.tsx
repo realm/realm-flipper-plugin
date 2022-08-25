@@ -68,7 +68,7 @@ const realm = new Realm({
     DataSchema,
   ],
   path: 'main',
-  schemaVersion: 35,
+  schemaVersion: 37,
 });
 
 //realmPlugin.newfunc();
