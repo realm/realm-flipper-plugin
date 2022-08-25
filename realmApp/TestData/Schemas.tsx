@@ -37,6 +37,7 @@ export const AllTypesSchema = {
     list: 'int[]',
     linkedBanana: 'Banana?',
     linkingObjects: 'AllTypes?',
+    listLinkedAlltypes: 'AllTypes[]',
     ListDecimal128: 'decimal128[]',
     // SetDecimal128: 'decimal128<>',
     ObjectList: 'mixed[]',
