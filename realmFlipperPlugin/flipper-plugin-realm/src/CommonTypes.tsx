@@ -1,5 +1,6 @@
 
 export type RealmPluginState = {
+  deviceSerial: string;
   realms: string[];
   selectedRealm: string;
   objects: RealmObject[];

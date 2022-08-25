@@ -12,6 +12,11 @@ export const RealmSelect = ({ realms }: InputType) => {
     const instance = usePlugin(plugin);
     const state = useValue(instance.state);
 
+    const realmName = (realmPath: string, serial: string) => {
+      const firstIndexOfSerial = realmPath.indexOf(serial);
+      return realmPath.substring(firstIndexOfSerial+serial.length);
+    }
+
     const onRealmSelected = useCallback(
         (selected: string) => {
           instance.getSchemas(selected);
@@ -21,7 +26,7 @@ export const RealmSelect = ({ realms }: InputType) => {
       );
       const realmOptions = realms.map((realm) => (
         <Select.Option key={realm} value={realm}>
-          {realm}
+          {realmName(realm, state.deviceSerial)}
         </Select.Option>
       ));
         return (
