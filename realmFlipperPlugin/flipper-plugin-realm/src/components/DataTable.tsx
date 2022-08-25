@@ -149,7 +149,7 @@ PropertyType) => {
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
-      if (value !== null && linkedSchema) {
+      if (value !== null && linkedSchema && property.type === 'object') {
         return (
           <Layout.Container
             style={{
