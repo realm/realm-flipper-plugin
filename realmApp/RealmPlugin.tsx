@@ -18,17 +18,6 @@ type PluginConfig = {
   connection: Flipper.FlipperConnection;
 };
 
-type getObjectsQuery = {
-  schema: string;
-  realm: string;
-  cursorId: number;
-  filterCursor: number | string;
-  limit: number;
-  sortingDirection: 'ascend' | 'descend';
-  sortingColumn: string;
-  sortingColumnType: string;
-};
-
 // convert object from a schema to realm one
 const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   if (!schemaName) {
@@ -199,7 +188,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, limit} = req;
+          const {schema, sortingColumn, sortingDirection} = req;
           let objects = realm.objects(schema);
           if (!objects.length) {
             responder.error({message: 'No objects found in the schema'});
@@ -227,6 +216,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             realm.schema.find(schemaa => schemaa.name === schema),
             realm.schema,
           );
+          const limit = 50;
           console.log('sending back!');
           responder.success({
             objects: afterConversion,

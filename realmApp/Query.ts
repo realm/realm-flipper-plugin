@@ -5,7 +5,6 @@ type getObjectsQuery = {
   realm: string;
   cursorId: number;
   filterCursor: number | string;
-  limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
   sortingColumnType: string;
@@ -14,7 +13,6 @@ type getObjectsQuery = {
 export class Query {
   reqFilterCursor;
   reqCursorId;
-  limit;
   sortingColumn;
   sortingColumnType;
   sortingDirection;
@@ -24,7 +22,6 @@ export class Query {
 
   constructor(req: getObjectsQuery, objects: Realm.Results<Realm.Object>, responder: Flipper.FlipperResponder) {
     const {
-      limit,
       sortingColumn,
       sortingDirection,
       cursorId,
@@ -32,7 +29,6 @@ export class Query {
       sortingColumnType,
       query,
     } = req;
-    this.limit = limit;
     this.sortingColumn = sortingColumn;
     this.sortingColumnType = sortingColumnType;
     this.sortingDirection = sortingDirection;
@@ -79,7 +75,7 @@ export class Query {
         this.sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : '$0'
       } && _id ${!this.reqCursorId ? '<=' : '<'} ${
         this.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
-      }) LIMIT(${this.limit})`,
+      }) LIMIT(50)`,
     );
 
     if (this.query) {
@@ -143,7 +139,7 @@ export class Query {
             this.sortingColumnType === 'uuid'
               ? `uuid(${cursorId})`
               : `${cursorId}`
-          }) LIMIT(${this.limit})`,
+          }) LIMIT(50)`,
           filterCursor,
         );
     } else {
@@ -154,7 +150,7 @@ export class Query {
             this.sortingColumnType === 'uuid'
               ? `uuid(${cursorId})`
               : `${cursorId}`
-          } LIMIT(${this.limit})`,
+          } LIMIT(50)`,
           cursorId,
         );
     }

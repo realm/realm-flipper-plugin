@@ -34,9 +34,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemaHistoryIndex: 0,
     cursorId: null,
     filterCursor: 0,
-    selectedPageSize: 50,
     totalObjects: 0,
-    currentPage: 1,
     sortingColumn: null,
     sortingDirection: null,
     hasMore: false,
@@ -91,18 +89,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
     const { newObject, index } = data;
-    const upperIndex = state.currentPage * state.selectedPageSize - 1;
-    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
-    if (index > upperIndex || index < lowerIndex) {
-      return false;
-    }
     let newObjects = state.objects;
     newObjects.splice(
-      index - (state.currentPage - 1) * state.selectedPageSize,
+      index,
       0,
       newObject
     );
-    const newFirstObject = newObjects[0];
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -112,10 +104,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: state.sortingColumn
         ? newLastObject[state.sortingColumn]
         : null,
-      prev_page_cursorId: newFirstObject._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? newFirstObject[state.sortingColumn]
-        : null,
     });
   });
 
@@ -123,19 +111,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('DELETE');
     const state = pluginState.get();
     const { index } = data;
-    const upperIndex = state.currentPage * state.selectedPageSize - 1;
-    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
-    if (index > upperIndex || index < lowerIndex) {
-      return false;
-    }
     let newObjects = state.objects;
     newObjects.splice(
-      index - (state.currentPage - 1) * state.selectedPageSize,
+      index,
       1
     );
 
     console.log('after', newObjects);
-    const newFirstObject = newObjects[0];
     const newLastObject = newObjects[newObjects.length - 1];
     console.log(newFirstObject, newLastObject);
     pluginState.set({
@@ -146,10 +128,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: state.sortingColumn
         ? newLastObject[state.sortingColumn]
         : null,
-      prev_page_cursorId: newFirstObject._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? newFirstObject[state.sortingColumn]
-        : null,
     });
   });
 
@@ -157,18 +135,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('EDIT');
     const state = pluginState.get();
     const { newObject, index } = data;
-    const upperIndex = state.currentPage * state.selectedPageSize - 1;
-    const lowerIndex = (state.currentPage - 1) * state.selectedPageSize;
-    if (index > upperIndex || index < lowerIndex) {
-      return false;
-    }
     let newObjects = state.objects;
     newObjects.splice(
-      index - (state.currentPage - 1) * state.selectedPageSize,
+      index,
       1,
       newObject
     );
-    const newFirstObject = newObjects[0];
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -176,12 +148,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       totalObjects: state.totalObjects - 1,
       cursorId: newLastObject._id,
       filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
-      prev_page_cursorId: newFirstObject._id,
-      prev_page_filterCursor: state.sortingColumn
-        ? newFirstObject[state.sortingColumn]
-        : null,
     });
   });
 
@@ -221,7 +187,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
         realm: realm,
         cursorId: state.cursorId,
         filterCursor: state.filterCursor,
-        limit: state.selectedPageSize,
         sortingColumn: state.sortingColumn,
         sortingColumnType: state.sortingColumnType,
         sortDirection: state.sortingDirection,
@@ -298,7 +263,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursorId: null,
       sortingColumn: null,
       sortingColumnType: state.currentSchema.properties['_id'].type,
-      currentPage: 1,
       query: query,
       objects: [],
     });
@@ -358,7 +322,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       sortingColumn: null,
       currentSchema: schema,
       sortingColumnType: schema.properties['_id'].type,
-      currentPage: 1,
       query: '',
       errorMessage: '',
     });
@@ -403,21 +366,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSelectedPageSize = (
-    pageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500
-  ) => {
-    const state = pluginState.get();
-    pluginState.set({
-      ...state,
-      selectedPageSize: pageSize,
-      cursorId: null,
-      filterCursor: null,
-      objects: [],
-      sortingColumn: null,
-      sortingColumnType: state.currentSchema?.properties['_id'].type ?? null,
-      sortingDirection: null,
-    });
-  };
 
   client.onConnect(() => {
     const state = pluginState.get();
@@ -458,14 +406,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: schema.name,
       object: object,
-    });
-  };
-
-  const setCurrentPage = (currentPage: number) => {
-    const state = pluginState.get();
-    pluginState.set({
-      ...state,
-      currentPage: currentPage,
     });
   };
 
@@ -538,8 +478,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     removeObject,
     goBackSchemaHistory,
     goForwardSchemaHistory,
-    setSelectedPageSize,
-    setCurrentPage,
     setSortingColumnAndType,
     toggleSortingDirection,
     setSortingDirection,

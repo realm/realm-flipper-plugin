@@ -328,7 +328,6 @@ PropertyType) => {
       }
     }
     instance.getObjects();
-    instance.setCurrentPage(1);
   };
   // TODO: think about key as a property in the Realm DB
   return (

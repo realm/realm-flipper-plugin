@@ -11,8 +11,6 @@ export type RealmPluginState = {
   schemaHistoryIndex: number;
   cursorId: number | null;
   filterCursor: number | null;
-  selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
-  currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
@@ -105,7 +103,6 @@ type getForwardsObjectsRequest = {
   realm: string;
   filterCursor: string | number | null;
   cursorId: number | null;
-  limit: number;
   sortingColumn: string | null;
   sortingColumnType: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
