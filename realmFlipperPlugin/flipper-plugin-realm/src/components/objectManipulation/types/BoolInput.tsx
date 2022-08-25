@@ -23,7 +23,7 @@ export const BoolInput = ({ property, set, defaultValue }: TypeInputProps) => {
   };
 
   return (
-    <Row align="middle" style={{ background: 'white' }}>
+    <Row align="middle">
       <Col flex="auto">
         <Radio.Group
           options={options}

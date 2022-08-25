@@ -12,7 +12,6 @@ type Relationship = {
 
 type InputType = {
   schemas: SchemaObject[];
-  selectedRealm: string;
 };
 
 
@@ -69,7 +68,7 @@ const calculateMermaid = (schemas: SchemaObject[]): string => {
 };
 
 // let fd = fs.openSync(args.outputFileName, "w");
-export const SchemaGraph = ({ schemas, selectedRealm }: InputType) => {
+export const SchemaGraph = ({ schemas }: InputType) => {
   const str = calculateMermaid(schemas);
 
   return (

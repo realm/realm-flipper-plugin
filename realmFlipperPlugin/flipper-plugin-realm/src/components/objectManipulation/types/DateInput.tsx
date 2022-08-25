@@ -22,7 +22,7 @@ export const DateInput = ({
   };
 
   return (
-    <Row align="middle" style={{ backgroundColor: theme.backgroundDefault }}>
+    <Row align="middle">
       <Col flex="auto">
         <DatePicker
           {...extraProps}

@@ -9,6 +9,7 @@ import {convertObjects} from './ConvertFunctions';
 import {Listener} from './Listener';
 import {Query} from './Query';
 const {BSON} = Realm;
+const {EJSON} = BSON;
 // config: Configuration,
 //     realms: Realm[],
 //     connection: Flipper.FlipperConnection,
@@ -48,7 +49,7 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    //console.log('convertLeaf', value, type);
+    // console.log('convertLeaf', value, type);
 
     // console.log(value);
     switch (type) {
@@ -63,11 +64,6 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'data':
         // console.log('data')
         return new ArrayBuffer(6);
-      // const buffer = new ArrayBuffer()
-      // const typedArray = Uint8Array.from(value);
-      // return new BSON.Binary(typedArray);
-      // return typedArray.buffer;
-      // return typedArray.buffer;
       default:
         // console.log('returning default', value)
         return value;
@@ -196,6 +192,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         });
 
         connection.receive('getObjects', (req, responder) => {
+          console.log('message: ', req);
           const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({message: 'No realm found'});
@@ -218,20 +215,20 @@ export default React.memo((props: {realms: Realm[]}) => {
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
           console.log('received', req);
-          let queryHandler = new Query(req, objects);
+          let queryHandler = new Query(req, objects, responder);
           objects = queryHandler.getObjectsByPagination();
           if (!objects) {
-            responder.error({message: 'No objects found'});
+            // responder.error({message: 'No objects found'});
             return;
           }
-          convertObjects(
+          const afterConversion = convertObjects(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),
             realm.schema,
           );
           console.log('sending back!');
           responder.success({
-            objects: objects,
+            objects: afterConversion,
             total: totalObjects,
             hasMore: objects.length >= limit,
           });
@@ -300,37 +297,37 @@ export default React.memo((props: {realms: Realm[]}) => {
           },
         );
 
-        connection.receive('executeQuery', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
-          if (!realm) {
-            responder.error({message: 'No realm found.'});
-            return;
-          }
-          const objs = realm.objects(obj.schema);
-          if (obj.query === '') {
-            responder.success(objs);
-            // connection.send('executeQuery', {result: objs});
-            return;
-          }
+        // connection.receive('executeQuery', (obj, responder) => {
+        //   const realm = realmsMap.get(obj.realm);
+        //   if (!realm) {
+        //     responder.error({message: 'No realm found.'});
+        //     return;
+        //   }
+        //   const objs = realm.objects(obj.schema);
+        //   if (obj.query === '') {
+        //     responder.success(objs);
+        //     // connection.send('executeQuery', {result: objs});
+        //     return;
+        //   }
 
-          let res;
-          try {
-            res = objs.filtered(obj.query);
-            responder.success(res);
-          } catch (err) {
-            responder.error({message: err.message});
-            // res = {result: err.message};
-          }
-          // responder.error(res);
-          // connection.send('executeQuery', res);
-        });
+        //   let res;
+        //   try {
+        //     res = objs.filtered(obj.query);
+        //     responder.success(res);
+        //   } catch (err) {
+        //     responder.error({message: err.message});
+        //     // res = {result: err.message};
+        //   }
+        //   // responder.error(res);
+        //   // connection.send('executeQuery', res);
+        // });
         connection.receive('addObject', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
           const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('trying to create:', converted);
+          // console.log('trying to create:', converted);
           try {
             realm.write(() => {
               realm.create(obj.schema, converted);
@@ -349,12 +346,33 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm) {
             return;
           }
-          //console.log('got', obj.object);
-          const converted = typeConverter(obj.object, realm, obj.schema);
-          //console.log('converted', converted);
+          const propsChanged = obj.propsChanged;
+          const schema = realm.schema.find(
+            schemaObj => schemaObj.name === obj.schema,
+          ) as CanonicalObjectSchema;
 
+          const converted = typeConverter(obj.object, realm, obj.schema);
+          console.log('converted obj is:', converted);
+          // load the values to be modified
+          const newObject = {};
+          propsChanged.forEach(propName => {
+            newObject[propName] = converted[propName];
+          });
+
+          // load all the rest values from the existing realm object
+          const primaryKey = converted[schema.primaryKey];
+          console.log('primary key: ' + primaryKey);
+          const realmObj = realm.objectForPrimaryKey(schema.name, primaryKey);
+          console.log('keys:', Object.keys(realmObj));
+          Object.keys(schema.properties).forEach(key => {
+            if (!propsChanged.find(val => val === key)) {
+              newObject[key] = realmObj[key];
+            }
+          });
+
+          // console.error('object after modifications:', newObject);
           realm.write(() => {
-            realm.create(obj.schema, converted, 'modified');
+            realm.create(obj.schema, newObject, 'modified');
           });
 
           const objects = realm.objects(obj.schema);
@@ -408,4 +426,162 @@ export default React.memo((props: {realms: Realm[]}) => {
     };
   });
   return <></>;
+<<<<<<< HEAD
 });
+
+function handleAddListener(
+  schemaToObjects: Map<string, Realm.Results<Realm.Object>>,
+  schema: string,
+  objects: Realm.Results<Realm.Object>,
+  sortingColumn: string,
+  sortDirection: 'ascend' | 'descend' | null,
+  onObjectsChange: (objects: any, changes: any) => void,
+) {
+  if (schemaToObjects.has(schema)) {
+    schemaToObjects.get(schema).removeAllListeners();
+  }
+  let objectsToListenTo: Realm.Results<Realm.Object> = objects;
+  const shouldSortDescending = sortDirection === 'descend';
+  if (sortingColumn) {
+    objectsToListenTo = objects.sorted([
+      [`${sortingColumn}`, shouldSortDescending],
+      ['_id', shouldSortDescending],
+    ]);
+  } else {
+    objectsToListenTo = objects.sorted('_id', shouldSortDescending);
+  }
+  objectsToListenTo.addListener(onObjectsChange);
+  schemaToObjects.set(schema, objectsToListenTo);
+
+  return schemaToObjects;
+}
+
+function getObjectsByPagination(
+  obj: getObjectsQuery,
+  objects: Realm.Results<Realm.Object>,
+  limit: number,
+  query: string,
+  responder: Flipper.FlipperResponder,
+) {
+  let filterCursor: string | number | null = null;
+  const shouldSortDescending = obj.sortDirection === 'descend';
+  const cursorId =
+    obj.cursorId ?? objects.sorted('_id', shouldSortDescending)[0]._id;
+  if (obj.sortingColumn) {
+    filterCursor =
+      obj.filterCursor ??
+      objects.sorted(`${obj.sortingColumn}`, shouldSortDescending)[0][
+        obj.sortingColumn
+      ];
+  }
+  if (shouldSortDescending) {
+    objects = getObjectsDescending(
+      obj,
+      cursorId,
+      filterCursor,
+      objects,
+      limit,
+      responder,
+    );
+  } else {
+    objects = getObjectsAscending(
+      obj,
+      cursorId,
+      filterCursor,
+      objects,
+      limit,
+      query,
+      responder,
+    );
+  }
+  return objects;
+}
+
+function getObjectsDescending(
+  obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: string | number | null,
+  objects: Realm.Results<Realm.Object>,
+  limit: number,
+  responder: Flipper.FlipperResponder,
+) {
+  const {sortingColumn, sortingColumnType} = obj;
+  try {
+    objects = objects
+      .sorted([
+        [`${sortingColumn}`, true],
+        ['_id', true],
+      ])
+      .filtered(
+        `${sortingColumn} ${!obj.filterCursor ? '<=' : '<'} ${
+          sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : `${cursorId}`
+        } || (${sortingColumn} == ${
+          sortingColumnType === 'uuid' ? `uuid(${filterCursor})` : `${cursorId}`
+        } && _id ${!obj.cursorId ? '<=' : '<'} ${
+          sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+        }) LIMIT(${limit})`,
+        filterCursor,
+        cursorId,
+      );
+    return objects;
+  } catch (error) {
+    responder.error({message: error});
+    return;
+  }
+}
+
+function getObjectsAscending(
+  obj: getObjectsQuery,
+  cursorId: number,
+  filterCursor: number | string | null,
+  objects: Realm.Results<Realm.Object>,
+  limit: number,
+  query: string,
+  responder: Flipper.FlipperResponder,
+) {
+  const {sortingColumn} = obj;
+  if (query) {
+    try {
+      objects = objects.filtered(query);
+    } catch (e) {
+      console.log('error, returning:', e.message);
+      responder.error({
+        message: e.message,
+      });
+      return;
+    }
+  }
+  if (sortingColumn) {
+    console.log('cursorId is', cursorId);
+    objects = objects
+      .sorted([
+        [`${sortingColumn}`, false],
+        ['_id', false],
+      ])
+      .filtered(
+        `${sortingColumn} ${!obj.filterCursor ? '>=' : '>'} ${
+          obj.sortingColumnType === 'uuid'
+            ? `uuid(${filterCursor})`
+            : `${filterCursor}`
+        } || (${sortingColumn} == ${filterCursor} && _id ${
+          !obj.cursorId ? '>=' : '>'
+        } ${
+          obj.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+        }) LIMIT(${limit})`,
+      );
+  } else {
+    console.log('cursorId is aah', cursorId);
+    objects = objects
+      .sorted('_id', false)
+      .filtered(
+        `_id ${!obj.cursorId ? '>=' : '>'} ${
+          obj.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
+        } LIMIT(${limit})`,
+        cursorId,
+      );
+  }
+  return objects;
+}
+=======
+});
+>>>>>>> main

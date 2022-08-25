@@ -20,9 +20,10 @@ export const ObjectEdit = ({
 }: InputType) => {
   const [value, setValue] = useState(initialObject);
   const { modifyObject } = usePlugin(plugin);
+  const [propsChanged, setPropsChanges] = useState<Set<string>>(new Set());
 
   const onOk = () => {
-    modifyObject(value);
+    modifyObject(value, propsChanged);
     hideModal();
   };
 
@@ -42,6 +43,7 @@ export const ObjectEdit = ({
         schema={schema}
         value={value}
         setValue={setValue}
+        setPropsChanges={setPropsChanges}
       ></PropertiesModify>
     </Modal>
   );

@@ -1,4 +1,4 @@
-import { Modal, Radio } from 'antd';
+import { Button, Modal, Radio } from 'antd';
 import { useState } from 'react';
 import { RealmObject, SchemaObject } from '../../CommonTypes';
 
@@ -6,6 +6,7 @@ import React from 'react';
 import { plugin } from '../..';
 import { Layout, usePlugin } from 'flipper-plugin';
 import { PropertiesModify } from './PropertiesModify';
+import { PlusOutlined } from '@ant-design/icons';
 
 type PropertyType = {
   schema: SchemaObject;
@@ -40,9 +41,11 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
     <Layout.Horizontal
       style={{ justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
     >
-      <Radio.Button type="primary" onClick={showModal}>
-        Create {schema.name}
-      </Radio.Button>
+      <Radio.Group>
+        <Radio.Button type="primary" onClick={showModal}>
+          {<PlusOutlined />} Create {schema.name}
+        </Radio.Button>
+      </Radio.Group>
       <Modal
         title={'Create ' + schema.name}
         visible={visible}
@@ -52,7 +55,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
         cancelText="Cancel"
         destroyOnClose
       >
-        <PropertiesModify schema={schema} value={values} setValue={setValues}/>
+        <PropertiesModify schema={schema} value={values} setValue={setValues} />
       </Modal>
     </Layout.Horizontal>
   );

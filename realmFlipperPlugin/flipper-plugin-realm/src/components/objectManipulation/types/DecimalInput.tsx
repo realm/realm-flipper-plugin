@@ -18,7 +18,7 @@ export const DecimalInput = ({
   };
 
   return (
-    <Row align="middle" style={{ background: 'white' }}>
+    <Row align="middle">
       <Col flex="auto">
         <InputNumber
         {...extraProps}

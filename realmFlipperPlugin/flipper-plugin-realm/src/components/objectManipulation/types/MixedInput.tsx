@@ -12,21 +12,18 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState(
     // stores type or objectType if it's an object
-    defaultValue === null ? 'string' : defaultValue?.type,
+    defaultValue === null ? 'string' : defaultValue?.type
   );
 
   const [value, setValue] = useState<unknown | undefined>(
-    defaultValue === null ? undefined : defaultValue?.value
+    defaultValue === null ? undefined : defaultValue
   );
   const { state } = usePlugin(plugin);
   const { schemas } = useValue(state);
 
   const addObject = () => {
-    set({
-      type: chosenType,
-      value
-    });
-    
+    set(value);
+    // setChosenType()
     setReset((v) => v + 1);
     setChosen(true);
     hideModal();
@@ -44,28 +41,28 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
     hideModal();
   };
 
-  const onChangeSelect = (v: string) => {
-    setChosenType(v);
-    setValue(
-      getDefault({
-        type: v,
-        optional: false,
-      })
-    );
+  const onChangeSelect = (newType: string) => {
+    setChosenType(newType);
+
+    const typeObj = {
+      type: newType,
+      optional: false,
+    };
+    const defaultValue = getDefault(typeObj);
+    setValue(defaultValue);
   };
 
   const renderChosen = () => {
     // console.log('renderChosen', value);
-    const objectType = schemas.find(schema => schema.name === chosenType);
+    const objectType = schemas.find((schema) => schema.name === chosenType);
     let type;
     if (objectType) {
       type = 'object';
-    }
-    else {
+    } else {
       type = chosenType;
     }
     return (
-      <Row style={{ backgroundColor: 'white' }} align="middle">
+      <Row align="middle">
         <Col flex="auto">
           <Tag color="success">{chosenType}</Tag>
           {renderValue(value, { type, objectType: objectType?.name }, schemas)}
@@ -86,16 +83,16 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
 
   const renderSelector = () => {
     const typeList = [
-      'objectId',
-      'uuid',
+      // 'objectId',
+      // 'uuid',
       'bool',
       'int',
       'float',
       'double',
       'decimal128',
       'string',
-      'data',
-      'date',
+      // 'data',
+      // 'date',
     ].reverse();
 
     return (
@@ -117,7 +114,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
           cancelText="Cancel"
         >
           <Layout>
-            <div style={{ backgroundColor: 'white' }}>Select a type:</div>
+            <div>Select a type:</div>
             <Select
               defaultValue={'string'}
               onChange={onChangeSelect}
@@ -132,6 +129,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
                   );
                 })}
               </Select.OptGroup>
+{/*           not supported for now
               <Select.OptGroup label="Link types">
                 {schemas.map((item, index) => {
                   return (
@@ -143,7 +141,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
                     </Select.Option>
                   );
                 })}
-              </Select.OptGroup>
+              </Select.OptGroup> */}
             </Select>
             <TypeInput
               property={{

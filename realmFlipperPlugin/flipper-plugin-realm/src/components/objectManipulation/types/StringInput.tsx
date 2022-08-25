@@ -15,7 +15,7 @@ export const StringInput = ({
   const [reset, setReset] = useState(0);
 
   return (
-    <Row align="middle" style={{ background: 'white' }}>
+    <Row align="middle">
       <Col flex="auto">
         <Input
           {...extraProps}

@@ -2,9 +2,10 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { StarOutlined } from '@ant-design/icons';
 import { Button, Alert, AutoComplete, Row, Col } from 'antd';
 import { plugin } from '../index';
-import { DataTable, schemaObjToColumns } from '../components/DataTable';
+// import { DataTable, schemaObjToColumns } from '../components/DataTab/DataTable';
 import { usePlugin, useValue, Layout } from 'flipper-plugin';
 import { RealmObject, SchemaProperty, SchemaObject } from '../CommonTypes';
+import { DataTable, schemaObjToColumns } from '../components/DataTable';
 type PropsType = {
   schema?: SchemaObject;
   renderOptions?: (
@@ -85,7 +86,7 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
         />
       ) : null}
       <Layout.Container grow style={{ minHeight: '500px' }}>
-        <Row style={{ backgroundColor: 'white' }}>
+        <Row>
           <Col flex="auto">
             <AutoComplete
               style={{ width: '100%' }}

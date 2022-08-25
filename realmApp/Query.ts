@@ -9,6 +9,7 @@ type getObjectsQuery = {
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
   sortingColumnType: string;
+  query: string;
 };
 export class Query {
   reqFilterCursor;
@@ -18,8 +19,10 @@ export class Query {
   sortingColumnType;
   sortingDirection;
   objects: Realm.Results<Realm.Object>;
+  query: string;
+  responder: Flipper.FlipperResponder;
 
-  constructor(req: getObjectsQuery, objects: Realm.Results<Realm.Object>) {
+  constructor(req: getObjectsQuery, objects: Realm.Results<Realm.Object>, responder: Flipper.FlipperResponder) {
     const {
       limit,
       sortingColumn,
@@ -27,6 +30,7 @@ export class Query {
       cursorId,
       filterCursor,
       sortingColumnType,
+      query,
     } = req;
     this.limit = limit;
     this.sortingColumn = sortingColumn;
@@ -35,6 +39,8 @@ export class Query {
     this.reqCursorId = cursorId;
     this.reqFilterCursor = filterCursor;
     this.objects = objects;
+    this.query = query;
+    this.responder = responder;
   }
 
   getObjectsByPagination() {
@@ -75,6 +81,18 @@ export class Query {
         this.sortingColumnType === 'uuid' ? `uuid(${cursorId})` : `${cursorId}`
       }) LIMIT(${this.limit})`,
     );
+
+    if (this.query) {
+      try {
+        this.objects = this.objects.filtered(this.query);
+      } catch (e) {
+        this.responder.error({
+          message: e.message,
+        });
+        return;
+      }
+    }
+
     this.objects = this.objects.sorted([
       [`${this.sortingColumn}`, true],
       ['_id', true],
@@ -94,6 +112,16 @@ export class Query {
   }
 
   getObjectsAscending(cursorId: number, filterCursor: number | string | null) {
+    if (this.query) {
+      try {
+        this.objects = this.objects.filtered(this.query);
+      } catch (e) {
+        this.responder.error({
+          message: e.message,
+        });
+        return;
+      }
+    }
     if (this.sortingColumn) {
       console.log(
         this.sortingColumn,

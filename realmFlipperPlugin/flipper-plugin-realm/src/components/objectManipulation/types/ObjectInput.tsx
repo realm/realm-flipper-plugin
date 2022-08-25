@@ -4,7 +4,7 @@ import { usePlugin, useValue, Layout } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
 import { RealmObject } from '../../../CommonTypes';
-import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
+// import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
 
 export const ObjectInput = ({
@@ -32,7 +32,7 @@ export const ObjectInput = ({
     const val = value[targetSchema.primaryKey];
     const content = `${targetSchema?.primaryKey}: ${val}`;
     return (
-      <Row style={{ width: '100%', backgroundColor: 'white' }} align="middle">
+      <Row style={{ width: '100%' }} align="middle">
         <Col>
           <Tag color="success">{targetSchema?.name}</Tag>
         </Col>
@@ -87,10 +87,11 @@ export const ObjectInput = ({
           closable={false}
         >
           <Layout.Container grow>
-            <RealmQueryLanguage
+            Empty for now...
+            {/* <RealmQueryLanguage
               schema={targetSchema}
               renderOptions={chooseOption}
-            />
+            /> */}
           </Layout.Container>
         </Modal>
       </Layout.Container>

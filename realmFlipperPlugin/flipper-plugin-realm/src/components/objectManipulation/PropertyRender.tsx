@@ -1,4 +1,5 @@
-import { Layout, Tag } from 'antd';
+import { Col, Divider, Row, Tag } from 'antd';
+import { Layout } from 'flipper-plugin';
 import React from 'react';
 import { SchemaProperty } from '../../CommonTypes';
 import { TypeInput } from './types/TypeInput';
@@ -12,7 +13,7 @@ type PropertyType = {
 
 export const typeToString = (property: SchemaProperty): string => {
   let title = '';
-  
+
   switch (property.type) {
     case 'list':
     case 'set':
@@ -23,7 +24,7 @@ export const typeToString = (property: SchemaProperty): string => {
     default:
       title += property.type;
   }
-  
+
   if (property.optional) {
     title += '?';
   }
@@ -41,7 +42,7 @@ export const typeToString = (property: SchemaProperty): string => {
   }
 
   return title;
-}
+};
 
 export const PropertyRender = ({
   initialValue,
@@ -52,25 +53,32 @@ export const PropertyRender = ({
   const title = typeToString(property);
 
   return (
-    <Layout>
-      <Layout.Header style={{ paddingLeft: 0, paddingRight: 0 }}>
-        <div style={{ backgroundColor: 'white' }}>
-          {property.name}
-          <span style={{ float: 'right' }}>
-            <Tag color="default">{title}</Tag>
-            {!property.optional ? <Tag color="blue">required</Tag> : null}
-            {isPrimary ? <Tag color="green">primary key</Tag> : null}
-          </span>
-        </div>
-      </Layout.Header>
-      <Layout.Content>
+    // <Layout.Container>
+
+    <>
+      <Row gutter={[0, 16]}>
+        <Col>
+            {property.name}
+        </Col>
+        <Col flex="auto">
+          {/* <Divider type="horizontal" style={{width: '100%'}}></Divider> */}
+        </Col>
+        <Col>
+              <Tag color="default">{title}</Tag>
+              {!property.optional ? <Tag color="blue">required</Tag> : null}
+              {isPrimary ? <Tag color="green">primary key</Tag> : null}
+            {/* </span> */}
+        </Col>
+        <Col span={24}>
         <TypeInput
-          property={property}
-          set={set}
-          defaultValue={initialValue}
-          extraProps={{ style: { width: '100%' } }}
-        />
-      </Layout.Content>
-    </Layout>
+            property={property}
+            set={set}
+            defaultValue={initialValue}
+            extraProps={{ style: { width: '100%' } }}
+          />
+        </Col>
+      </Row>
+    </>
+    // </Layout.Container>
   );
 };
