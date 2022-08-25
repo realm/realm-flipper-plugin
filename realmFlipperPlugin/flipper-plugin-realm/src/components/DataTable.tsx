@@ -150,7 +150,7 @@ PropertyType) => {
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
-      if (value !== null && linkedSchema) {
+      if (value !== null && linkedSchema && property.type === 'object') {
         return (
           <Layout.Container
             style={{
@@ -222,7 +222,7 @@ PropertyType) => {
                 //@ts-ignore
                 pointerX: env.clientX - 290,
                 //@ts-ignore
-                pointerY: env.clientY - 160,
+                pointerY: env.clientY - 195,
                 scrollX,
                 scrollY,
               });
