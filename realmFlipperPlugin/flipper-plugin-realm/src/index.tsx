@@ -227,11 +227,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
         query: state.query,
       })
       .then((response: RealmsMessage) => {
+        if (response.objects && !response.objects.length) {
+          return;
+        }        
         console.log('got objects:', response.objects);
         const state = pluginState.get();
-        if (!response.objects && response.objects.length) {
-          return;
-        }
         const objects = response.objects;
         const nextCursor = objects[objects.length - 1];
 
