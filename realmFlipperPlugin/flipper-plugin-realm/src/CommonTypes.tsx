@@ -14,7 +14,7 @@ export type RealmPluginState = {
   currentPage: number;
   totalObjects: number;
   sortingColumn: string | null;
-  sortDirection: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   hasMore: boolean;
   sortingColumnType: string | null;
   query: string;
@@ -107,8 +107,7 @@ type getForwardsObjectsRequest = {
   limit: number;
   sortingColumn: string | null;
   sortingColumnType: string | null;
-  sortDirection: 'ascend' | 'descend' | null;
-  query: string;
+  sortingDirection: 'ascend' | 'descend' | null;
 };
 
 export type ObjectRequest = {

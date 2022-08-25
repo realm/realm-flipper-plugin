@@ -1,6 +1,6 @@
 import { SchemaObject } from '../CommonTypes';
 import React from 'react';
-import { BooleanValue } from '../components/BooleanValue';
+import BooleanValue from '../components/BooleanValue';
 import { Typography } from 'antd';
 
 type TypeDescription = {
@@ -109,7 +109,7 @@ function parseData(input) {
 function parseBoolean(input: boolean): JSX.Element {
   const inputAsString = input.toString();
 
-  return <BooleanValue active={input}> {inputAsString}</BooleanValue>;
+  return <BooleanValue active={input} value={inputAsString} />
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {
