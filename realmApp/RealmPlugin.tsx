@@ -197,21 +197,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
           }
           let objects = realm.objects(schema);
-          console.log('before parsing:', objects[0]);
-          const prop = objects[0]._id;
-          console.log(prop instanceof BSON.UUID);
-          let objj = JSON.stringify(objects[0], (key: string, value: any) => {
-            if (value instanceof BSON.UUID) {
-              // console.l
-              return value.toString();
-            }
-            return value;
-          });
-          console.log('obj:', objj);
-          let parsedObjects = EJSON.stringify(objj, {
-            relaxed: false,
-          });
-          console.log('parsed objects:', parsedObjects);
           if (!objects.length) {
             responder.error({message: 'No objects found in the schema'});
             return;
@@ -238,13 +223,13 @@ export default React.memo((props: {realms: Realm[]}) => {
             return;
             // responder.error({message: 'No objects found'});
           }
-          convertObjects(
+          const afterConversion = convertObjects(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),
             realm.schema,
           );
           responder.success({
-            objects: objects,
+            objects: afterConversion,
             total: objectsLength,
             hasMore: objects.length >= limit,
           });

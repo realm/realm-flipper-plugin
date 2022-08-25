@@ -7,7 +7,6 @@ import { TypeInputProps } from "./TypeInput";
 export const DataInput = ({ set }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
 
-
   const emptyState: {
     selectedFile?: UploadFile<unknown>;
     selectedFileList: UploadFile<unknown>[];

@@ -87,7 +87,8 @@ export const TypeInput = (props: TypeInputProps) => {
     case 'decimal128':
       return <DecimalInput {...props} />;
     case 'data':
-      return <DataInput {...props} />;
+      // return <DataInput {...props} />;
+      return <>Not yet implemented.</>
     case 'dictionary':
       return <DictionaryInput {...props} />;
     case 'objectId':

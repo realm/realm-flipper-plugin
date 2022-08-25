@@ -1,5 +1,5 @@
 import { Alert } from 'antd';
-import { Layout, usePlugin } from 'flipper-plugin';
+import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
