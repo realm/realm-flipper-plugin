@@ -22,23 +22,17 @@ Gets the schemas for a given realm and sends them to the plugin.
 ### `getObjects(queryObject: QueryObject)`
 
 Takes a query request object, and sends back a `limit` amount of objects. 
-### `getOneObject` -- TODO: will probably be deleted
-
-### `executeQuery()` -- TODO WILL PROBABLY BE DELETED
-
-Takes a Realm Query Language string and returns the objects which return true for the predicate.
-
+### `getOneObject(primaryKey: number)`
+Given a primary key, it gets one object from the backend and sends it to the desktop plugin.
 ### `addObject(realm: String, schema: String, objectToAdd: RealmObject)`
 Adds a user-specified object to the Realm database.
-### `modifyObject(realm: String, schema: String, objectToAdd: RealmObject)` -- TODO: ask tomasz what this takes
+### `modifyObject(realm: String, schema: String, objectToAdd: RealmObject)` -- 
 Modifies an object in the Realm database.
 ### `removeObject(realm: String, schema: String, objectToAdd: RealmObject)`
 Removed an object in the Realm database.
 ### Plugin events
 ---
 The plugin listens for the following events:
-
-### getOneObject -- TODO: probably will be removed!!
 
 ### `liveObjectAdded(obj: RealmObject)`
 
