@@ -25,10 +25,10 @@ const ViewModeTabs = (props: {
           <SettingOutlined style={{ marginRight: 5 }} />
           <Typography.Text>Schema</Typography.Text>
         </Radio.Button>
-        <Radio.Button onClick={() => props.setViewMode('RQL')} value="RQL">
+        {/* <Radio.Button onClick={() => props.setViewMode('RQL')} value="RQL">
           <ConsoleSqlOutlined style={{ marginRight: 5 }} />
           <Typography.Text>RQL</Typography.Text>
-        </Radio.Button>
+        </Radio.Button> */}
         <Radio.Button onClick={() => props.setViewMode('schemaGraph')} value="schemaGraph">
         <RadarChartOutlined style={{ marginRight: 5 }}/>
           <Typography.Text>Schemas graph</Typography.Text>

@@ -165,6 +165,7 @@ export default React.memo((props: {realms: Realm[]}) => {
         return 'realm';
       },
       onConnect(connection) {
+        // connection.receive
         connection.send('getCurrentQuery');
 
         connection.receive('receivedCurrentQuery', obj => {

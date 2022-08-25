@@ -44,7 +44,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: '',
     errorMessage: '',
   });
-
+  console.log(client);
   client.onMessage('getOneObject', (data: ObjectMessage) => {
     const state = pluginState.get();
     pluginState.set({ ...state, singleObject: data.object });
@@ -555,7 +555,7 @@ export function Component() {
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<
-    'data' | 'schemas' | 'RQL' | 'schemaGraph'
+    'data' | 'schemas' | 'schemaGraph'
   >('data');
 
   return (
