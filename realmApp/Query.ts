@@ -92,7 +92,6 @@ export class Query {
         return;
       }
     }
-    console.error('ok, query is:', this.query);
     this.objects = this.objects.sorted([
       [`${this.sortingColumn}`, true],
       ['_id', true],

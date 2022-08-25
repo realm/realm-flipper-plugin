@@ -90,7 +90,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 14,
+      _id: Math.random() * 1000000000,
       name: 'Jack',
       color: 'yellow',
       length: 40,

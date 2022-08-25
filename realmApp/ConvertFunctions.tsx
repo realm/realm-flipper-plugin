@@ -24,6 +24,7 @@ const convertObject = (
       return value;
     }
     if (property.type === 'data') {
+      // console.log('value of data is:', )
       // console.log('value is:', new Uint8Array(value));
       return Array.from(new Uint8Array(value));
     }

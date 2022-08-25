@@ -9,7 +9,6 @@ import {convertObjects} from './ConvertFunctions';
 import {Listener} from './Listener';
 import {Query} from './Query';
 const {BSON} = Realm;
-const {EJSON} = BSON;
 // config: Configuration,
 //     realms: Realm[],
 //     connection: Flipper.FlipperConnection,
@@ -62,8 +61,9 @@ const typeConverter = (object: any, realm: Realm, schemaName?: string) => {
       case 'objectId':
         return new BSON.ObjectId(value);
       case 'data':
-        // console.log('data')
-        return new ArrayBuffer(6);
+        // console.log('data with value:', value.length);
+        const arr = new Uint8Array(value);
+        return arr;
       default:
         // console.log('returning default', value)
         return value;

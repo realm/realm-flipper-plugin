@@ -240,6 +240,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
         }
         const objects = response.objects;
         const nextCursor = objects[objects.length - 1];
+
+        if (state.currentSchema.name !== schema) {
+          return;
+        }
         pluginState.set({
           ...state,
           objects: [...state.objects, ...response.objects],
