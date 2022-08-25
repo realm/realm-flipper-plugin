@@ -92,7 +92,7 @@ export class Query {
         return;
       }
     }
-
+    console.error('ok, query is:', this.query);
     this.objects = this.objects.sorted([
       [`${this.sortingColumn}`, true],
       ['_id', true],
@@ -112,6 +112,8 @@ export class Query {
   }
 
   getObjectsAscending(cursorId: number, filterCursor: number | string | null) {
+    console.error('ok, query is:', this.query);
+
     if (this.query) {
       try {
         this.objects = this.objects.filtered(this.query);
