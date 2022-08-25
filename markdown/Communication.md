@@ -5,7 +5,6 @@ A typical round-trip consists of the plugin making a request to the app by calli
 
 ![A diagram of the Realm Flipper Plugin communication archictecture](/realmFlipperPlugin/communicationDiagram.png "Realm Flipper Plugin communication archictecture")
 ## Event API
-___
 The plugin and app listens for events emitted bi-directionally, to faciliate data sharing over the wire. Specifically, the Realm Flipper Plugin communicates with the React Native application through the following methods:
 
 ### App events
@@ -22,23 +21,17 @@ Gets the schemas for a given realm and sends them to the plugin.
 ### `getObjects(queryObject: QueryObject)`
 
 Takes a query request object, and sends back a `limit` amount of objects. 
-### `getOneObject` -- TODO: will probably be deleted
-
-### `executeQuery()` -- TODO WILL PROBABLY BE DELETED
-
-Takes a Realm Query Language string and returns the objects which return true for the predicate.
-
+### `getOneObject(primaryKey: number)`
+Given a primary key, it gets one object from the backend and sends it to the desktop plugin.
 ### `addObject(realm: String, schema: String, objectToAdd: RealmObject)`
 Adds a user-specified object to the Realm database.
-### `modifyObject(realm: String, schema: String, objectToAdd: RealmObject)` -- TODO: ask tomasz what this takes
+### `modifyObject(realm: String, schema: String, objectToAdd: RealmObject)` -- 
 Modifies an object in the Realm database.
 ### `removeObject(realm: String, schema: String, objectToAdd: RealmObject)`
 Removed an object in the Realm database.
 ### Plugin events
 ---
 The plugin listens for the following events:
-
-### getOneObject -- TODO: probably will be removed!!
 
 ### `liveObjectAdded(obj: RealmObject)`
 
@@ -65,5 +58,4 @@ The desktop plugin listens for `getCurrentQuery` as to send back the current que
 The app listens for `receivedCurrentQuery` as to attach an updated Realm collection listener.
 
 ## Conclusion
----
 These functions define the communication between the plugin and the API, and are necessary for supporting the required functionality.

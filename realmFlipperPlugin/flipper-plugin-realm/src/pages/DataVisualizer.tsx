@@ -54,6 +54,11 @@ const DataVisualizer = ({
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
+  const handleDataInspector = (inspectionData: InspectionDataType) => {
+    showSidebar ? null : setShowSidebar(true);
+    setNewInspectionData(inspectionData);
+  };
+
   const deleteRow = (row: RealmObject) => {
     removeObject(row);
   };
@@ -72,104 +77,99 @@ const DataVisualizer = ({
       object: row,
       type: 'object',
     });
+  };
+
+  /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
+  const generateMenuItems: MenuItemGenerator = (
+    row: RealmObject,
+    schemaProperty: SchemaProperty,
+    schema: SchemaObject
+  ) => [
+    {
+      key: 1,
+      text: 'Inspect Object',
+      onClick: () => {
+        const object = {};
+        Object.keys(row).forEach((key) => {
+          object[key] = row[key];
+        });
+        handleDataInspector({
+          data: {
+            [schema.name]: object,
+          },
+          view: 'object',
+        });
+      },
+    },
+    {
+      key: 2,
+      text: 'Inspect Property',
+      onClick: () => {
+        handleDataInspector({
+          data: {
+            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+          },
+          view: 'property',
+        });
+      },
+    },
+    {
+      key: 3,
+      text: 'Edit Object',
+      onClick: () => editObject(row),
+    },
+    {
+      key: 4,
+      text: 'Edit Property',
+      onClick: () => editField(row, schemaProperty),
+    },
+    {
+      key: 5,
+      text: 'Delete Object',
+      onClick: () => deleteRow(row),
+    },
+  ];
+
+  /**  Managing dropdown properties.*/
+  const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
+    generateMenuItems,
+    record: {},
+    schemaProperty: null,
+    visible: false,
+    pointerX: 0,
+    pointerY: 0,
+    scrollX: 0,
+    scrollY: 0,
+  });
+
+  /** Hook to close the dropdown when clicked outside of it. */
+  useEffect(() => {
+    const closeDropdown = () => {
+      setdropdownProp({ ...dropdownProp, visible: false });
+    };
+    document.body.addEventListener('click', closeDropdown);
+    return () => document.body.removeEventListener('click', closeDropdown);
+  }, []);
+
+  /** Handler to keep track of the current x and y position of the scrollcontainer. This is needed to render the dropdown in the correct place when scrolled. */
+  const handleScroll = (event: React.BaseSyntheticEvent) => {
+    const { scrollLeft, scrollTop } = event.target;
+    scrollX.current = scrollLeft;
+    scrollY.current = scrollTop;
+    console.log('handleScroll');
+    console.log(scrollX.current);
+    console.log(scrollY.current);
+  };
+
+  if (!currentSchema) {
+    return <div>Please select a schema.</div>;
   }
-    const handleDataInspector = (inspectionData: InspectionDataType) => {
-      showSidebar ? null : setShowSidebar(true);
-      setNewInspectionData(inspectionData);
-    };
 
-    /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
-    const generateMenuItems: MenuItemGenerator = (
-      row: RealmObject,
-      schemaProperty: SchemaProperty,
-      schema: SchemaObject
-    ) => [
-      {
-        key: 1,
-        text: 'Inspect Object',
-        onClick: () => {
-          const object = {};
-          Object.keys(row).forEach((key) => {
-            object[key] = row[key];
-          });
-          handleDataInspector({
-            data: {
-              [schema.name]: object,
-            },
-            view: 'object',
-          });
-        },
-      },
-      {
-        key: 2,
-        text: 'Inspect Property',
-        onClick: () => {
-          handleDataInspector({
-            data: {
-              [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name],
-            },
-            view: 'property',
-          });
-        },
-      },
-      {
-        key: 3,
-        text: 'Edit Object',
-        onClick: () => editObject(row),
-      },
-      {
-        key: 4,
-        text: 'Edit Property',
-        onClick: () => editField(row, schemaProperty),
-      },
-      {
-        key: 5,
-        text: 'Delete Object',
-        onClick: () => deleteRow(row),
-      },
-    ];
+  if (!schemas || !schemas.length) {
+    return <div>No schemas found. Check selected Realm.</div>;
+  }
 
-    /**  Managing dropdown properties.*/
-    const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-      generateMenuItems,
-      record: {},
-      schemaProperty: null,
-      visible: false,
-      pointerX: 0,
-      pointerY: 0,
-      scrollX: 0,
-      scrollY: 0,
-    });
-
-    /** Hook to close the dropdown when clicked outside of it. */
-    useEffect(() => {
-      const closeDropdown = () => {
-        setdropdownProp({ ...dropdownProp, visible: false });
-      };
-      document.body.addEventListener('click', closeDropdown);
-      return () => document.body.removeEventListener('click', closeDropdown);
-    }, []);
-
-    /** Handler to keep track of the current x and y position of the scrollcontainer. This is needed to render the dropdown in the correct place when scrolled. */
-    const handleScroll = (event: React.BaseSyntheticEvent) => {
-      const { scrollLeft, scrollTop } = event.target;
-      scrollX.current = scrollLeft;
-      scrollY.current = scrollTop;
-      console.log('handleScroll');
-      console.log(scrollX.current);
-      console.log(scrollY.current);
-    };
-
-    if (!currentSchema) {
-      return <div>Please select a schema.</div>;
-    }
-
-    if (!schemas || !schemas.length) {
-      return <div>No schemas found. Check selected Realm.</div>;
-    }
-
-    /** Take the current dropdownProp and update it with the current x and y scroll values.
+  /** Take the current dropdownProp and update it with the current x and y scroll values.
    This cannot be done with useState because it would cause too many rerenders.*/
     const updatedDropdownProp = {
       ...dropdownProp,

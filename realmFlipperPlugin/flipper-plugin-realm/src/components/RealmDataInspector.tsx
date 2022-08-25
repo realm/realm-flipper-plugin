@@ -54,7 +54,7 @@ console.log('inspectionData',inspectionData)
   return (
     <DetailSidebar>
       <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-        <Layout style={{ backgroundColor: 'white' }}>
+        <Layout >
           <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
             <Row gutter={16}>
               <Col span={24} offset={1}>
@@ -72,23 +72,23 @@ console.log('inspectionData',inspectionData)
                   </Radio.Button>
                 </Radio.Group>
               </Col>
-              <Col span={12} style={{ display: 'flex', justifyContent: 'end' }}>
-                <Radio.Group>
-                  <Radio.Button onClick={() => goBackInspector()}>
+              <Col span={12} style={{ display:'flex', justifyContent: 'flex-end', gap: '5px', padding:'5px' }}>
+                {/* <Radio.Group> */}
+                  <Button onClick={() => goBackInspector()}>
                     {' '}
                     <ArrowLeftOutlined />
-                  </Radio.Button>
+                  </Button>
 
-                  <Radio.Button onClick={() => goForwardInspector()}>
+                  <Button onClick={() => goForwardInspector()}>
                     <ArrowRightOutlined />
-                  </Radio.Button>
-                </Radio.Group>
+                  </Button>
+                {/* </Radio.Group> */}
               </Col>
             </Row>
           </Space>
         </Layout>
 
-        <Layout style={{ backgroundColor: 'white' }}>
+        <Layout>
           <Row>
             <Col offset={1} span={22}>
               <DataInspector
