@@ -585,7 +585,7 @@ export function Component() {
           ></SchemaVisualizer>
         </>
       ) : null}
-      {viewMode === 'RQL' ? <></> : null}
+      {/* {viewMode === 'RQL' ? <></> : null} */}
       {viewMode === 'schemaGraph' ? (
         <SchemaGraph schemas={schemas}></SchemaGraph>
       ) : null}
