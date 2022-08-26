@@ -195,7 +195,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         console.log('objects:', objects[0].data)
         pluginState.set({
           ...state,
-          objects: [...state.objects, ...response.objects],
+          objects: [...state.objects, ...objects],
           // filterCursor: state.sortingColumn
           //   ? nextCursor[state.sortingColumn]
           //   : null,
