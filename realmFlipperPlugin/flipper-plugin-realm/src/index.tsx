@@ -40,6 +40,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     hasMore: false,
     sortingColumnType: null,
     currentSchema: null,
+    loading: false,
     query: '',
     errorMessage: '',
   });
@@ -90,11 +91,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     const { newObject, index } = data;
     let newObjects = state.objects;
-    newObjects.splice(
-      index,
-      0,
-      newObject
-    );
+    newObjects.splice(index, 0, newObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -112,22 +109,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     const { index } = data;
     let newObjects = state.objects;
-    newObjects.splice(
-      index,
-      1
-    );
-
+    newObjects.splice(index, 1);
+    //find out case where last index is deleted
     console.log('after', newObjects);
     const newLastObject = newObjects[newObjects.length - 1];
-    console.log(newFirstObject, newLastObject);
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
     });
   });
 
@@ -135,19 +124,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     console.log('EDIT');
     const state = pluginState.get();
     const { newObject, index } = data;
+    console.log("editing", newObject, index)
     let newObjects = state.objects;
-    newObjects.splice(
-      index,
-      1,
-      newObject
-    );
+    newObjects.splice(index, 1, newObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
     });
   });
 
@@ -181,6 +165,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    pluginState.set({
+      ...state, 
+      loading: true,
+    })
     client
       .send('getObjects', {
         schema: schema,
@@ -189,31 +177,32 @@ export function plugin(client: PluginClient<Events, Methods>) {
         filterCursor: state.filterCursor,
         sortingColumn: state.sortingColumn,
         sortingColumnType: state.sortingColumnType,
-        sortDirection: state.sortingDirection,
+        sortingDirection: state.sortingDirection,
         query: state.query,
       })
       .then((response: RealmsMessage) => {
         if (response.objects && !response.objects.length) {
           return;
-        }        
-        console.log('got objects:', response.objects);
+        }
+        console.log('got objects 3:', response.objects);
         const state = pluginState.get();
-        const objects = response.objects;
-        const nextCursor = objects[objects.length - 1];
+        const nextCursor = response.nextCursor;
 
         if (state.currentSchema.name !== schema) {
           return;
         }
+
         pluginState.set({
           ...state,
           objects: [...state.objects, ...response.objects],
-          filterCursor: state.sortingColumn
-            ? nextCursor[state.sortingColumn]
-            : null,
-          cursorId: nextCursor._id,
+          // filterCursor: state.sortingColumn
+          //   ? nextCursor[state.sortingColumn]
+          //   : null,
+          cursorId: nextCursor,
           totalObjects: response.total,
           hasMore: response.hasMore,
           errorMessage: '',
+          loading: false,
         });
       })
       .catch((reason) => {
@@ -221,6 +210,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
           ...state,
           errorMessage: reason.message,
           objects: toRestore ? toRestore : [],
+          loading: false
         });
       });
   };
@@ -366,7 +356,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-
   client.onConnect(() => {
     const state = pluginState.get();
     pluginState.set({
@@ -442,6 +431,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       sortingDirection: newSortingDirection,
       filterCursor: null,
+      cursorId: null,
       objects: [],
     });
   };
@@ -498,9 +488,9 @@ export function Component() {
     currentSchema,
   } = useValue(state);
 
-  const [viewMode, setViewMode] = useState<
-    'data' | 'schemas' | 'schemaGraph'
-  >('data');
+  const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
+    'data'
+  );
 
   return (
     <>

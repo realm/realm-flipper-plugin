@@ -15,6 +15,7 @@ export type RealmPluginState = {
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
   hasMore: boolean;
+  loading: boolean;
   sortingColumnType: string | null;
   query: string;
   errorMessage: string;
