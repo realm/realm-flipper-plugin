@@ -382,6 +382,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
       object: newObject,
       objectKey: newObject._objectKey,
       propsChanged: Array.from(propsChanged.values()),
+    }).catch((e) => {
+      pluginState.set({
+        ...state,
+        errorMessage: e.message,
+      })
     });
   };
 

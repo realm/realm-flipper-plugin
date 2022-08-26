@@ -287,8 +287,8 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           responder.success(undefined);
         });
-        connection.receive('modifyObject', obj => {
-          console.log('modify', obj)
+        connection.receive('modifyObject', (obj, responder) => {
+          console.log('modify', obj);
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
@@ -317,6 +317,10 @@ export default React.memo((props: {realms: Realm[]}) => {
             schema.name,
             obj.objectKey,
           );
+          if (!realmObj) {
+            responder.error({message: 'Realm Object removed while editing.'});
+            return;
+          }
           // console.log('keys:', Object.keys(realmObj));
           Object.keys(schema.properties).forEach(key => {
             if (!propsChanged.find(val => val === key)) {
