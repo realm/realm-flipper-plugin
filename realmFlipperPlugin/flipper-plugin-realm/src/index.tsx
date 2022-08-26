@@ -26,6 +26,7 @@ import { convertObjects } from './utils/ConvertFunctions';
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
 export function plugin(client: PluginClient<Events, Methods>) {
   const pluginState = createState<RealmPluginState>({
+    deviceSerial: '',
     realms: [],
     selectedRealm: '',
     objects: [],
@@ -420,6 +421,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onConnect(() => {
+    const state = pluginState.get();
+    pluginState.set({
+      ...state,
+      deviceSerial: client.device.description.serial,
+    });
     getRealms();
   });
 

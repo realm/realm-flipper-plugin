@@ -35,14 +35,18 @@ The constructor for *RealmFlipperPlugin* accepts a list of objects, all of them 
 
 # Template Apps
 
-# Analytics
-
-
 
 # Contributing
 
 # Code of Conduct
+This project adheres to the MongoDB Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to community-conduct@mongodb.com.
 
 # License
+Realm JS and Realm Core are published under the Apache License 2.0.
+
+This product is not being made available to any person located in Cuba, Iran, North Korea, Sudan, Syria or the Crimea region, or to any other person that is not eligible to receive the product under U.S. law.
 
 # Feedback
+If you use Realm and are happy with it, all we ask is that you please consider sending out a tweet mentioning @realm to share your thoughts
+
+And if you don't like it, please let us know what you would like improved, so we can fix it!

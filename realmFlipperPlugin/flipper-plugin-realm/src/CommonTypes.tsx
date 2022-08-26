@@ -1,5 +1,13 @@
-
-export type PaginationObject = {
+export type RealmPluginState = {
+  deviceSerial: string;
+  realms: string[];
+  selectedRealm: string;
+  objects: RealmObject[];
+  schemas: SchemaObject[];
+  currentSchema: SchemaObject | null;
+  errorMsg?: string;
+  schemaHistory: SchemaObject[];
+  schemaHistoryIndex: number;
   cursorId: number | null;
   filterCursor: number | null;
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
@@ -9,22 +17,7 @@ export type PaginationObject = {
   sortingDirection: 'ascend' | 'descend' | null;
   hasMore: boolean;
   sortingColumnType: string | null;
-  errorMsg?: string;
   query: string;
-}
-
-export type RealmPluginState = {
-  realms: string[];
-  selectedRealm: string;
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  currentSchema: SchemaObject | null;
-  schemaHistory: SchemaObject[];
-  schemaHistoryIndex: number;
-  // pagination for the data tab
-  dataPagination: PaginationObject;
-  // pagination for inner search table (when creating new object)
-  // innerPagination: PaginationObject;
   errorMessage: string;
 };
 
