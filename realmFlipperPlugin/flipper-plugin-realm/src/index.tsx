@@ -191,7 +191,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         if (state.currentSchema.name !== schema) {
           return;
         }
-        objects = convertObjects(objects, state.currentSchema, downloadData);
+        let objects = convertObjects(response.objects, state.currentSchema, downloadData);
         console.log('objects:', objects[0].data)
         pluginState.set({
           ...state,
