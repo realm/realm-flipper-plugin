@@ -1,13 +1,5 @@
 
-export type RealmPluginState = {
-  realms: string[];
-  selectedRealm: string;
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  currentSchema: SchemaObject | null;
-  errorMsg?: string;
-  schemaHistory: SchemaObject[];
-  schemaHistoryIndex: number;
+export type PaginationObject = {
   cursorId: number | null;
   filterCursor: number | null;
   selectedPageSize: 10 | 25 | 50 | 75 | 100 | 1000 | 2500;
@@ -17,23 +9,25 @@ export type RealmPluginState = {
   sortingDirection: 'ascend' | 'descend' | null;
   hasMore: boolean;
   sortingColumnType: string | null;
+  errorMsg?: string;
   query: string;
+}
+
+export type RealmPluginState = {
+  realms: string[];
+  selectedRealm: string;
+  objects: RealmObject[];
+  schemas: SchemaObject[];
+  currentSchema: SchemaObject | null;
+  schemaHistory: SchemaObject[];
+  schemaHistoryIndex: number;
+  // pagination for the data tab
+  dataPagination: PaginationObject;
+  // pagination for inner search table (when creating new object)
+  // innerPagination: PaginationObject;
   errorMessage: string;
 };
-const typeList = [
-  'objectId',
-  'uuid',
-  'bool',
-  'int',
-  'float',
-  'double',
-  'decimal128',
-  'string',
-  'data',
-  'date',
-];
-// export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
-// export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
+
 export type RealmObject = Record<string, unknown>;
 
 export type SchemaObject = {
@@ -72,6 +66,14 @@ export type Methods = {
   modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
   getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
+  downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
+};
+
+type DataDownloadRequest = {
+  schema: string;
+  realm: string;
+  objectKey: string;
+  propertyName: string;
 };
 
 export type AddObject = {
