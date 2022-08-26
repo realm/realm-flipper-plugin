@@ -90,7 +90,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   const instance = usePlugin(plugin);
 
   const onSchemaSelected = (selectedSchema: SchemaObject) => {
-    // instance.getObjects();
     instance.setSelectedSchema(selectedSchema);
   };
 
@@ -121,8 +120,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
       ]
     }
 
-    const simpleColumns = ['primaryKey', 'name'].map(simpleColumnGenerator);
-
+    const simpleColumns = ['primaryKey', 'name', 'indexed'].map(simpleColumnGenerator);
 
     return [
       ...simpleColumns,
@@ -159,7 +157,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     'name',
     'type',
     // 'mapTo',
-    // 'indexed',
+    'indexed',
     'optional',
     'objectType',
   ];

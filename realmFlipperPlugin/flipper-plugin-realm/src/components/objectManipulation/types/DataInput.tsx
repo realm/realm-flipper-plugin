@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
 export const DataInput = ({ set }: TypeInputProps) => {
-  // const [reset, setReset] = useState(0);
+  const [reset, setReset] = useState(0);
 
   const emptyState: {
     selectedFile?: UploadFile<unknown>;
@@ -24,12 +24,8 @@ export const DataInput = ({ set }: TypeInputProps) => {
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
       const contents = e.target?.result as ArrayBuffer;
-      let typedArray = new Uint8Array(contents);
-      if (typedArray.length > 600000) {
-        typedArray = typedArray.slice(0, 600000);
-      }
+      const typedArray = new Uint8Array(contents);
       set(Array.from(typedArray));
-      console.log('array is:', typedArray);
     }
     reader.readAsArrayBuffer(fileObj);
   };
@@ -52,12 +48,12 @@ export const DataInput = ({ set }: TypeInputProps) => {
         nextState.selectedFileList = [];
     }
     setState(nextState);
-    // setReset(v => v + 1)
+    setReset(v => v + 1)
   };
 
   const beforeUpload = (file: RcFile) => {
     const size = file.size;
-    const goodSize = size < 60 * 1024;
+    const goodSize = size < 60 * 1024 * 1024;
     if (!goodSize) {
       message.error("File must be smaller than 60MB!");
     }

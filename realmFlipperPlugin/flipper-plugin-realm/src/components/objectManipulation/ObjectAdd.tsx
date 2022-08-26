@@ -29,6 +29,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
   };
 
   const onOk = () => {
+    console.log('onOk, ', values);
     addObject(values);
     hideModal();
   };
