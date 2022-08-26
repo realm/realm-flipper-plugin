@@ -49,6 +49,7 @@ export class Listener {
       if (this.connection) {
         this.connection.send('liveObjectDeleted', {
           index: index,
+          schema: this.schema,
         });
         this.connection.send('getCurrentQuery');
       }
@@ -60,6 +61,7 @@ export class Listener {
         this.connection.send('liveObjectAdded', {
           newObject: inserted,
           index: index,
+          schema: this.schema,
         });
         this.connection.send('getCurrentQuery');
       }
@@ -71,6 +73,7 @@ export class Listener {
         this.connection.send('liveObjectEdited', {
           newObject: modified,
           index: index,
+          schema: this.schema,
         });
         this.connection.send('getCurrentQuery');
       }

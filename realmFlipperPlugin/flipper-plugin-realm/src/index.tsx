@@ -88,7 +88,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
+    console.log('Added');
     const state = pluginState.get();
+    if (data.schema != state.currentSchema.name) {
+      return;
+    }
     const { newObject, index } = data;
     let newObjects = state.objects;
     newObjects.splice(index, 0, newObject);
@@ -107,6 +111,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     console.log('DELETE');
     const state = pluginState.get();
+    if (data.schema != state.currentSchema.name) {
+      return;
+    }
     const { index } = data;
     let newObjects = state.objects;
     newObjects.splice(index, 1);
@@ -123,8 +130,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     console.log('EDIT');
     const state = pluginState.get();
+    if (data.schema != state.currentSchema.name) {
+      return;
+    }
     const { newObject, index } = data;
-    console.log("editing", newObject, index)
+    console.log('editing', newObject, index);
     let newObjects = state.objects;
     newObjects.splice(index, 1, newObject);
     const newLastObject = newObjects[newObjects.length - 1];
@@ -166,9 +176,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     pluginState.set({
-      ...state, 
+      ...state,
       loading: true,
-    })
+    });
     client
       .send('getObjects', {
         schema: schema,
@@ -180,41 +190,51 @@ export function plugin(client: PluginClient<Events, Methods>) {
         sortingDirection: state.sortingDirection,
         query: state.query,
       })
-      .then((response: RealmsMessage) => {
-        if (response.objects && !response.objects.length) {
-          return;
-        }
-        console.log('got objects 3:', response.objects);
-        const state = pluginState.get();
-        const nextCursor = response.nextCursor;
+      .then(
+        (response: RealmsMessage) => {
+          if (response.objects && !response.objects.length) {
+            return;
+          }
+          console.log('got objects 3:', response.objects);
+          const state = pluginState.get();
+          const nextCursor = response.nextCursor;
 
-        if (state.currentSchema.name !== schema) {
-          return;
+          if (state.currentSchema.name !== schema) {
+            return;
+          }
+          let objects = convertObjects(
+            response.objects,
+            state.currentSchema,
+            downloadData
+          );
+          pluginState.set({
+            ...state,
+            objects: [...state.objects, ...objects],
+            // filterCursor: state.sortingColumn
+            //   ? nextCursor[state.sortingColumn]
+            //   : null,
+            cursorId: nextCursor,
+            totalObjects: response.total,
+            hasMore: response.hasMore,
+            errorMessage: '',
+            loading: false,
+          });
+        },
+        (reason) => {
+          pluginState.set({
+            ...state,
+            errorMessage: reason.message,
+            objects: toRestore ? toRestore : [],
+            loading: false,
+          });
         }
-        let objects = convertObjects(response.objects, state.currentSchema, downloadData);
-        console.log('objects:', objects[0].data)
-        pluginState.set({
-          ...state,
-          objects: [...state.objects, ...objects],
-          // filterCursor: state.sortingColumn
-          //   ? nextCursor[state.sortingColumn]
-          //   : null,
-          cursorId: nextCursor,
-          totalObjects: response.total,
-          hasMore: response.hasMore,
-          errorMessage: '',
-          loading: false,
-        });
-      }, (reason) => {
-        pluginState.set({
-          ...state,
-          errorMessage: reason.message,
-          objects: toRestore ? toRestore : [],
-          loading: false
-        });
-      });
+      );
   };
-  const downloadData = (schema: string, objectKey: string, propertyName: string) => {
+  const downloadData = (
+    schema: string,
+    objectKey: string,
+    propertyName: string
+  ) => {
     const state = pluginState.get();
     return client.send('downloadData', {
       schema: schema,
@@ -222,7 +242,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objectKey: objectKey,
       propertyName: propertyName,
     });
-  }
+  };
   const getOneObject = async (schema: string, primaryKey: any) => {
     const state = pluginState.get();
     return client.send('getOneObject', {
@@ -375,18 +395,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
     //   newFields[propName] = newObject[propName];
     // });
     // newFields['_id'] = newObject['_id'];
-    client.send('modifyObject', {
-      realm: state.selectedRealm,
-      schema: state.currentSchema?.name,
-      object: newObject,
-      objectKey: newObject._objectKey,
-      propsChanged: Array.from(propsChanged.values()),
-    }).catch((e) => {
-      pluginState.set({
-        ...state,
-        errorMessage: e.message,
+    client
+      .send('modifyObject', {
+        realm: state.selectedRealm,
+        schema: state.currentSchema?.name,
+        object: newObject,
+        objectKey: newObject._objectKey,
+        propsChanged: Array.from(propsChanged.values()),
       })
-    });
+      .catch((e) => {
+        pluginState.set({
+          ...state,
+          errorMessage: e.message,
+        });
+      });
   };
 
   const removeObject = (object: Record<string, unknown>) => {
