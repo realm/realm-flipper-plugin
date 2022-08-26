@@ -258,7 +258,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const prevObjects = Array.from(state.objects);
     pluginState.set({
       ...state,
-      schemaHistoryIndex: length,
       filterCursor: null,
       cursorId: null,
       sortingColumn: null,
