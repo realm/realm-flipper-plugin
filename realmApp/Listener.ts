@@ -34,12 +34,10 @@ export class Listener {
     let objectsToListenTo: Realm.Results<Realm.Object> = this.objects;
     const shouldSortDescending = this.sortingDirection === 'descend';
     if (this.sortingColumn) {
-      objectsToListenTo = this.objects.sorted([
-        [`${this.sortingColumn}`, shouldSortDescending],
-        ['_id', shouldSortDescending],
-      ]);
-    } else {
-      objectsToListenTo = this.objects.sorted('_id', shouldSortDescending);
+      objectsToListenTo = this.objects.sorted(
+        this.sortingColumn,
+        shouldSortDescending,
+      );
     }
     objectsToListenTo.addListener(this.onObjectsChange);
     this.schemaToObjects.set(this.schema, objectsToListenTo);

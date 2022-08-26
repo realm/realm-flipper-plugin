@@ -69,7 +69,6 @@ const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
 };
 
 export default React.memo((props: {realms: Realm[]}) => {
-  const DEFAULT_PAGE_SIZE = 50;
   let realmsMap = new Map<string, Realm>();
   let listenerHandler: Listener;
   const {realms} = props;
@@ -92,7 +91,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           if (!realm || !obj.schema) {
             return;
           }
-
+          console.log(obj);
           listenerHandler = new Listener(
             schemaToObjects,
             obj.schema,
@@ -117,7 +116,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, limit} = req;
+          const {schema, sortingColumn, sortingDirection} = req;
           let objects = realm.objects(schema);
           if (!objects.length) {
             responder.error({message: 'No objects found in the schema'});
@@ -133,9 +132,22 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
-          console.log('received', req);
-          let queryHandler = new Query(req, objects, responder);
-          objects = queryHandler.getObjectsByPagination();
+          let cursorId = null;
+          const LIMIT = 50;
+          const shouldSortDescending = sortingDirection === 'descend';
+          cursorId = req.cursorId ?? objects[0]._objectKey();
+          if (sortingColumn) {
+            objects = objects.sorted(sortingColumn, shouldSortDescending);
+            cursorId = req.cursorId ?? objects[0]._objectKey();
+          }
+          let howFarWeGot = realm._objectForObjectKey(schema, cursorId);
+          let index = objects.findIndex(
+            obj => obj._objectKey() === howFarWeGot._objectKey(),
+          );
+          objects = objects.slice(
+            index === 0 ? index : index + 1,
+            index + (LIMIT + 1),
+          );
           if (!objects) {
             // responder.error({message: 'No objects found'});
             return;
@@ -148,7 +160,8 @@ export default React.memo((props: {realms: Realm[]}) => {
           responder.success({
             objects: afterConversion,
             total: totalObjects,
-            hasMore: objects.length >= limit,
+            hasMore: objects.length >= LIMIT,
+            nextCursor: objects[objects.length - 1]._objectKey(),
           });
         });
 

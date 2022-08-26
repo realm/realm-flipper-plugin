@@ -63,13 +63,13 @@ export const DataTable = ({
   scrollX,
   scrollY,
   handleDataInspector,
-  enableSort
+  enableSort,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const sortableTypes = new Set([
     'string',
     'int',
@@ -300,6 +300,9 @@ PropertyType) => {
 
   const handleInfiniteOnLoad = () => {
     console.log('more');
+    if (state.loading) {
+      return;
+    }
     setLoading(true);
     if (state.objects.length >= state.totalObjects) {
       message.warning('Infinite List loaded all');
@@ -315,9 +318,11 @@ PropertyType) => {
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
-    console.log('ON CHANGE', pagination, filters, sorter, extra);
     //TODO: make type of a field
     if (extra.action === 'sort') {
+      if (state.loading) {
+        return;
+      }
       if (state.sortingColumn !== sorter.field) {
         instance.setSortingDirection('ascend');
         instance.setSortingColumnAndType(
@@ -327,9 +332,8 @@ PropertyType) => {
       } else {
         instance.toggleSortingDirection();
       }
+      instance.getObjects();
     }
-    instance.getObjects();
-    instance.setCurrentPage(1);
   };
   // TODO: think about key as a property in the Realm DB
   return (
@@ -339,6 +343,7 @@ PropertyType) => {
         height: '100%',
         width: '100%',
         textAlign: 'center',
+        paddingBottom: '100px',
       }}
     >
       <InfiniteScroll
@@ -350,7 +355,7 @@ PropertyType) => {
         loader={
           <div
             style={{
-              marginTop: '25px',
+              marginTop: '20px',
               marginBottom: '25px',
               display: 'inline-block',
             }}

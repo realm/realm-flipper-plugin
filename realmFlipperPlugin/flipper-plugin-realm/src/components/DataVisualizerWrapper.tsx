@@ -4,7 +4,6 @@ import { SchemaObject, RealmObject } from '../CommonTypes';
 import DataVisualizer from '../pages/DataVisualizer';
 
 import { DataTabHeader } from './DataTabHeader';
-import PaginationActionGroup from './PaginationActionGroup';
 import SchemaSelect from './SchemaSelect';
 
 type InputType = {
@@ -25,7 +24,7 @@ export const DataVisualizerWrapper = ({
   return (
     <>
       <SchemaSelect schemas={schemas} />
-      <Layout.Container height={800}>
+      <Layout.Container style={{height: "100%"}}>
         <DataTabHeader currentSchema={currentSchema} />
         <DataVisualizer
           objects={objects}
@@ -34,7 +33,6 @@ export const DataVisualizerWrapper = ({
           sortDirection={sortDirection}
           sortingColumn={sortingColumn}
         />
-        <PaginationActionGroup />
       </Layout.Container>
     </>
   );
