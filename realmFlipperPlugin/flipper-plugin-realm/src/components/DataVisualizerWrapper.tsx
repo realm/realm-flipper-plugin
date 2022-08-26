@@ -24,7 +24,7 @@ export const DataVisualizerWrapper = ({
   return (
     <>
       <SchemaSelect schemas={schemas} />
-      <Layout.Container height={800}>
+      <Layout.Container style={{height: "100%"}}>
         <DataTabHeader currentSchema={currentSchema} />
         <DataVisualizer
           objects={objects}
