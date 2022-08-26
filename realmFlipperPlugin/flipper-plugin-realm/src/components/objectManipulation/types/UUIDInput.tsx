@@ -9,6 +9,7 @@ export const UUIDInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary,
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
   const [value, setValue] = useState<string | null>(
@@ -29,6 +30,7 @@ export const UUIDInput = ({
       <Col flex="auto">
         <Input
           {...extraProps}
+          disabled={isPrimary}
           value={value !== null ? value : undefined}
           onChange={(v) => onChange(v.target.value)}
           placeholder={property.optional ? 'null' : undefined}
@@ -49,8 +51,7 @@ export const UUIDInput = ({
             setReset((v) => v + 1);
           }}
           icon={<ReloadOutlined />}
-        >
-        </Button>
+        ></Button>
         {property.optional ? (
           <Button
             icon={<ClearOutlined />}

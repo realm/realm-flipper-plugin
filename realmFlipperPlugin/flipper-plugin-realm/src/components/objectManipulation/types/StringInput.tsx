@@ -8,17 +8,19 @@ export const StringInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary
 }: TypeInputProps) => {
   const [value, setValue] = useState<string | null>(
     defaultValue as string | null
   );
   const [reset, setReset] = useState(0);
-
+    console.log(isPrimary)
   return (
     <Row align="middle">
       <Col flex="auto">
         <Input
           {...extraProps}
+          disabled={isPrimary}
           placeholder={property.optional && value === null ? 'null' : undefined}
           defaultValue={value !== null ? value : undefined}
           onChange={(v) => {

@@ -10,6 +10,7 @@ export const DateInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary
 }: TypeInputProps) => {
   // console.log('dateInput', property, defaultValue, set, extraProps)
   console.log('defaultValue as Date:', defaultValue as Date);
@@ -26,6 +27,7 @@ export const DateInput = ({
       <Col flex="auto">
         <DatePicker
           {...extraProps}
+          disabled={isPrimary}
           defaultValue={value !== undefined ? moment(value) : undefined}
           format="DD-MM-YYYY HH:mm:ss.SSS"
           showTime={{ defaultValue: property.optional ? undefined : moment() }}

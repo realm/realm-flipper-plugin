@@ -8,6 +8,7 @@ export const DecimalInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary
 }: TypeInputProps) => {
   const [value, setValue] = useState<string | null>(defaultValue as string | null);
 
@@ -21,7 +22,8 @@ export const DecimalInput = ({
     <Row align="middle">
       <Col flex="auto">
         <InputNumber
-        {...extraProps}
+          {...extraProps}
+          disabled={isPrimary}
           defaultValue={value === null ? undefined : value}
           onChange={onChange}
           placeholder={property.optional ? 'null' : undefined}

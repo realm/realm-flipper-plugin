@@ -3,7 +3,7 @@ import { Button, Col, Layout, Row } from 'antd';
 import React, { useEffect, useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
+export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputProps) => {
   const [_, setReset] = useState(0);
   const [arr, setArr] = useState<any[]>(defaultValue as any[]);
   const [occurences] = useState(new Map<any, number>());
@@ -79,6 +79,7 @@ export const SetInput = ({  property, set, defaultValue }: TypeInputProps) => {
             <Col flex="auto">
             <TypeInput
               property={innerProp}
+              isPrimary={isPrimary}
               set={(val) => {
                 setRow(val, index);
                 setReset((v) => v + 1);

@@ -15,7 +15,7 @@ const mapToObj = (map: Map<number, [string, any]>) => {
   return obj;
 };
 
-export const DictionaryInput = ({ set }: TypeInputProps) => {
+export const DictionaryInput = ({ set, isPrimary }: TypeInputProps) => {
   const [contents, setContents] = useState(
     new Map<number, [string, unknown]>()
   );
@@ -37,6 +37,7 @@ export const DictionaryInput = ({ set }: TypeInputProps) => {
             <Row key={index} style={{ width: '97%' }} align="middle">
               <Col span={9}>
                 <StringInput
+                  isPrimary={isPrimary}
                   defaultValue={value[0]}
                   set={(val: any) => {
                     contents.set(index, [val, value[1]]);
@@ -52,6 +53,7 @@ export const DictionaryInput = ({ set }: TypeInputProps) => {
               </Col>
               <Col span={13}>
                 <MixedInput
+                  isPrimary={isPrimary}
                   key={index + resetOffset}
                   property={keyProperty}
                   set={(val: any) => {
@@ -63,6 +65,7 @@ export const DictionaryInput = ({ set }: TypeInputProps) => {
               </Col>
               <Col span={1}>
                 <Button
+                  disabled={isPrimary}
                   icon={<DeleteOutlined />}
                   onClick={() => {
                     setResetOffset((v) => v + contents.size);
@@ -75,6 +78,7 @@ export const DictionaryInput = ({ set }: TypeInputProps) => {
         }
       )}
       <Button
+        disabled={isPrimary}
         onClick={() => {
           contents.set(contents.size, ['key' + contents.size, null]);
           setContents(contents);

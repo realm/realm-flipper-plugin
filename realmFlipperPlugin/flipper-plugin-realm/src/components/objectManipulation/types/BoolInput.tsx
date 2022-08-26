@@ -3,7 +3,7 @@ import { Button, Col, Radio, RadioChangeEvent, Row } from 'antd';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
-export const BoolInput = ({ property, set, defaultValue }: TypeInputProps) => {
+export const BoolInput = ({ property, set, defaultValue, isPrimary }: TypeInputProps) => {
   const [value, setValue] = useState<boolean | null>(defaultValue as boolean | null);
 
   const options = [
@@ -29,6 +29,7 @@ export const BoolInput = ({ property, set, defaultValue }: TypeInputProps) => {
           options={options}
           onChange={onChange}
           optionType="button"
+          disabled={isPrimary}
           value={value === null ? undefined : value ? 'True' : 'False'}
         />
       </Col>

@@ -8,15 +8,18 @@ export const IntInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [value, setValue] = useState<number | null>(defaultValue === undefined ? null : defaultValue as number);
-  
+  const [value, setValue] = useState<number | null>(
+    defaultValue === undefined ? null : (defaultValue as number)
+  );
+
   // useEffect(() => {
   //   setValue(defaultValue as number);
   // }, [defaultValue]);
 
-  console.log('rendering intinput, value:', value)
+  console.log('rendering intinput, value:', value);
   const onChange = (value: number) => {
     if (property.type === 'int' && !Number.isInteger(value)) {
       return;
@@ -30,6 +33,7 @@ export const IntInput = ({
       <Col flex="auto">
         <InputNumber
           {...extraProps}
+          disabled={isPrimary}
           value={value === null ? undefined : value}
           defaultValue={value === null ? undefined : value}
           onChange={onChange}
@@ -45,8 +49,7 @@ export const IntInput = ({
               setValue(null);
               setReset((v) => v + 1);
             }}
-          >
-          </Button>
+          ></Button>
         </Col>
       ) : null}
     </Row>

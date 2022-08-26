@@ -4,7 +4,7 @@ import { Layout } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
+export const ListInput = ({ property, set, defaultValue, isPrimary }: TypeInputProps) => {
   const [array, setArray] = useState(defaultValue as unknown[]);
   const [removalOffset, setRemovalOffset] = useState(0);
   const typePointed = property.objectType;
@@ -27,6 +27,7 @@ export const ListInput = ({ property, set, defaultValue }: TypeInputProps) => {
              <Row align="middle">
               <Col flex="auto">
                 <TypeInput
+                  isPrimary={isPrimary}
                   extraProps={{ style: { width: '100%' } }}
                   property={innerProp}
                   set={(val) => {

@@ -19,6 +19,7 @@ export type TypeInputProps = {
   defaultValue?: unknown;
   set: (val: unknown) => void;
   extraProps?: Record<string, unknown>;
+  isPrimary: boolean;
 };
 
 type TypeDescription = {

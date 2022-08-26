@@ -4,7 +4,7 @@ import { UploadChangeParam, UploadFile, RcFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
-export const DataInput = ({ set }: TypeInputProps) => {
+export const DataInput = ({ set, isPrimary }: TypeInputProps) => {
   const [reset, setReset] = useState(0);
 
   const emptyState: {
@@ -65,10 +65,14 @@ export const DataInput = ({ set }: TypeInputProps) => {
       <Upload
         beforeUpload={beforeUpload}
         fileList={state.selectedFileList}
-        customRequest={(options) => options.onSuccess?.("ok")}
+        customRequest={(options) => options.onSuccess?.('ok')}
         onChange={onChange}
+        disabled={isPrimary}
       >
-        <Button><UploadOutlined/>Select a file</Button>
+        <Button>
+          <UploadOutlined />
+          Select a file
+        </Button>
       </Upload>
     </Col>
   );

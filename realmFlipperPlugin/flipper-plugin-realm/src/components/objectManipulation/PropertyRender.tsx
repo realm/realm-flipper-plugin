@@ -71,6 +71,7 @@ export const PropertyRender = ({
         </Col>
         <Col span={24}>
         <TypeInput
+            isPrimary={isPrimary}
             property={property}
             set={set}
             defaultValue={initialValue}

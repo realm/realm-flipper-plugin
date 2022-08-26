@@ -6,7 +6,7 @@ import { plugin } from '../../..';
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 import { renderValue } from '../../../utils/Renderer';
 
-export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
+export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -144,6 +144,7 @@ export const MixedInput = ({ set, defaultValue }: TypeInputProps) => {
               </Select.OptGroup> */}
             </Select>
             <TypeInput
+            isPrimary={isPrimary}
               property={{
                 type: chosenType,
                 optional: false,
