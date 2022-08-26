@@ -70,6 +70,8 @@ const convertObjectFromDesktop = (
   realm: Realm,
   schemaName?: string,
 ) => {
+  delete object._objectKey;
+  // console.log('object:', object, schemaName);
   if (!schemaName) {
     throw new Error('Converting with missing schema name');
   }
@@ -113,7 +115,7 @@ const convertObjectFromDesktop = (
     if (val === null) {
       return null;
     }
-    // console.log('got type', type);
+    console.log('got type', property);
     switch (property.type) {
       case 'set':
         //console.log('received set:', val);

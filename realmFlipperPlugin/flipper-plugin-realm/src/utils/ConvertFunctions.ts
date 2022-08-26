@@ -9,7 +9,6 @@ const convertObject = (
 ) => {
   const properties = schema.properties;
   const newObj = {};
-  const objKey = object._objectKey;
   Object.keys(object).forEach(key => {
     const value = object[key];
 
@@ -18,14 +17,13 @@ const convertObject = (
       console.log('downloadData:', downloadData)
       newObj[key] = {
         length: value.$binaryData,
-        downloadData: () => downloadData(schema.name, objKey, property.name),
+        downloadData: () => downloadData(schema.name, object._objectKey, property.name),
       }
     }
     else {
       newObj[key] = value;
     }
   });
-  newObj._objectKey = () => objKey;
   return newObj;
 };
 

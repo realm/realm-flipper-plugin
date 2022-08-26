@@ -428,7 +428,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     propsChanged: Set<string>
   ) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject);
+    // console.log('modifyObject', newObject);
     // const newFields: Record<string, unknown> = {};
     // propsChanged.forEach((propName) => {
     //   newFields[propName] = newObject[propName];
@@ -438,6 +438,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
       object: newObject,
+      objectKey: newObject._objectKey,
       propsChanged: Array.from(propsChanged.values()),
     });
   };
@@ -452,7 +453,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('removeObject', {
       realm: state.selectedRealm,
       schema: schema.name,
-      object: object,
+      objectKey: object._objectKey,
     });
   };
 

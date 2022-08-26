@@ -1,12 +1,7 @@
 import React, {useEffect} from 'react';
-import {Text} from 'react-native';
 import {addPlugin, Flipper} from 'react-native-flipper';
-import Realm, {
-  CanonicalObjectSchema,
-  CanonicalObjectSchemaProperty,
-} from 'realm';
+import Realm, {CanonicalObjectSchema} from 'realm';
 import {
-  convertObjects,
   convertObjectsFromDesktop,
   convertObjectsToDesktop,
 } from './ConvertFunctions';
@@ -280,7 +275,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           responder.success(undefined);
         });
         connection.receive('modifyObject', obj => {
-          // console.log('modify', obj)
+          console.log('modify', obj)
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
@@ -290,8 +285,12 @@ export default React.memo((props: {realms: Realm[]}) => {
             schemaObj => schemaObj.name === obj.schema,
           ) as CanonicalObjectSchema;
 
-          const converted = typeConverter(obj.object, realm, obj.schema);
-          console.log('converted obj is:', converted);
+          const converted = convertObjectsFromDesktop(
+            [obj.object],
+            realm,
+            obj.schema,
+          )[0];
+
           // load the values to be modified
           const newObject = {};
           propsChanged.forEach(propName => {
@@ -299,10 +298,13 @@ export default React.memo((props: {realms: Realm[]}) => {
           });
 
           // load all the rest values from the existing realm object
-          const primaryKey = converted[schema.primaryKey];
-          console.log('primary key: ' + primaryKey);
-          const realmObj = realm.objectForPrimaryKey(schema.name, primaryKey);
-          console.log('keys:', Object.keys(realmObj));
+          // const primaryKey = converted[schema.primaryKey];
+          // console.log('primary key: ' + primaryKey);
+          const realmObj = realm._objectForObjectKey(
+            schema.name,
+            obj.objectKey,
+          );
+          // console.log('keys:', Object.keys(realmObj));
           Object.keys(schema.properties).forEach(key => {
             if (!propsChanged.find(val => val === key)) {
               newObject[key] = realmObj[key];
@@ -313,42 +315,23 @@ export default React.memo((props: {realms: Realm[]}) => {
           realm.write(() => {
             realm.create(obj.schema, newObject, 'modified');
           });
-
+          // console.log('after write', realmObj);
           // let objects = realm.objects(obj.schema);
           // objects.map()
           // connection.send('getObjects', {objects: objects});
         });
-        connection.receive('removeObject', (obj, responder) => {
+        connection.receive('removeObject', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
           }
-
-          const schema = realm.schema.find(
-            schema => schema.name === obj.schema,
+          const foundObject = realm._objectForObjectKey(
+            obj.schema,
+            obj.objectKey,
           );
-
-          const object = typeConverter(obj.object, realm, schema?.name);
-
-          const primaryKey = schema?.primaryKey;
-          if (!schema || !primaryKey) {
-            return;
-          }
-
-          try {
-            realm.write(() => {
-              const realmObj = realm.objectForPrimaryKey(
-                schema.name,
-                object[primaryKey],
-              );
-              realm.delete(realmObj);
-            });
-          } catch (err) {
-            responder.error({error: err.message});
-          }
-
-          const objects = realm.objects(obj.schema);
-          connection.send('getObjects', {objects: objects});
+          realm.write(() => {
+            realm.delete(foundObject);
+          });
         });
       },
       onDisconnect() {
