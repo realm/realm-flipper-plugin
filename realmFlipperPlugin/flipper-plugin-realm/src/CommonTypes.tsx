@@ -1,4 +1,3 @@
-
 export type RealmPluginState = {
   deviceSerial: string;
   realms: string[];
@@ -21,20 +20,7 @@ export type RealmPluginState = {
   query: string;
   errorMessage: string;
 };
-const typeList = [
-  'objectId',
-  'uuid',
-  'bool',
-  'int',
-  'float',
-  'double',
-  'decimal128',
-  'string',
-  'data',
-  'date',
-];
-// export type RealmPrimitiveValue = ObjectId | UUID | boolean | number | Decimal128 | string | Date | ArrayBuffer
-// export type RealmValueType = RealmObject | RealmPrimitiveValue | Array<RealmValueType> |  
+
 export type RealmObject = Record<string, unknown>;
 
 export type SchemaObject = {
@@ -73,6 +59,14 @@ export type Methods = {
   modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
   getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
+  downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
+};
+
+type DataDownloadRequest = {
+  schema: string;
+  realm: string;
+  objectKey: string;
+  propertyName: string;
 };
 
 export type AddObject = {

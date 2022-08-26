@@ -20,6 +20,7 @@ import { addToHistory } from './components/Query';
 import SchemaSelect from './components/SchemaSelect';
 import { SchemaGraph } from './pages/SchemaGraph';
 import SchemaVisualizer from './pages/SchemaVisualizer';
+import { convertObjects } from './utils/ConvertFunctions';
 
 // Read more: https://fbflipper.com/docs/tutorial/js-custom#creating-a-first-plugin
 // API: https://fbflipper.com/docs/extending/flipper-plugin#pluginclient
@@ -45,7 +46,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query: '',
     errorMessage: '',
   });
-  console.log(client);
   client.onMessage('getOneObject', (data: ObjectMessage) => {
     const state = pluginState.get();
     pluginState.set({ ...state, singleObject: data.object });
@@ -230,18 +230,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
       .then((response: RealmsMessage) => {
         if (response.objects && !response.objects.length) {
           return;
-        }        
-        console.log('got objects:', response.objects);
+        }
+        console.log('got objects:', response.objects[0]._objectKey);
         const state = pluginState.get();
-        const objects = response.objects;
+        let objects = response.objects;
         const nextCursor = objects[objects.length - 1];
 
         if (state.currentSchema.name !== schema) {
           return;
         }
+        objects = convertObjects(objects, state.currentSchema, downloadData);
+        console.log('objects:', objects[0].data)
         pluginState.set({
           ...state,
-          objects: [...state.objects, ...response.objects],
+          objects: [...state.objects, ...objects],
           filterCursor: state.sortingColumn
             ? nextCursor[state.sortingColumn]
             : null,
@@ -250,8 +252,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
           hasMore: response.hasMore,
           errorMessage: '',
         });
-      })
-      .catch((reason) => {
+      }, (reason) => {
         pluginState.set({
           ...state,
           errorMessage: reason.message,
@@ -259,7 +260,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
         });
       });
   };
-
+  const downloadData = (schema: string, objectKey: string, propertyName: string) => {
+    const state = pluginState.get();
+    return client.send('downloadData', {
+      schema: schema,
+      realm: state.selectedRealm,
+      objectKey: objectKey,
+      propertyName: propertyName,
+    });
+  }
   const getOneObject = async (schema: string, primaryKey: any) => {
     const state = pluginState.get();
     return client.send('getOneObject', {
@@ -281,8 +290,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
           ...state,
           schemas: newSchemas,
         });
-        setSelectedSchema(newSchemas[0]);
-        getObjects(newSchemas[0].name, state.selectedRealm);
+        if (newSchemas.length) {
+          setSelectedSchema(newSchemas[0]);
+          getObjects(newSchemas[0].name, state.selectedRealm);
+        }
       });
   };
 
@@ -303,16 +314,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [],
     });
     getObjects(state.currentSchema?.name, state.selectedRealm, prevObjects);
-
-    // handle case when the query was unsuccessful - restore previous objects
-    // console.log('previous objects', prevObjects, res)
-    // if (!res) {
-    //   pluginState.set({
-    //     ...pluginState.get(),
-    //     objects: prevObjects
-    //   });
-    //   console.log('after set:', pluginState);
-    // }
   };
 
   const addObject = (object: Record<string, unknown>) => {
@@ -433,7 +434,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     propsChanged: Set<string>
   ) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject);
+    // console.log('modifyObject', newObject);
     // const newFields: Record<string, unknown> = {};
     // propsChanged.forEach((propName) => {
     //   newFields[propName] = newObject[propName];
@@ -443,6 +444,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: state.currentSchema?.name,
       object: newObject,
+      objectKey: newObject._objectKey,
       propsChanged: Array.from(propsChanged.values()),
     });
   };
@@ -457,7 +459,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client.send('removeObject', {
       realm: state.selectedRealm,
       schema: schema.name,
-      object: object,
+      objectKey: object._objectKey,
     });
   };
 

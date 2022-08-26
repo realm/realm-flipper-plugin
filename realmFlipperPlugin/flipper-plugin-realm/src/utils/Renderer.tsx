@@ -1,7 +1,8 @@
 import { SchemaObject } from '../CommonTypes';
 import React from 'react';
 import BooleanValue from '../components/BooleanValue';
-import { Typography } from 'antd';
+import { Button, Typography } from 'antd';
+import fileDownload from 'js-file-download'
 
 type TypeDescription = {
   type: string;
@@ -92,21 +93,24 @@ function parseDictionary(input: Record<string, unknown>): string {
 }
 
 function parseData(input) {
-  const blob = new Blob([input]);
-  // / Convert Blob to URL
-  const blobUrl = URL.createObjectURL(blob);
-
-  // Create an a element with blobl URL
-  const anchor = document.createElement('a');
-  anchor.href = blobUrl;
-  anchor.target = '_blank';
-  anchor.download = 'file';
+  /*
+  input: {
+    downloadData: () => Promise<{ data: Uint8Array }>,
+    length,
+  }
+  */
+  const handleDownload = () => {
+    (input.downloadData() as Promise<{
+      data: number[], 
+    }>).then(res => {
+      fileDownload(new Uint8Array(res.data).buffer, 'data');
+    }, reason => {
+      console.log('downloading failed', reason.message);
+    });
+  };
   return (
-    <a href={blobUrl} target="_blank" rel="noreferrer" download="file">
-      download
-    </a>
-  );
-  // return anchor;
+    <Button onClick={handleDownload}>[{input.length} bytes]</Button>
+  )
 }
 
 function parseBoolean(input: boolean): JSX.Element {
@@ -144,20 +148,4 @@ function parseMixed(
   schemas: SchemaObject[]
 ): string | JSX.Element | number {
   return JSON.stringify(input);
-  const type = input.type;
-  const value = input.value;
-  // console.log('schemas got:', schemas)
-  const schema = schemas.find((schema) => schema.name === type);
-  // console.log('rendering ')
-  if (schema) {
-    // we are dealing with a linked object
-    return renderValue(value, {
-      type: 'object',
-      objectType: schema.name,
-    }, schemas);
-  } else {
-    return renderValue(value, {
-      type,
-    }, schemas);
-  }
 }
