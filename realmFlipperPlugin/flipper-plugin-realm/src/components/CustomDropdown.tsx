@@ -3,7 +3,6 @@ import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { theme } from 'flipper-plugin';
 
 export type DropdownPropertyType = {
-  generateMenuItems: MenuItemGenerator;
   record: RealmObject;
   schemaProperty: SchemaProperty | null;
   currentSchema?: SchemaObject;

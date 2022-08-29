@@ -180,7 +180,6 @@ const DataVisualizer = ({
     const columns = schemaObjToColumns(currentSchema);
 
     const errorMessage = state.get().errorMessage;
-
     return (
       <>
         {errorMessage ? (
