@@ -43,7 +43,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     currentSchema: null,
     loading: false,
     query: '',
-    errorMessage: '',
   });
   client.onMessage('getOneObject', (data: ObjectMessage) => {
     const state = pluginState.get();
@@ -301,7 +300,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         object: object,
       })
       .catch((reason) => {
-        pluginState.set({ ...state, errorMsg: reason.error });
+        pluginState.set({ ...state, errorMessage: reason.error });
       });
   };
 
@@ -479,7 +478,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const state = pluginState.get();
     pluginState.set({
       ...state,
-      errorMsg: undefined,
+      errorMessage: undefined,
     });
   };
 

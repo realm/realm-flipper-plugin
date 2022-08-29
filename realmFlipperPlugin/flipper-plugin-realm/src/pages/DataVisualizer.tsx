@@ -179,13 +179,13 @@ const DataVisualizer = ({
 
     const columns = schemaObjToColumns(currentSchema);
 
-    const errorMsg = state.get().errorMsg;
+    const errorMessage = state.get().errorMessage;
 
     return (
       <>
-        {errorMsg ? (
+        {errorMessage ? (
           <Alert
-            message={errorMsg}
+            message={errorMessage}
             type="error"
             closable
             onClose={() => {

@@ -16,7 +16,9 @@ type PropsType = {
 };
 
 export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
-  const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
   const [queryResult, setQueryResult] = useState<Record<string, unknown>[]>([]);
   const [query, setQuery] = useState('');
   const [favourites, setFavourites] = useState<string[]>(JSON.parse(
@@ -59,11 +61,11 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
     try {
       const res = await instance.executeQuery(query, schema.name);
       console.log('here', res);
-      setErrorMsg(undefined);
+      setErrorMessage(undefined);
       setQueryResult(res);
       return res;
     } catch (e) {
-      setErrorMsg(e.message);
+      setErrorMessage(e.message);
       console.log('there', e);
 
       return e;
@@ -76,10 +78,10 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
 
   return (
     <>
-      {errorMsg ? (
+      {errorMessage ? (
         <Alert
           message="Error"
-          description={errorMsg}
+          description={errorMessage}
           type="error"
           showIcon
           banner

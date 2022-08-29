@@ -5,7 +5,6 @@ export type RealmPluginState = {
   objects: RealmObject[];
   schemas: SchemaObject[];
   currentSchema: SchemaObject | null;
-  errorMsg?: string;
   schemaHistory: SchemaObject[];
   schemaHistoryIndex: number;
   cursorId: number | null;
@@ -17,7 +16,7 @@ export type RealmPluginState = {
   loading: boolean;
   sortingColumnType: string | null;
   query: string;
-  errorMessage: string;
+  errorMessage?: string;
 };
 
 export type RealmObject = Record<string, unknown>;
