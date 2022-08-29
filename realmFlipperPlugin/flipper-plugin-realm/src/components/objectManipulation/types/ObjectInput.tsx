@@ -11,6 +11,7 @@ export const ObjectInput = ({
   property,
   set,
   defaultValue,
+  isPrimary
 }: TypeInputProps) => {
   console.log('objectInput defaultValue:', defaultValue);
   const instance = usePlugin(plugin);
@@ -39,6 +40,7 @@ export const ObjectInput = ({
         <Col flex="auto">{content}</Col>
         <Col>
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);

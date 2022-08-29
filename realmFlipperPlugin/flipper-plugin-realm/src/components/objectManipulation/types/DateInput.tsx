@@ -40,6 +40,7 @@ export const DateInput = ({
       {property.optional ? (
         <Col>
           <Button
+            disabled={isPrimary}
             onClick={() => {
               set(null);
               setValue(undefined);

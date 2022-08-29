@@ -37,6 +37,7 @@ export const BoolInput = ({ property, set, defaultValue, isPrimary }: TypeInputP
       {property.optional ? (
         <Col>
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               setValue(null);

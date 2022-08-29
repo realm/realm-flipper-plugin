@@ -69,6 +69,7 @@ export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => 
         </Col>
         <Col>
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);

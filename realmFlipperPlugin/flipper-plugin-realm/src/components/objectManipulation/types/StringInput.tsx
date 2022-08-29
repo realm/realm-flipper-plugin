@@ -34,6 +34,7 @@ export const StringInput = ({
       {property.optional ? (
         <Col>
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);

@@ -44,6 +44,7 @@ export const UUIDInput = ({
       </Col>
       <Col>
         <Button
+          disabled={isPrimary}
           onClick={() => {
             const newVal = new UUID();
             setValue(newVal.toString());
@@ -54,6 +55,7 @@ export const UUIDInput = ({
         ></Button>
         {property.optional ? (
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);

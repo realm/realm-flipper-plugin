@@ -11,6 +11,7 @@ export const ObjectIdInput = ({
   defaultValue,
   set,
   extraProps,
+  isPrimary
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
   const [value, setValue] = useState<string | null>(defaultValue !== null ? (defaultValue as ObjectId).toString() : null);
@@ -30,6 +31,7 @@ export const ObjectIdInput = ({
         <Input
           {...extraProps}
           value={value !== null ? value : undefined}
+          disabled={isPrimary}
           onChange={(v) => onChange(v.target.value)}
           placeholder={property.optional ? 'null' : undefined}
           status={
@@ -42,6 +44,7 @@ export const ObjectIdInput = ({
       </Col>
       <Col>
         <Button
+          disabled={isPrimary}
           onClick={() => {
             const newVal = new ObjectId();
             setValue(newVal.toString());
@@ -49,10 +52,10 @@ export const ObjectIdInput = ({
             setReset((v) => v + 1);
           }}
           icon={<ReloadOutlined />}
-        >
-        </Button>
+        ></Button>
         {property.optional ? (
           <Button
+            disabled={isPrimary}
             icon={<ClearOutlined />}
             onClick={() => {
               set(null);

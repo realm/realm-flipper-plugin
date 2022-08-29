@@ -77,35 +77,40 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
         return (
           <Row key={index}>
             <Col flex="auto">
-            <TypeInput
-              property={innerProp}
-              isPrimary={isPrimary}
-              set={(val) => {
-                setRow(val, index);
-                setReset((v) => v + 1);
-              }}
-              defaultValue={value}
-              extraProps={{style: { width: '100%' }, status: (count < 2 ? '' : 'error') }}
-              key={deleteOffset + index}
-            ></TypeInput>
+              <TypeInput
+                property={innerProp}
+                isPrimary={isPrimary}
+                set={(val) => {
+                  setRow(val, index);
+                  setReset((v) => v + 1);
+                }}
+                defaultValue={value}
+                extraProps={{
+                  style: { width: '100%' },
+                  status: count < 2 ? '' : 'error',
+                }}
+                key={deleteOffset + index}
+              ></TypeInput>
             </Col>
             <Col>
-            <Button
-              key={-index - 1}
-              type="primary"
-              icon={<DeleteOutlined />}
-              // remove ith element
-              onClick={() => {
-                setDeleteOffset(v => v + arr.length)
-                deleteRow(index);
-                setReset((v) => v + arr.length + 2);
-              }}
-            />
+              <Button
+                key={-index - 1}
+                type="primary"
+                disabled={isPrimary}
+                icon={<DeleteOutlined />}
+                // remove ith element
+                onClick={() => {
+                  setDeleteOffset((v) => v + arr.length);
+                  deleteRow(index);
+                  setReset((v) => v + arr.length + 2);
+                }}
+              />
             </Col>
           </Row>
         );
       })}
       <Button
+        disabled={isPrimary}
         onClick={() => {
           // const val = getDefault(innerProp);
           const newVal = getDefault(innerProp);
