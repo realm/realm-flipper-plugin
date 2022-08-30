@@ -1,4 +1,4 @@
-import { Table, Typography } from 'antd';
+import { message, Table, Typography } from 'antd';
 import { Layout, useMemoize, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../index';
@@ -17,7 +17,7 @@ const createRows = (
   const newRows: Record<string, unknown>[] = [];
   order.forEach((propName: string, index: number) => {
     const value = properties[propName];
-    console.log('here?')
+    console.log('here?');
     newRows.push({
       ...value,
       key: index,
@@ -27,10 +27,12 @@ const createRows = (
 
   return newRows;
 };
-const renderPropertyLinked = (objectType: string, schemas: SchemaObject[], onSchemaSelected: (selectedSchema: SchemaObject) => void): string | JSX.Element => {
-  const targetSchema = schemas.find(
-    (schema) => schema.name === objectType
-  );
+const renderPropertyLinked = (
+  objectType: string,
+  schemas: SchemaObject[],
+  onSchemaSelected: (selectedSchema: SchemaObject) => void
+): string | JSX.Element => {
+  const targetSchema = schemas.find((schema) => schema.name === objectType);
   if (!targetSchema) {
     return objectType;
   }
@@ -39,40 +41,67 @@ const renderPropertyLinked = (objectType: string, schemas: SchemaObject[], onSch
       {targetSchema.name}
     </Link>
   );
-}
+};
 
-const renderFullType = (property: SchemaProperty, schemas: SchemaObject[], onSchemaSelected: (selectedSchema: SchemaObject) => void): string | JSX.Element => {
+const renderFullType = (
+  property: SchemaProperty,
+  schemas: SchemaObject[],
+  onSchemaSelected: (selectedSchema: SchemaObject) => void
+): string | JSX.Element => {
   let title;
-  
+
   switch (property.type) {
     case 'list':
     case 'set':
     case 'dictionary':
     case 'object':
-      title = <>{renderPropertyLinked(property.objectType as string, schemas, onSchemaSelected)}</>;
+      title = (
+        <>
+          {renderPropertyLinked(
+            property.objectType as string,
+            schemas,
+            onSchemaSelected
+          )}
+        </>
+      );
       break;
     default:
       title = <>{property.type}</>;
   }
-  
+
   if (property.optional) {
     title = <>{title}?</>;
   }
 
   switch (property.type) {
     case 'list':
-      title = <>{title}{"[]"}</>;
+      title = (
+        <>
+          {title}
+          {'[]'}
+        </>
+      );
       break;
     case 'set':
-      title = <>{title}{"<>"}</>;
+      title = (
+        <>
+          {title}
+          {'<>'}
+        </>
+      );
       break;
     case 'dictionary':
-      title = <>{title}{"{}"}</>;
+      title = (
+        <>
+          {title}
+          {'{}'}
+        </>
+      );
       break;
   }
 
   return title;
-}
+};
 
 type InputType = {
   schemas: Array<SchemaObject>;
@@ -90,20 +119,23 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   const instance = usePlugin(plugin);
 
   const onSchemaSelected = (selectedSchema: SchemaObject) => {
+    if (currentSchema.name === selectedSchema.name) {
+      message.info('You are already viewing this schema');
+    }
     instance.setSelectedSchema(selectedSchema);
   };
 
   function createColumnConfig() {
     const simpleColumnGenerator = (columnName: string) => ({
-        key: columnName,
-        title: columnName,
-        dataIndex: columnName,
-        // onFilter: (value: string, record: any) => record[col].startsWith(value),
-        render: (cellContent: string, record: SchemaProperty) =>
-          renderTableCells(cellContent, typeof cellContent, columnName, record),
-        // filterSearch: true,
-      });
-  
+      key: columnName,
+      title: columnName,
+      dataIndex: columnName,
+      // onFilter: (value: string, record: any) => record[col].startsWith(value),
+      render: (cellContent: string, record: SchemaProperty) =>
+        renderTableCells(cellContent, typeof cellContent, columnName, record),
+      // filterSearch: true,
+    });
+
     const innerTypeColumns = ['type', 'optional'].map(simpleColumnGenerator);
     const typeColumnGroup = {
       title: 'type',
@@ -114,18 +146,17 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
           key: 'string format',
           render: (cellContent: string, record: SchemaProperty) => {
             return renderFullType(record, schemas, onSchemaSelected);
-          }
+          },
         },
         ...innerTypeColumns,
-      ]
-    }
+      ],
+    };
 
-    const simpleColumns = ['primaryKey', 'name', 'indexed'].map(simpleColumnGenerator);
+    const simpleColumns = ['primaryKey', 'name', 'indexed'].map(
+      simpleColumnGenerator
+    );
 
-    return [
-      ...simpleColumns,
-      typeColumnGroup,
-    ];
+    return [...simpleColumns, typeColumnGroup];
   }
 
   const renderTableCells = (
@@ -136,7 +167,11 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   ) => {
     // console.log('rendering, ', value, type, column, record);
     if (column === 'objectType' && isPropertyLinked(record)) {
-      return renderPropertyLinked(record.objectType as string, schemas, onSchemaSelected);
+      return renderPropertyLinked(
+        record.objectType as string,
+        schemas,
+        onSchemaSelected
+      );
     }
 
     switch (type) {
