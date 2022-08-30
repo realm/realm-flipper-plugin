@@ -74,7 +74,7 @@ PropertyType) => {
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [selectedIndex, setSelectedIndex] = useState<number>();
   const sortableTypes = new Set([
     'string',
     'int',
@@ -83,6 +83,7 @@ PropertyType) => {
     'decimal128',
     'decimal',
     'float',
+    'bool'
   ]);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
