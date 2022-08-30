@@ -44,6 +44,7 @@ export type Events = {
   liveObjectAdded: AddLiveObjectRequest;
   liveObjectDeleted: DeleteLiveObjectRequest;
   liveObjectEdited: EditLiveObjectRequest;
+  getCurrentQuery: undefined;
   getRealms: RealmsMessage;
   executeQuery: QueryResult;
   getOneObject: ObjectMessage;
@@ -56,6 +57,7 @@ export type Methods = {
   addObject: (object: AddObject) => Promise<RealmObject>;
   modifyObject: (newObject: AddObject) => Promise<RealmObject>;
   removeObject: (object: AddObject) => Promise<void>;
+  receivedCurrentQuery: (request: {schema: string | null; realm: string; sortingDirection: 'ascend' | 'descend' | null; sortingColumn: string | null}) => void;
   getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
   downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
 };
@@ -75,6 +77,7 @@ export type AddObject = {
 };
 export type RealmsMessage = {
   realms: string[];
+  objects: Record<string, unknown>[];
 };
 export type ObjectsMessage = {
   objects: Array<RealmObject>;
@@ -100,6 +103,7 @@ type getForwardsObjectsRequest = {
   sortingColumn: string | null;
   sortingColumnType: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
+  query: string;
 };
 
 export type ObjectRequest = {
@@ -109,13 +113,17 @@ export type ObjectRequest = {
 };
 export type AddLiveObjectRequest = {
   newObject: RealmObject;
+  index: number;
+  schema: string;
 };
 export type DeleteLiveObjectRequest = {
   index: number;
+  schema: string;
 };
 export type EditLiveObjectRequest = {
   newObject: RealmObject;
   index: number;
+  schema: string;
 };
 type QueryObject = {
   schema: string;

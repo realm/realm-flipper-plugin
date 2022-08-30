@@ -140,7 +140,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             objects = objects.sorted(sortingColumn, shouldSortDescending);
             cursorId = req.cursorId ?? objects[0]._objectKey();
           }
-          let howFarWeGot = realm._objectForObjectKey(schema, cursorId);
+          let howFarWeGot = realm._objectForObjectKey(schema, String(cursorId));
           let index = objects.findIndex(
             obj => obj._objectKey() === howFarWeGot._objectKey(),
           );

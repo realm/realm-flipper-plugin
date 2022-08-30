@@ -305,7 +305,6 @@ PropertyType) => {
     }
     setLoading(true);
     if (state.objects.length >= state.totalObjects) {
-      message.warning('Infinite List loaded all');
       return;
     }
     instance.getObjects();

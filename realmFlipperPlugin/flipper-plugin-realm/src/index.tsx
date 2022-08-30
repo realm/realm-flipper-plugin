@@ -52,7 +52,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getCurrentQuery', () => {
     const state = pluginState.get();
     client.send('receivedCurrentQuery', {
-      schema: state.currentSchema.name,
+      schema: state.currentSchema ? state.currentSchema.name : null,
       realm: state.selectedRealm,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
@@ -89,11 +89,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     console.log('Added');
     const state = pluginState.get();
-    if (data.schema != state.currentSchema.name) {
+    const { newObject, index, schema } = data;
+    if (schema != state.currentSchema?.name) {
       return;
     }
-    const { newObject, index } = data;
-    let newObjects = state.objects;
+    const newObjects = state.objects;
     newObjects.splice(index, 0, newObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
@@ -110,11 +110,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     console.log('DELETE');
     const state = pluginState.get();
-    if (data.schema != state.currentSchema.name) {
+    const { index, schema } = data;
+    if (schema != state.currentSchema?.name) {
       return;
     }
-    const { index } = data;
-    let newObjects = state.objects;
+    const newObjects = state.objects;
     newObjects.splice(index, 1);
     //find out case where last index is deleted
     console.log('after', newObjects);
@@ -129,12 +129,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     console.log('EDIT');
     const state = pluginState.get();
-    if (data.schema != state.currentSchema.name) {
+    const { index, schema, newObject } = data;
+    if (schema != state.currentSchema?.name) {
       return;
     }
-    const { newObject, index } = data;
     console.log('editing', newObject, index);
-    let newObjects = state.objects;
+    const newObjects = state.objects;
     newObjects.splice(index, 1, newObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
