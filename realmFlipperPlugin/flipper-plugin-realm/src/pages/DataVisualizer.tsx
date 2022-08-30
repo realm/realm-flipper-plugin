@@ -22,6 +22,7 @@ type PropertyType = {
   currentSchema: SchemaObject | null;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
+  hasMore: boolean;
 };
 
 const DataVisualizer = ({
@@ -30,6 +31,7 @@ const DataVisualizer = ({
   currentSchema,
   sortingDirection,
   sortingColumn,
+  hasMore
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
@@ -234,6 +236,7 @@ const DataVisualizer = ({
               columns={columns}
               objects={objects}
               schemas={schemas}
+              hasMore={hasMore}
               sortingDirection={sortingDirection}
               sortingColumn={sortingColumn}
               currentSchema={currentSchema}

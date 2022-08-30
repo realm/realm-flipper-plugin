@@ -523,6 +523,7 @@ export function Component() {
     sortingDirection,
     sortingColumn,
     currentSchema,
+    hasMore
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
@@ -540,6 +541,7 @@ export function Component() {
         <DataVisualizerWrapper
           schemas={schemas}
           objects={objects}
+          hasMore={hasMore}
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}

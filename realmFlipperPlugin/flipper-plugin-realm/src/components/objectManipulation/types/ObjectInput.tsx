@@ -1,5 +1,6 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, Menu, Modal, Row, Tag } from 'antd';
+import { Button, Col, Menu, Modal, Row, Tag, Typography } from 'antd';
+import { Header } from 'antd/lib/layout/layout';
 import { usePlugin, useValue, Layout } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
@@ -26,6 +27,7 @@ export const ObjectInput = ({
   const [chosen, setChosen] = useState(!!value);
   const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
 
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
@@ -92,6 +94,7 @@ export const ObjectInput = ({
         .then((response) => {
           console.log('recevied', response);
           setObjects(response.objects)
+          setHasMore(response.hasMore);
         });
     };
 
@@ -109,12 +112,14 @@ export const ObjectInput = ({
           closable={false}
         >
           <Layout.Container height={800}>
+            <Typography.Title style={{marginBottom: "5px"}}>{targetSchema.name}</Typography.Title>
             <DataVisualizer
               objects={objects}
               sortingColumn={sortingColumn}
               sortingDirection={sortingDirection}
               schemas={schemas}
               currentSchema={targetSchema}
+              hasMore={hasMore}
             ></DataVisualizer>
             {/* <RealmQueryLanguage
               schema={targetSchema}

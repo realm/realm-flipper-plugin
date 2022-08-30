@@ -34,6 +34,7 @@ type PropertyType = {
   scrollX: number;
   scrollY: number;
   enableSort: boolean;
+  hasMore: boolean;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
 };
 
@@ -64,6 +65,7 @@ export const DataTable = ({
   scrollY,
   handleDataInspector,
   enableSort,
+  hasMore
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -267,6 +269,7 @@ PropertyType) => {
               schemas={schemas}
               currentSchema={linkedSchema}
               sortingColumn={null}
+              hasMore={hasMore}
               generateMenuItems={generateMenuItems}
               setdropdownProp={setdropdownProp}
               dropdownProp={dropdownProp}
@@ -287,6 +290,7 @@ PropertyType) => {
               schemas={schemas}
               currentSchema={linkedSchema}
               sortingColumn={null}
+              hasMore={hasMore}
               generateMenuItems={generateMenuItems}
               setdropdownProp={setdropdownProp}
               dropdownProp={dropdownProp}
@@ -350,7 +354,7 @@ PropertyType) => {
         initialLoad={false}
         pageStart={0}
         loadMore={handleInfiniteOnLoad}
-        hasMore={state.hasMore}
+        hasMore={hasMore}
         useWindow={false}
         loader={
           <div
@@ -405,12 +409,14 @@ const NestedTable = ({
   generateMenuItems,
   setdropdownProp,
   dropdownProp,
+  hasMore
 }: PropertyType) => {
   return (
     <DataTable
       columns={columns}
       objects={objects}
       schemas={schemas}
+      hasMore={hasMore}
       currentSchema={currentSchema}
       sortingColumn={sortingColumn}
       generateMenuItems={generateMenuItems}

@@ -12,6 +12,7 @@ type InputType = {
   currentSchema: SchemaObject;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
+  hasMore: boolean;
 };
 
 export const DataVisualizerWrapper = ({
@@ -20,6 +21,7 @@ export const DataVisualizerWrapper = ({
   currentSchema,
   sortingDirection,
   sortingColumn,
+  hasMore
 }: InputType) => {
   return (
     <>
@@ -29,6 +31,7 @@ export const DataVisualizerWrapper = ({
         <DataVisualizer
           objects={objects}
           schemas={schemas}
+          hasMore={hasMore}
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
