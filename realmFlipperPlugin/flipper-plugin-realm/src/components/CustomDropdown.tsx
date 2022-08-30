@@ -11,6 +11,7 @@ export type DropdownPropertyType = {
   pointerY: number;
   scrollX: number;
   scrollY: number;
+  generateMenuItems: MenuItemGenerator;
 };
 
 type MenuItem = {

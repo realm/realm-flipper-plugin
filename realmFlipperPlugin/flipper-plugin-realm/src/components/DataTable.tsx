@@ -375,13 +375,16 @@ PropertyType) => {
           bordered={true}
           dataSource={objects}
           onRow={(object: RealmObject) => {
-           //if (doubleClickAction) {
-              return {
-                onDoubleClick: () => {
+            //if (doubleClickAction) {
+            return {
+              onDoubleClick: () => {
+                if (doubleClickAction) {
                   doubleClickAction(object);
-                },
-             // };
-            }
+                }
+              },
+              onClick: () => {},
+              // };
+            };
           }}
           rowKey={(record) => {
             return record[currentSchema.primaryKey];
