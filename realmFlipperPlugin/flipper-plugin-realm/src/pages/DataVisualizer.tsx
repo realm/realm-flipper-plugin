@@ -84,7 +84,7 @@ const DataVisualizer = ({
   };
 
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
-  const generateObjectMenuItems: MenuItemGenerator = (
+  const generateMenuItems: MenuItemGenerator = (
     row: RealmObject,
     schemaProperty: SchemaProperty,
     schema: SchemaObject
@@ -136,6 +136,7 @@ const DataVisualizer = ({
 
   /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
+      generateMenuItems,
     record: {},
     schemaProperty: null,
     visible: false,
@@ -241,7 +242,7 @@ const DataVisualizer = ({
             sortingDirection={sortingDirection}
             sortingColumn={sortingColumn}
             currentSchema={currentSchema}
-            generateMenuItems={generateObjectMenuItems}
+            generateMenuItems={generateMenuItems}
             getOneObject={getOneObject}
             setdropdownProp={setdropdownProp}
             dropdownProp={dropdownProp}
