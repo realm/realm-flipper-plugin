@@ -10,16 +10,18 @@ type InputType = {
   schemas: SchemaObject[];
   objects: RealmObject[];
   currentSchema: SchemaObject;
-  sortDirection: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
+  hasMore: boolean;
 };
 
 export const DataVisualizerWrapper = ({
   schemas,
   objects,
   currentSchema,
-  sortDirection,
+  sortingDirection,
   sortingColumn,
+  hasMore
 }: InputType) => {
   return (
     <>
@@ -29,8 +31,9 @@ export const DataVisualizerWrapper = ({
         <DataVisualizer
           objects={objects}
           schemas={schemas}
+          hasMore={hasMore}
           currentSchema={currentSchema}
-          sortDirection={sortDirection}
+          sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
         />
       </Layout.Container>

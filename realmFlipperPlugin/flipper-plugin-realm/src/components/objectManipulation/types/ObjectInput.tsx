@@ -1,9 +1,10 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, Menu, Modal, Row, Tag } from 'antd';
-import { usePlugin, useValue, Layout } from 'flipper-plugin';
+import { Button, Col, Menu, Modal, Row, Tag, Typography } from 'antd';
+import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
 import { RealmObject } from '../../../CommonTypes';
+import DataVisualizer from '../../../pages/DataVisualizer';
 // import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
 
@@ -11,15 +12,19 @@ export const ObjectInput = ({
   property,
   set,
   defaultValue,
-  isPrimary
+  isPrimary,
 }: TypeInputProps) => {
   console.log('objectInput defaultValue:', defaultValue);
   const instance = usePlugin(plugin);
-  const { schemas } = useValue(instance.state);
+  const { schemas, sortingDirection, sortingColumn, selectedRealm } = useValue(
+    instance.state
+  );
 
   const [value, setValue] = useState<RealmObject>(defaultValue as RealmObject);
   const [chosen, setChosen] = useState(!!value);
   const [visible, setVisible] = useState(false);
+  const [objects, setObjects] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
 
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
@@ -61,6 +66,10 @@ export const ObjectInput = ({
       setVisible(false);
     };
     const onChosen = (object: RealmObject) => {
+      if (!object) {
+        return;
+      }
+      console.log((object))
       setValue(object);
       set(object);
       setChosen(true);
@@ -75,9 +84,24 @@ export const ObjectInput = ({
       </Menu>
     );
 
+    const openModal = () => {
+      console.log('OPEN MODAL');
+      setVisible(true);
+      if (!targetSchema) {
+        return;
+      }
+      instance
+        .requestObjects(targetSchema.name, selectedRealm, null)
+        .then((response) => {
+          console.log('recevied', response);
+          setObjects(response.objects)
+          setHasMore(response.hasMore);
+        });
+    };
+
     return (
       <Layout.Container grow>
-        <Button onClick={() => setVisible(true)}>
+        <Button onClick={() => openModal()}>
           Select {property.objectType}
         </Button>
         <Modal
@@ -88,8 +112,17 @@ export const ObjectInput = ({
           width={800}
           closable={false}
         >
-          <Layout.Container grow>
-            Empty for now...
+          <Layout.Container height={800}>
+            <Typography.Title style={{marginBottom: "5px"}}>{targetSchema.name}</Typography.Title>
+            <DataVisualizer
+              objects={objects}
+              sortingColumn={sortingColumn}
+              sortingDirection={sortingDirection}
+              schemas={schemas}
+              currentSchema={targetSchema}
+              hasMore={hasMore}
+              doubleClickAction = {onChosen}
+            ></DataVisualizer>
             {/* <RealmQueryLanguage
               schema={targetSchema}
               renderOptions={chooseOption}

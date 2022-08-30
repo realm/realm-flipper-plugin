@@ -164,6 +164,26 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
+  const requestObjects = (
+    schema?: string | null,
+    realm?: string | null,
+    toRestore?: RealmObject[],
+    cursorId?: number | null
+  ) => {
+    const state = pluginState.get();
+    console.log("called with", schema, realm)
+    return client.send('getObjects', {
+      schema: schema ?? state.currentSchema.name,
+      realm: realm ?? state.selectedRealm,
+      cursorId: cursorId,
+      filterCursor: state.filterCursor,
+      sortingColumn: state.sortingColumn,
+      sortingColumnType: state.sortingColumnType,
+      sortingDirection: state.sortingDirection,
+      query: state.query,
+    });
+  };
+
   const getObjects = (
     schema?: string | null,
     realm?: string | null,
@@ -179,17 +199,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       loading: true,
     });
-    client
-      .send('getObjects', {
-        schema: schema,
-        realm: realm,
-        cursorId: state.cursorId,
-        filterCursor: state.filterCursor,
-        sortingColumn: state.sortingColumn,
-        sortingColumnType: state.sortingColumnType,
-        sortingDirection: state.sortingDirection,
-        query: state.query,
-      })
+    requestObjects(schema, realm, toRestore, state.cursorId)
       .then(
         (response: ObjectsMessage) => {
           if (response.objects && !response.objects.length) {
@@ -501,6 +511,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     refreshState,
     getOneObject,
     clearError,
+    requestObjects,
   };
 }
 
@@ -513,6 +524,7 @@ export function Component() {
     sortingDirection,
     sortingColumn,
     currentSchema,
+    hasMore
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
@@ -530,8 +542,9 @@ export function Component() {
         <DataVisualizerWrapper
           schemas={schemas}
           objects={objects}
+          hasMore={hasMore}
           currentSchema={currentSchema}
-          sortDirection={sortingDirection}
+          sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
         />
       ) : null}

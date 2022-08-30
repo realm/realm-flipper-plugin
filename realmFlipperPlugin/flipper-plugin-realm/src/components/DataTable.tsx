@@ -6,11 +6,11 @@ import React, { useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
+import InfiniteScroll from 'react-infinite-scroller';
+import { InspectionDataType } from '../components/RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import { MenuItemGenerator } from './CustomDropdown';
-import { InspectionDataType } from '../components/RealmDataInspector';
-import InfiniteScroll from 'react-infinite-scroller';
 
 export type ColumnType = {
   optional: boolean;
@@ -34,7 +34,9 @@ type PropertyType = {
   scrollX: number;
   scrollY: number;
   enableSort: boolean;
+  hasMore: boolean;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
+  doubleClickAction: () => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.
@@ -64,6 +66,8 @@ export const DataTable = ({
   scrollY,
   handleDataInspector,
   enableSort,
+  hasMore,
+  doubleClickAction,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -267,6 +271,7 @@ PropertyType) => {
               schemas={schemas}
               currentSchema={linkedSchema}
               sortingColumn={null}
+              hasMore={hasMore}
               generateMenuItems={generateMenuItems}
               setdropdownProp={setdropdownProp}
               dropdownProp={dropdownProp}
@@ -287,6 +292,7 @@ PropertyType) => {
               schemas={schemas}
               currentSchema={linkedSchema}
               sortingColumn={null}
+              hasMore={hasMore}
               generateMenuItems={generateMenuItems}
               setdropdownProp={setdropdownProp}
               dropdownProp={dropdownProp}
@@ -349,7 +355,7 @@ PropertyType) => {
         initialLoad={false}
         pageStart={0}
         loadMore={handleInfiniteOnLoad}
-        hasMore={state.hasMore}
+        hasMore={hasMore}
         useWindow={false}
         loader={
           <div
@@ -368,6 +374,15 @@ PropertyType) => {
           sticky={true}
           bordered={true}
           dataSource={objects}
+          onRow={(object: RealmObject) => {
+           //if (doubleClickAction) {
+              return {
+                onDoubleClick: () => {
+                  doubleClickAction(object);
+                },
+             // };
+            }
+          }}
           rowKey={(record) => {
             return record[currentSchema.primaryKey];
           }}
@@ -404,12 +419,14 @@ const NestedTable = ({
   generateMenuItems,
   setdropdownProp,
   dropdownProp,
+  hasMore,
 }: PropertyType) => {
   return (
     <DataTable
       columns={columns}
       objects={objects}
       schemas={schemas}
+      hasMore={hasMore}
       currentSchema={currentSchema}
       sortingColumn={sortingColumn}
       generateMenuItems={generateMenuItems}

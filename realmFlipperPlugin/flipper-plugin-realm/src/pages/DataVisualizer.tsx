@@ -22,6 +22,8 @@ type PropertyType = {
   currentSchema: SchemaObject | null;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
+  hasMore: boolean;
+  doubleClickAction: () => Record<string, unknown>[];
 };
 
 const DataVisualizer = ({
@@ -30,6 +32,8 @@ const DataVisualizer = ({
   currentSchema,
   sortingDirection,
   sortingColumn,
+  hasMore,
+  doubleClickAction,
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
@@ -80,7 +84,7 @@ const DataVisualizer = ({
   };
 
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
-  const generateMenuItems: MenuItemGenerator = (
+  const generateObjectMenuItems: MenuItemGenerator = (
     row: RealmObject,
     schemaProperty: SchemaProperty,
     schema: SchemaObject
@@ -132,7 +136,6 @@ const DataVisualizer = ({
 
   /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-    generateMenuItems,
     record: {},
     schemaProperty: null,
     visible: false,
@@ -156,9 +159,6 @@ const DataVisualizer = ({
     const { scrollLeft, scrollTop } = event.target;
     scrollX.current = scrollLeft;
     scrollY.current = scrollTop;
-    console.log('handleScroll');
-    console.log(scrollX.current);
-    console.log(scrollY.current);
   };
 
   if (!currentSchema) {
@@ -171,104 +171,105 @@ const DataVisualizer = ({
 
   /** Take the current dropdownProp and update it with the current x and y scroll values.
    This cannot be done with useState because it would cause too many rerenders.*/
-    const updatedDropdownProp = {
-      ...dropdownProp,
-      scrollX: scrollX.current,
-      scrollY: scrollY.current,
-    };
+  const updatedDropdownProp = {
+    ...dropdownProp,
+    scrollX: scrollX.current,
+    scrollY: scrollY.current,
+  };
 
-    const columns = schemaObjToColumns(currentSchema);
+  const columns = schemaObjToColumns(currentSchema);
 
-    const errorMessage = state.get().errorMessage;
-
-    return (
-      <>
-        {errorMessage ? (
-          <Alert
-            message={errorMessage}
-            type="error"
-            closable
-            onClose={() => {
-              clearError();
-            }}
-          ></Alert>
-        ) : null}
+  const errorMessage = state.get().errorMessage;
+  return (
+    <>
+      {errorMessage ? (
+        <Alert
+          message={errorMessage}
+          type="error"
+          closable
+          onClose={() => {
+            clearError();
+          }}
+        ></Alert>
+      ) : null}
+      <div
+        onScroll={handleScroll}
+        style={{
+          flex: `1 1 0`,
+          boxSizing: 'border-box',
+          position: 'relative',
+          overflow: 'auto',
+        }}
+      >
         <div
-          onScroll={handleScroll}
           style={{
-            flex: `1 1 0`,
-            boxSizing: 'border-box',
-            position: 'relative',
-            overflow: 'auto',
+            position: 'absolute',
+            height: '100%',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              height: '100%',
-            }}
-          >
-            {editingObject.editing && editingObject.type === 'object' ? (
-              <ObjectEdit
-                schema={currentSchema}
-                initialObject={editingObject.object as RealmObject}
-                setVisible={(val: boolean) => {
-                  setEditingObject((obj) => ({
-                    ...obj,
-                    editing: val,
-                  }));
-                }}
-                visible={editingObject.editing}
-              ></ObjectEdit>
-            ) : editingObject.editing && editingObject.type === 'field' ? (
-              <FieldEdit
-                schema={currentSchema}
-                fieldName={editingObject.fieldName as string}
-                setVisible={(val: boolean) => {
-                  setEditingObject((obj) => ({
-                    ...obj,
-                    editing: val,
-                  }));
-                }}
-                visible={editingObject.editing}
-                value={editingObject.object}
-              />
-            ) : null}
-            <DataTable
-              columns={columns}
-              objects={objects}
-              schemas={schemas}
-              sortingDirection={sortingDirection}
-              sortingColumn={sortingColumn}
-              currentSchema={currentSchema}
-              generateMenuItems={generateMenuItems}
-              getOneObject={getOneObject}
-              setdropdownProp={setdropdownProp}
-              dropdownProp={dropdownProp}
-              scrollX={scrollX.current}
-              scrollY={scrollY.current}
-              handleDataInspector={handleDataInspector}
-              enableSort={true}
+          {editingObject.editing && editingObject.type === 'object' ? (
+            <ObjectEdit
+              schema={currentSchema}
+              initialObject={editingObject.object as RealmObject}
+              setVisible={(val: boolean) => {
+                setEditingObject((obj) => ({
+                  ...obj,
+                  editing: val,
+                }));
+              }}
+              visible={editingObject.editing}
+            ></ObjectEdit>
+          ) : editingObject.editing && editingObject.type === 'field' ? (
+            <FieldEdit
+              schema={currentSchema}
+              fieldName={editingObject.fieldName as string}
+              setVisible={(val: boolean) => {
+                setEditingObject((obj) => ({
+                  ...obj,
+                  editing: val,
+                }));
+              }}
+              visible={editingObject.editing}
+              value={editingObject.object}
             />
-            <CustomDropdown {...updatedDropdownProp} />
-            <RealmDataInspector
-              currentSchema={currentSchema}
-              schemas={schemas}
-              inspectionData={inspectionData}
-              setInspectionData={setInspectionData}
-              showSidebar={showSidebar}
-              setShowSidebar={setShowSidebar}
-              goBackStack={goBackStack}
-              setGoBackStack={setGoBackStack}
-              goForwardStack={goForwardStack}
-              setGoForwardStack={setGoForwardStack}
-              setNewInspectionData={setNewInspectionData}
-            />
-          </div>
+          ) : null}
+          <DataTable
+            columns={columns}
+            objects={objects}
+            schemas={schemas}
+            hasMore={hasMore}
+            sortingDirection={sortingDirection}
+            sortingColumn={sortingColumn}
+            currentSchema={currentSchema}
+            generateMenuItems={generateObjectMenuItems}
+            getOneObject={getOneObject}
+            setdropdownProp={setdropdownProp}
+            dropdownProp={dropdownProp}
+            scrollX={scrollX.current}
+            scrollY={scrollY.current}
+            handleDataInspector={handleDataInspector}
+            enableSort={true}
+            doubleClickAction={doubleClickAction}
+          />
+          <CustomDropdown {...updatedDropdownProp} />
+          <RealmDataInspector
+            currentSchema={currentSchema}
+            schemas={schemas}
+            inspectionData={inspectionData}
+            setInspectionData={setInspectionData}
+            showSidebar={showSidebar}
+            setShowSidebar={setShowSidebar}
+            goBackStack={goBackStack}
+            setGoBackStack={setGoBackStack}
+            goForwardStack={goForwardStack}
+            setGoForwardStack={setGoForwardStack}
+            setNewInspectionData={setNewInspectionData}
+          />
         </div>
-      </>
-    );
-  
+      </div>
+    </>
+  );
+
   // update inspectionData and push object to GoBackStack
   function setNewInspectionData(newInspectionData: InspectionDataType) {
     if (inspectionData !== undefined) {
