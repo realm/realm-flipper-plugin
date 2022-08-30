@@ -1,5 +1,5 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, InputNumber, Row } from 'antd';
+import { Button, Col, Form, InputNumber, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
@@ -8,7 +8,7 @@ export const IntInput = ({
   defaultValue,
   set,
   extraProps,
-  isPrimary
+  isPrimary,
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
   const [value, setValue] = useState<number | null>(
@@ -31,14 +31,18 @@ export const IntInput = ({
   return (
     <Row align="middle">
       <Col flex="auto">
-        <InputNumber
-          {...extraProps}
-          disabled={isPrimary}
-          value={value === null ? undefined : value}
-          defaultValue={value === null ? undefined : value}
-          onChange={onChange}
-          placeholder={property.optional && value === null ? 'null' : undefined}
-        />
+        <Form.Item>
+          <InputNumber
+            {...extraProps}
+            disabled={isPrimary}
+            value={value === null ? undefined : value}
+            defaultValue={value === null ? undefined : value}
+            onChange={onChange}
+            placeholder={
+              property.optional && value === null ? 'null' : undefined
+            }
+          />
+        </Form.Item>
       </Col>
       {property.optional ? (
         <Col>
