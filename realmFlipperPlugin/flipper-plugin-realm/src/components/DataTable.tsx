@@ -6,11 +6,11 @@ import React, { useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
+import InfiniteScroll from 'react-infinite-scroller';
+import { InspectionDataType } from '../components/RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import { MenuItemGenerator } from './CustomDropdown';
-import { InspectionDataType } from '../components/RealmDataInspector';
-import InfiniteScroll from 'react-infinite-scroller';
 
 export type ColumnType = {
   optional: boolean;
@@ -214,14 +214,6 @@ PropertyType) => {
       property,
       render,
       onCell: (object: RealmObject) => {
-        if (doubleClickAction) {
-          return {
-            onDoubleClick: () => {
-              console.log('you double');
-              doubleClickAction();
-            },
-          };
-        }
         if (generateMenuItems) {
           return {
             onContextMenu: (env: Event) => {
@@ -383,6 +375,15 @@ PropertyType) => {
           sticky={true}
           bordered={true}
           dataSource={objects}
+          onRow={(object: RealmObject) => {
+           //if (doubleClickAction) {
+              return {
+                onDoubleClick: () => {
+                  doubleClickAction(object);
+                },
+             // };
+            }
+          }}
           rowKey={(record) => {
             return record[currentSchema.primaryKey];
           }}

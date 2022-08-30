@@ -1,13 +1,10 @@
 import { ClearOutlined } from '@ant-design/icons';
 import { Button, Col, Menu, Modal, Row, Tag, Typography } from 'antd';
-import { Header } from 'antd/lib/layout/layout';
-import { usePlugin, useValue, Layout } from 'flipper-plugin';
+import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
 import { RealmObject } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
-import { DataTable } from '../../DataTable';
-import { DataVisualizerWrapper } from '../../DataVisualizerWrapper';
 // import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
 
@@ -69,6 +66,10 @@ export const ObjectInput = ({
       setVisible(false);
     };
     const onChosen = (object: RealmObject) => {
+      if (!object) {
+        return;
+      }
+      console.log((object))
       setValue(object);
       set(object);
       setChosen(true);
@@ -120,7 +121,7 @@ export const ObjectInput = ({
               schemas={schemas}
               currentSchema={targetSchema}
               hasMore={hasMore}
-              doubleClickAction = {chooseOption}
+              doubleClickAction = {onChosen}
             ></DataVisualizer>
             {/* <RealmQueryLanguage
               schema={targetSchema}
