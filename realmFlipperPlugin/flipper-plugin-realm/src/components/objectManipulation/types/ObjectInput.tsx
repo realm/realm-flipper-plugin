@@ -120,6 +120,7 @@ export const ObjectInput = ({
               schemas={schemas}
               currentSchema={targetSchema}
               hasMore={hasMore}
+              doubleClickAction = {chooseOption}
             ></DataVisualizer>
             {/* <RealmQueryLanguage
               schema={targetSchema}

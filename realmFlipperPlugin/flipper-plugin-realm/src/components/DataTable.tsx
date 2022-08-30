@@ -36,6 +36,7 @@ type PropertyType = {
   enableSort: boolean;
   hasMore: boolean;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
+  doubleClickAction: () => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.
@@ -65,7 +66,8 @@ export const DataTable = ({
   scrollY,
   handleDataInspector,
   enableSort,
-  hasMore
+  hasMore,
+  doubleClickAction,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -212,6 +214,14 @@ PropertyType) => {
       property,
       render,
       onCell: (object: RealmObject) => {
+        if (doubleClickAction) {
+          return {
+            onDoubleClick: () => {
+              console.log('you double');
+              doubleClickAction();
+            },
+          };
+        }
         if (generateMenuItems) {
           return {
             onContextMenu: (env: Event) => {
@@ -409,7 +419,7 @@ const NestedTable = ({
   generateMenuItems,
   setdropdownProp,
   dropdownProp,
-  hasMore
+  hasMore,
 }: PropertyType) => {
   return (
     <DataTable
