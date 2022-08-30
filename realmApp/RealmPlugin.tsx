@@ -118,10 +118,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           }
           const {schema, sortingColumn, sortingDirection} = req;
           let objects = realm.objects(schema);
-          if (!objects.length) {
-            responder.error({message: 'No objects found in the schema'});
-            return;
-          }
           listenerHandler = new Listener(
             schemaToObjects,
             schema,
@@ -132,6 +128,16 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
+          if (!totalObjects) {
+            console.log("here")
+            responder.success({
+              objects: [],
+              total: totalObjects,
+              hasMore: false,
+              nextCursor: null,
+            });
+            return;
+          }
           let cursorId = null;
           const LIMIT = 50;
           const shouldSortDescending = sortingDirection === 'descend';
@@ -148,10 +154,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             index === 0 ? index : index + 1,
             index + (LIMIT + 1),
           );
-          if (!objects) {
-            // responder.error({message: 'No objects found'});
-            return;
-          }
+          console.log('gere');
           const afterConversion = convertObjectsToDesktop(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),
@@ -161,7 +164,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             objects: afterConversion,
             total: totalObjects,
             hasMore: objects.length >= LIMIT,
-            nextCursor: objects[objects.length - 1]._objectKey(),
+            nextCursor: objects[objects.length - 1]?._objectKey(),
           });
         });
 
