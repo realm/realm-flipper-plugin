@@ -29,7 +29,7 @@ const convertObject = (
 
 export const convertObjects = (
   objects: RealmObject[],
-  schema: SchemaObject,
+  schema: SchemaObject | null,
   downloadData: (schema: string, primaryKey: unknown, propertyName: string) => Promise<Uint8Array>,
 ) => {
   return objects.map(v => convertObject(v, schema, downloadData));

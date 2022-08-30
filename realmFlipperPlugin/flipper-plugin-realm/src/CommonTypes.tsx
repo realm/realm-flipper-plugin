@@ -78,11 +78,12 @@ export type AddObject = {
 export type RealmsMessage = {
   realms: string[];
   objects: Record<string, unknown>[];
+  total: number;
 };
 export type ObjectsMessage = {
   objects: Array<RealmObject>;
   total: number;
-  next_cursor: { [sortingField: string]: number };
+  nextCursor: number;
   prev_cursor: { [sortingField: string]: number };
   hasMore: boolean;
 };

@@ -8,6 +8,7 @@ import {
   Events,
   Methods,
   ObjectMessage,
+  ObjectsMessage,
   RealmObject,
   RealmPluginState,
   RealmsMessage,
@@ -190,7 +191,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         query: state.query,
       })
       .then(
-        (response: RealmsMessage) => {
+        (response: ObjectsMessage) => {
           if (response.objects && !response.objects.length) {
             return;
           }
@@ -198,10 +199,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
           const state = pluginState.get();
           const nextCursor = response.nextCursor;
 
-          if (state.currentSchema.name !== schema) {
+          if (state.currentSchema?.name !== schema) {
             return;
           }
-          let objects = convertObjects(
+          const objects = convertObjects(
             response.objects,
             state.currentSchema,
             downloadData
@@ -280,7 +281,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       cursorId: null,
       sortingColumn: null,
-      sortingColumnType: state.currentSchema.properties['_id'].type,
+      sortingColumnType: state.currentSchema?.properties['_id'].type,
       query: query,
       objects: [],
     });
