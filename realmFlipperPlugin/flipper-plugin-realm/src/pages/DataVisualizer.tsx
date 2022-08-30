@@ -156,9 +156,6 @@ const DataVisualizer = ({
     const { scrollLeft, scrollTop } = event.target;
     scrollX.current = scrollLeft;
     scrollY.current = scrollTop;
-    console.log('handleScroll');
-    console.log(scrollX.current);
-    console.log(scrollY.current);
   };
 
   if (!currentSchema) {

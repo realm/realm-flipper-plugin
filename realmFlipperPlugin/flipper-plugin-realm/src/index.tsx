@@ -52,7 +52,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getCurrentQuery', () => {
     const state = pluginState.get();
     client.send('receivedCurrentQuery', {
-      schema: state.currentSchema.name,
+      schema: state.currentSchema ? state.currentSchema.name : null,
       realm: state.selectedRealm,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
@@ -198,7 +198,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm)
+    requestObjects(schema, realm, toRestore, state.cursorId)
       .then(
         (response: RealmsMessage) => {
           if (response.objects && !response.objects.length) {
