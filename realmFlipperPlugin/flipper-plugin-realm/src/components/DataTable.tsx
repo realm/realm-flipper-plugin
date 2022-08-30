@@ -36,7 +36,7 @@ type PropertyType = {
   enableSort: boolean;
   hasMore: boolean;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
-  doubleClickAction: () => Record<string, unknown>[];
+  doubleClickAction: (object: RealmObject) => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.
@@ -74,6 +74,7 @@ PropertyType) => {
   const state = useValue(instance.state);
 
   const [loading, setLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>();
   const sortableTypes = new Set([
     'string',
     'int',
@@ -82,6 +83,7 @@ PropertyType) => {
     'decimal128',
     'decimal',
     'float',
+    'bool'
   ]);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
@@ -341,6 +343,10 @@ PropertyType) => {
     }
   };
   // TODO: think about key as a property in the Realm DB
+
+  const css = `.table-row-dark {
+    background-color: #fbfbfb;
+}`;
   return (
     <div
       style={{
@@ -351,6 +357,7 @@ PropertyType) => {
         paddingBottom: '100px',
       }}
     >
+      <style>{css}</style>
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
@@ -374,17 +381,23 @@ PropertyType) => {
           sticky={true}
           bordered={true}
           dataSource={objects}
-          onRow={(object: RealmObject) => {
-            //if (doubleClickAction) {
-            return {
-              onDoubleClick: () => {
-                if (doubleClickAction) {
+          rowClassName={(record, index) => {
+            return index === selectedIndex ? 'table-row-dark' : '';
+          }}
+          onRow={(object: RealmObject, rowIndex: number) => {
+            if (doubleClickAction) {
+              return {
+                onClick: () => {
+                  setSelectedIndex(rowIndex);
                   doubleClickAction(object);
-                }
-              },
-              onClick: () => {},
-              // };
-            };
+                },
+                // onDoubleClick: () => {
+                //   if (doubleClickAction) {
+                //     doubleClickAction(object);
+                //   }
+                // },
+              };
+            }
           }}
           rowKey={(record) => {
             return record[currentSchema.primaryKey];

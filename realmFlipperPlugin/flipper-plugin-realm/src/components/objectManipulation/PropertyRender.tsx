@@ -1,4 +1,4 @@
-import { Col, Divider, Row, Tag } from 'antd';
+import { Col, Divider, Form, Row, Tag } from 'antd';
 import { Layout } from 'flipper-plugin';
 import React from 'react';
 import { SchemaProperty } from '../../CommonTypes';
@@ -57,26 +57,26 @@ export const PropertyRender = ({
 
     <>
       <Row gutter={[0, 16]}>
-        <Col>
-            {property.name}
-        </Col>
+        <Col>{property.name}</Col>
         <Col flex="auto">
           {/* <Divider type="horizontal" style={{width: '100%'}}></Divider> */}
         </Col>
         <Col>
-              <Tag color="default">{title}</Tag>
-              {!property.optional ? <Tag color="blue">required</Tag> : null}
-              {isPrimary ? <Tag color="green">primary key</Tag> : null}
-            {/* </span> */}
+          <Tag color="default">{title}</Tag>
+          {!property.optional ? <Tag color="blue">required</Tag> : null}
+          {isPrimary ? <Tag color="green">primary key</Tag> : null}
+          {/* </span> */}
         </Col>
         <Col span={24}>
-        <TypeInput
-            isPrimary={isPrimary}
-            property={property}
-            set={set}
-            defaultValue={initialValue}
-            extraProps={{ style: { width: '100%' } }}
-          />
+          <Form >
+            <TypeInput
+              isPrimary={isPrimary}
+              property={property}
+              set={set}
+              defaultValue={initialValue}
+              extraProps={{ style: { width: '100%' } }}
+            />
+          </Form>
         </Col>
       </Row>
     </>

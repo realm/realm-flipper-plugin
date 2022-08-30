@@ -171,7 +171,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     cursorId?: number | null
   ) => {
     const state = pluginState.get();
-    console.log("called with", schema, realm)
+    console.log('called with', schema, realm);
     return client.send('getObjects', {
       schema: schema ?? state.currentSchema.name,
       realm: realm ?? state.selectedRealm,
@@ -199,46 +199,54 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm, toRestore, state.cursorId)
-      .then(
-        (response: ObjectsMessage) => {
-          if (response.objects && !response.objects.length) {
-            return;
-          }
-          console.log('got objects 3:', response.objects);
-          const state = pluginState.get();
-          const nextCursor = response.nextCursor;
-
-          if (state.currentSchema?.name !== schema) {
-            return;
-          }
-          const objects = convertObjects(
-            response.objects,
-            state.currentSchema,
-            downloadData
-          );
+    requestObjects(schema, realm, toRestore, state.cursorId).then(
+      (response: ObjectsMessage) => {
+        const state = pluginState.get();
+        if (response.objects && !response.objects.length) {
           pluginState.set({
             ...state,
-            objects: [...state.objects, ...objects],
-            // filterCursor: state.sortingColumn
-            //   ? nextCursor[state.sortingColumn]
-            //   : null,
-            cursorId: nextCursor,
+            hasMore: false,
+            loading: false,
             totalObjects: response.total,
-            hasMore: response.hasMore,
-            errorMessage: '',
-            loading: false,
+            cursorId: null,
           });
-        },
-        (reason) => {
-          pluginState.set({
-            ...state,
-            errorMessage: reason.message,
-            objects: toRestore ? toRestore : [],
-            loading: false,
-          });
+          return;
         }
-      );
+        console.log('got objects 3:', response.objects);
+
+        const nextCursor = response.nextCursor;
+
+        if (state.currentSchema?.name !== schema) {
+          return;
+        }
+        console.log('response', response.hasMore);
+        const objects = convertObjects(
+          response.objects,
+          state.currentSchema,
+          downloadData
+        );
+        pluginState.set({
+          ...state,
+          objects: [...state.objects, ...objects],
+          // filterCursor: state.sortingColumn
+          //   ? nextCursor[state.sortingColumn]
+          //   : null,
+          cursorId: nextCursor,
+          totalObjects: response.total,
+          hasMore: response.hasMore,
+          errorMessage: '',
+          loading: false,
+        });
+      },
+      (reason) => {
+        pluginState.set({
+          ...state,
+          errorMessage: reason.message,
+          objects: toRestore ? toRestore : [],
+          loading: false,
+        });
+      }
+    );
   };
   const downloadData = (
     schema: string,
@@ -524,7 +532,7 @@ export function Component() {
     sortingDirection,
     sortingColumn,
     currentSchema,
-    hasMore
+    hasMore,
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
