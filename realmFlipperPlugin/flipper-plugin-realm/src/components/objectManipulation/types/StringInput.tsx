@@ -18,15 +18,6 @@ export const StringInput = ({
   return (
     <Row align="middle">
       <Col flex="auto">
-        <Form.Item
-          name={['string']}
-          rules={[
-            {
-              pattern: new RegExp(/^[a-zA-Z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+$/i),
-              message: 'Field only accepts letters',
-            },
-          ]}
-        >
           <Input
             {...extraProps}
             disabled={isPrimary}
@@ -40,7 +31,6 @@ export const StringInput = ({
             }}
             key={reset}
           />
-        </Form.Item>
       </Col>
 
       {property.optional ? (
