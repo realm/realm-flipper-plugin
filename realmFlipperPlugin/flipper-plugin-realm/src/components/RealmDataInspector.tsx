@@ -44,7 +44,7 @@ export const RealmDataInspector = ({
 }: PropertyType) => {
   if (!showSidebar || inspectionData === undefined) return null;
 
-console.log('inspectionData',inspectionData)
+  console.log('inspectionData', inspectionData);
 
   console.log('goForwardStack');
   console.log(goForwardStack);
@@ -109,23 +109,18 @@ console.log('inspectionData',inspectionData)
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
-                  let linkedSchema: SchemaObject | undefined = undefined;
-                  if (
-                    currentSchema && // The schema of the object that is currently rendered.
-                    // If the property with the current name exists.
-                    currentSchema.properties[name] &&
-                    // If the current schema contains the field objectType, i.e. it is an object.
-                    'objectType' in currentSchema.properties[name]
-                  ) {
-                    console.log(currentSchema?.properties[name].objectType);
-
-                    // Find the schema the current object belongs to.
-                    linkedSchema = schemas.find(
-                      (schema) =>
-                        schema.name ===
-                        currentSchema?.properties[name].objectType
-                    );
-                  }
+                  // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
+                  let linkedSchema: SchemaObject | undefined = schemas.find(
+                    (schema) =>
+                      schema.properties[name] && // The schema has the currently rendered property
+                      schemas.find(
+                        (
+                          innerSchema // And there is a schema that fits the objectType of that property
+                        ) =>
+                          schema.properties[name].objectType ===
+                          innerSchema.name
+                      )
+                  );
 
                   // If the current field is named objectType find the SchemaObject corresponding to its value (if there is one) and assign it to linkedSchema.
                   // Assigning inspectionData to linkedSchemaName and then traverse it using path to get the linkedSchemaName.
