@@ -97,6 +97,8 @@ const DataVisualizer = ({
         Object.keys(row).forEach((key) => {
           object[key] = row[key];
         });
+        setGoForwardStack([]);
+        setGoBackStack([]);
         handleDataInspector({
           data: {
             [schema.name]: object,
@@ -109,6 +111,8 @@ const DataVisualizer = ({
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
+        setGoForwardStack([]);
+        setGoBackStack([]);
         handleDataInspector({
           data: {
             [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
@@ -136,7 +140,7 @@ const DataVisualizer = ({
 
   /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-      generateMenuItems,
+    generateMenuItems,
     record: {},
     schemaProperty: null,
     visible: false,
