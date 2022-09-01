@@ -116,7 +116,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection} = req;
+          const {schema, sortingColumn, sortingDirection, query} = req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
             schemaToObjects,
@@ -129,7 +129,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
           if (!totalObjects) {
-            console.log("here")
+            console.log('here');
             responder.success({
               objects: [],
               total: totalObjects,
@@ -150,11 +150,14 @@ export default React.memo((props: {realms: Realm[]}) => {
           let index = objects.findIndex(
             obj => obj._objectKey() === howFarWeGot._objectKey(),
           );
+          if (query) {
+            objects = objects.filtered(query);
+          }
           objects = objects.slice(
             index === 0 ? index : index + 1,
             index + (LIMIT + 1),
           );
-          console.log('gere');
+          console.log('gere', query);
           const afterConversion = convertObjectsToDesktop(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),

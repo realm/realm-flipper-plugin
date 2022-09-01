@@ -299,7 +299,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       filterCursor: null,
       cursorId: null,
       sortingColumn: null,
-      sortingColumnType: state.currentSchema?.properties['_id'].type,
       query: query,
       objects: [],
     });
