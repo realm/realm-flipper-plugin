@@ -58,11 +58,6 @@ const DataVisualizer = ({
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
-  const handleDataInspector = (inspectionData: InspectionDataType) => {
-    showSidebar ? null : setShowSidebar(true);
-    setNewInspectionData(inspectionData);
-  };
-
   const deleteRow = (row: RealmObject) => {
     removeObject(row);
   };
@@ -97,7 +92,9 @@ const DataVisualizer = ({
         Object.keys(row).forEach((key) => {
           object[key] = row[key];
         });
-        handleDataInspector({
+        setGoForwardStack([]);
+        setGoBackStack([]);
+        setNewInspectionData({
           data: {
             [schema.name]: object,
           },
@@ -109,7 +106,9 @@ const DataVisualizer = ({
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
-        handleDataInspector({
+        setGoForwardStack([]);
+        setGoBackStack([]);
+        setNewInspectionData({
           data: {
             [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
           },
@@ -136,7 +135,7 @@ const DataVisualizer = ({
 
   /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
-      generateMenuItems,
+    generateMenuItems,
     record: {},
     schemaProperty: null,
     visible: false,
@@ -248,13 +247,12 @@ const DataVisualizer = ({
             dropdownProp={dropdownProp}
             scrollX={scrollX.current}
             scrollY={scrollY.current}
-            handleDataInspector={handleDataInspector}
+            setNewInspectionData={setNewInspectionData}
             enableSort={true}
             doubleClickAction={doubleClickAction}
           />
           <CustomDropdown {...updatedDropdownProp} />
           <RealmDataInspector
-            currentSchema={currentSchema}
             schemas={schemas}
             inspectionData={inspectionData}
             setInspectionData={setInspectionData}
@@ -273,6 +271,7 @@ const DataVisualizer = ({
 
   // update inspectionData and push object to GoBackStack
   function setNewInspectionData(newInspectionData: InspectionDataType) {
+    showSidebar ? null : setShowSidebar(true);
     if (inspectionData !== undefined) {
       goBackStack.push(inspectionData);
       setGoBackStack(goBackStack);
