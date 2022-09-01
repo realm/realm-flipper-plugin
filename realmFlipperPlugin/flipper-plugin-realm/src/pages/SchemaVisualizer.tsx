@@ -208,6 +208,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   return (
     <Layout.Container height={800}>
       <Table
+        showSorterTooltip={false}
         dataSource={rows}
         columns={columnObjs}
         size="middle"

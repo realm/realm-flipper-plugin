@@ -380,6 +380,7 @@ PropertyType) => {
         <Table
           sticky={true}
           bordered={true}
+          showSorterTooltip={false}
           dataSource={objects}
           rowClassName={(record, index) => {
             return index === selectedIndex ? 'table-row-dark' : '';
