@@ -139,31 +139,32 @@ export const RealmDataInspector = ({
 
                   // If there is a schema for the object to be rendered.
                   if (linkedSchema !== undefined) {
-                    if (name === 'objectType') {
-                      return (
-                        <>
-                          {name + ' '}
-                          <Tooltip title="Explore Schema" placement="topLeft">
-                            <Button
-                              shape="circle"
-                              type="primary"
-                              size="small"
-                              icon={<SearchOutlined />}
-                              ghost
-                              onClick={() => {
-                                console.log(linkedSchema);
-                                setNewInspectionData({
-                                  data: {
-                                    [linkedSchema.name]: linkedSchema,
-                                  },
-                                  view: 'schema',
-                                });
-                              }}
-                            />
-                          </Tooltip>
-                        </>
-                      );
-                    }
+                    // Deprecated code for inspecting schemas. Might be relevant later when implementing DataInspector into schemas tab
+                    // if (name === 'objectType') {
+                    //   return (
+                    //     <>
+                    //       {name + ' '}
+                    //       <Tooltip title="Explore Schema" placement="topLeft">
+                    //         <Button
+                    //           shape="circle"
+                    //           type="primary"
+                    //           size="small"
+                    //           icon={<SearchOutlined />}
+                    //           ghost
+                    //           onClick={() => {
+                    //             console.log(linkedSchema);
+                    //             setNewInspectionData({
+                    //               data: {
+                    //                 [linkedSchema.name]: linkedSchema,
+                    //               },
+                    //               view: 'schema',
+                    //             });
+                    //           }}
+                    //         />
+                    //       </Tooltip>
+                    //     </>
+                    //   );
+                    // }
 
                     return (
                       <>
@@ -175,7 +176,10 @@ export const RealmDataInspector = ({
                             size="small"
                             icon={<SearchOutlined />}
                             ghost
-                            onClick={() => {
+                            onClick={(event) => {
+                              // event.preventDefault()
+                              event.stopPropagation()
+                              console.log(event);
                               let object = inspectionData.data;
                               path.forEach((key) => (object = object[key]));
                               console.log(object);
