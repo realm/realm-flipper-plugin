@@ -309,15 +309,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             obj.schema,
           )[0];
 
-          // load the values to be modified
-          const newObject = {};
-          propsChanged.forEach(propName => {
-            newObject[propName] = converted[propName];
-          });
-
-          // load all the rest values from the existing realm object
-          // const primaryKey = converted[schema.primaryKey];
-          // console.log('primary key: ' + primaryKey);
           const realmObj = realm._objectForObjectKey(
             schema.name,
             obj.objectKey,
@@ -326,15 +317,11 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'Realm Object removed while editing.'});
             return;
           }
-          // console.log('keys:', Object.keys(realmObj));
-          Object.keys(schema.properties).forEach(key => {
-            if (!propsChanged.find(val => val === key)) {
-              newObject[key] = realmObj[key];
-            }
-          });
 
-          // console.error('object after modifications:', newObject);
           realm.write(() => {
+            propsChanged.forEach(propName => {
+              realmObj[propName] = converted[propName];
+            })
             realm.create(obj.schema, newObject, 'modified');
           });
           // console.log('after write', realmObj);
