@@ -35,7 +35,7 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
-  handleDataInspector: (inspectionData: InspectionDataType) => void;
+  setNewInspectionData: (inspectionData: InspectionDataType) => void;
   doubleClickAction: (object: RealmObject) => Record<string, unknown>[];
 };
 
@@ -64,7 +64,7 @@ export const DataTable = ({
   dropdownProp,
   scrollX,
   scrollY,
-  handleDataInspector,
+  setNewInspectionData,
   enableSort,
   hasMore,
   doubleClickAction,
@@ -121,7 +121,7 @@ PropertyType) => {
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() =>
-            handleDataInspector({ data: value, view: inspectorView })
+            setNewInspectionData({ data: value, view: inspectorView })
           }
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}

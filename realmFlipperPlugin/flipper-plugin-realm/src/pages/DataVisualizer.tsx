@@ -58,11 +58,6 @@ const DataVisualizer = ({
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
-  const handleDataInspector = (inspectionData: InspectionDataType) => {
-    showSidebar ? null : setShowSidebar(true);
-    setNewInspectionData(inspectionData);
-  };
-
   const deleteRow = (row: RealmObject) => {
     removeObject(row);
   };
@@ -99,7 +94,7 @@ const DataVisualizer = ({
         });
         setGoForwardStack([]);
         setGoBackStack([]);
-        handleDataInspector({
+        setNewInspectionData({
           data: {
             [schema.name]: object,
           },
@@ -113,7 +108,7 @@ const DataVisualizer = ({
       onClick: () => {
         setGoForwardStack([]);
         setGoBackStack([]);
-        handleDataInspector({
+        setNewInspectionData({
           data: {
             [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
           },
@@ -252,7 +247,7 @@ const DataVisualizer = ({
             dropdownProp={dropdownProp}
             scrollX={scrollX.current}
             scrollY={scrollY.current}
-            handleDataInspector={handleDataInspector}
+            setNewInspectionData={setNewInspectionData}
             enableSort={true}
             doubleClickAction={doubleClickAction}
           />
@@ -277,6 +272,7 @@ const DataVisualizer = ({
 
   // update inspectionData and push object to GoBackStack
   function setNewInspectionData(newInspectionData: InspectionDataType) {
+    showSidebar ? null : setShowSidebar(true);
     if (inspectionData !== undefined) {
       goBackStack.push(inspectionData);
       setGoBackStack(goBackStack);
