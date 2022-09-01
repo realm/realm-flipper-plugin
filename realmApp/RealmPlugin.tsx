@@ -293,7 +293,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           responder.success(undefined);
         });
         connection.receive('modifyObject', (obj, responder) => {
-          console.log('modify', obj);
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
@@ -321,14 +320,10 @@ export default React.memo((props: {realms: Realm[]}) => {
           realm.write(() => {
             propsChanged.forEach(propName => {
               realmObj[propName] = converted[propName];
-            })
-            realm.create(obj.schema, newObject, 'modified');
+            });
           });
-          // console.log('after write', realmObj);
-          // let objects = realm.objects(obj.schema);
-          // objects.map()
-          // connection.send('getObjects', {objects: objects});
         });
+
         connection.receive('removeObject', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
