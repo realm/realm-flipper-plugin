@@ -195,7 +195,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     requestObjects(schema, realm, toRestore, state.cursorId)
       .then(
         (response: ObjectsMessage) => {
-          console.log("response", response)
           const state = pluginState.get();
           if (response.objects && !response.objects.length) {
             pluginState.set({
@@ -207,14 +206,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
             });
             return;
           }
-          console.log('got objects 3:', response.objects);
+          console.log('got objects:', response.objects);
 
           const nextCursor = response.nextCursor;
 
           if (state.currentSchema?.name !== schema) {
             return;
           }
-          console.log('response', response.hasMore);
           const objects = convertObjects(
             response.objects,
             state.currentSchema,
@@ -241,8 +239,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
         }
       )
       .catch((error) => {
-        console.log(error);
-        console.log("ERERERERER")
         pluginState.set({
           ...state,
           errorMessage: error.message,
