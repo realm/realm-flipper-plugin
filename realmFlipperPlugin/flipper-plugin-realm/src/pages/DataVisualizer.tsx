@@ -253,7 +253,6 @@ const DataVisualizer = ({
           />
           <CustomDropdown {...updatedDropdownProp} />
           <RealmDataInspector
-            currentSchema={currentSchema}
             schemas={schemas}
             inspectionData={inspectionData}
             setInspectionData={setInspectionData}
