@@ -6,7 +6,7 @@ import {
   convertObjectsToDesktop,
 } from './ConvertFunctions';
 import {Listener} from './Listener';
-import {Query} from './Query';
+
 const {BSON} = Realm;
 // config: Configuration,
 //     realms: Realm[],
@@ -151,7 +151,15 @@ export default React.memo((props: {realms: Realm[]}) => {
             obj => obj._objectKey() === howFarWeGot._objectKey(),
           );
           if (query) {
-            objects = objects.filtered(query);
+            try {
+              objects = objects.filtered(query);
+            } catch (e) {
+              console.log('error, returning:', e.message);
+              responder.error({
+                message: e.message,
+              });
+              return;
+            }
           }
           objects = objects.slice(
             index === 0 ? index : index + 1,

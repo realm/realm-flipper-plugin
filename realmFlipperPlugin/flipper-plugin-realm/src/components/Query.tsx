@@ -45,6 +45,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
     <>
       {state.get().errorMessage ? (
         <Alert
+          style={{marginTop: 6, marginBottom: 8}}
           message="Error"
           description={state.get().errorMessage}
           type="error"

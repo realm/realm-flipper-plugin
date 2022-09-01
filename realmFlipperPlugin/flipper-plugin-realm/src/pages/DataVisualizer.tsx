@@ -179,20 +179,7 @@ const DataVisualizer = ({
   };
 
   const columns = schemaObjToColumns(currentSchema);
-
-  const errorMessage = state.get().errorMessage;
   return (
-    <>
-      {errorMessage ? (
-        <Alert
-          message={errorMessage}
-          type="error"
-          closable
-          onClose={() => {
-            clearError();
-          }}
-        ></Alert>
-      ) : null}
       <div
         onScroll={handleScroll}
         style={{
@@ -268,7 +255,6 @@ const DataVisualizer = ({
           />
         </div>
       </div>
-    </>
   );
 
   // update inspectionData and push object to GoBackStack

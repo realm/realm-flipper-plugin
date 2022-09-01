@@ -25,6 +25,7 @@ export const ObjectInput = ({
   const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState([]);
   const [hasMore, setHasMore] = useState(false);
+  const [cursorId, setCursorId] = useState(null);
 
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
@@ -94,8 +95,9 @@ export const ObjectInput = ({
         .requestObjects(targetSchema.name, selectedRealm, null)
         .then((response) => {
           console.log('recevied', response);
-          setObjects(response.objects)
+          setObjects(response.objects);
           setHasMore(response.hasMore);
+          setCursorId(response.nextCursor);
         });
     };
 

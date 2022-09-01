@@ -199,54 +199,67 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm, toRestore, state.cursorId).then(
-      (response: ObjectsMessage) => {
-        const state = pluginState.get();
-        if (response.objects && !response.objects.length) {
+    requestObjects(schema, realm, toRestore, state.cursorId)
+      .then(
+        (response: ObjectsMessage) => {
+          console.log("response", response)
+          const state = pluginState.get();
+          if (response.objects && !response.objects.length) {
+            pluginState.set({
+              ...state,
+              hasMore: false,
+              loading: false,
+              totalObjects: response.total,
+              cursorId: null,
+            });
+            return;
+          }
+          console.log('got objects 3:', response.objects);
+
+          const nextCursor = response.nextCursor;
+
+          if (state.currentSchema?.name !== schema) {
+            return;
+          }
+          console.log('response', response.hasMore);
+          const objects = convertObjects(
+            response.objects,
+            state.currentSchema,
+            downloadData
+          );
           pluginState.set({
             ...state,
-            hasMore: false,
-            loading: false,
+            objects: [...state.objects, ...objects],
+            // filterCursor: state.sortingColumn
+            //   ? nextCursor[state.sortingColumn]
+            //   : null,
+            cursorId: nextCursor,
             totalObjects: response.total,
-            cursorId: null,
+            hasMore: response.hasMore,
+            errorMessage: '',
+            loading: false,
           });
-          return;
+        },
+        (reason) => {
+          console.log(reason)
+          pluginState.set({
+            ...state,
+            errorMessage: reason.message,
+            objects:  [],
+            loading: false,
+          });
         }
-        console.log('got objects 3:', response.objects);
-
-        const nextCursor = response.nextCursor;
-
-        if (state.currentSchema?.name !== schema) {
-          return;
-        }
-        console.log('response', response.hasMore);
-        const objects = convertObjects(
-          response.objects,
-          state.currentSchema,
-          downloadData
-        );
+      )
+      .catch((error) => {
+        console.log(error);
+        console.log("ERERERERER")
         pluginState.set({
           ...state,
-          objects: [...state.objects, ...objects],
-          // filterCursor: state.sortingColumn
-          //   ? nextCursor[state.sortingColumn]
-          //   : null,
-          cursorId: nextCursor,
-          totalObjects: response.total,
-          hasMore: response.hasMore,
-          errorMessage: '',
+          errorMessage: error.message,
+          objects: [],
           loading: false,
         });
-      },
-      (reason) => {
-        pluginState.set({
-          ...state,
-          errorMessage: reason.message,
-          objects: toRestore ? toRestore : [],
-          loading: false,
-        });
-      }
-    );
+      });
   };
   const downloadData = (
     schema: string,
@@ -302,7 +315,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       query: query,
       objects: [],
     });
-    getObjects(state.currentSchema?.name, state.selectedRealm, prevObjects);
+    getObjects();
   };
 
   const addObject = (object: Record<string, unknown>) => {

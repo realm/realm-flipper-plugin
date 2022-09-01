@@ -77,16 +77,7 @@ export const RealmQueryLanguage = ({ schema, renderOptions }: PropsType) => {
   };
 
   return (
-    <>
-      {errorMessage ? (
-        <Alert
-          message="Error"
-          description={errorMessage}
-          type="error"
-          showIcon
-          banner
-        />
-      ) : null}
+
       <Layout.Container grow style={{ minHeight: '500px' }}>
         <Row>
           <Col flex="auto">
