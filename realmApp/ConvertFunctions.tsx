@@ -30,7 +30,7 @@ const convertObjectToDesktop = (
     }
     if (property.type === 'data') {
       return {
-        $binaryData: value.byteLength,
+        $binaryData: value?.byteLength, //TODO: inside of "Maybe" schema, value is null which throws an error
       };
     }
     if (property.type === 'mixed') {

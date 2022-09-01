@@ -35,12 +35,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemaHistory: [],
     schemaHistoryIndex: 0,
     cursorId: null,
-    filterCursor: 0,
     totalObjects: 0,
     sortingColumn: null,
     sortingDirection: null,
     hasMore: false,
-    sortingColumnType: null,
     currentSchema: null,
     loading: false,
     query: '',
@@ -102,9 +100,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
       cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
     });
   });
 
@@ -176,9 +171,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       schema: schema ?? state.currentSchema.name,
       realm: realm ?? state.selectedRealm,
       cursorId: cursorId,
-      filterCursor: state.filterCursor,
       sortingColumn: state.sortingColumn,
-      sortingColumnType: state.sortingColumnType,
       sortingDirection: state.sortingDirection,
       query: state.query,
     });
@@ -230,9 +223,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
           pluginState.set({
             ...state,
             objects: [...state.objects, ...objects],
-            // filterCursor: state.sortingColumn
-            //   ? nextCursor[state.sortingColumn]
-            //   : null,
             cursorId: nextCursor,
             totalObjects: response.total,
             hasMore: response.hasMore,
@@ -309,7 +299,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const prevObjects = Array.from(state.objects);
     pluginState.set({
       ...state,
-      filterCursor: null,
       cursorId: null,
       sortingColumn: null,
       query: query,
@@ -355,12 +344,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
-      filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
-      sortingColumnType: schema.properties['_id'].type,
       query: '',
       errorMessage: '',
     });
@@ -371,11 +358,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
-      filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -385,11 +370,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
-      filterCursor: null,
       cursorId: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -400,7 +383,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       selectedRealm: realm,
       objects: [],
-      filterCursor: null,
       cursorId: null,
     });
   };
@@ -457,17 +439,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const setSortingColumnAndType = (
     sortingColumn: string | null,
-    sortingColumnType: string | null
   ) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
       sortingColumn: sortingColumn,
-      sortingColumnType: sortingColumnType
-        ? sortingColumnType
-        : state.currentSchema?.properties['_id'].type,
-      filterCursor: null,
       cursorId: null,
     });
   };
@@ -487,7 +464,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       sortingDirection: newSortingDirection,
-      filterCursor: null,
       cursorId: null,
       objects: [],
     });

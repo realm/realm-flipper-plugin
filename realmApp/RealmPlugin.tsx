@@ -21,11 +21,9 @@ type getObjectsQuery = {
   schema: string;
   realm: string;
   cursorId: number;
-  filterCursor: number | string;
   limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
-  sortingColumnType: string;
 };
 
 const modifyObject = (object: any, schemaName: string, realm: Realm) => {
@@ -116,7 +114,8 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, query} = req;
+          const {schema, sortingColumn, sortingDirection, query, cursorId} =
+            req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
             schemaToObjects,
@@ -128,8 +127,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
-          if (!totalObjects) {
-            console.log('here');
+          if (!totalObjects || objects.isEmpty()) {
             responder.success({
               objects: [],
               total: totalObjects,
@@ -138,17 +136,17 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          let cursorId = null;
+          let queryCursorId = null;
           const LIMIT = 50;
           const shouldSortDescending = sortingDirection === 'descend';
-          cursorId = req.cursorId ?? objects[0]._objectKey();
+          queryCursorId = cursorId ?? objects[0]._objectKey();
           if (sortingColumn) {
             objects = objects.sorted(sortingColumn, shouldSortDescending);
-            cursorId = req.cursorId ?? objects[0]._objectKey();
+            queryCursorId = cursorId ?? objects[0]._objectKey();
           }
-          let howFarWeGot = realm._objectForObjectKey(schema, String(cursorId));
-          let index = objects.findIndex(
-            obj => obj._objectKey() === howFarWeGot._objectKey(),
+          const lastObject = realm._objectForObjectKey(schema, queryCursorId);
+          let indexOfLastObject = objects.findIndex(
+            obj => obj._objectKey() === lastObject._objectKey(),
           );
           if (query) {
             try {
@@ -162,15 +160,13 @@ export default React.memo((props: {realms: Realm[]}) => {
             }
           }
           objects = objects.slice(
-            index === 0 ? index : index + 1,
-            index + (LIMIT + 1),
+            indexOfLastObject === 0 ? indexOfLastObject : indexOfLastObject + 1,
+            indexOfLastObject + (LIMIT + 1),
           );
-          console.log('gere', query);
           const afterConversion = convertObjectsToDesktop(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),
           );
-          console.log('sending back!');
           responder.success({
             objects: afterConversion,
             total: totalObjects,
