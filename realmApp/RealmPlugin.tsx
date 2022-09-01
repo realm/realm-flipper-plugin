@@ -99,6 +99,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             obj.sortingColumn,
             obj.sortingDirection,
             connection,
+            realm.schema,
           );
           listenerHandler.handleAddListener();
         });
@@ -125,6 +126,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             sortingColumn,
             sortingDirection,
             connection,
+            realm.schema,
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;

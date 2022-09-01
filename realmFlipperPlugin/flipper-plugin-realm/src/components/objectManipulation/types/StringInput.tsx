@@ -20,12 +20,12 @@ export const StringInput = ({
       <Col flex="auto">
         <Form.Item
           name={['string']}
-          rules={[
-            {
-              pattern: new RegExp(/^[a-zA-Z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+$/i),
-              message: 'Field only accepts letters',
-            },
-          ]}
+          // rules={[
+          //   {
+          //     pattern: new RegExp(/^[a-zA-Z@~`!@#$%^&*()_=+\\\\';:\"\\/?>.<,-]+$/i),
+          //     message: 'Field only accepts letters',
+          //   },
+          // ]}
         >
           <Input
             {...extraProps}

@@ -61,14 +61,15 @@ const realm = new Realm({
     NoPrimaryKey,
     DictSchema,
     SetsSchema,
-    Parcel,
-    ParcelService,
-    Delivery,
-    MailCarrier,
     DataSchema,
   ],
   path: 'main',
   schemaVersion: 37,
+});
+
+const realm2 = new Realm({
+  schema: [Parcel, ParcelService, Delivery, MailCarrier],
+  schemaVersion: 7,
 });
 
 //realmPlugin.newfunc();
@@ -152,7 +153,7 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <RealmPlugin realms={[realm]} />
+      <RealmPlugin realms={[realm, realm2]} />
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"

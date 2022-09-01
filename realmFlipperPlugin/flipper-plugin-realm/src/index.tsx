@@ -94,8 +94,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (schema != state.currentSchema?.name) {
       return;
     }
+    // const newObjects = convertObjects(state.objects, state.currentSchema, downloadData);
     const newObjects = state.objects;
-    newObjects.splice(index, 0, newObject);
+    const addedObject = convertObjects([newObject], state.currentSchema, downloadData)[0];
+    newObjects.splice(index, 0, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -136,7 +138,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     console.log('editing', newObject, index);
     const newObjects = state.objects;
-    newObjects.splice(index, 1, newObject);
+    const addedObject = convertObjects([newObject], state.currentSchema, downloadData)[0];
+    newObjects.splice(index, 1, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -440,6 +443,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: schema.name,
       object: object,
+      objectKey: object._objectKey,
     });
   };
 
@@ -533,6 +537,7 @@ export function Component() {
     sortingColumn,
     currentSchema,
     hasMore,
+    selectedRealm,
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
@@ -567,7 +572,7 @@ export function Component() {
       ) : null}
       {/* {viewMode === 'RQL' ? <></> : null} */}
       {viewMode === 'schemaGraph' ? (
-        <SchemaGraph schemas={schemas}></SchemaGraph>
+        <SchemaGraph schemas={schemas} selectedRealm={selectedRealm}></SchemaGraph>
       ) : null}
     </>
   );
