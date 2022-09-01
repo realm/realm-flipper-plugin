@@ -62,6 +62,7 @@ export class Listener {
           newObject: inserted,
           index: index,
           schema: this.schema,
+          newObjectKey: inserted._objectKey(),
         });
         this.connection.send('getCurrentQuery');
       }
@@ -74,6 +75,7 @@ export class Listener {
           newObject: modified,
           index: index,
           schema: this.schema,
+          newObjectKey: modified._objectKey(),
         });
         this.connection.send('getCurrentQuery');
       }

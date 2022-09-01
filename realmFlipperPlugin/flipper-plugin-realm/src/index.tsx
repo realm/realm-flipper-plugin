@@ -88,18 +88,28 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     console.log('Added');
     const state = pluginState.get();
-    const { newObject, index, schema } = data;
+    const { newObject, index, schema, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
+    if (index > state.objects.length) {
+      return;
+    }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
+    const object = convertObjects(
+      [clone],
+      state.currentSchema,
+      downloadData
+    )[0];
     const newObjects = state.objects;
-    newObjects.splice(index, 0, newObject);
+    newObjects.splice(index, 0, object);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
-      totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
+      totalObjects: state.totalObjects + 1,
+      cursorId: newLastObject._objectKey,
     });
   });
 
@@ -110,33 +120,45 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (schema != state.currentSchema?.name) {
       return;
     }
+    if (index > state.objects.length) {
+      return;
+    }
     const newObjects = state.objects;
     newObjects.splice(index, 1);
-    //find out case where last index is deleted
-    console.log('after', newObjects);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._objectKey,
     });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     console.log('EDIT');
     const state = pluginState.get();
-    const { index, schema, newObject } = data;
+    const { index, schema, newObject, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
-    console.log('editing', newObject, index);
+    if (index > state.objects.length) {
+      return;
+    }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
+    const object = convertObjects(
+      [clone],
+      state.currentSchema,
+      downloadData
+    )[0];
     const newObjects = state.objects;
-    newObjects.splice(index, 1, newObject);
+    newObjects.splice(index, 1, object);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
+      cursorId: newLastObject._objectKey,
     });
   });
 
@@ -206,7 +228,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
             });
             return;
           }
-          console.log('got objects:', response.objects);
+          console.log('got objects:', response);
 
           const nextCursor = response.nextCursor;
 
@@ -229,11 +251,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
           });
         },
         (reason) => {
-          console.log(reason)
+          console.log(reason);
           pluginState.set({
             ...state,
             errorMessage: reason.message,
-            objects:  [],
+            objects: [],
             loading: false,
           });
         }
@@ -433,9 +455,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumnAndType = (
-    sortingColumn: string | null,
-  ) => {
+  const setSortingColumnAndType = (sortingColumn: string | null) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
