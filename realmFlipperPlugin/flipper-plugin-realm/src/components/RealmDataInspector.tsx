@@ -6,7 +6,7 @@ import {
 } from '@ant-design/icons';
 import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RealmObject, SchemaObject } from '../CommonTypes';
 import { BoldSpan } from './SchemaSelect';
 
@@ -16,7 +16,6 @@ export type InspectionDataType = {
 };
 
 type PropertyType = {
-  currentSchema: SchemaObject;
   schemas: SchemaObject[];
   inspectionData: InspectionDataType;
   setInspectionData: (value: RealmObject) => void;
@@ -30,7 +29,6 @@ type PropertyType = {
 };
 
 export const RealmDataInspector = ({
-  currentSchema,
   schemas,
   inspectionData,
   setInspectionData,
@@ -51,11 +49,30 @@ export const RealmDataInspector = ({
   console.log('goBackStack');
   console.log(goBackStack);
 
+  const [flickering, setFlickering] = useState(false);
+
+  const doFlicker = () => {
+    setFlickering(true);
+    setTimeout(() => setFlickering(false), 10);
+  };
+
+  useEffect(doFlicker, [inspectionData]);
+
+  const flickerStyle = {
+    backgroundColor: flickering ? '#6932c9' : 'transparent',
+  };
+
   return (
     <DetailSidebar>
-      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
-        <Layout>
-          <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+      <Space
+        direction="vertical"
+        size="middle"
+        style={flickerStyle}
+      >
+        <Layout
+          style={flickerStyle}
+        >
+          <Space direction="vertical" size="middle" style={{ display: 'flex', ...flickerStyle }}>
             <Row gutter={16}>
               <Col span={24} offset={1}>
                 <BoldSpan>
@@ -101,13 +118,18 @@ export const RealmDataInspector = ({
           </Space>
         </Layout>
 
-        <Layout>
+        <Layout
+          style={flickerStyle}
+        >
           <Row>
             <Col offset={1} span={22}>
               <DataInspector
                 data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
+                style={{
+                  backgroundColor: flickering ? '#6932c9' : 'transparent',
+                }}
                 onRenderName={(path, name) => {
                   // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
                   let linkedSchema: SchemaObject | undefined = schemas.find(
@@ -178,7 +200,7 @@ export const RealmDataInspector = ({
                             ghost
                             onClick={(event) => {
                               // event.preventDefault()
-                              event.stopPropagation()
+                              event.stopPropagation();
                               console.log(event);
                               let object = inspectionData.data;
                               path.forEach((key) => (object = object[key]));
