@@ -21,10 +21,12 @@ export const IntInput = ({
 
   console.log('rendering intinput, value:', value);
   const onChange = (value: number) => {
+    console.log('onChange', value);
     if (property.type === 'int' && !Number.isInteger(value)) {
       return;
     }
     set(value);
+    setValue(value);
     setReset((v) => v + 1);
   };
 

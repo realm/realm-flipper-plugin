@@ -5,7 +5,7 @@ import { RealmObject, SchemaObject } from '../CommonTypes';
 const convertObject = (
   object: RealmObject,
   schema: SchemaObject,
-  downloadData: (schema: string, primaryKey: unknown, propertyName: string) => Promise<Uint8Array>,
+  downloadData: (schema: string, objectKey: string, propertyName: string) => Promise<Uint8Array>,
 ) => {
   const properties = schema.properties;
   const newObj = {};

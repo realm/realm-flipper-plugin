@@ -60,6 +60,8 @@ export const getDefault = (property: TypeDescription) => {
       return new Object();
     case 'objectId':
       return new ObjectId();
+    case 'data':
+      return [];
     default:
       return null;
   }
@@ -89,7 +91,6 @@ export const TypeInput = (props: TypeInputProps) => {
       return <DecimalInput {...props} />;
     case 'data':
       return <DataInput {...props} />;
-      // return <>Not yet implemented.</>
     case 'dictionary':
       return <DictionaryInput {...props} />;
     case 'objectId':
