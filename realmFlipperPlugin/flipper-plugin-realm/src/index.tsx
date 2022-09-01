@@ -537,6 +537,7 @@ export function Component() {
     sortingColumn,
     currentSchema,
     hasMore,
+    totalObjects
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
@@ -558,6 +559,7 @@ export function Component() {
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
+          totalObjects={totalObjects}
         />
       ) : null}
       {viewMode === 'schemas' ? (

@@ -57,13 +57,13 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           }}
         />
       ) : null}
-      <Row gutter={[2, 0]} align="middle">
+      <Row style={{padding: 10}} gutter={[2, 0]} align="middle">
         <Col>
           <Checkbox
             defaultChecked
             onChange={() => setShowSuggestions((v) => !v)}
           >
-            History
+            Query History
           </Checkbox>
         </Col>
         <Col>

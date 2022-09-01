@@ -40,7 +40,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
 
   return (
     <Layout.Horizontal
-      style={{ justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
+      style={{ padding: 7, justifyContent: 'right', marginLeft: 'auto', marginRight: 7 }}
     >
       <Radio.Group>
         <Radio.Button type="primary" onClick={showModal}>
