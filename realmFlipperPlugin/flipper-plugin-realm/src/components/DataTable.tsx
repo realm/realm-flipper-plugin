@@ -181,7 +181,7 @@ PropertyType) => {
               size="small"
               icon={<EnterOutlined />}
               onClick={(event) => {
-                event.stopPropagation()
+                event.stopPropagation();
                 expandRow(
                   row[currentSchema.primaryKey],
                   linkedSchema,
@@ -259,26 +259,26 @@ PropertyType) => {
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
-      const newRowExpansionProp = {
-        ...rowExpansionProp,
-        expandedRowKeys: [rowToExpandKey],
-        expandedRowRender: () => {
-          return (
-            <NestedTable
-              columns={schemaObjToColumns(linkedSchema)}
-              objects={[objectToRender]}
-              schemas={schemas}
-              currentSchema={linkedSchema}
-              sortingColumn={null}
-              hasMore={hasMore}
-              generateMenuItems={generateMenuItems}
-              setdropdownProp={setdropdownProp}
-              dropdownProp={dropdownProp}
-            />
-          );
-        },
-      };
-      setRowExpansionProp(newRowExpansionProp);
+    const newRowExpansionProp = {
+      ...rowExpansionProp,
+      expandedRowKeys: [rowToExpandKey],
+      expandedRowRender: () => {
+        return (
+          <NestedTable
+            columns={schemaObjToColumns(linkedSchema)}
+            objects={[objectToRender]}
+            schemas={schemas}
+            currentSchema={linkedSchema}
+            sortingColumn={null}
+            hasMore={hasMore}
+            generateMenuItems={generateMenuItems}
+            setdropdownProp={setdropdownProp}
+            dropdownProp={dropdownProp}
+          />
+        );
+      },
+    };
+    setRowExpansionProp(newRowExpansionProp);
   };
 
   const handleInfiniteOnLoad = () => {
