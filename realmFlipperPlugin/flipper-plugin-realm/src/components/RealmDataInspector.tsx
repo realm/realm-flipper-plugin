@@ -42,13 +42,6 @@ export const RealmDataInspector = ({
 }: PropertyType) => {
   if (!showSidebar || inspectionData === undefined) return null;
 
-  console.log('inspectionData', inspectionData);
-
-  console.log('goForwardStack');
-  console.log(goForwardStack);
-  console.log('goBackStack');
-  console.log(goBackStack);
-
   const [flickering, setFlickering] = useState(false);
 
   const doFlicker = () => {
@@ -174,7 +167,6 @@ export const RealmDataInspector = ({
                     //           icon={<SearchOutlined />}
                     //           ghost
                     //           onClick={() => {
-                    //             console.log(linkedSchema);
                     //             setNewInspectionData({
                     //               data: {
                     //                 [linkedSchema.name]: linkedSchema,
@@ -201,10 +193,8 @@ export const RealmDataInspector = ({
                             onClick={(event) => {
                               // event.preventDefault()
                               event.stopPropagation();
-                              console.log(event);
                               let object = inspectionData.data;
                               path.forEach((key) => (object = object[key]));
-                              console.log(object);
                               setNewInspectionData({
                                 data: {
                                   [linkedSchema.name]: object,
@@ -238,12 +228,6 @@ export const RealmDataInspector = ({
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
-    console.log('goForwardStack');
-
-    console.log(goForwardStack);
-    console.log('goBackStack');
-
-    console.log(goBackStack);
   }
 
   function goForwardInspector() {
@@ -254,11 +238,5 @@ export const RealmDataInspector = ({
     }
     setGoForwardStack(goForwardStack);
     setGoBackStack(goBackStack);
-    console.log('goForwardStack');
-
-    console.log(goForwardStack);
-    console.log('goBackStack');
-
-    console.log(goBackStack);
   }
 };

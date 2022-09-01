@@ -2,7 +2,7 @@ import { EnterOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
@@ -83,7 +83,7 @@ PropertyType) => {
     'decimal128',
     'decimal',
     'float',
-    'bool'
+    'bool',
   ]);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
@@ -94,6 +94,16 @@ PropertyType) => {
     expandedRowKeys: [],
     showExpandColumn: false,
   });
+
+  /** Hook to close the nested Table when clicked outside of it. */
+  useEffect(() => {
+    console.log('aaaaa');
+    const closeNestedTable = () => {
+      setRowExpansionProp({ ...rowExpansionProp, expandedRowKeys: [] });
+    };
+    document.body.addEventListener('click', closeNestedTable);
+    return () => document.body.removeEventListener('click', closeNestedTable);
+  }, []);
 
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -170,13 +180,14 @@ PropertyType) => {
               type="primary"
               size="small"
               icon={<EnterOutlined />}
-              onClick={() =>
+              onClick={(event) => {
+                event.stopPropagation()
                 expandRow(
                   row[currentSchema.primaryKey],
                   linkedSchema,
                   value as RealmObject
-                )
-              }
+                );
+              }}
               ghost
             />
             {
@@ -248,20 +259,6 @@ PropertyType) => {
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
-    console.log('objectToRender', objectToRender);
-
-    // const fetchedObject = await getLinkedObject(
-    //   linkedSchema.name,
-    //   objectToRender[linkedSchema.primaryKey]
-    // );
-
-    // console.log('fetchedObject', fetchedObject);
-
-    if (
-      !rowExpansionProp.expandedRowKeys.find(
-        (rowKey) => rowKey === rowToExpandKey
-      )
-    ) {
       const newRowExpansionProp = {
         ...rowExpansionProp,
         expandedRowKeys: [rowToExpandKey],
@@ -282,28 +279,6 @@ PropertyType) => {
         },
       };
       setRowExpansionProp(newRowExpansionProp);
-    } else {
-      const newRowExpansionProp = {
-        ...rowExpansionProp,
-        expandedRowKeys: [],
-        expandedRowRender: () => {
-          return (
-            <NestedTable
-              columns={schemaObjToColumns(linkedSchema)}
-              objects={[objectToRender]}
-              schemas={schemas}
-              currentSchema={linkedSchema}
-              sortingColumn={null}
-              hasMore={hasMore}
-              generateMenuItems={generateMenuItems}
-              setdropdownProp={setdropdownProp}
-              dropdownProp={dropdownProp}
-            />
-          );
-        },
-      };
-      setRowExpansionProp(newRowExpansionProp);
-    }
   };
 
   const handleInfiniteOnLoad = () => {
