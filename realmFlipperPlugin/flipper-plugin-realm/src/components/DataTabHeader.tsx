@@ -18,7 +18,7 @@ export const DataTabHeader = ({ currentSchema, totalObjects }: InputType) => {
       <Col span={24}>
         <RealmQueryInput execute={executeQuery} />
       </Col>
-      <Typography.Text
+      {currentSchema ?<Typography.Text
         style={{
           padding: 10,
           fontWeight: 500,
@@ -27,7 +27,7 @@ export const DataTabHeader = ({ currentSchema, totalObjects }: InputType) => {
         }}
       >
         {totalObjects} {currentSchema.name} objects
-      </Typography.Text>
+      </Typography.Text> : null}
       <ObjectAdd schema={currentSchema} />
     </Row>
   );

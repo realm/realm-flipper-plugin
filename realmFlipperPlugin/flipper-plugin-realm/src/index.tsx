@@ -494,8 +494,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const refreshState = () => {
-    //refresh
+    const state = pluginState.get()
+    pluginState.set({
+      ...state,
+      cursorId: null,
+      sortingColumn: null,
+      sortingDirection: null,
+      loading: false,
+      query: '',
+      errorMessage: '',
+      objects: []    
+    });
+    getObjects();
   };
+  
 
   const clearError = () => {
     const state = pluginState.get();
