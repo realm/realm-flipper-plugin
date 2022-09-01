@@ -53,7 +53,7 @@ export const RealmDataInspector = ({
 
   const doFlicker = () => {
     setFlickering(true);
-    setTimeout(() => setFlickering(false), 10);
+    setTimeout(() => setFlickering(false), 5);
   };
 
   useEffect(doFlicker, [inspectionData]);
