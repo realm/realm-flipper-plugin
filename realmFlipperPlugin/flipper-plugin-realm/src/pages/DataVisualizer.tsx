@@ -43,6 +43,7 @@ const DataVisualizer = ({
   fetchMore,
   handleDataInspector,
 }: PropertyType) => {
+  /** Hooks to manage the state of the DataInspector and open/close the sidebar. */
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<InspectionDataType>>([]);
@@ -50,6 +51,7 @@ const DataVisualizer = ({
     Array<InspectionDataType>
   >([]);
 
+  /** Hook to open/close the editing dialog and set its properties. */
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
     object?: unknown;
@@ -59,17 +61,17 @@ const DataVisualizer = ({
   }>({
     editing: false,
   });
-
   const pluginState = usePlugin(plugin);
   const { removeObject, getOneObject, state, clearError } = pluginState;
 
+  /** refs to keep track of the current scrolling position for the context menu */
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
+  /** Functions for deleting and editing rows/objects */
   const deleteRow = (row: RealmObject) => {
     removeObject(row);
   };
-
   const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
     setEditingObject({
       editing: true,
@@ -185,7 +187,6 @@ const DataVisualizer = ({
     scrollY: scrollY.current,
   };
 
-  const columns = schemaObjToColumns(currentSchema);
   return (
     <div
       onScroll={handleScroll}
@@ -229,7 +230,7 @@ const DataVisualizer = ({
           />
         ) : null}
         <DataTable
-          columns={columns}
+          columns={schemaObjToColumns(currentSchema)}
           objects={objects}
           schemas={schemas}
           hasMore={hasMore}
