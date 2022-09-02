@@ -36,6 +36,10 @@ The function render() inside the antdColumns contains the logic defining how eac
 
 A special functionality of the antd table are [expandable rows](https://ant.design/components/table/#components-table-demo-expand) to render extra content underneath. In the DataTable this feature is used for traversing linked objects by rendering a nested table underneath the respective row. This behaviour is handled by setting the 'expandable' property of the antd table. For this a useState hook ([rowExpansionProp, setRowExpansionProp]) is used which is updated when the button for expanding a row is clicked or the nested table is closed by clicking outside of it.
 
+### Querying
+
+The query functionality is implemented into the DataTabHeader ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx)) by the RealmQueryInput component ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/Query.tsx)). It makes use of the executeQuery() function in the plugin API to execute the entered query. The result of the query is saved by updating the state. If an error occurs, it is propagated to the user using an alert.
+
 ### Dropdown Menu
 
 The dropdown menu is rendered inside the DataVisualizer. The component CustomDropdown ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/CustomDropdown.tsx)) defines a generic dropdown. Its menu items are specified using a property. The dropdown is opened in the DataTable inside the onCell property of the antdColumns and closed in the DataInspector by listening to a click event.
@@ -51,6 +55,11 @@ The RealmDataInspector ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/co
 
 Note:
 A usage example of the DataInspector can be found [here](https://fbflipper.com/docs/tutorial/js-custom/). During the development of this proof-of-concept the DataInspector was not documented on the Flipper website. In the future it might get documented [here](https://fbflipper.com/docs/extending/flipper-plugin/#datainspector).
+
+## SchemaVisualizer
+
+## SchemaGraph
+
 
 # Mobile Plugin
 
