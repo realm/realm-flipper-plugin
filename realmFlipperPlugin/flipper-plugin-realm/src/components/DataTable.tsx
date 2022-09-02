@@ -41,6 +41,13 @@ type PropertyType = {
   clickAction?: (object: RealmObject) => Record<string, unknown>[];
 };
 
+type ClickableTextType = {
+  displayText: string;
+  addThreeDots: boolean;
+  value: Record<string, unknown>;
+  inspectorView: 'object' | 'property';
+};
+
 // Receives a schema and returns column objects for the table.
 export const schemaObjToColumns = (schema: SchemaObject): ColumnType[] => {
   return schema.order.map((propertyName) => {
@@ -91,14 +98,12 @@ PropertyType) => {
     expandedRowRender: () => {
       return;
     },
-    // expandIcon: () => null,
     expandedRowKeys: [],
     showExpandColumn: false,
   });
 
   /** Hook to close the nested Table when clicked outside of it. */
   useEffect(() => {
-    console.log('aaaaa');
     const closeNestedTable = () => {
       setRowExpansionProp({ ...rowExpansionProp, expandedRowKeys: [] });
     };
@@ -110,13 +115,7 @@ PropertyType) => {
     return <Layout.Container>Please select schema.</Layout.Container>;
   }
 
-  type ClickableTextType = {
-    displayText: string;
-    addThreeDots: boolean;
-    value: Record<string, unknown>;
-    inspectorView: 'object' | 'property';
-  };
-
+  /**  Functional component to render clickable text which opens the DataInspector.*/
   const ClickableText = ({
     displayText,
     addThreeDots,
@@ -152,12 +151,14 @@ PropertyType) => {
     );
   };
 
-  const filledColumns = columns.map((column) => {
+  /** Definition of antd-specific columns. This constant is passed to the antd table as a property. */
+  const antdColumns = columns.map((column) => {
     const property: SchemaProperty = currentSchema.properties[column.name];
 
     /*  A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: unknown, row: RealmObject) => {
+      /** Apply the renderValue function on the value in the cell to create a standard cell. */
       const cellValue: string | number | JSX.Element = renderValue(
         value,
         property,
@@ -167,6 +168,8 @@ PropertyType) => {
       const linkedSchema = schemas.find(
         (schema) => schema.name === property.objectType
       );
+
+      /** Render buttons to expand the row and a clickable text if the cell contains a linked Realm object. */
       if (value !== null && linkedSchema && property.type === 'object') {
         return (
           <Layout.Container
@@ -203,6 +206,7 @@ PropertyType) => {
         );
       }
 
+      /** If the cell contains a string which is too long cut it off and render it as a clickable text. */
       if (typeof cellValue === 'string' && cellValue.length > 70) {
         return (
           <ClickableText
@@ -217,16 +221,24 @@ PropertyType) => {
     };
 
     return {
+      /** Simple antd table props defined in their documentation */
       minWidth: 20000,
-      title: createTitle(column),
       key: property.name,
       dataIndex: property.name,
       width: 300,
       ellipsis: {
         showTitle: false,
       },
-      property,
+
+      /** The title appearing in the tables title row. */
+      title: createTitle(column),
+
+      /** The function that defines how each cell is rendered. */
       render,
+
+      property,
+
+      /** The function listening for onCell events, here listening for left-clicks on the cell to render the context menu.*/
       onCell: (object: RealmObject) => {
         if (generateMenuItems) {
           return {
@@ -249,12 +261,17 @@ PropertyType) => {
           };
         }
       },
+
+      /** Enabling/Disabling sorting if the property.type is a sortable type */
       sorter: enableSort && sortableTypes.has(property.type), //TODO: false if object, list, set
+
+      /** Defining the sorting order. */
       sortOrder:
         state.sortingColumn === property.name ? state.sortingDirection : null,
     };
   });
 
+  /** Updating the rowExpansion property of the antd table to expand the correct row and render a nested table inside of it. */
   const expandRow = (
     rowToExpandKey: any,
     linkedSchema: SchemaObject,
@@ -282,6 +299,7 @@ PropertyType) => {
     setRowExpansionProp(newRowExpansionProp);
   };
 
+  /** Loading new objects if the end of the table is reached. */
   const handleInfiniteOnLoad = () => {
     if (state.loading) {
       return;
@@ -292,6 +310,7 @@ PropertyType) => {
     fetchMore();
   };
 
+  /** Handling the changes of objects. */
   const handleOnChange = (
     pagination: TablePaginationConfig,
     filters: Record<string, Key[] | null>,
@@ -365,7 +384,7 @@ PropertyType) => {
             return record[currentSchema.primaryKey];
           }}
           expandable={rowExpansionProp}
-          columns={filledColumns}
+          columns={antdColumns}
           onChange={handleOnChange}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
@@ -388,6 +407,7 @@ const createTitle = (column: ColumnType) => {
   );
 };
 
+/** Internal component to render a nested table for exploring linked objects. */
 const NestedTable = ({
   columns,
   objects,
