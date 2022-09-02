@@ -15,7 +15,7 @@ export const UUIDInput = ({
   const [value, setValue] = useState<string | null>(
     defaultValue ? (defaultValue as UUID).toString() : null
   );
-
+    isPrimary = false;
   const onChange = (value: string) => {
     setValue(value);
     if (UUID.isValid(value)) {

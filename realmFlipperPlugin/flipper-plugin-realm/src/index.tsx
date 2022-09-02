@@ -97,13 +97,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     const clone = structuredClone(newObject);
     clone._objectKey = newObjectKey;
-    const object = convertObjects(
-      [clone],
-      state.currentSchema,
-      downloadData
-    )[0];
     const newObjects = state.objects;
-    newObjects.splice(index, 0, object);
+    const addedObject = convertObjects([clone], state.currentSchema, downloadData)[0]; //TODO: possibly switch clone and newObject here
+    newObjects.splice(index, 0, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -146,13 +142,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     const clone = structuredClone(newObject);
     clone._objectKey = newObjectKey;
-    const object = convertObjects(
-      [clone],
-      state.currentSchema,
-      downloadData
-    )[0];
     const newObjects = state.objects;
-    newObjects.splice(index, 1, object);
+    const addedObject = convertObjects([clone], state.currentSchema, downloadData)[0];
+    newObjects.splice(index, 1, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -453,6 +445,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: schema.name,
       object: object,
+      objectKey: object._objectKey,
     });
   };
 
@@ -550,6 +543,7 @@ export function Component() {
     sortingColumn,
     currentSchema,
     hasMore,
+    selectedRealm,
     totalObjects
   } = useValue(state);
 
@@ -587,7 +581,7 @@ export function Component() {
       ) : null}
       {/* {viewMode === 'RQL' ? <></> : null} */}
       {viewMode === 'schemaGraph' ? (
-        <SchemaGraph schemas={schemas}></SchemaGraph>
+        <SchemaGraph schemas={schemas} selectedRealm={selectedRealm}></SchemaGraph>
       ) : null}
     </>
   );

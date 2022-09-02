@@ -97,6 +97,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             obj.sortingColumn,
             obj.sortingDirection,
             connection,
+            realm.schema,
           );
           listenerHandler.handleAddListener();
         });
@@ -124,6 +125,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             sortingColumn,
             sortingDirection,
             connection,
+            realm.schema,
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
@@ -298,7 +300,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           responder.success(undefined);
         });
         connection.receive('modifyObject', (obj, responder) => {
-          console.log('modify', obj);
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
             return;
@@ -314,15 +315,6 @@ export default React.memo((props: {realms: Realm[]}) => {
             obj.schema,
           )[0];
 
-          // load the values to be modified
-          const newObject = {};
-          propsChanged.forEach(propName => {
-            newObject[propName] = converted[propName];
-          });
-
-          // load all the rest values from the existing realm object
-          // const primaryKey = converted[schema.primaryKey];
-          // console.log('primary key: ' + primaryKey);
           const realmObj = realm._objectForObjectKey(
             schema.name,
             obj.objectKey,
@@ -331,22 +323,14 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'Realm Object removed while editing.'});
             return;
           }
-          // console.log('keys:', Object.keys(realmObj));
-          Object.keys(schema.properties).forEach(key => {
-            if (!propsChanged.find(val => val === key)) {
-              newObject[key] = realmObj[key];
-            }
-          });
 
-          // console.error('object after modifications:', newObject);
           realm.write(() => {
-            realm.create(obj.schema, newObject, 'modified');
+            propsChanged.forEach(propName => {
+              realmObj[propName] = converted[propName];
+            });
           });
-          // console.log('after write', realmObj);
-          // let objects = realm.objects(obj.schema);
-          // objects.map()
-          // connection.send('getObjects', {objects: objects});
         });
+
         connection.receive('removeObject', obj => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {

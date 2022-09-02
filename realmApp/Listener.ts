@@ -1,3 +1,5 @@
+import {convertObjectsToDesktop} from './ConvertFunctions';
+
 export class Listener {
   schemaToObjects: Map<string, Realm.Results<Realm.Object>>;
   schema;
@@ -5,6 +7,7 @@ export class Listener {
   sortingColumn;
   sortingDirection;
   connection;
+  schemas;
   constructor(
     schemaToObjects,
     schema,
@@ -12,6 +15,7 @@ export class Listener {
     sortingColumn,
     sortingDirection,
     connection,
+    schemas,
   ) {
     this.schemaToObjects = schemaToObjects;
     this.schema = schema;
@@ -19,6 +23,7 @@ export class Listener {
     this.sortingColumn = sortingColumn;
     this.sortingDirection = sortingDirection;
     this.connection = connection;
+    this.schemas = schemas;
   }
 
   removeAllListeners() {
@@ -57,9 +62,13 @@ export class Listener {
 
     changes.insertions.forEach(index => {
       const inserted = objects[index];
+      const schema = this.schemas.find(
+        schemaObj => this.schema === schemaObj.name,
+      );
+      const converted = convertObjectsToDesktop([inserted], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectAdded', {
-          newObject: inserted,
+          newObject: converted,
           index: index,
           schema: this.schema,
           newObjectKey: inserted._objectKey(),
@@ -70,9 +79,13 @@ export class Listener {
 
     changes.modifications.forEach(index => {
       const modified = objects[index];
+      const schema = this.schemas.find(
+        schemaObj => this.schema === schemaObj.name,
+      );
+      const converted = convertObjectsToDesktop([modified], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectEdited', {
-          newObject: modified,
+          newObject: converted,
           index: index,
           schema: this.schema,
           newObjectKey: modified._objectKey(),

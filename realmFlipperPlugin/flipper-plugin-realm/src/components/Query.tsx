@@ -1,4 +1,4 @@
-import { shell } from 'electron';
+import {  shell  } from 'electron';
 import { QuestionOutlined, StarOutlined } from '@ant-design/icons';
 import { Alert, AutoComplete, Button, Checkbox, Col, Row } from 'antd';
 import React, { useState } from 'react';
@@ -14,19 +14,34 @@ const wrapItem = (query: string, id: number) => ({
   value: query,
   key: id,
 });
+let favorites: Array<string> = [];
 
 export const RealmQueryInput = ({ execute }: InputType) => {
   const { state } = usePlugin(plugin);
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [_, setReset] = useState(0);
 
   const executeQuery = () => {
-    execute(query);
+    execute(query.trim());
   };
+
   queryHistory = JSON.parse(
     localStorage.getItem('history') || '{ "history": [] }'
   ).history;
-  const favourites = ['fav1'];
+  favorites = JSON.parse(
+    localStorage.getItem('favorites') || '{ "favorites": [] }'
+  ).favorites;
+
+  const addToFavorites = (query: string) => {
+    if (query !== '' && !favorites.some((qr) => qr === query)) {
+      favorites = [...favorites, query];
+    }
+  
+    localStorage.setItem('favorites', JSON.stringify({ favorites }));
+    setReset(v => v + 1);
+  };
+
   return (
     <>
       {state.get().errorMessage ? (
@@ -48,6 +63,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           <Checkbox
             defaultChecked
             onChange={() => setShowSuggestions((v) => !v)}
+            style={{ paddingLeft: '4px'}}
           >
             Query History
           </Checkbox>
@@ -56,7 +72,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           <Button
             icon={<StarOutlined />}
             onClick={() => {
-              return;
+              addToFavorites(query.trim());
             }}
           ></Button>
         </Col>
@@ -85,7 +101,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
                     },
                     {
                       label: 'Favourites',
-                      options: favourites
+                      options: favorites
                         .map((val, id) => wrapItem(val, 2 * id + 1))
                         .reverse(),
                     },

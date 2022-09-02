@@ -1,19 +1,22 @@
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, Col, message, Upload } from 'antd';
-import { UploadChangeParam, UploadFile, RcFile } from "antd/lib/upload";
+import { UploadChangeParam, RcFile, UploadFile } from "antd/lib/upload";
 import React, { useState } from "react";
 import { TypeInputProps } from "./TypeInput";
 
-export const DataInput = ({ set, isPrimary }: TypeInputProps) => {
-  const [reset, setReset] = useState(0);
+export const DataInput = ({ set, isPrimary, defaultValue }: TypeInputProps) => {
+  const [_, setReset] = useState(0);
 
-  const emptyState: {
+  const initialState: {
     selectedFile?: UploadFile<unknown>;
     selectedFileList: UploadFile<unknown>[];
   } = {
-    selectedFileList: [],
+    selectedFileList: defaultValue ? [{
+      uid: '',
+      name: 'data: '+defaultValue.length + ' bytes',
+    }] : [],
   };
-  const [state, setState] = useState(emptyState);
+  const [state, setState] = useState(initialState);
 
   const chooseFile = (file: UploadFile<unknown>) => {
     const fileObj = file.originFileObj
@@ -31,7 +34,7 @@ export const DataInput = ({ set, isPrimary }: TypeInputProps) => {
   };
 
   const onChange = (info: UploadChangeParam<UploadFile<unknown>>) => {
-    const nextState = emptyState;
+    const nextState = initialState;
     switch (info.file.status) {
       case "uploading":
         nextState.selectedFileList = [info.file];
