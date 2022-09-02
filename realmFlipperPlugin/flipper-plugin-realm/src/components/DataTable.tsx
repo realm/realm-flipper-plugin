@@ -35,8 +35,11 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
+  cursorId: number | null;
+  totalObjects: number;
+  fetchMore: () => void;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
-  doubleClickAction: (object: RealmObject) => Record<string, unknown>[];
+  clickAction: (object: RealmObject) => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.
@@ -67,7 +70,10 @@ export const DataTable = ({
   handleDataInspector,
   enableSort,
   hasMore,
-  doubleClickAction,
+  cursorId,
+  totalObjects,
+  fetchMore,
+  clickAction,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
@@ -83,7 +89,7 @@ PropertyType) => {
     'decimal128',
     'decimal',
     'float',
-    'bool'
+    'bool',
   ]);
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
@@ -312,10 +318,11 @@ PropertyType) => {
       return;
     }
     setLoading(true);
-    if (state.objects.length >= state.totalObjects) {
+    if (objects.length >= totalObjects) {
+      console.log('here', state.totalObjects);
       return;
     }
-    instance.getObjects();
+    fetchMore();
     console.log('objects in state', state.objects);
   };
 
@@ -332,10 +339,7 @@ PropertyType) => {
       }
       if (state.sortingColumn !== sorter.field) {
         instance.setSortingDirection('ascend');
-        instance.setSortingColumnAndType(
-          sorter.field,
-          state.currentSchema?.properties[sorter.field].type
-        );
+        instance.setSortingColumnAndType(sorter.field);
       } else {
         instance.toggleSortingDirection();
       }
@@ -343,7 +347,7 @@ PropertyType) => {
     }
   };
   // TODO: think about key as a property in the Realm DB
-
+  console.log('rerender', objects);
   const css = `.table-row-dark {
     background-color: #fbfbfb;
 }`;
@@ -386,15 +390,15 @@ PropertyType) => {
             return index === selectedIndex ? 'table-row-dark' : '';
           }}
           onRow={(object: RealmObject, rowIndex: number) => {
-            if (doubleClickAction) {
+            if (clickAction) {
               return {
                 onClick: () => {
                   setSelectedIndex(rowIndex);
-                  doubleClickAction(object);
+                  clickAction(object);
                 },
                 // onDoubleClick: () => {
-                //   if (doubleClickAction) {
-                //     doubleClickAction(object);
+                //   if (clickAction) {
+                //     clickAction(object);
                 //   }
                 // },
               };

@@ -202,7 +202,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjects = (
     schema?: string | null,
     realm?: string | null,
-    toRestore?: RealmObject[]
+    toRestore?: RealmObject[],
+    cursorId?: number | null,
   ) => {
     const state = pluginState.get();
     if (!state.currentSchema) {
@@ -210,11 +211,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    cursorId = cursorId ?? state.cursorId;
     pluginState.set({
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm, toRestore, state.cursorId)
+    requestObjects(schema, realm, toRestore, cursorId)
       .then(
         (response: ObjectsMessage) => {
           const state = pluginState.get();
@@ -540,7 +542,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 }
 
 export function Component() {
-  const { state } = usePlugin(plugin);
+  const { state, getObjects } = usePlugin(plugin);
   const {
     realms,
     objects,
@@ -572,6 +574,7 @@ export function Component() {
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
           totalObjects={totalObjects}
+          fetchMore={getObjects}
         />
       ) : null}
       {viewMode === 'schemas' ? (

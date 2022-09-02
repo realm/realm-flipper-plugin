@@ -23,7 +23,10 @@ type PropertyType = {
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
-  doubleClickAction: () => Record<string, unknown>[];
+  cursorId?: number | null;
+  totalObjects?: number;
+  clickAction?: (object: RealmObject) => void;
+  fetchMore: () => void;
 };
 
 const DataVisualizer = ({
@@ -33,7 +36,10 @@ const DataVisualizer = ({
   sortingDirection,
   sortingColumn,
   hasMore,
-  doubleClickAction,
+  cursorId,
+  totalObjects,
+  clickAction,
+  fetchMore,
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
@@ -180,81 +186,84 @@ const DataVisualizer = ({
 
   const columns = schemaObjToColumns(currentSchema);
   return (
+    <div
+      onScroll={handleScroll}
+      style={{
+        flex: `1 1 0`,
+        boxSizing: 'border-box',
+        position: 'relative',
+        overflow: 'auto',
+      }}
+    >
       <div
-        onScroll={handleScroll}
         style={{
-          flex: `1 1 0`,
-          boxSizing: 'border-box',
-          position: 'relative',
-          overflow: 'auto',
+          position: 'absolute',
+          height: '100%',
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            height: '100%',
-          }}
-        >
-          {editingObject.editing && editingObject.type === 'object' ? (
-            <ObjectEdit
-              schema={currentSchema}
-              initialObject={editingObject.object as RealmObject}
-              setVisible={(val: boolean) => {
-                setEditingObject((obj) => ({
-                  ...obj,
-                  editing: val,
-                }));
-              }}
-              visible={editingObject.editing}
-            ></ObjectEdit>
-          ) : editingObject.editing && editingObject.type === 'field' ? (
-            <FieldEdit
-              schema={currentSchema}
-              fieldName={editingObject.fieldName as string}
-              setVisible={(val: boolean) => {
-                setEditingObject((obj) => ({
-                  ...obj,
-                  editing: val,
-                }));
-              }}
-              visible={editingObject.editing}
-              value={editingObject.object}
-            />
-          ) : null}
-          <DataTable
-            columns={columns}
-            objects={objects}
-            schemas={schemas}
-            hasMore={hasMore}
-            sortingDirection={sortingDirection}
-            sortingColumn={sortingColumn}
-            currentSchema={currentSchema}
-            generateMenuItems={generateMenuItems}
-            getOneObject={getOneObject}
-            setdropdownProp={setdropdownProp}
-            dropdownProp={dropdownProp}
-            scrollX={scrollX.current}
-            scrollY={scrollY.current}
-            handleDataInspector={handleDataInspector}
-            enableSort={true}
-            doubleClickAction={doubleClickAction}
+        {editingObject.editing && editingObject.type === 'object' ? (
+          <ObjectEdit
+            schema={currentSchema}
+            initialObject={editingObject.object as RealmObject}
+            setVisible={(val: boolean) => {
+              setEditingObject((obj) => ({
+                ...obj,
+                editing: val,
+              }));
+            }}
+            visible={editingObject.editing}
+          ></ObjectEdit>
+        ) : editingObject.editing && editingObject.type === 'field' ? (
+          <FieldEdit
+            schema={currentSchema}
+            fieldName={editingObject.fieldName as string}
+            setVisible={(val: boolean) => {
+              setEditingObject((obj) => ({
+                ...obj,
+                editing: val,
+              }));
+            }}
+            visible={editingObject.editing}
+            value={editingObject.object}
           />
-          <CustomDropdown {...updatedDropdownProp} />
-          <RealmDataInspector
-            currentSchema={currentSchema}
-            schemas={schemas}
-            inspectionData={inspectionData}
-            setInspectionData={setInspectionData}
-            showSidebar={showSidebar}
-            setShowSidebar={setShowSidebar}
-            goBackStack={goBackStack}
-            setGoBackStack={setGoBackStack}
-            goForwardStack={goForwardStack}
-            setGoForwardStack={setGoForwardStack}
-            setNewInspectionData={setNewInspectionData}
-          />
-        </div>
+        ) : null}
+        <DataTable
+          columns={columns}
+          objects={objects}
+          schemas={schemas}
+          hasMore={hasMore}
+          cursorId={cursorId}
+          sortingDirection={sortingDirection}
+          sortingColumn={sortingColumn}
+          currentSchema={currentSchema}
+          totalObjects={totalObjects}
+          generateMenuItems={generateMenuItems}
+          getOneObject={getOneObject}
+          setdropdownProp={setdropdownProp}
+          dropdownProp={dropdownProp}
+          scrollX={scrollX.current}
+          scrollY={scrollY.current}
+          handleDataInspector={handleDataInspector}
+          enableSort={true}
+          fetchMore={fetchMore}
+          clickAction={clickAction}
+        />
+        <CustomDropdown {...updatedDropdownProp} />
+        <RealmDataInspector
+          currentSchema={currentSchema}
+          schemas={schemas}
+          inspectionData={inspectionData}
+          setInspectionData={setInspectionData}
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          goBackStack={goBackStack}
+          setGoBackStack={setGoBackStack}
+          goForwardStack={goForwardStack}
+          setGoForwardStack={setGoForwardStack}
+          setNewInspectionData={setNewInspectionData}
+        />
       </div>
+    </div>
   );
 
   // update inspectionData and push object to GoBackStack

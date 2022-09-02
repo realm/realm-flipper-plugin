@@ -3,7 +3,7 @@ import { Button, Col, Menu, Modal, Row, Tag, Typography } from 'antd';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
-import { RealmObject } from '../../../CommonTypes';
+import { ObjectsMessage, RealmObject } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
 // import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
@@ -26,6 +26,7 @@ export const ObjectInput = ({
   const [objects, setObjects] = useState([]);
   const [hasMore, setHasMore] = useState(false);
   const [cursorId, setCursorId] = useState(null);
+  const [totalObjects, setTotalObjects] = useState(0);
 
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
@@ -48,7 +49,9 @@ export const ObjectInput = ({
           <Button
             disabled={isPrimary}
             icon={<ClearOutlined />}
-            onClick={() => {
+            onClick={(e) => {
+              setObjects([]);
+              setCursorId(null);
               set(null);
               setChosen(false);
             }}
@@ -65,6 +68,8 @@ export const ObjectInput = ({
     };
     const onCancel = () => {
       setVisible(false);
+      setObjects([])
+      setCursorId(null);
     };
     const onChosen = (object: RealmObject) => {
       if (!object) {
@@ -85,20 +90,25 @@ export const ObjectInput = ({
       </Menu>
     );
 
+    const fetchMore = () => {
+      instance
+        .requestObjects(targetSchema.name, selectedRealm, null, cursorId)
+        .then((response: ObjectsMessage) => {
+          console.log('recevied', response.objects);
+          setObjects([...objects,...response.objects]);
+          setHasMore(response.hasMore);
+          setCursorId(response.nextCursor);
+          setTotalObjects(response.total);
+          console.log("objects here", objects);
+        });
+    }
+
     const openModal = () => {
-      console.log('OPEN MODAL');
       setVisible(true);
       if (!targetSchema) {
         return;
       }
-      instance
-        .requestObjects(targetSchema.name, selectedRealm, null)
-        .then((response) => {
-          console.log('recevied', response);
-          setObjects(response.objects);
-          setHasMore(response.hasMore);
-          setCursorId(response.nextCursor);
-        });
+      fetchMore();
     };
 
     return (
@@ -109,13 +119,15 @@ export const ObjectInput = ({
         <Modal
           onOk={onOk}
           onCancel={onCancel}
-          forceRender
+          forceRender={true}
           visible={visible}
           width={800}
           closable={false}
         >
           <Layout.Container height={800}>
-            <Typography.Title style={{marginBottom: "5px"}}>{targetSchema.name}</Typography.Title>
+            <Typography.Title style={{ marginBottom: '5px' }}>
+              {targetSchema.name}
+            </Typography.Title>
             <DataVisualizer
               objects={objects}
               sortingColumn={sortingColumn}
@@ -123,12 +135,11 @@ export const ObjectInput = ({
               schemas={schemas}
               currentSchema={targetSchema}
               hasMore={hasMore}
-              doubleClickAction = {onChosen}
+              totalObjects={totalObjects}
+              cursorId={cursorId}
+              clickAction={onChosen}
+              fetchMore={fetchMore}
             ></DataVisualizer>
-            {/* <RealmQueryLanguage
-              schema={targetSchema}
-              renderOptions={chooseOption}
-            /> */}
           </Layout.Container>
         </Modal>
       </Layout.Container>

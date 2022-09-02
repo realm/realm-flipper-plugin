@@ -14,6 +14,7 @@ type InputType = {
   sortingColumn: string | null;
   hasMore: boolean;
   totalObjects: number;
+  fetchMore: () => void;
 };
 
 export const DataVisualizerWrapper = ({
@@ -23,6 +24,7 @@ export const DataVisualizerWrapper = ({
   sortingDirection,
   sortingColumn,
   hasMore,
+  fetchMore,
   totalObjects
 }: InputType) => {
   return (
@@ -37,6 +39,7 @@ export const DataVisualizerWrapper = ({
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
+          fetchMore={fetchMore}
         />
       </Layout.Container>
     </>
