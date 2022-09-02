@@ -7,7 +7,7 @@ On a high level the Realm Flipper Plugin consists of the desktop plugin and the 
 
 ## Plugin API and State (index.tsx)
 
-The index file is the central component of the desktop plugin. It contains the plugin function which defines the plugin API for the Realm Flipper Plugin. It carries the pluginState and a multitude of functions for communication with the mobile plugin, e.g. getSchemas() or executeQuery(). These are either called from other components of the desktop plugin or executed when an RPC from the mobile plugin is received. These functions trigger RPC calls with client.send() and define how the response from the mobile device is handled. Usually the pluginState is updated with the received information (Read more about this in the [communication documentation](Communication.md))
+The index file is the central component of the desktop plugin. It contains the plugin function which defines the plugin API for the Realm Flipper Plugin. It carries the pluginState and a multitude of functions for communication with the mobile plugin, e.g. getSchemas() or executeQuery(). These are either called from other components of the desktop plugin or executed when an RPC from the mobile plugin is received. These functions trigger RPC calls with client.send() and define how the response from the mobile device is handled. Usually the pluginState is updated with the received information (Read more about this in [Communication.md](Communication.md))
 The pluginState contains data, e.g. regarding Realms, objects and schemas. The plugin API and pluginState are exposed using Flippers usePlugin() hook. This hook is used in multiple other components.
 
 ## React entry point (index.tsx)
@@ -16,11 +16,21 @@ Besides the plugin the index file contains the functional component with the nam
 
 ## DataVisualizer
 
-The DataVisualizer is the core component of the data tab. It is 
+The [DataVisualizer](../realmFlipperPlugin/flipper-plugin-realm/src/pages/DataVisualizer.tsx) is the core component of the data tab. It is implemented in index.tsx with a [DataVisualizerWrapper](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx) which adds a [schema selector](../realmFlipperPlugin/flipper-plugin-realm/src/components/SchemaSelect.tsx) and the [DataTabHeader](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx) for querying and creating objects.
 
+The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) showing the Realm objects of the selected schema inside the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
 
+### DataTable
 
+#### Nested Tables
 
+### Editing Fields
+
+### Editing Objects
+
+### RealmDataInspector
+
+### Dropdown Menu
 
 
 # Mobile Plugin
