@@ -1,13 +1,6 @@
-import {shell} from 'electron';
+import { shell } from 'electron';
 import { QuestionOutlined, StarOutlined } from '@ant-design/icons';
-import {
-  Alert,
-  AutoComplete,
-  Button,
-  Checkbox,
-  Col,
-  Row,
-} from 'antd';
+import { Alert, AutoComplete, Button, Checkbox, Col, Row } from 'antd';
 import React, { useState } from 'react';
 import { usePlugin } from 'flipper-plugin';
 import { plugin } from '..';
@@ -38,7 +31,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
     <>
       {state.get().errorMessage ? (
         <Alert
-          style={{marginTop: 6, marginBottom: 8}}
+          style={{ marginTop: 6, marginBottom: 8 }}
           message="Error"
           description={state.get().errorMessage}
           type="error"
@@ -50,7 +43,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           }}
         />
       ) : null}
-      <Row style={{padding: 10}} gutter={[2, 0]} align="middle">
+      <Row style={{ padding: 10 }} gutter={[2, 0]} align="middle">
         <Col>
           <Checkbox
             defaultChecked
@@ -85,6 +78,9 @@ export const RealmQueryInput = ({ execute }: InputType) => {
                       label: 'History',
                       options: queryHistory
                         .map((val, id) => wrapItem(val, 2 * id))
+                        .filter((suggestion) =>
+                          suggestion.value.startsWith(query)
+                        )
                         .reverse(),
                     },
                     {
@@ -99,10 +95,14 @@ export const RealmQueryInput = ({ execute }: InputType) => {
           />
         </Col>
         <Col>
-          <Button onClick={() => {
-            const url = 'https://www.mongodb.com/docs/realm/realm-query-language/';
-            shell.openExternal(url);
-          }} icon={<QuestionOutlined />} />
+          <Button
+            onClick={() => {
+              const url =
+                'https://www.mongodb.com/docs/realm/realm-query-language/';
+              shell.openExternal(url);
+            }}
+            icon={<QuestionOutlined />}
+          />
         </Col>
         <Col>
           <Button
@@ -113,7 +113,6 @@ export const RealmQueryInput = ({ execute }: InputType) => {
             Execute
           </Button>
         </Col>
-
       </Row>
     </>
   );
