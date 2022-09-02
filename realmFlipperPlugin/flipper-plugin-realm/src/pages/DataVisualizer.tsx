@@ -23,7 +23,6 @@ type PropertyType = {
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
-  cursorId?: number | null;
   totalObjects: number;
   enableSort: boolean;
   clickAction?: (object: RealmObject) => void;
@@ -37,8 +36,8 @@ const DataVisualizer = ({
   sortingDirection,
   sortingColumn,
   hasMore,
-  cursorId,
   totalObjects,
+  enableSort,
   clickAction,
   fetchMore,
 }: PropertyType) => {
@@ -233,7 +232,6 @@ const DataVisualizer = ({
           objects={objects}
           schemas={schemas}
           hasMore={hasMore}
-          cursorId={cursorId}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
           currentSchema={currentSchema}

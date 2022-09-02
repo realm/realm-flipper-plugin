@@ -35,7 +35,6 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
-  cursorId?: number | null;
   totalObjects: number;
   fetchMore: () => void;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
@@ -70,7 +69,6 @@ export const DataTable = ({
   handleDataInspector,
   enableSort,
   hasMore,
-  cursorId,
   totalObjects,
   fetchMore,
   clickAction,
