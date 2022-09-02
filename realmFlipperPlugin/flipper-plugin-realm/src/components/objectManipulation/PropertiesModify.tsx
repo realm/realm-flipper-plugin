@@ -41,7 +41,7 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
             <PropertyRender
               // key={index}
               property={schema.properties[propertyName]}
-              isPrimary={propertyName === schema.primaryKey}
+              isPrimary={propertyName === schema.primaryKey && setPropsChanges} //if setPropsChanges is null => you are adding an object
               set={set}
               initialValue={value[propertyName]} />
           </Col>
