@@ -24,7 +24,8 @@ type PropertyType = {
   sortingColumn: string | null;
   hasMore: boolean;
   cursorId?: number | null;
-  totalObjects?: number;
+  totalObjects: number;
+  enableSort: boolean;
   clickAction?: (object: RealmObject) => void;
   fetchMore: () => void;
 };
@@ -244,7 +245,7 @@ const DataVisualizer = ({
           scrollX={scrollX.current}
           scrollY={scrollY.current}
           handleDataInspector={handleDataInspector}
-          enableSort={true}
+          enableSort={enableSort}
           fetchMore={fetchMore}
           clickAction={clickAction}
         />

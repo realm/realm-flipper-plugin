@@ -139,6 +139,7 @@ export const ObjectInput = ({
               cursorId={cursorId}
               clickAction={onChosen}
               fetchMore={fetchMore}
+              enableSort={false}
             ></DataVisualizer>
           </Layout.Container>
         </Modal>

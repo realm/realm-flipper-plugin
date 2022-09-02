@@ -35,11 +35,11 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
-  cursorId: number | null;
+  cursorId?: number | null;
   totalObjects: number;
   fetchMore: () => void;
   handleDataInspector: (inspectionData: InspectionDataType) => void;
-  clickAction: (object: RealmObject) => Record<string, unknown>[];
+  clickAction?: (object: RealmObject) => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.

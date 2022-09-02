@@ -39,6 +39,7 @@ export const DataVisualizerWrapper = ({
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
+          enableSort={true}
           fetchMore={fetchMore}
         />
       </Layout.Container>
