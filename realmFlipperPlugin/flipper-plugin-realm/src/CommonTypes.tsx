@@ -7,7 +7,7 @@ export type RealmPluginState = {
   currentSchema: SchemaObject | null;
   schemaHistory: SchemaObject[];
   schemaHistoryIndex: number;
-  cursorId: number | null;
+  cursor: number | null;
   totalObjects: number;
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
@@ -97,7 +97,7 @@ type RealmRequest = {
 type getForwardsObjectsRequest = {
   schema: string;
   realm: string;
-  cursorId: number | null;
+  cursor: number | null;
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
   query: string;

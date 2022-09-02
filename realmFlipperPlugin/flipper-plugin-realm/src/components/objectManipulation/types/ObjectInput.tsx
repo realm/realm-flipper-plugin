@@ -25,7 +25,7 @@ export const ObjectInput = ({
   const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState<RealmObject[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const [cursorId, setCursorId] = useState<number | null>(null);
+  const [cursor, setcursor] = useState<number | null>(null);
   const [totalObjects, setTotalObjects] = useState(0);
 
   const targetSchema = schemas.find(
@@ -51,7 +51,7 @@ export const ObjectInput = ({
             icon={<ClearOutlined />}
             onClick={(e) => {
               setObjects([]);
-              setCursorId(null);
+              setcursor(null);
               set(null);
               setChosen(false);
             }}
@@ -69,7 +69,7 @@ export const ObjectInput = ({
     const onCancel = () => {
       setVisible(false);
       setObjects([])
-      setCursorId(null);
+      setcursor(null);
     };
     const onChosen = (object: RealmObject) => {
       if (!object) {
@@ -91,11 +91,11 @@ export const ObjectInput = ({
 
     const fetchMore = () => {
       instance
-        .requestObjects(targetSchema.name, selectedRealm, undefined, cursorId)
+        .requestObjects(targetSchema.name, selectedRealm, undefined, cursor)
         .then((response: ObjectsMessage) => {
           setObjects([...objects,...response.objects]);
           setHasMore(response.hasMore);
-          setCursorId(response.nextCursor);
+          setcursor(response.nextCursor);
           setTotalObjects(response.total);
         });
     }

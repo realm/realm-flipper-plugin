@@ -20,7 +20,7 @@ type PluginConfig = {
 type getObjectsQuery = {
   schema: string;
   realm: string;
-  cursorId: number;
+  cursor: number;
   limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
@@ -114,7 +114,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, query, cursorId} =
+          const {schema, sortingColumn, sortingDirection, query, cursor} =
             req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
@@ -136,15 +136,15 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          let queryCursorId = null;
+          let querycursor = null;
           const LIMIT = 50;
           const shouldSortDescending = sortingDirection === 'descend';
-          queryCursorId = cursorId ?? objects[0]._objectKey();
+          querycursor = cursor ?? objects[0]._objectKey();
           if (sortingColumn) {
             objects = objects.sorted(sortingColumn, shouldSortDescending);
-            queryCursorId = cursorId ?? objects[0]._objectKey();
+            querycursor = cursor ?? objects[0]._objectKey();
           }
-          const lastObject = realm._objectForObjectKey(schema, queryCursorId);
+          const lastObject = realm._objectForObjectKey(schema, querycursor);
           let indexOfLastObject = objects.findIndex(
             obj => obj._objectKey() === lastObject._objectKey(),
           );
