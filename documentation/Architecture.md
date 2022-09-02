@@ -34,7 +34,11 @@ The function render() inside the antdColumns contains the logic defining how eac
 
 #### Nested Tables
 
-A special functionality of the antd table is the expansion of rows to render extra content underneath. In the DataTable this feature is used for traversing linked objects by rendering a nested table underneath the respective row. This behaviour is handled by setting the 'expandable' property of the antd table. For this a useState hook ([rowExpansionProp, setRowExpansionProp]) is used which is updated when the button for expanding a row is clicked or the nested table is closed by clicking outside of it.
+A special functionality of the antd table are [expandable rows](https://ant.design/components/table/#components-table-demo-expand) to render extra content underneath. In the DataTable this feature is used for traversing linked objects by rendering a nested table underneath the respective row. This behaviour is handled by setting the 'expandable' property of the antd table. For this a useState hook ([rowExpansionProp, setRowExpansionProp]) is used which is updated when the button for expanding a row is clicked or the nested table is closed by clicking outside of it.
+
+### Dropdown Menu
+
+The dropdown menu is rendered inside the DataVisualizer. The component CustomDropdown ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/CustomDropdown.tsx)) defines a generic dropdown. Its menu items are specified using a property. The dropdown is opened in the DataTable inside the onCell property of the antdColumns and closed in the DataInspector by listening to a click event.
 
 ### Adding, editing and deleting fields and objects
 
@@ -43,8 +47,10 @@ Also for deleting objects the context menu is used in order to call the removeOb
 
 ### RealmDataInspector
 
-### Dropdown Menu
+The RealmDataInspector ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/RealmDataInspector.tsx)) is used to explore data in the sidebar in JSON format. It is used in the DataVisualizer which also manages its state. The RealmDataInspector makes use of Flippers DataInspector.
 
+Note:
+A usage example of the DataInspector can be found [here](https://fbflipper.com/docs/tutorial/js-custom/). During the development of this proof-of-concept the DataInspector was not documented on the Flipper website. In the future it might get documented [here](https://fbflipper.com/docs/extending/flipper-plugin/#datainspector).
 
 # Mobile Plugin
 
