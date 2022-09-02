@@ -31,7 +31,7 @@ The constructor for *RealmFlipperPlugin* accepts a list of objects, all of them 
 # Documentation
 
 - [Communication](/markdown/Communication.md)
-- Architecture
+- [Architecture](/markdown/Architecture.md)
 
 # Template Apps
 
