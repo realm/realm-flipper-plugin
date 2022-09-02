@@ -27,6 +27,7 @@ type PropertyType = {
   enableSort: boolean;
   clickAction?: (object: RealmObject) => void;
   fetchMore: () => void;
+  handleDataInspecter: () => void;
 };
 
 const DataVisualizer = ({
@@ -40,6 +41,7 @@ const DataVisualizer = ({
   enableSort,
   clickAction,
   fetchMore,
+  handleDataInspector,
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
