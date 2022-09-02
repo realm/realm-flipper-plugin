@@ -16,7 +16,7 @@ Besides the plugin the index file contains the functional component with the nam
 
 ## DataVisualizer
 
-The [DataVisualizer](../realmFlipperPlugin/flipper-plugin-realm/src/pages/DataVisualizer.tsx) is the core component of the data tab. It is implemented in index.tsx with a [DataVisualizerWrapper](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx) which adds a [schema selector](../realmFlipperPlugin/flipper-plugin-realm/src/components/SchemaSelect.tsx) and the [DataTabHeader](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx) for querying and creating objects.
+The DataVisualizer ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/DataVisualizer.tsx)) is the core component of the data tab. It is implemented in index.tsx with a DataVisualizerWrapper ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx)) which adds a SchemaSelect ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/SchemaSelect.tsx)) and the DataTabHeader ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx)) for querying and creating objects.
 
 The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) showing the Realm objects of the selected schema inside the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
 
