@@ -42,30 +42,27 @@ export const RealmDataInspector = ({
 }: PropertyType) => {
   if (!showSidebar || inspectionData === undefined) return null;
 
+  /** Utilities to trigger a brief flickering when the InspectionData is updated.
+   * In some cases this makes it easier to see when the data changed. */
   const [flickering, setFlickering] = useState(false);
-
   const doFlicker = () => {
     setFlickering(true);
     setTimeout(() => setFlickering(false), 5);
   };
-
   useEffect(doFlicker, [inspectionData]);
-
   const flickerStyle = {
     backgroundColor: flickering ? '#6932c9' : 'transparent',
   };
 
   return (
     <DetailSidebar>
-      <Space
-        direction="vertical"
-        size="middle"
-        style={flickerStyle}
-      >
-        <Layout
-          style={flickerStyle}
-        >
-          <Space direction="vertical" size="middle" style={{ display: 'flex', ...flickerStyle }}>
+      <Space direction="vertical" size="middle" style={flickerStyle}>
+        <Layout style={flickerStyle}>
+          <Space
+            direction="vertical"
+            size="middle"
+            style={{ display: 'flex', ...flickerStyle }}
+          >
             <Row gutter={16}>
               <Col span={24} offset={1}>
                 <BoldSpan>
@@ -111,9 +108,7 @@ export const RealmDataInspector = ({
           </Space>
         </Layout>
 
-        <Layout
-          style={flickerStyle}
-        >
+        <Layout style={flickerStyle}>
           <Row>
             <Col offset={1} span={22}>
               <DataInspector
