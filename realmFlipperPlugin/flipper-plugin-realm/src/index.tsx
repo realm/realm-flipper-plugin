@@ -230,7 +230,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
             });
             return;
           }
-          console.log('got objects:', response);
 
           const nextCursor = response.nextCursor;
 

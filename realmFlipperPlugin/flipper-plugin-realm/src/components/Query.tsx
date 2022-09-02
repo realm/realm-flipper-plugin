@@ -28,14 +28,7 @@ export const RealmQueryInput = ({ execute }: InputType) => {
   const [showSuggestions, setShowSuggestions] = useState(true);
 
   const executeQuery = () => {
-    console.log('execute query');
     execute(query);
-    // if (res === undefined) {
-    //   // success
-    //   setErrorMsg('');
-    // } else {
-    //   setErrorMsg(res);
-    // }
   };
   queryHistory = JSON.parse(
     localStorage.getItem('history') || '{ "history": [] }'

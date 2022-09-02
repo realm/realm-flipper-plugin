@@ -76,9 +76,6 @@ export const DataTable = ({
 PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-
-  const [loading, setLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number>();
   const sortableTypes = new Set([
     'string',
     'int',
@@ -311,17 +308,13 @@ PropertyType) => {
   };
 
   const handleInfiniteOnLoad = () => {
-    console.log('more');
     if (state.loading) {
       return;
     }
-    setLoading(true);
     if (objects.length >= totalObjects) {
-      console.log('here', state.totalObjects);
       return;
     }
     fetchMore();
-    console.log('objects in state', state.objects);
   };
 
   const handleOnChange = (
@@ -345,10 +338,6 @@ PropertyType) => {
     }
   };
   // TODO: think about key as a property in the Realm DB
-  console.log('rerender', objects);
-  const css = `.table-row-dark {
-    background-color: #fbfbfb;
-}`;
   return (
     <div
       style={{
@@ -359,7 +348,6 @@ PropertyType) => {
         paddingBottom: '100px',
       }}
     >
-      <style>{css}</style>
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
@@ -384,14 +372,10 @@ PropertyType) => {
           bordered={true}
           showSorterTooltip={false}
           dataSource={objects}
-          rowClassName={(record, index) => {
-            return index === selectedIndex ? 'table-row-dark' : '';
-          }}
-          onRow={(object: RealmObject, rowIndex: number) => {
+          onRow={(object: RealmObject) => {
             if (clickAction) {
               return {
                 onClick: () => {
-                  setSelectedIndex(rowIndex);
                   clickAction(object);
                 },
                 // onDoubleClick: () => {

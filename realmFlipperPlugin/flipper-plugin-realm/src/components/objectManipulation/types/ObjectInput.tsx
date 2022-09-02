@@ -23,9 +23,9 @@ export const ObjectInput = ({
   const [value, setValue] = useState<RealmObject>(defaultValue as RealmObject);
   const [chosen, setChosen] = useState(!!value);
   const [visible, setVisible] = useState(false);
-  const [objects, setObjects] = useState([]);
+  const [objects, setObjects] = useState<RealmObject[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const [cursorId, setCursorId] = useState(null);
+  const [cursorId, setCursorId] = useState<number | null>(null);
   const [totalObjects, setTotalObjects] = useState(0);
 
   const targetSchema = schemas.find(
@@ -75,7 +75,6 @@ export const ObjectInput = ({
       if (!object) {
         return;
       }
-      console.log((object))
       setValue(object);
       set(object);
       setChosen(true);
@@ -92,14 +91,12 @@ export const ObjectInput = ({
 
     const fetchMore = () => {
       instance
-        .requestObjects(targetSchema.name, selectedRealm, null, cursorId)
+        .requestObjects(targetSchema.name, selectedRealm, undefined, cursorId)
         .then((response: ObjectsMessage) => {
-          console.log('recevied', response.objects);
           setObjects([...objects,...response.objects]);
           setHasMore(response.hasMore);
           setCursorId(response.nextCursor);
           setTotalObjects(response.total);
-          console.log("objects here", objects);
         });
     }
 
@@ -136,7 +133,6 @@ export const ObjectInput = ({
               currentSchema={targetSchema}
               hasMore={hasMore}
               totalObjects={totalObjects}
-              cursorId={cursorId}
               clickAction={onChosen}
               fetchMore={fetchMore}
               enableSort={false}
