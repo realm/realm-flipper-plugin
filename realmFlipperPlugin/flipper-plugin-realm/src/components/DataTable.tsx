@@ -35,8 +35,10 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
+  totalObjects: number;
+  fetchMore: () => void;
   setNewInspectionData: (inspectionData: InspectionDataType) => void;
-  doubleClickAction: (object: RealmObject) => Record<string, unknown>[];
+  clickAction?: (object: RealmObject) => Record<string, unknown>[];
 };
 
 // Receives a schema and returns column objects for the table.
@@ -67,14 +69,13 @@ export const DataTable = ({
   setNewInspectionData,
   enableSort,
   hasMore,
-  doubleClickAction,
+  totalObjects,
+  fetchMore,
+  clickAction,
 }: // rowSelection
 PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
-
-  const [loading, setLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number>();
   const sortableTypes = new Set([
     'string',
     'int',
@@ -282,16 +283,13 @@ PropertyType) => {
   };
 
   const handleInfiniteOnLoad = () => {
-    console.log('more');
     if (state.loading) {
       return;
     }
-    setLoading(true);
-    if (state.objects.length >= state.totalObjects) {
+    if (objects.length >= totalObjects) {
       return;
     }
-    instance.getObjects();
-    console.log('objects in state', state.objects);
+    fetchMore();
   };
 
   const handleOnChange = (
@@ -307,10 +305,7 @@ PropertyType) => {
       }
       if (state.sortingColumn !== sorter.field) {
         instance.setSortingDirection('ascend');
-        instance.setSortingColumnAndType(
-          sorter.field,
-          state.currentSchema?.properties[sorter.field].type
-        );
+        instance.setSortingColumnAndType(sorter.field);
       } else {
         instance.toggleSortingDirection();
       }
@@ -318,10 +313,6 @@ PropertyType) => {
     }
   };
   // TODO: think about key as a property in the Realm DB
-
-  const css = `.table-row-dark {
-    background-color: #fbfbfb;
-}`;
   return (
     <div
       style={{
@@ -332,7 +323,6 @@ PropertyType) => {
         paddingBottom: '100px',
       }}
     >
-      <style>{css}</style>
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
@@ -355,20 +345,17 @@ PropertyType) => {
         <Table
           sticky={true}
           bordered={true}
+          showSorterTooltip={false}
           dataSource={objects}
-          rowClassName={(record, index) => {
-            return index === selectedIndex ? 'table-row-dark' : '';
-          }}
-          onRow={(object: RealmObject, rowIndex: number) => {
-            if (doubleClickAction) {
+          onRow={(object: RealmObject) => {
+            if (clickAction) {
               return {
                 onClick: () => {
-                  setSelectedIndex(rowIndex);
-                  doubleClickAction(object);
+                  clickAction(object);
                 },
                 // onDoubleClick: () => {
-                //   if (doubleClickAction) {
-                //     doubleClickAction(object);
+                //   if (clickAction) {
+                //     clickAction(object);
                 //   }
                 // },
               };

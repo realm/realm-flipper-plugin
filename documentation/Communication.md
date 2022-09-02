@@ -20,7 +20,7 @@ Gets the user-specified realms and sends them to the plugin.
 Gets the schemas for a given realm and sends them to the plugin.
 ### `getObjects(queryObject: QueryObject)`
 
-Takes a query request object, and sends back a `limit` amount of objects. 
+Takes a query request object, and sends back 50 amount of objects. 
 ### `getOneObject(primaryKey: number)`
 Given a primary key, it gets one object from the backend and sends it to the desktop plugin.
 ### `addObject(realm: String, schema: String, objectToAdd: RealmObject)`
@@ -57,5 +57,26 @@ The desktop plugin listens for `getCurrentQuery` as to send back the current que
 ### `receivedCurrentQuery`
 The app listens for `receivedCurrentQuery` as to attach an updated Realm collection listener.
 
+
+## Types
+
+### QueryObject
+A `QueryObject` consists of the neccessary arguments for querying:
+```ts
+type QueryObject = {
+      schema: string;
+      realm: string;
+      cursor: number | null;
+      sortingColumn: string;
+      sortingDirection: 'ascend' | 'descend';
+      query: string;
+}
+```
+
+### RealmObject
+A RealmObject is an object in a realm:
+```ts
+type RealmObject = Record<string, unknown>;
+```
 ## Conclusion
 These functions define the communication between the plugin and the API, and are necessary for supporting the required functionality.

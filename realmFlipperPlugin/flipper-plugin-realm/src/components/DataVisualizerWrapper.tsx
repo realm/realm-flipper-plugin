@@ -13,6 +13,8 @@ type InputType = {
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
+  totalObjects: number;
+  fetchMore: () => void;
 };
 
 export const DataVisualizerWrapper = ({
@@ -21,13 +23,15 @@ export const DataVisualizerWrapper = ({
   currentSchema,
   sortingDirection,
   sortingColumn,
-  hasMore
+  hasMore,
+  fetchMore,
+  totalObjects
 }: InputType) => {
   return (
     <>
       <SchemaSelect schemas={schemas} />
       <Layout.Container style={{height: "100%"}}>
-        <DataTabHeader currentSchema={currentSchema} />
+        <DataTabHeader totalObjects={totalObjects} currentSchema={currentSchema} />
         <DataVisualizer
           objects={objects}
           schemas={schemas}
@@ -35,6 +39,8 @@ export const DataVisualizerWrapper = ({
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
+          enableSort={true}
+          fetchMore={fetchMore}
         />
       </Layout.Container>
     </>

@@ -34,13 +34,11 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schemas: [],
     schemaHistory: [],
     schemaHistoryIndex: 0,
-    cursorId: null,
-    filterCursor: 0,
+    cursor: null,
     totalObjects: 0,
     sortingColumn: null,
     sortingDirection: null,
     hasMore: false,
-    sortingColumnType: null,
     currentSchema: null,
     loading: false,
     query: '',
@@ -90,23 +88,24 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     console.log('Added');
     const state = pluginState.get();
-    const { newObject, index, schema } = data;
+    const { newObject, index, schema, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
-    // const newObjects = convertObjects(state.objects, state.currentSchema, downloadData);
+    if (index > state.objects.length) {
+      return;
+    }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
     const newObjects = state.objects;
-    const addedObject = convertObjects([newObject], state.currentSchema, downloadData)[0];
+    const addedObject = convertObjects([clone], state.currentSchema, downloadData)[0]; //TODO: possibly switch clone and newObject here
     newObjects.splice(index, 0, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
-      totalObjects: state.totalObjects - 1,
-      cursorId: newLastObject._id,
-      filterCursor: state.sortingColumn
-        ? newLastObject[state.sortingColumn]
-        : null,
+      totalObjects: state.totalObjects + 1,
+      cursor: newLastObject._objectKey,
     });
   });
 
@@ -117,34 +116,41 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (schema != state.currentSchema?.name) {
       return;
     }
+    if (index > state.objects.length) {
+      return;
+    }
     const newObjects = state.objects;
     newObjects.splice(index, 1);
-    //find out case where last index is deleted
-    console.log('after', newObjects);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
+      cursor: newLastObject._objectKey,
     });
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     console.log('EDIT');
     const state = pluginState.get();
-    const { index, schema, newObject } = data;
+    const { index, schema, newObject, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
-    console.log('editing', newObject, index);
+    if (index > state.objects.length) {
+      return;
+    }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
     const newObjects = state.objects;
-    const addedObject = convertObjects([newObject], state.currentSchema, downloadData)[0];
+    const addedObject = convertObjects([clone], state.currentSchema, downloadData)[0];
     newObjects.splice(index, 1, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
+      cursor: newLastObject._objectKey,
     });
   });
 
@@ -171,17 +177,15 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema?: string | null,
     realm?: string | null,
     toRestore?: RealmObject[],
-    cursorId?: number | null
+    cursor?: number | null
   ) => {
     const state = pluginState.get();
     console.log('called with', schema, realm);
     return client.send('getObjects', {
       schema: schema ?? state.currentSchema.name,
       realm: realm ?? state.selectedRealm,
-      cursorId: cursorId,
-      filterCursor: state.filterCursor,
+      cursor: cursor,
       sortingColumn: state.sortingColumn,
-      sortingColumnType: state.sortingColumnType,
       sortingDirection: state.sortingDirection,
       query: state.query,
     });
@@ -190,7 +194,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
   const getObjects = (
     schema?: string | null,
     realm?: string | null,
-    toRestore?: RealmObject[]
+    toRestore?: RealmObject[],
+    cursor?: number | null,
   ) => {
     const state = pluginState.get();
     if (!state.currentSchema) {
@@ -198,58 +203,64 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     schema = schema ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
+    cursor = cursor ?? state.cursor;
     pluginState.set({
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm, toRestore, state.cursorId).then(
-      (response: ObjectsMessage) => {
-        const state = pluginState.get();
-        if (response.objects && !response.objects.length) {
+    requestObjects(schema, realm, toRestore, cursor)
+      .then(
+        (response: ObjectsMessage) => {
+          const state = pluginState.get();
+          if (response.objects && !response.objects.length) {
+            pluginState.set({
+              ...state,
+              hasMore: false,
+              loading: false,
+              totalObjects: response.total,
+              cursor: null,
+            });
+            return;
+          }
+
+          const nextCursor = response.nextCursor;
+
+          if (state.currentSchema?.name !== schema) {
+            return;
+          }
+          const objects = convertObjects(
+            response.objects,
+            state.currentSchema,
+            downloadData
+          );
           pluginState.set({
             ...state,
-            hasMore: false,
-            loading: false,
+            objects: [...state.objects, ...objects],
+            cursor: nextCursor,
             totalObjects: response.total,
-            cursorId: null,
+            hasMore: response.hasMore,
+            errorMessage: '',
+            loading: false,
           });
-          return;
+        },
+        (reason) => {
+          console.log(reason);
+          pluginState.set({
+            ...state,
+            errorMessage: reason.message,
+            objects: [],
+            loading: false,
+          });
         }
-        console.log('got objects 3:', response.objects);
-
-        const nextCursor = response.nextCursor;
-
-        if (state.currentSchema?.name !== schema) {
-          return;
-        }
-        console.log('response', response.hasMore);
-        const objects = convertObjects(
-          response.objects,
-          state.currentSchema,
-          downloadData
-        );
+      )
+      .catch((error) => {
         pluginState.set({
           ...state,
-          objects: [...state.objects, ...objects],
-          // filterCursor: state.sortingColumn
-          //   ? nextCursor[state.sortingColumn]
-          //   : null,
-          cursorId: nextCursor,
-          totalObjects: response.total,
-          hasMore: response.hasMore,
-          errorMessage: '',
+          errorMessage: error.message,
+          objects: [],
           loading: false,
         });
-      },
-      (reason) => {
-        pluginState.set({
-          ...state,
-          errorMessage: reason.message,
-          objects: toRestore ? toRestore : [],
-          loading: false,
-        });
-      }
-    );
+      });
   };
   const downloadData = (
     schema: string,
@@ -299,14 +310,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const prevObjects = Array.from(state.objects);
     pluginState.set({
       ...state,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
       sortingColumn: null,
-      sortingColumnType: state.currentSchema?.properties['_id'].type,
       query: query,
       objects: [],
     });
-    getObjects(state.currentSchema?.name, state.selectedRealm, prevObjects);
+    getObjects();
   };
 
   const addObject = (object: Record<string, unknown>) => {
@@ -346,12 +355,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       schemaHistory: [...newHistory],
       schemaHistoryIndex: length,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
       objects: [],
       sortingColumn: null,
       currentSchema: schema,
-      sortingColumnType: schema.properties['_id'].type,
       query: '',
       errorMessage: '',
     });
@@ -362,11 +369,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       schemaHistoryIndex: state.schemaHistoryIndex - 1,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -376,11 +381,9 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       schemaHistoryIndex: state.schemaHistoryIndex + 1,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
       objects: [],
       sortingColumn: null,
-      sortingColumnType: schema.properties['_id'].type,
       currentSchema: schema,
     });
   };
@@ -391,8 +394,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       selectedRealm: realm,
       objects: [],
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
     });
   };
 
@@ -447,20 +449,13 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
   };
 
-  const setSortingColumnAndType = (
-    sortingColumn: string | null,
-    sortingColumnType: string | null
-  ) => {
+  const setSortingColumnAndType = (sortingColumn: string | null) => {
     const state = pluginState.get();
     pluginState.set({
       ...state,
       objects: [],
       sortingColumn: sortingColumn,
-      sortingColumnType: sortingColumnType
-        ? sortingColumnType
-        : state.currentSchema?.properties['_id'].type,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
     });
   };
 
@@ -479,8 +474,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       sortingDirection: newSortingDirection,
-      filterCursor: null,
-      cursorId: null,
+      cursor: null,
       objects: [],
     });
   };
@@ -494,8 +488,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const refreshState = () => {
-    //refresh
+    const state = pluginState.get()
+    pluginState.set({
+      ...state,
+      cursor: null,
+      sortingColumn: null,
+      sortingDirection: null,
+      loading: false,
+      query: '',
+      errorMessage: '',
+      objects: []    
+    });
+    getObjects();
   };
+  
 
   const clearError = () => {
     const state = pluginState.get();
@@ -528,7 +534,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 }
 
 export function Component() {
-  const { state } = usePlugin(plugin);
+  const { state, getObjects } = usePlugin(plugin);
   const {
     realms,
     objects,
@@ -538,6 +544,7 @@ export function Component() {
     currentSchema,
     hasMore,
     selectedRealm,
+    totalObjects
   } = useValue(state);
 
   const [viewMode, setViewMode] = useState<'data' | 'schemas' | 'schemaGraph'>(
@@ -559,6 +566,8 @@ export function Component() {
           currentSchema={currentSchema}
           sortingDirection={sortingDirection}
           sortingColumn={sortingColumn}
+          totalObjects={totalObjects}
+          fetchMore={getObjects}
         />
       ) : null}
       {viewMode === 'schemas' ? (

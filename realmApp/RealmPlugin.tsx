@@ -6,7 +6,7 @@ import {
   convertObjectsToDesktop,
 } from './ConvertFunctions';
 import {Listener} from './Listener';
-import {Query} from './Query';
+
 const {BSON} = Realm;
 // config: Configuration,
 //     realms: Realm[],
@@ -20,12 +20,10 @@ type PluginConfig = {
 type getObjectsQuery = {
   schema: string;
   realm: string;
-  cursorId: number;
-  filterCursor: number | string;
+  cursor: number;
   limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
-  sortingColumnType: string;
 };
 
 const modifyObject = (object: any, schemaName: string, realm: Realm) => {
@@ -117,7 +115,8 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection} = req;
+          const {schema, sortingColumn, sortingDirection, query, cursor} =
+            req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
             schemaToObjects,
@@ -130,8 +129,7 @@ export default React.memo((props: {realms: Realm[]}) => {
           );
           listenerHandler.handleAddListener();
           const totalObjects = objects.length;
-          if (!totalObjects) {
-            console.log("here")
+          if (!totalObjects || objects.isEmpty()) {
             responder.success({
               objects: [],
               total: totalObjects,
@@ -140,28 +138,37 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          let cursorId = null;
+          let querycursor = null;
           const LIMIT = 50;
           const shouldSortDescending = sortingDirection === 'descend';
-          cursorId = req.cursorId ?? objects[0]._objectKey();
+          querycursor = cursor ?? objects[0]._objectKey();
           if (sortingColumn) {
             objects = objects.sorted(sortingColumn, shouldSortDescending);
-            cursorId = req.cursorId ?? objects[0]._objectKey();
+            querycursor = cursor ?? objects[0]._objectKey();
           }
-          let howFarWeGot = realm._objectForObjectKey(schema, String(cursorId));
-          let index = objects.findIndex(
-            obj => obj._objectKey() === howFarWeGot._objectKey(),
+          const lastObject = realm._objectForObjectKey(schema, querycursor);
+          let indexOfLastObject = objects.findIndex(
+            obj => obj._objectKey() === lastObject._objectKey(),
           );
+          if (query) {
+            try {
+              objects = objects.filtered(query);
+            } catch (e) {
+              console.log('error, returning:', e.message);
+              responder.error({
+                message: e.message,
+              });
+              return;
+            }
+          }
           objects = objects.slice(
-            index === 0 ? index : index + 1,
-            index + (LIMIT + 1),
+            indexOfLastObject === 0 ? indexOfLastObject : indexOfLastObject + 1,
+            indexOfLastObject + (LIMIT + 1),
           );
-          console.log('gere');
           const afterConversion = convertObjectsToDesktop(
             objects,
             realm.schema.find(schemaa => schemaa.name === schema),
           );
-          console.log('sending back!');
           responder.success({
             objects: afterConversion,
             total: totalObjects,
