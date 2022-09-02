@@ -30,8 +30,8 @@ addPlugin(new RealmFlipperPlugin(realmList));
 The constructor for *RealmFlipperPlugin* accepts a list of objects, all of them are either a Realm object, or a Realm configuration object (the file used to create a Realm object).
 # Documentation
 
-- [Communication](/markdown/Communication.md)
-- [Architecture](/markdown/Architecture.md)
+- [Communication](/documentation/Communication.md)
+- [Architecture](/documentation/Architecture.md)
 
 # Template Apps
 
