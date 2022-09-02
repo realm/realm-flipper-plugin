@@ -18,15 +18,28 @@ Besides the plugin the index file contains the functional component with the nam
 
 The DataVisualizer ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/DataVisualizer.tsx)) is the core component of the data tab. It is implemented in index.tsx with a DataVisualizerWrapper ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx)) which adds a SchemaSelect ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/SchemaSelect.tsx)) and the DataTabHeader ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx)) for querying and creating objects.
 
-The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) showing the Realm objects of the selected schema inside the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
+The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTable.tsx)) showing the Realm objects of the selected schema and the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
 
 ### DataTable
 
+The DataTable uses the [Ant Design Table](https://ant.design/components/table/) (antd table) to display data but adds extra functions for the use context of visualizing Realm objects. 
+
+#### antdColumns and schemaObjToColumns()
+
+The function schemaObjToColumns() takes a schema object as argument and returns an array of column objects. The column objects contain general information about each column for example if it a primary key column, what the name of the column should be and what datatype the contents have. These are used later to create antd specific column objects (antdColumns) to be passed to the antd table.
+
+#### Rendering Cells
+
+The function render() inside the antdColumns contains the logic defining how each cell is rendered. In a standard case it applies the renderValue() function which returns a basic text based on the property to be rendered. In case the cell contains a linked Realm object buttons are rendered in addition and the text is made clickable. If the string is long it is cut off and also a clickable text is rendered to see the full value of the cell.
+
 #### Nested Tables
 
-### Editing Fields
+A special functionality of the antd table is the expansion of rows to render extra content underneath. In the DataTable this feature is used for traversing linked objects by rendering a nested table underneath the respective row. This behaviour is handled by setting the 'expandable' property of the antd table. For this a useState hook ([rowExpansionProp, setRowExpansionProp]) is used which is updated when the button for expanding a row is clicked or the nested table is closed by clicking outside of it.
 
-### Editing Objects
+### Adding, editing and deleting fields and objects
+
+The DataVisualizer makes use of the components FieldEdit ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/objectManipulation/FieldEdit.tsx)) and ObjectEdit ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/objectManipulation/ObjectEdit.tsx)) to manipulate data in the database. These are managed using useState hooks and triggered from the dropdown menu.
+Also for deleting objects the context menu is used in order to call the removeObject function in the plugin API. Through an RPC call the respective object is deleted and the UI is updated. 
 
 ### RealmDataInspector
 
