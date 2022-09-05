@@ -3,8 +3,8 @@ import { Button, Col, Layout, Modal, Row, Select, Tag } from 'antd';
 import { usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
-import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 import { renderValue } from '../../../utils/Renderer';
+import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
 export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => {
   const [reset, setReset] = useState(0);

@@ -5,7 +5,9 @@ import ViewModeTabs from './ViewModeTabs';
 
 type InputType = {
   viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph';
-  setViewMode: (viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph') => void;
+  setViewMode: React.Dispatch<
+    React.SetStateAction<'data' | 'schemas' | 'schemaGraph'>
+  >;
   realms: string[];
 };
 

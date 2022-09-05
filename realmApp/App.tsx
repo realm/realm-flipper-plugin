@@ -64,7 +64,7 @@ const realm = new Realm({
     DataSchema,
   ],
   path: 'main',
-  schemaVersion: 37,
+  schemaVersion: 400,
 });
 
 const realm2 = new Realm({
@@ -91,7 +91,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: i,
+      _id: 3,
       name: 'Jack',
       color: 'yellow',
       length: 40,
@@ -106,7 +106,7 @@ function createBanana() {
 //   createBanana();
 // }
 
-function deleteBanana() {
+function deleteBanana() {    
   realm.write(() => {
     //realm.delete(realm.objects("Banana"));
     realm.delete(realm.objectForPrimaryKey('Banana', 3));

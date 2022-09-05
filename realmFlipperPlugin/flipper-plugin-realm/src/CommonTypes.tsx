@@ -17,7 +17,7 @@ export type RealmPluginState = {
   errorMessage?: string;
 };
 
-export type RealmObject = Record<string, unknown>;
+export type RealmObject = Record<string, unknown> 
 
 export type SchemaObject = {
   name: string;
@@ -49,13 +49,18 @@ export type Events = {
 };
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
-  getObjects: (data: getForwardsObjectsRequest) => Promise<RealmObject[]>;
-  getSchemas: (data: RealmRequest) => Promise<SchemaObject[]>;
-  getRealms: () => Promise<string[]>;
+  getObjects: (data: getForwardsObjectsRequest) => Promise<ObjectsMessage>;
+  getSchemas: (data: RealmRequest) => Promise<SchemaMessage>;
+  getRealms: () => Promise<RealmsMessage>;
   addObject: (object: AddObject) => Promise<RealmObject>;
-  modifyObject: (newObject: AddObject) => Promise<RealmObject>;
-  removeObject: (object: AddObject) => Promise<void>;
-  receivedCurrentQuery: (request: {schema: string | null; realm: string; sortingDirection: 'ascend' | 'descend' | null; sortingColumn: string | null}) => void;
+  modifyObject: (newObject: EditObject) => Promise<RealmObject>;
+  removeObject: (object: RemoveObject) => Promise<void>;
+  receivedCurrentQuery: (request: {
+    schema: string | null;
+    realm: string;
+    sortingDirection: 'ascend' | 'descend' | null;
+    sortingColumn: string | null;
+  }) => Promise<void>;
   getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
   downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
 };
@@ -67,11 +72,26 @@ type DataDownloadRequest = {
   propertyName: string;
 };
 
+export type EditObject = {
+  schema?: string;
+  realm?: string;
+  object: RealmObject;
+  propsChanged?: string[];
+  objectKey: number;
+};
+
+export type RemoveObject = {
+  schema?: string;
+  realm?: string;
+  object: RealmObject;
+  objectKey: number;
+};
+
 export type AddObject = {
   schema?: string;
   realm?: string;
   object: RealmObject;
-  propsChanged?: Set<string>;
+  propsChanged?: string[];
 };
 export type RealmsMessage = {
   realms: string[];
@@ -112,6 +132,7 @@ export type AddLiveObjectRequest = {
   newObject: RealmObject;
   index: number;
   schema: string;
+  newObjectKey: number;
 };
 export type DeleteLiveObjectRequest = {
   index: number;
@@ -121,6 +142,7 @@ export type EditLiveObjectRequest = {
   newObject: RealmObject;
   index: number;
   schema: string;
+  newObjectKey: number;
 };
 type QueryObject = {
   schema: string;

@@ -68,7 +68,7 @@ export const ObjectInput = ({
     };
     const onCancel = () => {
       setVisible(false);
-      setObjects([])
+      setObjects([]);
       setcursor(null);
     };
     const onChosen = (object: RealmObject) => {
@@ -81,24 +81,22 @@ export const ObjectInput = ({
       setVisible(false);
     };
 
-    const chooseOption = (row: RealmObject) => (
-      <Menu>
-        <Menu.Item key={1} onClick={() => onChosen(row)}>
-          Choose the object
-        </Menu.Item>
-      </Menu>
-    );
-
     const fetchMore = () => {
+      if (!instance) {
+        return;
+      }
+      if (!instance.requestObjects()) {
+        return;
+      }
       instance
         .requestObjects(targetSchema.name, selectedRealm, undefined, cursor)
         .then((response: ObjectsMessage) => {
-          setObjects([...objects,...response.objects]);
+          setObjects([...objects, ...response.objects]);
           setHasMore(response.hasMore);
           setcursor(response.nextCursor);
           setTotalObjects(response.total);
         });
-    }
+    };
 
     const openModal = () => {
       setVisible(true);

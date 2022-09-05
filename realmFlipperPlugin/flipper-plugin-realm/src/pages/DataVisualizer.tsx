@@ -1,20 +1,18 @@
-import { Alert } from 'antd';
 import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
 import { plugin } from '..';
 import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
+import {
+  CustomDropdown,
+  DropdownPropertyType,
+  MenuItemGenerator
+} from '../components/CustomDropdown';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
 import {
-  RealmDataInspector,
-  InspectionDataType,
+  InspectionDataType, RealmDataInspector
 } from '../components/RealmDataInspector';
-import {
-  CustomDropdown,
-  DropdownPropertyType,
-  MenuItemGenerator,
-} from '../components/CustomDropdown';
 
 type PropertyType = {
   objects: Array<RealmObject>;
@@ -23,11 +21,11 @@ type PropertyType = {
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
-  totalObjects: number;
+  totalObjects?: number;
   enableSort: boolean;
   clickAction?: (object: RealmObject) => void;
   fetchMore: () => void;
-  handleDataInspecter: () => void;
+  handleDataInspector?: () => void;
 };
 
 const DataVisualizer = ({
@@ -41,14 +39,11 @@ const DataVisualizer = ({
   enableSort,
   clickAction,
   fetchMore,
-  handleDataInspector,
 }: PropertyType) => {
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<InspectionDataType>>([]);
-  const [goForwardStack, setGoForwardStack] = useState<
-    Array<InspectionDataType>
-  >([]);
+  const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
 
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
@@ -61,7 +56,7 @@ const DataVisualizer = ({
   });
 
   const pluginState = usePlugin(plugin);
-  const { removeObject, getOneObject, state, clearError } = pluginState;
+  const { removeObject } = pluginState;
 
   const scrollX = useRef(0);
   const scrollY = useRef(0);
@@ -96,9 +91,9 @@ const DataVisualizer = ({
       key: 1,
       text: 'Inspect Object',
       onClick: () => {
-        const object = {};
+        const object: RealmObject = {};
         Object.keys(row).forEach((key) => {
-          object[key] = row[key];
+          object[key as keyof RealmObject] = row[key];
         });
         setGoForwardStack([]);
         setGoBackStack([]);
@@ -238,12 +233,12 @@ const DataVisualizer = ({
           currentSchema={currentSchema}
           totalObjects={totalObjects}
           generateMenuItems={generateMenuItems}
-          getOneObject={getOneObject}
+          // getOneObject={getOneObject} TODO: is this still used?
           setdropdownProp={setdropdownProp}
           dropdownProp={dropdownProp}
           scrollX={scrollX.current}
           scrollY={scrollY.current}
-          handleDataInspector={handleDataInspector}
+          //handleDataInspector={handleDataInspector} TODO: is this still used?
           enableSort={enableSort}
           setNewInspectionData={setNewInspectionData}
           fetchMore={fetchMore}
@@ -251,7 +246,7 @@ const DataVisualizer = ({
         />
         <CustomDropdown {...updatedDropdownProp} />
         <RealmDataInspector
-          currentSchema={currentSchema}
+          //currentSchema={currentSchema} TODO: RealmDataInspector doesnt need currentSchema?
           schemas={schemas}
           inspectionData={inspectionData}
           setInspectionData={setInspectionData}
