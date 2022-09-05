@@ -62,6 +62,10 @@ const realm = new Realm({
     DictSchema,
     SetsSchema,
     DataSchema,
+    Parcel,
+    ParcelService,
+    MailCarrier,
+    Delivery,
   ],
   path: 'main',
   schemaVersion: 400,
@@ -115,7 +119,7 @@ function deleteBanana() {
 
 function editBanana() {
   realm.write(() => {
-    realm.objectForPrimaryKey('Banana', 3).color = "Blue";
+    realm.objectForPrimaryKey('Banana', 3).color = 'Blue';
   });
 }
 
