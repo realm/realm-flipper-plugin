@@ -5,10 +5,10 @@ import { RealmObject, SchemaObject } from '../CommonTypes';
 const convertObject = (
   object: RealmObject,
   schema: SchemaObject,
-  downloadData: (schema: string, objectKey: string, propertyName: string) => Promise<Uint8Array>,
+  downloadData: (schema: string, objectKey: number, propertyName: string) => Promise<Uint8Array>,
 ) => {
   const properties = schema.properties;
-  const newObj = {};
+  const newObj: RealmObject = {};
   Object.keys(object).forEach(key => {
     const value = object[key];
 
@@ -16,8 +16,8 @@ const convertObject = (
     if (property && property.type == 'data') {
       console.log('downloadData:', downloadData)
       newObj[key] = {
-        length: value.$binaryData,
-        downloadData: () => downloadData(schema.name, object._objectKey, property.name),
+        length: (value as Record<"$binaryData", number>).$binaryData,
+        downloadData: () => downloadData(schema.name, Number(object._objectKey), property.name),
       }
     }
     else {
@@ -29,7 +29,7 @@ const convertObject = (
 
 export const convertObjects = (
   objects: RealmObject[],
-  schema: SchemaObject | null,
+  schema: SchemaObject,
   downloadData: (schema: string, primaryKey: unknown, propertyName: string) => Promise<Uint8Array>,
 ) => {
   return objects.map(v => convertObject(v, schema, downloadData));

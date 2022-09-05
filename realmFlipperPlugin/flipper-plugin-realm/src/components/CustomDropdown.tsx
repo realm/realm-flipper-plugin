@@ -5,7 +5,7 @@ import { theme } from 'flipper-plugin';
 export type DropdownPropertyType = {
   record: RealmObject;
   schemaProperty: SchemaProperty | null;
-  currentSchema?: SchemaObject;
+  currentSchema: SchemaObject;
   visible: boolean;
   pointerX: number;
   pointerY: number;
@@ -26,7 +26,7 @@ export type MenuItemGenerator = (
   schema: SchemaObject
 ) => Array<MenuItem>;
 
-const listItem = (menuItem) => {
+const listItem = (menuItem: MenuItem) => {
   const [hover, setHover] = useState(false);
 
   const handleMouseEnter = () => {

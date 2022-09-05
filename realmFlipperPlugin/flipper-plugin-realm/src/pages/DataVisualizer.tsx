@@ -17,7 +17,7 @@ import {
 type PropertyType = {
   objects: Array<RealmObject>;
   schemas: Array<SchemaObject>;
-  currentSchema: SchemaObject | null;
+  currentSchema: SchemaObject;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
@@ -47,7 +47,7 @@ const DataVisualizer = ({
 
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
-    object?: unknown;
+    object?: RealmObject;
     // schemaProperty?: SchemaProperty;
     type?: 'field' | 'object';
     fieldName?: string;
@@ -139,6 +139,7 @@ const DataVisualizer = ({
   /**  Managing dropdown properties.*/
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
     generateMenuItems,
+    currentSchema: currentSchema,
     record: {},
     schemaProperty: null,
     visible: false,
@@ -209,7 +210,7 @@ const DataVisualizer = ({
             }}
             visible={editingObject.editing}
           ></ObjectEdit>
-        ) : editingObject.editing && editingObject.type === 'field' ? (
+        ) : editingObject.editing && editingObject.type === 'field' && editingObject.object ? (
           <FieldEdit
             schema={currentSchema}
             fieldName={editingObject.fieldName as string}
