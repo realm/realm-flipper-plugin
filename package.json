@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "fb-watchman": "^2.0.1",
-    "pretty-print-json": "^1.2.5",
-    "react-native-uuid": "^2.0.1",
-    "realm": "^10.19.5"
-  }
-}

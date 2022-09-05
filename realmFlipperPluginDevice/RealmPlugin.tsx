@@ -4,8 +4,8 @@ import Realm, {CanonicalObjectSchema} from 'realm';
 import {
   convertObjectsFromDesktop,
   convertObjectsToDesktop,
-} from './ConvertFunctions';
-import {Listener} from './Listener';
+} from '../realmApp/ConvertFunctions';
+import {Listener} from '../realmApp/Listener';
 
 const {BSON} = Realm;
 // config: Configuration,

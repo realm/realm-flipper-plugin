@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tag } from 'antd';
-import { ColumnType } from '../components/DataTable';
+import { ColumnType } from './DataTable';
 
 export const ColumnTitle = ({
   optional,
