@@ -21,8 +21,8 @@ export const DataTabHeader = ({ currentSchema, totalObjects }: InputType) => {
       {currentSchema ?<Typography.Text
         style={{
           padding: 10,
+          paddingLeft: 20,
           fontWeight: 500,
-          textDecoration: 'underline',
           color: '#70757a',
         }}
       >
