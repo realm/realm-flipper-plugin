@@ -1,8 +1,8 @@
-import {  shell  } from 'electron';
 import { QuestionOutlined, StarOutlined } from '@ant-design/icons';
 import { Alert, AutoComplete, Button, Checkbox, Col, Row } from 'antd';
-import React, { useState } from 'react';
+import { shell } from 'electron';
 import { usePlugin } from 'flipper-plugin';
+import React, { useState } from 'react';
 import { plugin } from '..';
 
 type InputType = {

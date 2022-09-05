@@ -1,12 +1,12 @@
-import { Button, Modal, Radio } from 'antd';
+import { Modal, Radio } from 'antd';
 import { useState } from 'react';
 import { RealmObject, SchemaObject } from '../../CommonTypes';
 
+import { PlusOutlined } from '@ant-design/icons';
+import { Layout, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../..';
-import { Layout, usePlugin } from 'flipper-plugin';
 import { PropertiesModify } from './PropertiesModify';
-import { PlusOutlined } from '@ant-design/icons';
 
 type PropertyType = {
   schema: SchemaObject;

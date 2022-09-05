@@ -1,6 +1,6 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { SchemaObject } from '../CommonTypes';
 import { plugin } from '../index';
 import SchemaHistoryActions from './SchemaHistoryActions';
@@ -24,14 +24,16 @@ const SchemaSelect = ({
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    let selectedSchemaObject: SchemaObject;
+    let selectedSchemaObject: SchemaObject | null = null;
     schemas.forEach((schema) => {
-      console.log('in here?,', schema)
       if (schema.name === selected) {
         selectedSchemaObject = schema;
         return;
       }
     });
+    if (!selectedSchemaObject) {
+      return;
+    }
     instance.setSelectedSchema(selectedSchemaObject);
     instance.getObjects();
   };

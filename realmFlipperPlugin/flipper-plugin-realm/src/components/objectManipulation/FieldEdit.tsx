@@ -1,5 +1,5 @@
 import React from 'react';
-import { SchemaObject, SchemaProperty } from '../../CommonTypes';
+import { RealmObject, SchemaObject } from '../../CommonTypes';
 import { ObjectEdit } from './ObjectEdit';
 
 type InputType = {

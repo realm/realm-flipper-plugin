@@ -13,11 +13,10 @@ const createRows = (
   order: string[],
   properties: { [key: string]: SchemaProperty },
   primaryKey: string
-): Record<string, unknown>[] => {
+) => {
   const newRows: Record<string, unknown>[] = [];
   order.forEach((propName: string, index: number) => {
     const value = properties[propName];
-    console.log('here?');
     newRows.push({
       ...value,
       key: index,
@@ -177,7 +176,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={!!value as boolean} value={value.toString()} />
+          <BooleanValue active={!!value as boolean} value={!!value as boolean ? 'True' : 'False'} />
         );
       case 'string':
         return <Text>{value as string}</Text>;

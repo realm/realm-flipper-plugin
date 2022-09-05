@@ -35,10 +35,10 @@ type PropertyType = {
   scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
-  totalObjects: number;
+  totalObjects?: number;
   fetchMore: () => void;
   setNewInspectionData: (inspectionData: InspectionDataType) => void;
-  clickAction?: (object: RealmObject) => Record<string, unknown>[];
+  clickAction?: (object: RealmObject) => void;
 };
 
 type ClickableTextType = {
@@ -324,7 +324,7 @@ PropertyType) => {
       }
       if (state.sortingColumn !== sorter.field) {
         instance.setSortingDirection('ascend');
-        instance.setSortingColumnAndType(sorter.field);
+        instance.setSortingColumn(sorter.field);
       } else {
         instance.toggleSortingDirection();
       }

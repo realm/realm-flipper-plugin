@@ -2,7 +2,7 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
   CloseOutlined,
-  SearchOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
@@ -17,14 +17,16 @@ export type InspectionDataType = {
 
 type PropertyType = {
   schemas: SchemaObject[];
-  inspectionData: InspectionDataType;
-  setInspectionData: (value: RealmObject) => void;
+  inspectionData: InspectionDataType | undefined;
+  setInspectionData: React.Dispatch<
+    React.SetStateAction<InspectionDataType | undefined>
+  >;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
   goBackStack: Array<RealmObject>;
-  setGoBackStack: (value: Array<RealmObject>) => void;
+  setGoBackStack: React.Dispatch<React.SetStateAction<RealmObject[]>>;
   goForwardStack: Array<RealmObject>;
-  setGoForwardStack: (value: Array<RealmObject>) => void;
+  setGoForwardStack: React.Dispatch<React.SetStateAction<RealmObject[]>>;
   setNewInspectionData: (newInspectionData: InspectionDataType) => void;
 };
 

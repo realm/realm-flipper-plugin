@@ -115,8 +115,7 @@ export default React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, query, cursor} =
-            req;
+          const {schema, sortingColumn, sortingDirection, query, cursor} = req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
             schemaToObjects,
@@ -138,19 +137,19 @@ export default React.memo((props: {realms: Realm[]}) => {
             });
             return;
           }
-          let querycursor = null;
+          let queryCursor = null;
           const LIMIT = 50;
           const shouldSortDescending = sortingDirection === 'descend';
-          querycursor = cursor ?? objects[0]._objectKey();
+          queryCursor = cursor ?? objects[0]._objectKey(); //If no cursor, choose first object in the collection
           if (sortingColumn) {
             objects = objects.sorted(sortingColumn, shouldSortDescending);
-            querycursor = cursor ?? objects[0]._objectKey();
+            queryCursor = cursor ?? objects[0]._objectKey();
           }
-          const lastObject = realm._objectForObjectKey(schema, querycursor);
-          let indexOfLastObject = objects.findIndex(
-            obj => obj._objectKey() === lastObject._objectKey(),
+          const firstObject = realm._objectForObjectKey(schema, queryCursor); //First object to send
+          let indexOfFirstObject = objects.findIndex(
+            obj => obj._objectKey() === firstObject._objectKey(),
           );
-          if (query) {
+          if (query) { //Filtering if RQL query is provided
             try {
               objects = objects.filtered(query);
             } catch (e) {
@@ -162,8 +161,11 @@ export default React.memo((props: {realms: Realm[]}) => {
             }
           }
           objects = objects.slice(
-            indexOfLastObject === 0 ? indexOfLastObject : indexOfLastObject + 1,
-            indexOfLastObject + (LIMIT + 1),
+            //Send over list from index of first object to the limit
+            indexOfFirstObject === 0
+              ? indexOfFirstObject
+              : indexOfFirstObject + 1,
+            indexOfFirstObject + (LIMIT + 1),
           );
           const afterConversion = convertObjectsToDesktop(
             objects,

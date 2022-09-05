@@ -8,7 +8,7 @@ type InputType = {
   schema: SchemaObject;
   value: RealmObject;
   setValue: (v: RealmObject) => void;
-  setPropsChanges?: (v: any) => void;
+  setPropsChanges?: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
 export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: InputType) => {
@@ -41,7 +41,7 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
             <PropertyRender
               // key={index}
               property={schema.properties[propertyName]}
-              isPrimary={propertyName === schema.primaryKey && setPropsChanges} //if setPropsChanges is null => you are adding an object
+              isPrimary={propertyName === schema.primaryKey && Boolean(setPropsChanges)} //if setPropsChanges is null => you are adding an object
               set={set}
               initialValue={value[propertyName]} />
           </Col>

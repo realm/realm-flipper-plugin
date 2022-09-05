@@ -1,15 +1,15 @@
 import {
-  ConsoleSqlOutlined,
   RadarChartOutlined,
   SettingOutlined,
-  TableOutlined,
+  TableOutlined
 } from '@ant-design/icons';
 import { Radio, Typography } from 'antd';
-import { Toolbar } from 'flipper-plugin';
 import React from 'react';
 
 const ViewModeTabs = (props: {
-  setViewMode: (viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph') => void;
+  setViewMode: React.Dispatch<
+    React.SetStateAction<'data' | 'schemas' | 'schemaGraph'>
+  >;
   viewMode: 'data' | 'schemas' | 'RQL' | 'schemaGraph';
 }) => {
   return (

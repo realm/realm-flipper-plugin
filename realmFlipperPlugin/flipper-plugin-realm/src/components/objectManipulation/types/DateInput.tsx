@@ -3,7 +3,6 @@ import { Button, Col, DatePicker, Row } from 'antd';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
-import { theme } from 'flipper-plugin';
 
 export const DateInput = ({
   property,

@@ -1,5 +1,4 @@
-import { Col, Divider, Form, Row, Tag } from 'antd';
-import { Layout } from 'flipper-plugin';
+import { Col, Form, Row, Tag } from 'antd';
 import React from 'react';
 import { SchemaProperty } from '../../CommonTypes';
 import { TypeInput } from './types/TypeInput';

@@ -1,6 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
-import { Layout } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
