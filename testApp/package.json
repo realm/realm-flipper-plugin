@@ -11,10 +11,12 @@
     },
     "dependencies": {
         "@types/realm": "^1.13.0",
+        "core-js": "^3.25.0",
         "react": "17.0.2",
         "react-native": "0.68.1",
         "react-native-flipper": "^0.153.0",
-        "realm": "^10.20.0"
+        "realm": "^10.20.0",
+        "realm-flipper-plugin-device": "^1.0.14"
     },
     "devDependencies": {
         "@babel/core": "^7.12.9",

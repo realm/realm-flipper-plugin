@@ -41,7 +41,8 @@ import {
   Button,
 } from 'react-native';
 
-import RealmPlugin from './RealmPlugin';
+import RealmPlugin from 'realm-flipper-plugin-device';
+
 import {
   Colors,
   DebugInstructions,
@@ -49,6 +50,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
 import {createParcelTestData} from './TestData/parcelExample';
 
 // Open a Realm

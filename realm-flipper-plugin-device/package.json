@@ -1,0 +1,19 @@
+{
+  "name": "realm-flipper-plugin-device",
+  "version": "1.0.14",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "file:../node_modules/react",
+    "react-native-flipper": "^0.162.0",
+    "realm": "^10.20.0",
+    "rollup-plugin-typescript": "^1.0.1"
+  }
+}

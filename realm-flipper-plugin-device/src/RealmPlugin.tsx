@@ -4,8 +4,8 @@ import Realm, {CanonicalObjectSchema} from 'realm';
 import {
   convertObjectsFromDesktop,
   convertObjectsToDesktop,
-} from '../realmApp/ConvertFunctions';
-import {Listener} from '../realmApp/Listener';
+} from './ConvertFunctions';
+import {Listener} from './Listener';
 
 const {BSON} = Realm;
 // config: Configuration,
@@ -66,7 +66,7 @@ const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
   });
 };
 
-export default React.memo((props: {realms: Realm[]}) => {
+const RealmPlugin = ((props: {realms: Realm[]}) => {
   let realmsMap = new Map<string, Realm>();
   let listenerHandler: Listener;
   const {realms} = props;
@@ -339,3 +339,5 @@ export default React.memo((props: {realms: Realm[]}) => {
   });
   return <></>;
 });
+
+export default React.memo(RealmPlugin);
