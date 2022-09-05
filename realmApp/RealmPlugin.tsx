@@ -240,30 +240,6 @@ export default React.memo((props: {realms: Realm[]}) => {
           },
         );
 
-        // connection.receive('executeQuery', (obj, responder) => {
-        //   const realm = realmsMap.get(obj.realm);
-        //   if (!realm) {
-        //     responder.error({message: 'No realm found.'});
-        //     return;
-        //   }
-        //   const objs = realm.objects(obj.schema);
-        //   if (obj.query === '') {
-        //     responder.success(objs);
-        //     // connection.send('executeQuery', {result: objs});
-        //     return;
-        //   }
-
-        //   let res;
-        //   try {
-        //     res = objs.filtered(obj.query);
-        //     responder.success(res);
-        //   } catch (err) {
-        //     responder.error({message: err.message});
-        //     // res = {result: err.message};
-        //   }
-        //   // responder.error(res);
-        //   // connection.send('executeQuery', res);
-        // });
         connection.receive('downloadData', (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {
