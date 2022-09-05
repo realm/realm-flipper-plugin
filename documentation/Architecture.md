@@ -22,7 +22,7 @@ The main responsibility of the DataVisualizer is to render the [DataTable](#data
 
 ### DataTable
 
-The DataTable uses the [Ant Design Table](https://ant.design/components/table/) (antd table) to display data but adds extra functions for the use context of visualizing Realm objects. 
+The DataTable uses the [Ant Design Table](https://ant.design/components/table/) (antd table) to display data but extra functions are added for the use context of visualizing Realm objects. 
 
 #### antdColumns and schemaObjToColumns()
 
@@ -51,15 +51,19 @@ Also for deleting objects the context menu is used in order to call the removeOb
 
 ### RealmDataInspector
 
-The RealmDataInspector ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/RealmDataInspector.tsx)) is used to explore data in the sidebar in JSON format. It is used in the DataVisualizer which also manages its state. The RealmDataInspector makes use of Flippers DataInspector.
+The RealmDataInspector ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/RealmDataInspector.tsx)) is used to explore data in the sidebar in JSON format. It is used in the DataVisualizer which also manages its state. The RealmDataInspector implements Flippers DataInspector.
 
 Note:
 A usage example of the DataInspector can be found [here](https://fbflipper.com/docs/tutorial/js-custom/). During the development of this proof-of-concept the DataInspector was not documented on the Flipper website. In the future it might get documented [here](https://fbflipper.com/docs/extending/flipper-plugin/#datainspector).
 
 ## SchemaVisualizer
 
+The SchemaVisualizer ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/SchemaVisualizer.tsx)) is the main component of the 'Schema' tab. It renders a list of schema properties and their configuration. Mainly it makes use of the antd table for which it creates column and row objects with createColumnConfig() and createRows().
+It makes use of some smaller imported functions and components that can be understood from the source code.
+
 ## SchemaGraph
 
+The SchemaGraph ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/SchemaGraph.tsx)) uses [Mermaid](https://mermaid-js.github.io/mermaid) to create a graph from the schemas stored in the plugin state. It contains a function calculateMermaid() which returns a configuration string based on the array of schema objects handed to it. This string is used to generate the Mermaid component.
 
 # Mobile Plugin
 
