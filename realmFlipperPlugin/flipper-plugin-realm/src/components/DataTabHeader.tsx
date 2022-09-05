@@ -23,7 +23,6 @@ export const DataTabHeader = ({ currentSchema, totalObjects }: InputType) => {
           padding: 10,
           paddingLeft: 20,
           fontWeight: 500,
-          textDecoration: 'underline',
           color: '#70757a',
         }}
       >
