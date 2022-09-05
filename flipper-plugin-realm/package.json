@@ -1,0 +1,86 @@
+{
+  "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
+  "name": "realm-flipper-plugin",
+  "id": "realm",
+  "version": "1.0.0",
+  "pluginType": "client",
+  "main": "dist/bundle.js",
+  "flipperBundlerEntry": "src/index.tsx",
+  "license": "MIT",
+  "keywords": [
+    "flipper-plugin"
+  ],
+  "icon": "apps",
+  "title": "Realm",
+  "scripts": {
+    "prepack": "flipper-pkg bundle",
+    "build": "flipper-pkg bundle",
+    "watch": "flipper-pkg bundle --watch",
+    "test": "jest --no-watchman",
+    "fix": "eslint --fix src/*",
+    "lint": "eslint",
+    "architecture": "depcruise --exclude \"src/components/objectManipulation/\" --include-only \"^src\" --output-type dot src | dot -T svg > dependencygraph.svg"
+  },
+  "peerDependencies": {
+    "@emotion/styled": "latest",
+    "antd": "latest",
+    "flipper-plugin": "^0.153.0",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "latest",
+    "@babel/preset-typescript": "latest",
+    "@emotion/styled": "latest",
+    "@testing-library/react": "latest",
+    "@types/jest": "^28.1.5",
+    "@types/mermaid": "^8.2.9",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@types/react-infinite-scroller": "^1.2.3",
+    "@types/react-window-infinite-loader": "^1.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "antd": "latest",
+    "css-loader": "^6.7.1",
+    "dependency-cruiser": "^11.14.2",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.30.1",
+    "flipper-pkg": "latest",
+    "flipper-plugin": "latest",
+    "jest": "latest",
+    "jest-mock-console": "latest",
+    "prettier": "^2.7.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "ts-jest": "^28.0.6",
+    "typescript": "^4.4.4"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "transformIgnorePatterns": [
+      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
+    ],
+    "setupFiles": [
+      "<rootDir>/jest-setup.ts"
+    ]
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "antd-table-infinity": "^1.1.6",
+    "bson": "^4.6.5",
+    "dot": "^1.1.3",
+    "electron": "^20.0.3",
+    "jest-environment-jsdom": "^28.1.3",
+    "js-big-decimal": "^1.3.5",
+    "js-file-download": "^0.4.12",
+    "mermaid": "^9.1.4",
+    "moment": "^2.29.4",
+    "pretty-print-json": "^1.2.5",
+    "react-infinite-scroller": "^1.2.6",
+    "react-mermaid2": "^0.1.4",
+    "react-native-uuid": "^2.0.1"
+  }
+}
