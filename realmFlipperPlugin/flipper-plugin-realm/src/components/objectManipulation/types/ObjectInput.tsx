@@ -1,5 +1,5 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, Menu, Modal, Row, Tag, Typography } from 'antd';
+import { Button, Col, Modal, Row, Tag, Typography } from 'antd';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
@@ -25,7 +25,7 @@ export const ObjectInput = ({
   const [visible, setVisible] = useState(false);
   const [objects, setObjects] = useState<RealmObject[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setcursor] = useState<number | null>(null);
+  const [cursor, setCursor] = useState<number | null>(null);
   const [totalObjects, setTotalObjects] = useState(0);
 
   const targetSchema = schemas.find(
@@ -49,9 +49,9 @@ export const ObjectInput = ({
           <Button
             disabled={isPrimary}
             icon={<ClearOutlined />}
-            onClick={(e) => {
+            onClick={() => {
               setObjects([]);
-              setcursor(null);
+              setCursor(null);
               set(null);
               setChosen(false);
             }}
@@ -69,7 +69,7 @@ export const ObjectInput = ({
     const onCancel = () => {
       setVisible(false);
       setObjects([]);
-      setcursor(null);
+      setCursor(null);
     };
     const onChosen = (object: RealmObject) => {
       if (!object) {
@@ -93,7 +93,7 @@ export const ObjectInput = ({
         .then((response: ObjectsMessage) => {
           setObjects([...objects, ...response.objects]);
           setHasMore(response.hasMore);
-          setcursor(response.nextCursor);
+          setCursor(response.nextCursor);
           setTotalObjects(response.total);
         });
     };

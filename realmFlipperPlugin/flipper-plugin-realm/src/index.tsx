@@ -236,7 +236,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
           const nextCursor = response.nextCursor;
 
-          if (state.currentSchema?.name !== schema) {
+          if (!state.currentSchema || state.currentSchema?.name !== schema) {
             return;
           }
           const objects = convertObjects(

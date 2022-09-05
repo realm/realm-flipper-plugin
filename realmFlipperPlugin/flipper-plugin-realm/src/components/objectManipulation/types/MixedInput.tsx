@@ -12,7 +12,7 @@ export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => 
   const [visible, setVisible] = useState(false);
   const [chosenType, setChosenType] = useState(
     // stores type or objectType if it's an object
-    defaultValue === null ? 'string' : defaultValue?.type
+    defaultValue === null ? 'string' : (defaultValue as Record<string, unknown>).type
   );
 
   const [value, setValue] = useState<unknown | undefined>(

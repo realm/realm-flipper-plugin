@@ -11,10 +11,17 @@ export const DataInput = ({ set, isPrimary, defaultValue }: TypeInputProps) => {
     selectedFile?: UploadFile<unknown>;
     selectedFileList: UploadFile<unknown>[];
   } = {
-    selectedFileList: defaultValue ? [{
-      uid: '',
-      name: 'data: '+ defaultValue.length + ' bytes',
-    }] : [],
+    selectedFileList: defaultValue
+      ? [
+          {
+            uid: '',
+            name:
+              'data: ' +
+              (defaultValue as Record<'length', number>).length +
+              ' bytes', //TODO: ask Tomasz about this
+          },
+        ]
+      : [],
   };
   const [state, setState] = useState(initialState);
 
