@@ -195,7 +195,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     return client.send('getObjects', {
       schema: schema ?? state.currentSchema?.name,
       realm: realm ?? state.selectedRealm,
-      cursor: typeof cursor === 'number' ? cursor : null,
+      cursor: cursor,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
       query: state.query,
@@ -223,6 +223,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       .then(
         (response: ObjectsMessage) => {
           const state = pluginState.get();
+          console.log("response",response)
           if (response.objects && !response.objects.length) {
             pluginState.set({
               ...state,
