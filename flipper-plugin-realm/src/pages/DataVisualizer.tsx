@@ -5,13 +5,14 @@ import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import {
   CustomDropdown,
   DropdownPropertyType,
-  MenuItemGenerator
+  MenuItemGenerator,
 } from '../components/CustomDropdown';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
 import {
-  InspectionDataType, RealmDataInspector
+  InspectionDataType,
+  RealmDataInspector,
 } from '../components/RealmDataInspector';
 
 type PropertyType = {
@@ -97,28 +98,24 @@ const DataVisualizer = ({
         Object.keys(row).forEach((key) => {
           object[key as keyof RealmObject] = row[key];
         });
-        setGoForwardStack([]);
-        setGoBackStack([]);
         setNewInspectionData({
           data: {
             [schema.name]: object,
           },
           view: 'object',
-        });
+        },true);
       },
     },
     {
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
-        setGoForwardStack([]);
-        setGoBackStack([]);
         setNewInspectionData({
           data: {
             [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
           },
           view: 'property',
-        });
+        },true);
       },
     },
     {
@@ -211,7 +208,9 @@ const DataVisualizer = ({
             }}
             visible={editingObject.editing}
           ></ObjectEdit>
-        ) : editingObject.editing && editingObject.type === 'field' && editingObject.object ? (
+        ) : editingObject.editing &&
+          editingObject.type === 'field' &&
+          editingObject.object ? (
           <FieldEdit
             schema={currentSchema}
             fieldName={editingObject.fieldName as string}
@@ -265,11 +264,17 @@ const DataVisualizer = ({
   );
 
   // update inspectionData and push object to GoBackStack
-  function setNewInspectionData(newInspectionData: InspectionDataType) {
+  function setNewInspectionData(
+    newInspectionData: InspectionDataType,
+    wipeStacks?: boolean
+  ) {
     showSidebar ? null : setShowSidebar(true);
-    if (inspectionData !== undefined) {
+    if (inspectionData !== undefined && !wipeStacks) {
       goBackStack.push(inspectionData);
       setGoBackStack(goBackStack);
+      setGoForwardStack([]);
+    } else if (wipeStacks) {
+      setGoBackStack([]);
       setGoForwardStack([]);
     }
     setInspectionData(newInspectionData);

@@ -37,7 +37,10 @@ type PropertyType = {
   hasMore: boolean;
   totalObjects?: number;
   fetchMore: () => void;
-  setNewInspectionData: (inspectionData: InspectionDataType) => void;
+  setNewInspectionData: (
+    inspectionData: InspectionDataType,
+    wipeStacks?: boolean
+  ) => void;
   clickAction?: (object: RealmObject) => void;
 };
 
@@ -131,7 +134,7 @@ PropertyType) => {
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() =>
-            setNewInspectionData({ data: value, view: inspectorView })
+            setNewInspectionData({ data: value, view: inspectorView }, true)
           }
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
