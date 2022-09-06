@@ -77,16 +77,11 @@ const convertObjectFromDesktop = (
     throw new Error('Converting with missing schema name');
   }
   const readObject = (objectType: string, value: any) => {
-    const innerSchema = realm.schema.find(
-      schema => schema.name === objectType,
-    ) as CanonicalObjectSchema;
-    const convertedKey = convertLeaf(
-      value[schemaObj?.primaryKey as string],
-      innerSchema.properties[innerSchema.primaryKey as string].type,
-    );
+    const objectKey = value._objectKey;
+
     return value === null
       ? null
-      : realm.objectForPrimaryKey(objectType, convertedKey);
+      : realm._objectForObjectKey(objectType, objectKey);
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
