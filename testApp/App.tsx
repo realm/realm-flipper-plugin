@@ -29,6 +29,7 @@ import {
   MailCarrier,
   DataSchema,
   Person,
+  NoPrimaryKeyLink,
 } from './TestData/Schemas';
 
 import {
@@ -42,7 +43,8 @@ import {
   Button,
 } from 'react-native';
 
-import RealmPlugin from 'realm-flipper-plugin-device';
+// import RealmPlugin from 'realm-flipper-plugin-device';
+import RealmPlugin from './RealmPlugin';
 
 import {
   Colors,
@@ -66,6 +68,7 @@ const realm = new Realm({
     SetsSchema,
     DataSchema,
     Person,
+    NoPrimaryKeyLink,
   ],
   path: 'main',
   schemaVersion: 401,

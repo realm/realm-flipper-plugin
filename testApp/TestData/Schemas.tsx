@@ -195,3 +195,18 @@ export const DataSchema = {
   },
   primaryKey: '_id',
 };
+
+export const NoPrimaryKeyLink = {
+  name: 'NoPrimaryKeyLink',
+  properties: {
+    link: 'NoPrimaryKey',
+    dict: {
+      type: 'dictionary',
+      objectType: 'uuid',
+    },
+    dataList: {
+      type: 'list',
+      objectType: 'data',
+    },
+  },
+};

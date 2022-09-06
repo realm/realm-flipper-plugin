@@ -129,7 +129,7 @@ function parseLinkedObject(
 ): string {
   let returnValue = '';
   const childSchema: SchemaObject | undefined = schema;
-  if (childSchema !== undefined) {
+  if (childSchema.primaryKey != undefined && childSchema !== undefined) {
     returnValue =
       '[' +
       childSchema.name +
@@ -138,6 +138,9 @@ function parseLinkedObject(
       childSchema.primaryKey +
       ': ' +
       linkedObj[childSchema.primaryKey];
+  }
+  else {
+    returnValue = '[' + childSchema.name + ']._objectKey: ' + linkedObj._objectKey;
   }
 
   return returnValue;
