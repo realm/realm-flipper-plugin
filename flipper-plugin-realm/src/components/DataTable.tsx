@@ -190,11 +190,7 @@ PropertyType) => {
               icon={<PlusOutlined />}
               onClick={(event) => {
                 event.stopPropagation();
-                expandRow(
-                  row._objectKey,
-                  linkedSchema,
-                  value as RealmObject
-                );
+                expandRow(row._objectKey, linkedSchema, value as RealmObject);
               }}
               ghost
             />
@@ -257,7 +253,7 @@ PropertyType) => {
                 //@ts-ignore
                 pointerX: env.clientX - 290,
                 //@ts-ignore
-                pointerY: env.clientY - 195,
+                pointerY: env.clientY - 225,
                 scrollX,
                 scrollY,
               });
@@ -296,7 +292,7 @@ PropertyType) => {
             schemas={schemas}
             currentSchema={linkedSchema}
             sortingColumn={null}
-            hasMore={hasMore}
+            hasMore={false}
             generateMenuItems={generateMenuItems}
             setdropdownProp={setdropdownProp}
             dropdownProp={dropdownProp}
