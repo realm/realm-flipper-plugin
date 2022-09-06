@@ -97,7 +97,7 @@ function createBanana() {
   let banana1;
   realm.write(() => {
     banana1 = realm.create('Banana', {
-      _id: 3,
+      _id: Math.floor(Math.random() * 100000000),
       name: 'Jack',
       color: 'yellow',
       length: 40,
@@ -112,17 +112,22 @@ function createBanana() {
 //   createBanana();
 // }
 
-function deleteBanana() {    
+function deleteBanana() {
   realm.write(() => {
     //realm.delete(realm.objects("Banana"));
-    realm.delete(realm.objectForPrimaryKey('Banana', 3));
+    realm.delete(realm.objects('Banana')[0]);
   });
 }
 
+let index = 0;
+
 function editBanana() {
+  const bananas = realm.objects('Banana');
+
   realm.write(() => {
-    realm.objectForPrimaryKey('Banana', 3).color = 'Blue';
+    bananas[Math.floor(Math.random() * bananas.length)].color = 'Blue';
   });
+  index++;
 }
 
 const Section = ({children, title}): Node => {
