@@ -31,14 +31,11 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
     (schema) => schema.name === schemaName
   ) as CanonicalObjectSchema;
 
-  //console.log('object before', schemaName);
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj.properties[value[0]];
-    // console.log('handling val: ', value, 'of type', type);
     switch (type.name) {
       case "data":
         const array = value[1] as ArrayBuffer;
-        console.log("array found is", array);
         const view = new Uint8Array(array);
         let result: number[] = [];
         for (let i = 0; i < view.length; i++) {
@@ -56,11 +53,9 @@ const modifyObject = (object: any, schemaName: string, realm: Realm) => {
         break;
     }
   });
-  // console.log('object after', object);
 };
 
 const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
-  console.log("modifying", objects.length, "objects");
   objects.forEach((obj) => {
     modifyObject(obj, schemaName, realm);
   });
@@ -84,15 +79,10 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
         connection.send("getCurrentQuery");
 
         connection.receive("receivedCurrentQuery", (obj) => {
-          console.log("receivedCurrentQUery", obj);
           const realm = realmsMap.get(obj.realm);
           if (!realm || !obj.schema) {
             return;
           }
-          console.log(
-            "objectsCurrentlyListerningTo",
-            objectsCurrentlyListeningTo
-          );
           listenerHandler = new Listener(
             objectsCurrentlyListeningTo,
             obj.schema,
@@ -112,7 +102,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
         });
 
         connection.receive("getObjects", (req, responder) => {
-          console.log("message: ", req);
           const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({ message: "No realm found" });
@@ -158,7 +147,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             try {
               objects = objects.filtered(query);
             } catch (e) {
-              console.log("error, returning:", e.message);
               responder.error({
                 message: e.message,
               });
@@ -206,10 +194,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             }
             const schemaObj = realm.schema.find((s) => s.name === obj.schema);
             let pk;
-            console.log(
-              "schemaObj.properties[schemaObj.primaryKey].type",
-              schemaObj.properties[schemaObj.primaryKey].type
-            );
             switch (schemaObj.properties[schemaObj.primaryKey].type) {
               // case 'object':
               //   return readObject(objectType as string, value);
@@ -230,10 +214,8 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
               //   break;
 
               default:
-                // console.log('returning default', value)
                 pk = obj.primaryKey;
             }
-            console.log("obj.primaryKey", pk);
             try {
               const object = realm.objectForPrimaryKey(
                 obj.schema,
@@ -264,7 +246,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           if (!realm) {
             return;
           }
-          // console.log('addObject', obj);
           const converted = convertObjectsFromDesktop(
             [obj.object],
             realm,
@@ -331,14 +312,12 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
       onDisconnect() {
         if (listenerHandler) {
           listenerHandler.removeAllListeners();
-          console.log("Disconnected");
         }
       },
     });
     return () => {
       if (listenerHandler) {
         listenerHandler.removeAllListeners();
-        console.log("Disconnected");
       }
     };
   });

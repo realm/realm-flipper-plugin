@@ -72,7 +72,6 @@ const convertObjectFromDesktop = (
   schemaName?: string,
 ) => {
   delete object._objectKey;
-  // console.log('object:', object, schemaName);
   if (!schemaName) {
     throw new Error('Converting with missing schema name');
   }
@@ -90,9 +89,6 @@ const convertObjectFromDesktop = (
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    // console.log('convertLeaf', value, type);
-
-    // console.log(value);
     switch (type) {
       case 'object':
         return readObject(objectType as string, value);
@@ -103,11 +99,9 @@ const convertObjectFromDesktop = (
       case 'objectId':
         return new BSON.ObjectId(value);
       case 'data':
-        // console.log('data with value:', typeof value.length);
         const arr = new Uint8Array(value);
         return arr;
       default:
-        // console.log('returning default', value)
         return value;
     }
   };
@@ -116,17 +110,14 @@ const convertObjectFromDesktop = (
     if (val === null) {
       return null;
     }
-    console.log('got type', property);
     switch (property.type) {
       case 'set':
-        //console.log('received set:', val);
         // due to a problem with serialization, Set is being passed over as a list
         const realVal = (val as any[]).map(value => {
           return convertLeaf(value, property.objectType);
         });
         return realVal;
       case 'list':
-        // console.log('prop:', property, ' val:', val);
         return val.map(obj => {
           return convertLeaf(obj, property.objectType as string);
         });
@@ -145,8 +136,6 @@ const convertObjectFromDesktop = (
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj?.properties[value[0]];
     obj[value[0]] = convertRoot(value[1], type);
-  });
-  // console.log('returning', obj);
-  // console.log('example:', new BSON.UUID());
+  });;
   return obj;
 };

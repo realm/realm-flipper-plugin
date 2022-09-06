@@ -20,7 +20,6 @@ export class Listener {
     schemas
   ) {
     this.objectsCurrentlyListeningTo = objectsCurrentlyListeningTo;
-    console.log("initialized", objectsCurrentlyListeningTo);
     this.schema = schema;
     this.objects = objects;
     this.sortingColumn = sortingColumn;
@@ -30,17 +29,13 @@ export class Listener {
   }
 
   removeAllListeners() {
-    console.log("removing all from", this.objectsCurrentlyListeningTo);
     if (this.objectsCurrentlyListeningTo.length) {
-      console.log("removing all");
       this.objectsCurrentlyListeningTo.removeAllListeners();
     }
   }
 
   handleAddListener() {
-    console.log("removing before adding", this.objectsCurrentlyListeningTo);
     if (this.objectsCurrentlyListeningTo.length) {
-      console.log("removing");
       this.objectsCurrentlyListeningTo.removeAllListeners();
     }
     let objectsToListenTo: Realm.Results<Object> = this.objects;
@@ -53,10 +48,6 @@ export class Listener {
     }
     objectsToListenTo.addListener(this.onObjectsChange);
     this.objectsCurrentlyListeningTo = objectsToListenTo;
-    console.log(
-      "objectsCurrentlyListerningTo",
-      this.objectsCurrentlyListeningTo
-    );
     return this.objectsCurrentlyListeningTo;
   }
 
