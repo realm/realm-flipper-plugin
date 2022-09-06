@@ -1,4 +1,4 @@
-import { EnterOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import { SorterResult } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
@@ -183,7 +183,7 @@ PropertyType) => {
               shape="circle"
               type="primary"
               size="small"
-              icon={<EnterOutlined />}
+              icon={<PlusOutlined />}
               onClick={(event) => {
                 event.stopPropagation();
                 expandRow(
