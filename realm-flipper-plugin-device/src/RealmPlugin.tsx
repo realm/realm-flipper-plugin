@@ -68,6 +68,10 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
   useEffect(() => {
     let objectsCurrentlyListeningTo: Realm.Results<Realm.Object> = [];
     realms.forEach((realm) => {
+      console.log("realm", realm.prototype);
+      if (!realm.hasOwnProperty("_objectForObjectKey")) {
+        throw new Error("You need to be on realm 10.20.0 or higher");
+      }
       realmsMap.set(realm.path, realm);
     });
     addPlugin({
@@ -121,7 +125,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           );
           objectsCurrentlyListeningTo = listenerHandler.handleAddListener();
           const totalObjects = objects.length;
-          if (!totalObjects || objects.isEmpty()) {
+          if (!totalObjects || !objects[0] || objects.isEmpty()) {
             responder.success({
               objects: [],
               total: totalObjects,
