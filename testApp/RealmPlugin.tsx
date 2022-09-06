@@ -20,53 +20,13 @@ type PluginConfig = {
 type getObjectsQuery = {
   schema: string;
   realm: string;
-  cursor: number;
+  cursor: string;
   limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;
 };
 
-const modifyObject = (object: any, schemaName: string, realm: Realm) => {
-  const schemaObj = realm.schema.find(
-    schema => schema.name === schemaName,
-  ) as CanonicalObjectSchema;
-
-  //console.log('object before', schemaName);
-  Object.entries(object).forEach((value: [string, unknown]) => {
-    const type = schemaObj.properties[value[0]];
-    // console.log('handling val: ', value, 'of type', type);
-    switch (type.name) {
-      case 'data':
-        const array = value[1] as ArrayBuffer;
-        console.log('array found is', array);
-        const view = new Uint8Array(array);
-        let result: number[] = [];
-        for (let i = 0; i < view.length; i++) {
-          result = [...result, view[i]];
-        }
-        object[value[0]] = result;
-        break;
-      case 'list':
-      case 'dictionary':
-      case 'set':
-      case 'object':
-        // TODO: handle recursive stuff
-        break;
-      default:
-        break;
-    }
-  });
-  // console.log('object after', object);
-};
-
-const modifyObjects = (objects: any[], schemaName: string, realm: Realm) => {
-  console.log('modifying', objects.length, 'objects');
-  objects.forEach(obj => {
-    modifyObject(obj, schemaName, realm);
-  });
-};
-
-const RealmPlugin = ((props: {realms: Realm[]}) => {
+const RealmPlugin = (props: {realms: Realm[]}) => {
   let realmsMap = new Map<string, Realm>();
   let listenerHandler: Listener;
   const {realms} = props;
@@ -149,7 +109,8 @@ const RealmPlugin = ((props: {realms: Realm[]}) => {
           let indexOfFirstObject = objects.findIndex(
             obj => obj._objectKey() === firstObject._objectKey(),
           );
-          if (query) { //Filtering if RQL query is provided
+          if (query) {
+            //Filtering if RQL query is provided
             try {
               objects = objects.filtered(query);
             } catch (e) {
@@ -338,6 +299,6 @@ const RealmPlugin = ((props: {realms: Realm[]}) => {
     };
   });
   return <></>;
-});
+};
 
 export default React.memo(RealmPlugin);

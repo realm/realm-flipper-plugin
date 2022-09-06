@@ -1,4 +1,3 @@
-
 # Architecture
 
 On a high level the Realm Flipper Plugin consists of the desktop plugin and the mobile plugin on the device which communicate using Remote Procedure Calls (RPC). In the following we take a closer look at these components and explain how they work on the inside.
@@ -16,13 +15,13 @@ Besides the plugin the index file contains the functional component with the nam
 
 ## DataVisualizer
 
-The DataVisualizer ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/DataVisualizer.tsx)) is the core component of the data tab. It is implemented in index.tsx with a DataVisualizerWrapper ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx)) which adds a SchemaSelect ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/SchemaSelect.tsx)) and the DataTabHeader ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx)) for querying and creating objects.
+The DataVisualizer ([.tsx](../flipper-plugin-realm/src/pages/DataVisualizer.tsx)) is the core component of the data tab. It is implemented in index.tsx with a DataVisualizerWrapper ([.tsx](../flipper-plugin-realm/src/components/DataVisualizerWrapper.tsx)) which adds a SchemaSelect ([.tsx](../flipper-plugin-realm/src/components/SchemaSelect.tsx)) and the DataTabHeader ([.tsx](../flipper-plugin-realm/src/components/DataTabHeader.tsx)) for querying and creating objects.
 
-The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTable.tsx)) showing the Realm objects of the selected schema and the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
+The main responsibility of the DataVisualizer is to render the [DataTable](#datatable) ([.tsx](../flipper-plugin-realm/src/components/DataTable.tsx)) showing the Realm objects of the selected schema and the selected Realm. Besides this, it contains functions and state for rendering and hiding the RealmDataInspector and the Dropdown Menu
 
 ### DataTable
 
-The DataTable uses the [Ant Design Table](https://ant.design/components/table/) (antd table) to display data but extra functions are added for the use context of visualizing Realm objects. 
+The DataTable uses the [Ant Design Table](https://ant.design/components/table/) (antd table) to display data but extra functions are added for the use context of visualizing Realm objects.
 
 #### antdColumns and schemaObjToColumns()
 
@@ -38,32 +37,33 @@ A special functionality of the antd table are [expandable rows](https://ant.desi
 
 ### Querying
 
-The query functionality is implemented into the DataTabHeader ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/DataTabHeader.tsx)) by the RealmQueryInput component ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/Query.tsx)). It makes use of the executeQuery() function in the plugin API to execute the entered query. The result of the query is saved by updating the state. If an error occurs, it is propagated to the user using an alert.
+The query functionality is implemented into the DataTabHeader ([.tsx](../flipper-plugin-realm/src/components/DataTabHeader.tsx)) by the RealmQueryInput component ([.tsx](../flipper-plugin-realm/src/components/Query.tsx)). It makes use of the executeQuery() function in the plugin API to execute the entered query. The result of the query is saved by updating the state. If an error occurs, it is propagated to the user using an alert.
 
 ### Dropdown Menu
 
-The dropdown menu is rendered inside the DataVisualizer. The component CustomDropdown ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/CustomDropdown.tsx)) defines a generic dropdown. Its menu items are specified using a property. The dropdown is opened in the DataTable inside the onCell property of the antdColumns and closed in the DataInspector by listening to a click event.
+The dropdown menu is rendered inside the DataVisualizer. The component CustomDropdown ([.tsx](../flipper-plugin-realm/src/components/CustomDropdown.tsx)) defines a generic dropdown. Its menu items are specified using a property. The dropdown is opened in the DataTable inside the onCell property of the antdColumns and closed in the DataInspector by listening to a click event.
 
 ### Adding, editing and deleting fields and objects
 
-The DataVisualizer makes use of the components FieldEdit ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/objectManipulation/FieldEdit.tsx)) and ObjectEdit ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/objectManipulation/ObjectEdit.tsx)) to manipulate data in the database. These are managed using useState hooks and triggered from the dropdown menu.
-Also for deleting objects the context menu is used in order to call the removeObject function in the plugin API. Through an RPC call the respective object is deleted and the UI is updated. 
+The DataVisualizer makes use of the components FieldEdit ([.tsx](../flipper-plugin-realm/src/components/objectManipulation/FieldEdit.tsx)) and ObjectEdit ([.tsx](../flipper-plugin-realm/src/components/objectManipulation/ObjectEdit.tsx)) to manipulate data in the database. These are managed using useState hooks and triggered from the dropdown menu.
+Also for deleting objects the context menu is used in order to call the removeObject function in the plugin API. Through an RPC call the respective object is deleted and the UI is updated.
 
 ### RealmDataInspector
 
-The RealmDataInspector ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/components/RealmDataInspector.tsx)) is used to explore data in the sidebar in JSON format. It is used in the DataVisualizer which also manages its state. The RealmDataInspector implements Flippers DataInspector.
+The RealmDataInspector ([.tsx](../flipper-plugin-realm/src/components/RealmDataInspector.tsx)) is used to explore data in the sidebar in JSON format. It is used in the DataVisualizer which also manages its state. The RealmDataInspector implements Flippers DataInspector.
 
 Note:
 A usage example of the DataInspector can be found [here](https://fbflipper.com/docs/tutorial/js-custom/). During the development of this proof-of-concept the DataInspector was not documented on the Flipper website. In the future it might get documented [here](https://fbflipper.com/docs/extending/flipper-plugin/#datainspector).
 
 ## SchemaVisualizer
 
-The SchemaVisualizer ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/SchemaVisualizer.tsx)) is the main component of the 'Schema' tab. It renders a list of schema properties and their configuration. Mainly it makes use of the antd table for which it creates column and row objects with createColumnConfig() and createRows().
+The SchemaVisualizer ([.tsx](../flipper-plugin-realm/src/pages/SchemaVisualizer.tsx)) is the main component of the 'Schema' tab. It renders a list of schema properties and their configuration. Mainly it makes use of the antd table for which it creates column and row objects with createColumnConfig() and createRows().
 It makes use of some smaller imported functions and components that can be understood from the source code.
 
 ## SchemaGraph
 
-The SchemaGraph ([.tsx](../realmFlipperPlugin/flipper-plugin-realm/src/pages/SchemaGraph.tsx)) uses [Mermaid](https://mermaid-js.github.io/mermaid) to create a graph from the schemas stored in the plugin state. It contains a function calculateMermaid() which returns a configuration string based on the array of schema objects handed to it. This string is used to generate the Mermaid component.
+The SchemaGraph ([.tsx](../flipper-plugin-realm/src/pages/SchemaGraph.tsx)) uses [Mermaid](https://mermaid-js.github.io/mermaid) to create a graph from the schemas stored in the plugin state. It contains a function calculateMermaid() which returns a configuration string based on the array of schema objects handed to it. This string is used to generate the Mermaid component.
 
 # Mobile Plugin
 
+The mobile plugins job is to establish a communication between the desktop application and the mobile device. It is split into the three parts RealmPlugin ([.tsx](../realm-flipper-plugin-device/src/RealmPlugin.tsx)), Listener ([.ts](../realm-flipper-plugin-device/src/Listener.ts)), ConvertFunctions ([.tsx](../realm-flipper-plugin-device/src/ConvertFunctions.tsx)).

@@ -68,7 +68,7 @@ const realm = new Realm({
     Person,
   ],
   path: 'main',
-  schemaVersion: 400,
+  schemaVersion: 401,
 });
 
 const realm2 = new Realm({
@@ -196,7 +196,7 @@ const App: () => Node = () => {
           </Button>
           <Button
             title="Delete + create Parcel Testdata"
-            onPress={() => createParcelTestData(realm)}>
+            onPress={() => createParcelTestData(realm2)}>
             {' '}
           </Button>
           <Section title="See Your Changes">

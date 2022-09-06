@@ -37,7 +37,10 @@ type PropertyType = {
   hasMore: boolean;
   totalObjects?: number;
   fetchMore: () => void;
-  setNewInspectionData: (inspectionData: InspectionDataType) => void;
+  setNewInspectionData: (
+    inspectionData: InspectionDataType,
+    wipeStacks?: boolean
+  ) => void;
   clickAction?: (object: RealmObject) => void;
 };
 
@@ -128,10 +131,11 @@ PropertyType) => {
         <div
           style={{
             display: 'inline',
+            color: '#6831c7',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() =>
-            setNewInspectionData({ data: value, view: inspectorView })
+            setNewInspectionData({ data: value, view: inspectorView }, true)
           }
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
@@ -186,11 +190,7 @@ PropertyType) => {
               icon={<PlusOutlined />}
               onClick={(event) => {
                 event.stopPropagation();
-                expandRow(
-                  row[currentSchema.primaryKey],
-                  linkedSchema,
-                  value as RealmObject
-                );
+                expandRow(row._objectKey, linkedSchema, value as RealmObject);
               }}
               ghost
             />
@@ -253,7 +253,7 @@ PropertyType) => {
                 //@ts-ignore
                 pointerX: env.clientX - 290,
                 //@ts-ignore
-                pointerY: env.clientY - 195,
+                pointerY: env.clientY - 225,
                 scrollX,
                 scrollY,
               });
@@ -277,6 +277,10 @@ PropertyType) => {
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
+    console.log('expandRow');
+    console.log('objectToRender._objectKey', objectToRender._objectKey);
+    console.log('objectToRender', objectToRender);
+
     const newRowExpansionProp = {
       ...rowExpansionProp,
       expandedRowKeys: [rowToExpandKey],
@@ -288,7 +292,7 @@ PropertyType) => {
             schemas={schemas}
             currentSchema={linkedSchema}
             sortingColumn={null}
-            hasMore={hasMore}
+            hasMore={false}
             generateMenuItems={generateMenuItems}
             setdropdownProp={setdropdownProp}
             dropdownProp={dropdownProp}
@@ -419,6 +423,8 @@ const NestedTable = ({
   dropdownProp,
   hasMore,
 }: PropertyType) => {
+  console.log('NestedTable');
+
   return (
     <DataTable
       columns={columns}

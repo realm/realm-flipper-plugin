@@ -7,7 +7,7 @@ export type RealmPluginState = {
   currentSchema: SchemaObject | null;
   schemaHistory: SchemaObject[];
   schemaHistoryIndex: number;
-  cursor: number | null;
+  cursor: string | null;
   totalObjects: number;
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
@@ -77,14 +77,14 @@ export type EditObject = {
   realm?: string;
   object: RealmObject;
   propsChanged?: string[];
-  objectKey: number;
+  objectKey: string;
 };
 
 export type RemoveObject = {
   schema?: string;
   realm?: string;
   object: RealmObject;
-  objectKey: number;
+  objectKey: string;
 };
 
 export type AddObject = {
@@ -101,7 +101,7 @@ export type RealmsMessage = {
 export type ObjectsMessage = {
   objects: Array<RealmObject>;
   total: number;
-  nextCursor: number;
+  nextCursor: string;
   prev_cursor: { [sortingField: string]: number };
   hasMore: boolean;
 };
@@ -117,7 +117,7 @@ type RealmRequest = {
 type getForwardsObjectsRequest = {
   schema: string;
   realm: string;
-  cursor: number | null;
+  cursor: string | null;
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
   query: string;
@@ -132,7 +132,7 @@ export type AddLiveObjectRequest = {
   newObject: RealmObject;
   index: number;
   schema: string;
-  newObjectKey: number;
+  newObjectKey: string;
 };
 export type DeleteLiveObjectRequest = {
   index: number;
@@ -142,7 +142,7 @@ export type EditLiveObjectRequest = {
   newObject: RealmObject;
   index: number;
   schema: string;
-  newObjectKey: number;
+  newObjectKey: string;
 };
 type QueryObject = {
   schema: string;
