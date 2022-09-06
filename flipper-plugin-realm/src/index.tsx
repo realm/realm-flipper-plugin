@@ -86,7 +86,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
-    console.log('Added');
+    console.log('Added', data);
     const state = pluginState.get();
     const { newObject, index, schema, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
@@ -114,7 +114,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
-    console.log('DELETE');
+    console.log('DELETE', data);
     const state = pluginState.get();
     const { index, schema } = data;
     if (schema != state.currentSchema?.name) {
@@ -130,7 +130,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
-      cursor: Number(newLastObject._objectKey),
+      cursor: newLastObject ? Number(newLastObject._objectKey) : null,
     });
   });
 
@@ -157,7 +157,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       objects: [...newObjects],
-      totalObjects: state.totalObjects - 1,
+      totalObjects: state.totalObjects,
       cursor: Number(newLastObject._objectKey),
     });
   });
