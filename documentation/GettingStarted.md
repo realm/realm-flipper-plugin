@@ -46,4 +46,4 @@ export default function App() {
 ```
 
 
-For a more detailed example using multiple schemas, see our [testApp inside this repository](https://github.com/realm/realm-flipper-plugin/tree/main/testApp).
+For a more detailed example using multiple schemas, see our [testApp inside this repository](https://github.com/realm/realm-flipper-plugin/blob/main/testApp/App.tsx).
