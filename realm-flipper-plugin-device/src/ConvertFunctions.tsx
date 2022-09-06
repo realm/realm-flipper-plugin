@@ -11,15 +11,25 @@ type PropertyDescription = {
   objectType?: string;
 };
 
-// [keys: string]: CanonicalObjectSchemaProperty
-
 const convertObjectToDesktop = (
   object: RealmObject,
   properties: {
     [keys: string]: PropertyDescription;
   },
-  // schemas: CanonicalObjectSchema[],
 ) => {
+  const obj = {};
+  Object.keys(properties).forEach(key => {
+    const property = properties[key] as PropertyDescription;
+    obj[key] = object[key];
+
+    if (property.type === 'object') {
+      obj[key] = {
+        ...obj[key],
+        _objectKey: obj[key]._objectKey(),
+      };
+    }
+  });
+
   const replacer = (key, value) => {
     if (!key) {
       return value;
@@ -30,17 +40,16 @@ const convertObjectToDesktop = (
     }
     if (property.type === 'data') {
       return {
-        $binaryData: value?.byteLength, //TODO: inside of "Maybe" schema, value is null which throws an error
+        $binaryData: value?.byteLength,
       };
-    }
-    if (property.type === 'mixed') {
+    } else if (property.type === 'mixed') {
       return value;
     } else {
       return value;
     }
   };
 
-  let after = JSON.parse(JSON.stringify(object, replacer));
+  let after = JSON.parse(JSON.stringify(obj, replacer));
   // save so that it's sent over -> serialization would remove a function
   after._objectKey = object._objectKey();
   return after;
@@ -53,8 +62,8 @@ export const convertObjectsToDesktop = (
   return objects.map(obj => convertObjectToDesktop(obj, schema.properties));
 };
 
-// OBJECT FROM DESKTOP TO REALM TYPES
 /*
+OBJECT FROM DESKTOP TO REALM TYPES
 the other way around complicated because we send entire inner objects
 if that's not the case, can be changed to shallow conversion of all the properties
 */
@@ -76,16 +85,11 @@ const convertObjectFromDesktop = (
     throw new Error('Converting with missing schema name');
   }
   const readObject = (objectType: string, value: any) => {
-    const innerSchema = realm.schema.find(
-      schema => schema.name === objectType,
-    ) as CanonicalObjectSchema;
-    const convertedKey = convertLeaf(
-      value[schemaObj?.primaryKey as string],
-      innerSchema.properties[innerSchema.primaryKey as string].type,
-    );
+    const objectKey = value._objectKey;
+
     return value === null
       ? null
-      : realm.objectForPrimaryKey(objectType, convertedKey);
+      : realm._objectForObjectKey(objectType, objectKey);
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
@@ -136,6 +140,6 @@ const convertObjectFromDesktop = (
   Object.entries(object).forEach((value: [string, unknown]) => {
     const type = schemaObj?.properties[value[0]];
     obj[value[0]] = convertRoot(value[1], type);
-  });;
+  });
   return obj;
 };

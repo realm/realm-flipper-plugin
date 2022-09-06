@@ -37,8 +37,16 @@ export const ObjectInput = ({
   }
 
   const renderChosen = () => {
-    const val = value[targetSchema.primaryKey];
-    const content = `${targetSchema?.primaryKey}: ${val}`;
+    let content;
+    if (targetSchema?.primaryKey !== undefined) {
+      const val = value[targetSchema.primaryKey];
+      content = `${targetSchema.primaryKey}: ${val}`;
+    }
+    else {
+      const val = value._objectKey;
+      content = `_objectKey: ${val}`;
+    }
+
     return (
       <Row style={{ width: '100%' }} align="middle">
         <Col>
