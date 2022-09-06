@@ -6,14 +6,15 @@ import { plugin } from '../../..';
 import { renderValue } from '../../../utils/Renderer';
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
-export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => {
+export const MixedInput = ({
+  set,
+  defaultValue,
+  isPrimary,
+}: TypeInputProps) => {
   const [reset, setReset] = useState(0);
   const [chosen, setChosen] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [chosenType, setChosenType] = useState(
-    // stores type or objectType if it's an object
-    defaultValue === null ? 'string' : (defaultValue as Record<string, unknown>).type
-  );
+  const [chosenType, setChosenType] = useState('string');
 
   const [value, setValue] = useState<unknown | undefined>(
     defaultValue === null ? undefined : defaultValue
@@ -130,7 +131,7 @@ export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => 
                   );
                 })}
               </Select.OptGroup>
-{/*           not supported for now
+              {/*           not supported for now
               <Select.OptGroup label="Link types">
                 {schemas.map((item, index) => {
                   return (
@@ -145,7 +146,7 @@ export const MixedInput = ({ set, defaultValue , isPrimary}: TypeInputProps) => 
               </Select.OptGroup> */}
             </Select>
             <TypeInput
-            isPrimary={isPrimary}
+              isPrimary={isPrimary}
               property={{
                 type: chosenType,
                 optional: false,

@@ -22,7 +22,7 @@ const convertObjectToDesktop = (
     const property = properties[key] as PropertyDescription;
     obj[key] = object[key];
 
-    if (property.type === 'object') {
+    if (property.type === 'object' && obj[key]) {
       obj[key] = {
         ...obj[key],
         _objectKey: obj[key]._objectKey(),
@@ -134,7 +134,11 @@ const convertObjectFromDesktop = (
           return convertLeaf(obj, property.objectType as string);
         });
       case 'dictionary':
-        return val;
+        const res = {};
+        Object.keys(val).forEach(key => {
+          res[key] = convertLeaf(val[key], property.objectType as string);
+        });
+        return res;
       case 'object':
         return readObject(property.objectType as string, val);
       default:

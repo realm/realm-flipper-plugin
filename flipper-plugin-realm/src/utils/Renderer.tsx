@@ -120,7 +120,7 @@ function parseBoolean(input: boolean): JSX.Element {
 }
 
 function parseDecimal128(input: { $numberDecimal: string }): string {
-  return input.$numberDecimal;
+  return input.$numberDecimal ?? input;
 }
 
 function parseLinkedObject(

@@ -2,9 +2,8 @@ import { ArrowRightOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import React, { useState } from 'react';
 import { SchemaProperty } from '../../../CommonTypes';
-import { MixedInput } from './MixedInput';
 import { StringInput } from './StringInput';
-import { TypeInputProps } from './TypeInput';
+import { TypeInput, TypeInputProps } from './TypeInput';
 
 const mapToObj = (map: Map<number, [string, any]>) => {
   const obj = new Object();
@@ -15,19 +14,11 @@ const mapToObj = (map: Map<number, [string, any]>) => {
   return obj;
 };
 
-export const DictionaryInput = ({ set, isPrimary }: TypeInputProps) => {
+export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) => {
   const [contents, setContents] = useState(
     new Map<number, [string, unknown]>()
   );
-  // const [_, setReset] = useState(0);
   const [resetOffset, setResetOffset] = useState(0);
-  const keyProperty: SchemaProperty = {
-    name: '',
-    type: 'string',
-    indexed: false,
-    optional: false,
-    mapTo: '',
-  };
 
   return (
     <Row gutter={[2, 4]}>
@@ -44,7 +35,10 @@ export const DictionaryInput = ({ set, isPrimary }: TypeInputProps) => {
                     setContents(contents);
                     set(mapToObj(contents));
                   }}
-                  property={keyProperty}
+                  property={{
+                    type: 'string',
+                    optional: false,
+                  }}
                   key={index + resetOffset}
                 ></StringInput>
               </Col>
@@ -52,16 +46,19 @@ export const DictionaryInput = ({ set, isPrimary }: TypeInputProps) => {
                 <ArrowRightOutlined />
               </Col>
               <Col span={13}>
-                <MixedInput
+                <TypeInput
                   isPrimary={isPrimary}
                   key={index + resetOffset}
-                  property={keyProperty}
+                  property={{
+                    type: property.objectType as string,
+                    optional: property.optional,
+                  }}
                   set={(val: any) => {
                     contents.set(index, [value[0], val]);
-                    setContents(contents);
+                    // setContents(contents);
                     set(mapToObj(contents));
                   }}
-                ></MixedInput>
+                ></TypeInput>
               </Col>
               <Col span={1}>
                 <Button
