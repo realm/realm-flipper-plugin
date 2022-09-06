@@ -72,7 +72,7 @@ const realm = new Realm({
 });
 
 const realm2 = new Realm({
-  schema: [Parcel, ParcelService, Delivery, MailCarrier, Person],
+  schema: [Parcel, ParcelService, Delivery, MailCarrier],
   schemaVersion: 7,
 });
 
