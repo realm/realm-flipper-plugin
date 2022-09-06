@@ -381,7 +381,7 @@ PropertyType) => {
             }
           }}
           rowKey={(record) => {
-            return record[currentSchema.primaryKey];
+            return record._objectKey;
           }}
           expandable={rowExpansionProp}
           columns={antdColumns}
