@@ -46,7 +46,7 @@ type PropertyType = {
 
 type ClickableTextType = {
   displayText: string;
-  addThreeDots: boolean;
+  isLongString: boolean;
   value: Record<string, unknown>;
   inspectorView: 'object' | 'property';
 };
@@ -121,7 +121,7 @@ PropertyType) => {
   /**  Functional component to render clickable text which opens the DataInspector.*/
   const ClickableText = ({
     displayText,
-    addThreeDots,
+    isLongString,
     value,
     inspectorView,
   }: ClickableTextType) => {
@@ -131,7 +131,7 @@ PropertyType) => {
         <div
           style={{
             display: 'inline',
-            color: '#6831c7',
+            color: isLongString ? undefined : '#6831c7',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() =>
@@ -142,7 +142,7 @@ PropertyType) => {
         >
           {displayText}
         </div>
-        {addThreeDots ? (
+        {isLongString ? (
           <div
             style={{
               display: 'inline',
@@ -198,7 +198,7 @@ PropertyType) => {
               <ClickableText
                 value={value}
                 displayText={cellValue}
-                addThreeDots={false}
+                isLongString={false}
                 inspectorView="object"
               />
             }
@@ -212,7 +212,7 @@ PropertyType) => {
           <ClickableText
             value={value}
             displayText={cellValue.substring(0, 70)}
-            addThreeDots={true}
+            isLongString={true}
             inspectorView="property"
           />
         );
