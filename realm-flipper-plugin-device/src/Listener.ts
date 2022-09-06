@@ -1,21 +1,22 @@
+import { Flipper } from "react-native-flipper";
 import { Results } from "realm";
 import { convertObjectsToDesktop } from "./ConvertFunctions";
 
 export class Listener {
   objectsCurrentlyListeningTo: Results<Object>;
-  schema;
-  objects;
-  sortingColumn;
-  sortingDirection;
-  connection;
+  schema: string;
+  objects: Results<Object>;
+  sortingColumn: string;
+  sortingDirection: "ascend" | "descend";
+  connection: Flipper.FlipperConnection;
   schemas;
   constructor(
-    objectsCurrentlyListeningTo,
-    schema,
-    objects,
-    sortingColumn,
-    sortingDirection,
-    connection,
+    objectsCurrentlyListeningTo: Results<Object>,
+    schema: string,
+    objects: Results<Object>,
+    sortingColumn: string,
+    sortingDirection: "ascend" | "descend",
+    connection: Flipper.FlipperConnection,
     schemas
   ) {
     this.objectsCurrentlyListeningTo = objectsCurrentlyListeningTo;
@@ -42,7 +43,7 @@ export class Listener {
       console.log("removing");
       this.objectsCurrentlyListeningTo.removeAllListeners();
     }
-    let objectsToListenTo: Realm.Results<Realm.Object> = this.objects;
+    let objectsToListenTo: Realm.Results<Object> = this.objects;
     const shouldSortDescending = this.sortingDirection === "descend";
     if (this.sortingColumn) {
       objectsToListenTo = this.objects.sorted(
@@ -60,7 +61,7 @@ export class Listener {
   }
 
   onObjectsChange = (objects, changes) => {
-    changes.deletions.forEach((index) => {
+    changes.deletions.forEach((index: number) => {
       if (this.connection) {
         this.connection.send("liveObjectDeleted", {
           index: index,
@@ -70,10 +71,10 @@ export class Listener {
       }
     });
 
-    changes.insertions.forEach((index) => {
+    changes.insertions.forEach((index: number) => {
       const inserted = objects[index];
       const schema = this.schemas.find(
-        (schemaObj) => this.schema === schemaObj.name
+        (schemaObj: Record<string, unknown>) => this.schema === schemaObj.name
       );
       const converted = convertObjectsToDesktop([inserted], schema)[0];
       if (this.connection) {
@@ -87,7 +88,7 @@ export class Listener {
       }
     });
 
-    changes.modifications.forEach((index) => {
+    changes.modifications.forEach((index: number) => {
       const modified = objects[index];
       const schema = this.schemas.find(
         (schemaObj) => this.schema === schemaObj.name
