@@ -117,9 +117,6 @@ export const RealmDataInspector = ({
                 data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
-                style={{
-                  backgroundColor: flickering ? '#6932c9' : 'transparent',
-                }}
                 onRenderName={(path, name) => {
                   // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
                   let linkedSchema: SchemaObject | undefined = schemas.find(
