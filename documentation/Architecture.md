@@ -67,3 +67,15 @@ The SchemaGraph ([.tsx](../flipper-plugin-realm/src/pages/SchemaGraph.tsx)) uses
 # Mobile Plugin
 
 The mobile plugins job is to establish a communication between the desktop application and the mobile device. It is split into the three parts RealmPlugin ([.tsx](../realm-flipper-plugin-device/src/RealmPlugin.tsx)), Listener ([.ts](../realm-flipper-plugin-device/src/Listener.ts)), ConvertFunctions ([.tsx](../realm-flipper-plugin-device/src/ConvertFunctions.tsx)).
+
+## RealmPlugin
+
+In the RealmPlugin it is specified how the mobile device is answering RPCs by the desktop plugin. Firstly, it uses the 'react-native-flipper' package in order to enable Flipper for the react native app. Secondly, the Realm plugin is added to Flipper using addPlugin() (Read more about this [here](https://fbflipper.com/docs/tutorial/react-native/)). addPlugin() receives the three callback functions getId(), onConnect() and onDisconnect(). onConnect() contains most of the mobile plugin logic. It takes a connection as argument which is used for communication. Using connection.receive() several listeners for RPCs are added. They contain callback functions to be executed when the respective procedure call is received.
+
+## Listener
+
+Listener contains several functions managing active listeners as well as adding and removing listeners. This is crucial for the live object functionality to work.
+
+## ConvertFunctions
+
+ConvertFunctions contains functions to convert serialized data received from the desktop plugin into typed data or serialize data in order to send it to the desktop plugin.
