@@ -131,6 +131,7 @@ PropertyType) => {
         <div
           style={{
             display: 'inline',
+            color: '#6831c7',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() =>
@@ -190,7 +191,7 @@ PropertyType) => {
               onClick={(event) => {
                 event.stopPropagation();
                 expandRow(
-                  row[currentSchema.primaryKey],
+                  row._objectKey,
                   linkedSchema,
                   value as RealmObject
                 );
@@ -280,6 +281,10 @@ PropertyType) => {
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
+    console.log('expandRow');
+    console.log('objectToRender._objectKey', objectToRender._objectKey);
+    console.log('objectToRender', objectToRender);
+
     const newRowExpansionProp = {
       ...rowExpansionProp,
       expandedRowKeys: [rowToExpandKey],
@@ -422,6 +427,8 @@ const NestedTable = ({
   dropdownProp,
   hasMore,
 }: PropertyType) => {
+  console.log('NestedTable');
+
   return (
     <DataTable
       columns={columns}
