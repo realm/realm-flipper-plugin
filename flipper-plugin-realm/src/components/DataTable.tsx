@@ -277,10 +277,6 @@ PropertyType) => {
     linkedSchema: SchemaObject,
     objectToRender: RealmObject
   ) => {
-    console.log('expandRow');
-    console.log('objectToRender._objectKey', objectToRender._objectKey);
-    console.log('objectToRender', objectToRender);
-
     const newRowExpansionProp = {
       ...rowExpansionProp,
       expandedRowKeys: [rowToExpandKey],
@@ -423,8 +419,6 @@ const NestedTable = ({
   dropdownProp,
   hasMore,
 }: PropertyType) => {
-  console.log('NestedTable');
-
   return (
     <DataTable
       columns={columns}
