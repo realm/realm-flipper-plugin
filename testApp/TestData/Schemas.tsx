@@ -1,3 +1,14 @@
+export const Person = {
+  name: 'Person',
+  properties: {
+    _id: 'int',
+    bestFriend: 'Person?',
+    hobbies: 'string[]',
+    favouriteThing: 'mixed',
+  },
+  primaryKey: '_id',
+};
+
 export const TaskSchema = {
   name: 'Task',
   properties: {

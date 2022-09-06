@@ -28,6 +28,7 @@ import {
   Delivery,
   MailCarrier,
   DataSchema,
+  Person,
 } from './TestData/Schemas';
 
 import {
@@ -64,17 +65,14 @@ const realm = new Realm({
     DictSchema,
     SetsSchema,
     DataSchema,
-    Parcel,
-    ParcelService,
-    MailCarrier,
-    Delivery,
+    Person,
   ],
   path: 'main',
   schemaVersion: 400,
 });
 
 const realm2 = new Realm({
-  schema: [Parcel, ParcelService, Delivery, MailCarrier],
+  schema: [Parcel, ParcelService, Delivery, MailCarrier, Person],
   schemaVersion: 7,
 });
 
@@ -125,7 +123,7 @@ function editBanana() {
   const bananas = realm.objects('Banana');
 
   realm.write(() => {
-    bananas[Math.floor(Math.random() * bananas.length)].color = 'Blue';
+    bananas[Math.floor(Math.random() * bananas.length)].color = 'blue';
   });
   index++;
 }
