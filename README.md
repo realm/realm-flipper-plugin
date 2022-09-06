@@ -16,7 +16,7 @@ This is a plugin for Flipper to debug Realm databases in react-native applicatio
 **Query:** Query the database using [RQL](https://www.mongodb.com/docs/realm/realm-query-language/)
 
 # Getting Started
-To start using the Realm Flipper Plugin, follow our short [Getting Started Guide](./documentation/GettingStarted.md)
+To start using the Realm Flipper Plugin, follow our short [Getting Started Guide](./documentation/GettingStarted.md).
 # Documentation
 
 - [Communication](/documentation/Communication.md)
