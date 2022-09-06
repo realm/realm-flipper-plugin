@@ -4,7 +4,7 @@ import {
   CanonicalObjectSchema,
   CanonicalObjectSchemaProperty,
   Object as RealmObject,
-} from 'realm';
+} from "realm";
 
 type PropertyDescription = {
   type: string;
@@ -15,14 +15,14 @@ const convertObjectToDesktop = (
   object: RealmObject,
   properties: {
     [keys: string]: PropertyDescription;
-  },
+  }
 ) => {
   const obj = {};
-  Object.keys(properties).forEach(key => {
+  Object.keys(properties).forEach((key) => {
     const property = properties[key] as PropertyDescription;
     obj[key] = object[key];
 
-    if (property.type === 'object') {
+    if (property.type === "object" && obj[key]) {
       obj[key] = {
         ...obj[key],
         _objectKey: obj[key]._objectKey(),
@@ -38,11 +38,11 @@ const convertObjectToDesktop = (
     if (!property) {
       return value;
     }
-    if (property.type === 'data') {
+    if (property.type === "data") {
       return {
         $binaryData: value?.byteLength,
       };
-    } else if (property.type === 'mixed') {
+    } else if (property.type === "mixed") {
       return value;
     } else {
       return value;
@@ -57,9 +57,9 @@ const convertObjectToDesktop = (
 
 export const convertObjectsToDesktop = (
   objects: RealmObject[],
-  schema: CanonicalObjectSchema,
+  schema: CanonicalObjectSchema
 ) => {
-  return objects.map(obj => convertObjectToDesktop(obj, schema.properties));
+  return objects.map((obj) => convertObjectToDesktop(obj, schema.properties));
 };
 
 /*
@@ -70,19 +70,20 @@ if that's not the case, can be changed to shallow conversion of all the properti
 export const convertObjectsFromDesktop = (
   objects: RealmObject[],
   realm: Realm,
-  schemaName?: string,
+  schemaName?: string
 ) => {
-  return objects.map(obj => convertObjectFromDesktop(obj, realm, schemaName));
+  return objects.map((obj) => convertObjectFromDesktop(obj, realm, schemaName));
 };
 // convert object from a schema to realm one
 const convertObjectFromDesktop = (
   object: any,
   realm: Realm,
-  schemaName?: string,
+  schemaName?: string
 ) => {
   delete object._objectKey;
+  // console.log('object:', object, schemaName);
   if (!schemaName) {
-    throw new Error('Converting with missing schema name');
+    throw new Error("Converting with missing schema name");
   }
   const readObject = (objectType: string, value: any) => {
     const objectKey = value._objectKey;
@@ -93,16 +94,20 @@ const convertObjectFromDesktop = (
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
+    // console.log('convertLeaf', value, type);
+
+    // console.log(value);
     switch (type) {
-      case 'object':
+      case "object":
         return readObject(objectType as string, value);
-      case 'uuid':
+      case "uuid":
         return new BSON.UUID(value);
-      case 'decimal128':
+      case "decimal128":
         return new BSON.Decimal128(value);
-      case 'objectId':
+      case "objectId":
         return new BSON.ObjectId(value);
-      case 'data':
+      case "data":
+        // console.log('data with value:', typeof value.length);
         const arr = new Uint8Array(value);
         return arr;
       default:
@@ -114,27 +119,34 @@ const convertObjectFromDesktop = (
     if (val === null) {
       return null;
     }
+    console.log("got type", property);
     switch (property.type) {
-      case 'set':
+      case "set":
+        //console.log('received set:', val);
         // due to a problem with serialization, Set is being passed over as a list
-        const realVal = (val as any[]).map(value => {
+        const realVal = (val as any[]).map((value) => {
           return convertLeaf(value, property.objectType);
         });
         return realVal;
-      case 'list':
-        return val.map(obj => {
+      case "list":
+        // console.log('prop:', property, ' val:', val);
+        return val.map((obj) => {
           return convertLeaf(obj, property.objectType as string);
         });
-      case 'dictionary':
-        return val;
-      case 'object':
+      case "dictionary":
+        const res = {};
+        Object.keys(val).forEach((key) => {
+          res[key] = convertLeaf(val[key], property.objectType as string);
+        });
+        return res;
+      case "object":
         return readObject(property.objectType as string, val);
       default:
         return convertLeaf(val, property.type, property.objectType);
     }
   };
 
-  const schemaObj = realm.schema.find(schema => schema.name === schemaName);
+  const schemaObj = realm.schema.find((schema) => schema.name === schemaName);
 
   const obj = {};
   Object.entries(object).forEach((value: [string, unknown]) => {
