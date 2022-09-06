@@ -196,7 +196,7 @@ const App: () => Node = () => {
           </Button>
           <Button
             title="Delete + create Parcel Testdata"
-            onPress={() => createParcelTestData(realm)}>
+            onPress={() => createParcelTestData(realm2)}>
             {' '}
           </Button>
           <Section title="See Your Changes">
