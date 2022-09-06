@@ -20,7 +20,7 @@ type PluginConfig = {
 type getObjectsQuery = {
   schema: string;
   realm: string;
-  cursor: number;
+  cursor: string;
   limit: number;
   sortingDirection: 'ascend' | 'descend';
   sortingColumn: string;

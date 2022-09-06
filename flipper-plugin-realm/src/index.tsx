@@ -109,7 +109,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects + 1,
-      cursor: Number(newLastObject._objectKey),
+      cursor: newLastObject._objectKey as string,
     });
   });
 
@@ -130,7 +130,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects - 1,
-      cursor: newLastObject ? Number(newLastObject._objectKey) : null,
+      cursor: newLastObject ? newLastObject._objectKey as string: null,
     });
   });
 
@@ -158,7 +158,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       ...state,
       objects: [...newObjects],
       totalObjects: state.totalObjects,
-      cursor: Number(newLastObject._objectKey),
+      cursor: newLastObject._objectKey as string,
     });
   });
 
@@ -185,7 +185,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema?: string | null,
     realm?: string | null,
     toRestore?: RealmObject[],
-    cursor?: number | null
+    cursor?: string | null
   ): Promise<ObjectsMessage> => {
     const state = pluginState.get();
     console.log('called with', schema, realm);
@@ -195,7 +195,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     return client.send('getObjects', {
       schema: schema ?? state.currentSchema?.name,
       realm: realm ?? state.selectedRealm,
-      cursor: cursor,
+      cursor: cursor === undefined ? null : cursor,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
       query: state.query,
@@ -206,7 +206,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema?: string | null,
     realm?: string | null,
     toRestore?: RealmObject[],
-    cursor?: number | null
+    cursor?: string | null
   ) => {
     const state = pluginState.get();
     if (!state.currentSchema) {
@@ -431,7 +431,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
         realm: state.selectedRealm,
         schema: state.currentSchema?.name,
         object: newObject,
-        objectKey: Number(newObject._objectKey),
+        objectKey: newObject._objectKey,
         propsChanged: Array.from(propsChanged.values()),
       })
       .catch((e) => {
@@ -453,7 +453,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       schema: schema.name,
       object: object,
-      objectKey: Number(object._objectKey),
+      objectKey: object._objectKey,
     });
   };
 

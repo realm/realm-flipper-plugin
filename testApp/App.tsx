@@ -68,7 +68,7 @@ const realm = new Realm({
     Person,
   ],
   path: 'main',
-  schemaVersion: 400,
+  schemaVersion: 401,
 });
 
 const realm2 = new Realm({
