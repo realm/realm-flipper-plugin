@@ -95,7 +95,7 @@ function parseDictionary(input: Record<string, unknown>): string {
 
 function parseData(input) {
   if (input.downloadData === undefined) {
-    return 'data';
+    return <Typography.Text disabled>data</Typography.Text>;
   }
   /*
   input: {
