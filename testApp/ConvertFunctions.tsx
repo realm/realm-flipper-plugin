@@ -106,7 +106,6 @@ const convertObjectFromDesktop = (
       case 'objectId':
         return new BSON.ObjectId(value);
       case 'data':
-        // console.log('data with value:', typeof value.length);
         const arr = new Uint8Array(value);
         return arr;
       default:

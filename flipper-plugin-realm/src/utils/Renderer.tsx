@@ -71,6 +71,7 @@ function parseSimpleData(input: string | number): string | number {
 }
 
 function parseSetOrList(input: unknown, property: TypeDescription, schemas: SchemaObject[]): string {
+  console.log("parseSetOrList", input);
   const output = input.map((value: unknown) => {
     // check if the container holds objects
     if (schemas.some(schema => schema.name === property.objectType)) {
@@ -93,6 +94,9 @@ function parseDictionary(input: Record<string, unknown>): string {
 }
 
 function parseData(input) {
+  if (input.downloadData === undefined) {
+    return 'data';
+  }
   /*
   input: {
     downloadData: () => Promise<{ data: Uint8Array }>,
