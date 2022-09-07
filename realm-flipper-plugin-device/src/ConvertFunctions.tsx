@@ -20,16 +20,14 @@ const convertObjectToDesktop = (
   const obj = {};
   Object.keys(properties).forEach((key) => {
     const property = properties[key] as PropertyDescription;
-    obj[key] = object[key];
+    // make a copy of the object
+    obj[key] = object.toJSON()[key];
 
     if (property.type === "object" && obj[key]) {
-      obj[key] = {
-        ...obj[key],
-        _objectKey: obj[key]._objectKey(),
-      };
+      const objectKey = object[key]._objectKey();
+      obj[key]._objectKey = objectKey;
     }
   });
-
   const replacer = (key, value) => {
     if (!key) {
       return value;
@@ -94,9 +92,10 @@ const convertObjectFromDesktop = (
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    // console.log('convertLeaf', value, type);
+    if (realm.schema.some((schemaObj) => schemaObj.name === type)) {
+      return readObject(type, value);
+    }
 
-    // console.log(value);
     switch (type) {
       case "object":
         return readObject(objectType as string, value);
@@ -107,7 +106,6 @@ const convertObjectFromDesktop = (
       case "objectId":
         return new BSON.ObjectId(value);
       case "data":
-        // console.log('data with value:', typeof value.length);
         const arr = new Uint8Array(value);
         return arr;
       default:

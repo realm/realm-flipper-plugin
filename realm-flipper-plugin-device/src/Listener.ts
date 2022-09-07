@@ -1,25 +1,23 @@
-import { Flipper } from "react-native-flipper";
-import { Results } from "realm";
 import { convertObjectsToDesktop } from "./ConvertFunctions";
 
 export class Listener {
-  objectsCurrentlyListeningTo: Results<Object>;
-  schema: string;
-  objects: Results<Object>;
-  sortingColumn: string;
-  sortingDirection: "ascend" | "descend";
-  connection: Flipper.FlipperConnection;
+  schemaToObjects: Map<string, Realm.Results<Realm.Object>>;
+  schema;
+  objects;
+  sortingColumn;
+  sortingDirection;
+  connection;
   schemas;
   constructor(
-    objectsCurrentlyListeningTo: Results<Object>,
-    schema: string,
-    objects: Results<Object>,
-    sortingColumn: string,
-    sortingDirection: "ascend" | "descend",
-    connection: Flipper.FlipperConnection,
+    schemaToObjects,
+    schema,
+    objects,
+    sortingColumn,
+    sortingDirection,
+    connection,
     schemas
   ) {
-    this.objectsCurrentlyListeningTo = objectsCurrentlyListeningTo;
+    this.schemaToObjects = schemaToObjects;
     this.schema = schema;
     this.objects = objects;
     this.sortingColumn = sortingColumn;
@@ -29,16 +27,16 @@ export class Listener {
   }
 
   removeAllListeners() {
-    if (this.objectsCurrentlyListeningTo.length) {
-      this.objectsCurrentlyListeningTo.removeAllListeners();
+    for (let objects of this.schemaToObjects.values()) {
+      objects.removeAllListeners();
     }
   }
 
   handleAddListener() {
-    if (this.objectsCurrentlyListeningTo.length) {
-      this.objectsCurrentlyListeningTo.removeAllListeners();
+    if (this.schemaToObjects.has(this.schema)) {
+      this.schemaToObjects.get(this.schema).removeAllListeners();
     }
-    let objectsToListenTo: Realm.Results<Object> = this.objects;
+    let objectsToListenTo: Realm.Results<Realm.Object> = this.objects;
     const shouldSortDescending = this.sortingDirection === "descend";
     if (this.sortingColumn) {
       objectsToListenTo = this.objects.sorted(
@@ -47,12 +45,12 @@ export class Listener {
       );
     }
     objectsToListenTo.addListener(this.onObjectsChange);
-    this.objectsCurrentlyListeningTo = objectsToListenTo;
-    return this.objectsCurrentlyListeningTo;
+    this.schemaToObjects.set(this.schema, objectsToListenTo);
+    return this.schemaToObjects;
   }
 
   onObjectsChange = (objects, changes) => {
-    changes.deletions.forEach((index: number) => {
+    changes.deletions.forEach((index) => {
       if (this.connection) {
         this.connection.send("liveObjectDeleted", {
           index: index,
@@ -62,10 +60,10 @@ export class Listener {
       }
     });
 
-    changes.insertions.forEach((index: number) => {
+    changes.insertions.forEach((index) => {
       const inserted = objects[index];
       const schema = this.schemas.find(
-        (schemaObj: Record<string, unknown>) => this.schema === schemaObj.name
+        (schemaObj) => this.schema === schemaObj.name
       );
       const converted = convertObjectsToDesktop([inserted], schema)[0];
       if (this.connection) {
@@ -79,7 +77,7 @@ export class Listener {
       }
     });
 
-    changes.modifications.forEach((index: number) => {
+    changes.modifications.forEach((index) => {
       const modified = objects[index];
       const schema = this.schemas.find(
         (schemaObj) => this.schema === schemaObj.name
