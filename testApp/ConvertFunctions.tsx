@@ -92,9 +92,10 @@ const convertObjectFromDesktop = (
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
-    // console.log('convertLeaf', value, type);
+    if (realm.schema.some(schemaObj => schemaObj.name === type)) {
+      return readObject(type, value);
+    }
 
-    // console.log(value);
     switch (type) {
       case 'object':
         return readObject(objectType as string, value);

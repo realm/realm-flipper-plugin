@@ -1,5 +1,6 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Col, Layout, Row } from 'antd';
+import { Button, Col, Row } from 'antd';
+import { Layout } from "flipper-plugin";
 import React, { useEffect, useState } from "react";
 import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
@@ -70,7 +71,7 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
   };
 
   return (
-    <Layout>
+    <Layout.Container>
       {arr.map((value: any, index: number) => {
         const count = occurences.get(value) || 0;
         // console.log('index:', index, ' count is', count)
@@ -121,6 +122,6 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
       >
         Add {property.objectType}
       </Button>
-    </Layout>
+    </Layout.Container>
   );
 };
