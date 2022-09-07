@@ -310,7 +310,7 @@ PropertyType) => {
     fetchMore();
   };
 
-  /** Handling the changes of objects. */
+  /** Handling sorting. Is called when the 'state' of the Ant D Table changes, ie. you sort on a column. */
   const handleOnChange = (
     pagination: TablePaginationConfig,
     filters: Record<string, Key[] | null>,
@@ -346,7 +346,7 @@ PropertyType) => {
         initialLoad={false}
         pageStart={0}
         loadMore={handleInfiniteOnLoad}
-        hasMore={hasMore}
+        hasMore={state.loading && hasMore}
         useWindow={false}
         loader={
           <div
@@ -372,11 +372,6 @@ PropertyType) => {
                 onClick: () => {
                   clickAction(object);
                 },
-                // onDoubleClick: () => {
-                //   if (clickAction) {
-                //     clickAction(object);
-                //   }
-                // },
               };
             }
           }}
