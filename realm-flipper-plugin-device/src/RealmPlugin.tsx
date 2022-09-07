@@ -186,53 +186,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           responder.success({ schemas: schemas });
         });
 
-        connection.receive(
-          "getOneObject",
-          (
-            obj: { realm: string; schema: string; primaryKey: string },
-            responder
-          ) => {
-            const realm = realmsMap.get(obj.realm);
-            if (!realm) {
-              responder.error({ message: "No realm found." });
-            }
-            const schemaObj = realm.schema.find((s) => s.name === obj.schema);
-            let pk;
-            switch (schemaObj.properties[schemaObj.primaryKey].type) {
-              // case 'object':
-              //   return readObject(objectType as string, value);
-              case "uuid":
-                pk = new BSON.UUID(obj.primaryKey);
-                break;
-              case "decimal128":
-                pk = new BSON.Decimal128(obj.primaryKey);
-                break;
-
-              case "objectID":
-                pk = new BSON.ObjectId(obj.primaryKey);
-                break;
-
-              // case 'data':
-              //   const typedArray = Uint8Array.from(obj.primaryKey);
-              //   pk = typedArray.buffer;
-              //   break;
-
-              default:
-                pk = obj.primaryKey;
-            }
-            try {
-              const object = realm.objectForPrimaryKey(
-                obj.schema,
-                // new BSON.UUID(obj.primaryKey),
-                pk
-              );
-              responder.success(object);
-            } catch (err) {
-              responder.error({ message: err.message });
-            }
-          }
-        );
-
         connection.receive("downloadData", (obj, responder) => {
           const realm = realmsMap.get(obj.realm);
           if (!realm) {

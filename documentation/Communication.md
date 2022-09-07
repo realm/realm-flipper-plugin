@@ -21,8 +21,6 @@ Gets the schemas for a given realm and sends them to the plugin.
 ### `getObjects(queryObject: QueryObject)`
 
 Takes a query request object, and sends back 50 amount of objects. 
-### `getOneObject(primaryKey: number)`
-Given a primary key, it gets one object from the backend and sends it to the desktop plugin.
 ### `addObject(realm: String, schema: String, objectToAdd: RealmObject)`
 Adds a user-specified object to the Realm database.
 ### `modifyObject(realm: String, schema: String, objectToAdd: RealmObject)` -- 

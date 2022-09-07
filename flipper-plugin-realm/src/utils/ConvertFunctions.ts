@@ -14,7 +14,6 @@ const convertObject = (
 
     const property = properties[key];
     if (property && property.type == 'data') {
-      console.log('downloadData:', downloadData)
       newObj[key] = {
         length: (value as Record<"$binaryData", number>).$binaryData,
         downloadData: () => downloadData(schema.name, object._objectKey as string, property.name),

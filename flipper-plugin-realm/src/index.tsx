@@ -43,10 +43,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     loading: false,
     query: '',
   });
-  client.onMessage('getOneObject', (data: ObjectMessage) => {
-    const state = pluginState.get();
-    pluginState.set({ ...state, singleObject: data.object }); //TODO: remove this???
-  });
 
   client.onMessage('getCurrentQuery', () => {
     const state = pluginState.get();
@@ -284,14 +280,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       realm: state.selectedRealm,
       objectKey: objectKey,
       propertyName: propertyName,
-    });
-  };
-  const getOneObject = async (schema: string, primaryKey: any) => { //TODO: are we deleting this??
-    const state = pluginState.get();
-    return client.send('getOneObject', {
-      schema: schema,
-      realm: state.selectedRealm,
-      primaryKey: primaryKey,
     });
   };
 
@@ -534,7 +522,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     toggleSortingDirection,
     setSortingDirection,
     refreshState,
-    getOneObject,
     clearError,
     requestObjects,
   };
