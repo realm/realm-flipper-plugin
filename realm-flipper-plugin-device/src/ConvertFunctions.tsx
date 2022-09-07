@@ -47,7 +47,13 @@ const convertObjectToDesktop = (
     }
   };
 
-  let after = JSON.parse(JSON.stringify(obj, replacer));
+  let after;
+  try {
+    after = JSON.parse(JSON.stringify(obj, replacer));
+  } catch (err) {
+    // a walkaround for #85
+    return {};
+  }
   // save so that it's sent over -> serialization would remove a function
   after._objectKey = object._objectKey();
   return after;

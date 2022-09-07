@@ -16,7 +16,7 @@
         "react-native": "0.68.1",
         "react-native-flipper": "^0.153.0",
         "realm": "^10.20.0",
-        "realm-flipper-plugin-device": "file:../realm-flipper-plugin-device"
+        "realm-flipper-plugin-device": "^1.0.20"
     },
     "devDependencies": {
         "@babel/core": "^7.12.9",
