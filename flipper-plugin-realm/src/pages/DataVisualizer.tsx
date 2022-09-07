@@ -234,7 +234,6 @@ const DataVisualizer = ({
           currentSchema={currentSchema}
           totalObjects={totalObjects}
           generateMenuItems={generateMenuItems}
-          // getOneObject={getOneObject} TODO: is this still used?
           setdropdownProp={setdropdownProp}
           dropdownProp={dropdownProp}
           scrollX={scrollX.current}

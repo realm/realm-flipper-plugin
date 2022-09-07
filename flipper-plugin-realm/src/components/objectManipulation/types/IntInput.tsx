@@ -15,11 +15,6 @@ export const IntInput = ({
     defaultValue === undefined ? null : (defaultValue as number)
   );
 
-  // useEffect(() => {
-  //   setValue(defaultValue as number);
-  // }, [defaultValue]);
-
-  console.log('rendering intinput, value:', value);
   const onChange = (value: number) => {
     console.log('onChange', value);
     if (property.type === 'int' && !Number.isInteger(value)) {
@@ -33,7 +28,6 @@ export const IntInput = ({
   return (
     <Row align="middle">
       <Col flex="auto">
-        <Form.Item>
           <InputNumber
             {...extraProps}
             disabled={isPrimary}
@@ -44,7 +38,6 @@ export const IntInput = ({
               property.optional && value === null ? 'null' : undefined
             }
           />
-        </Form.Item>
       </Col>
       {property.optional ? (
         <Col>

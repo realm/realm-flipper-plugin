@@ -339,7 +339,6 @@ PropertyType) => {
         height: '100%',
         width: '100%',
         textAlign: 'center',
-        paddingBottom: '100px',
       }}
     >
       <InfiniteScroll
@@ -354,6 +353,7 @@ PropertyType) => {
               marginTop: '20px',
               marginBottom: '25px',
               display: 'inline-block',
+              paddingBottom: '100px',
             }}
             key={0}
           >
@@ -415,20 +415,23 @@ const NestedTable = ({
   hasMore,
 }: PropertyType) => {
   return (
-    <DataTable
-      columns={columns}
-      objects={objects}
-      schemas={schemas}
-      hasMore={hasMore}
-      currentSchema={currentSchema}
-      sortingColumn={sortingColumn}
-      generateMenuItems={generateMenuItems}
+    <div
       style={{
-        boxShadow: '20px 0px 50px grey',
+        boxShadow: '0px 0px 15px grey',
       }}
-      setdropdownProp={setdropdownProp}
-      dropdownProp={dropdownProp}
-      enableSort={false}
-    ></DataTable>
+    >
+      <DataTable
+        columns={columns}
+        objects={objects}
+        schemas={schemas}
+        hasMore={hasMore}
+        currentSchema={currentSchema}
+        sortingColumn={sortingColumn}
+        generateMenuItems={generateMenuItems}
+        setdropdownProp={setdropdownProp}
+        dropdownProp={dropdownProp}
+        enableSort={false}
+      ></DataTable>
+    </div>
   );
 };

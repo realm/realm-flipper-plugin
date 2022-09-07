@@ -45,7 +45,6 @@ export type Events = {
   getCurrentQuery: undefined;
   getRealms: RealmsMessage;
   executeQuery: QueryResult;
-  getOneObject: ObjectMessage;
 };
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
@@ -61,7 +60,6 @@ export type Methods = {
     sortingDirection: 'ascend' | 'descend' | null;
     sortingColumn: string | null;
   }) => Promise<void>;
-  getOneObject: (data: ObjectRequest) => Promise<RealmObject>;
   downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
 };
 
