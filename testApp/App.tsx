@@ -71,7 +71,7 @@ const realm = new Realm({
     NoPrimaryKeyLink,
   ],
   path: 'main',
-  schemaVersion: 401,
+  schemaVersion: 403,
 });
 
 const realm2 = new Realm({

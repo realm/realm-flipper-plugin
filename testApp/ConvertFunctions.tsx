@@ -20,16 +20,14 @@ const convertObjectToDesktop = (
   const obj = {};
   Object.keys(properties).forEach(key => {
     const property = properties[key] as PropertyDescription;
-    obj[key] = object[key];
+    // make a copy of the object
+    obj[key] = object.toJSON()[key];
 
     if (property.type === 'object' && obj[key]) {
-      obj[key] = {
-        ...obj[key],
-        _objectKey: obj[key]._objectKey(),
-      };
+      const objectKey = object[key]._objectKey();
+      obj[key]._objectKey = objectKey;
     }
   });
-
   const replacer = (key, value) => {
     if (!key) {
       return value;

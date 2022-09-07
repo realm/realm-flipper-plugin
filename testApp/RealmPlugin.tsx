@@ -162,7 +162,6 @@ const RealmPlugin = (props: {realms: Realm[]}) => {
             }
             const schemaObj = realm.schema.find(s => s.name === obj.schema);
             let pk;
-            console.log('aAAAAAA')
             console.log(
               'schemaObj.properties[schemaObj.primaryKey].type',
               schemaObj.properties[schemaObj.primaryKey].type,
