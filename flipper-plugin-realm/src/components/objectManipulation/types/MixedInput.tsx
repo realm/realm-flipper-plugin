@@ -91,7 +91,7 @@ export const MixedInput = ({
       'int',
       'float',
       'double',
-      'decimal128',
+      // 'decimal128',
       'string',
       // 'data',
       // 'date',

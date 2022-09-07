@@ -1,7 +1,6 @@
 import { ArrowRightOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import React, { useState } from 'react';
-import { SchemaProperty } from '../../../CommonTypes';
 import { StringInput } from './StringInput';
 import { TypeInput, TypeInputProps } from './TypeInput';
 
@@ -18,20 +17,26 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
   const [contents, setContents] = useState(
     new Map<number, [string, unknown]>()
   );
-  const [resetOffset, setResetOffset] = useState(0);
+  const [totalSize, setTotalSize] = useState(0);
+  // const [resetOffset, setResetOffset] = useState(0);
 
   return (
     <Row gutter={[2, 4]}>
-      {Array.from(contents.values()).map(
-        (value: [string, unknown], index: number) => {
+      {Array.from(contents.entries()).map(
+        (val: [number, [string, unknown]]) => {
+          const value = val[1];
           return (
-            <Row key={index} style={{ width: '97%' }} align="middle">
+            <Row key={val[0]} style={{ width: '97%' }} align="middle">
               <Col span={9}>
                 <StringInput
                   isPrimary={isPrimary}
                   defaultValue={value[0]}
                   set={(val: any) => {
-                    contents.set(index, [val, value[1]]);
+                    const realValue = contents.get(val[0]);
+                    if (realValue === undefined) {
+                      return;
+                    }
+                    contents.set(val[0], [val, realValue[1]]);
                     setContents(contents);
                     set(mapToObj(contents));
                   }}
@@ -39,7 +44,7 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
                     type: 'string',
                     optional: false,
                   }}
-                  key={index + resetOffset}
+                  key={val[0]}
                 ></StringInput>
               </Col>
               <Col span={1}>
@@ -48,13 +53,17 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
               <Col span={13}>
                 <TypeInput
                   isPrimary={isPrimary}
-                  key={index + resetOffset}
+                  key={val[0]}
                   property={{
                     type: property.objectType as string,
                     optional: property.optional,
                   }}
                   set={(val: any) => {
-                    contents.set(index, [value[0], val]);
+                    const stringKey = contents.get(val[0]);
+                    if (!stringKey) {
+                      return;
+                    }
+                    contents.set(val[0], [stringKey[0], val]);
                     // setContents(contents);
                     set(mapToObj(contents));
                   }}
@@ -65,8 +74,9 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
                   disabled={isPrimary}
                   icon={<DeleteOutlined />}
                   onClick={() => {
-                    setResetOffset((v) => v + contents.size);
-                    contents.delete(index);
+                    contents.delete(val[0]);
+                    setContents(contents);
+                    set(mapToObj(contents));
                   }}
                 ></Button>
               </Col>
@@ -76,11 +86,11 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
       )}
       <Button
         disabled={isPrimary}
-        onClick={() => {
-          contents.set(contents.size, ['key' + contents.size, null]);
+        onClick={() => {Ï
+          contents.set(totalSize, ['key' + totalSize, null]);
           setContents(contents);
           set(mapToObj(contents));
-          // setReset((v) => v + 1);
+          setTotalSize(v => v + 1);
         }}
         style={{ width: '100%' }}
       >
