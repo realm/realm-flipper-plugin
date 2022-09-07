@@ -339,7 +339,6 @@ PropertyType) => {
         height: '100%',
         width: '100%',
         textAlign: 'center',
-        paddingBottom: '100px',
       }}
     >
       <InfiniteScroll
@@ -354,6 +353,7 @@ PropertyType) => {
               marginTop: '20px',
               marginBottom: '25px',
               display: 'inline-block',
+              paddingBottom: '100px',
             }}
             key={0}
           >
