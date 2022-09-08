@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { StringInput } from './StringInput';
 import { TypeInput, TypeInputProps } from './TypeInput';
 
-const mapToObj = (map: Map<number, [string, any]>) => {
+const mapToObj = (map: Map<number, [string, unknown]>) => {
   const obj = new Object();
   map.forEach((val: [string, any]) => {
     obj[val[0] as keyof typeof obj] = val[1];
@@ -18,7 +18,6 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
     new Map<number, [string, unknown]>()
   );
   const [totalSize, setTotalSize] = useState(0);
-  // const [resetOffset, setResetOffset] = useState(0);
 
   return (
     <Row gutter={[2, 4]}>
@@ -58,12 +57,12 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
                     type: property.objectType as string,
                     optional: property.optional,
                   }}
-                  set={(val: any) => {
+                  set={(value: any) => {
                     const stringKey = contents.get(val[0]);
                     if (!stringKey) {
                       return;
                     }
-                    contents.set(val[0], [stringKey[0], val]);
+                    contents.set(val[0], [stringKey[0], value]);
                     // setContents(contents);
                     set(mapToObj(contents));
                   }}
@@ -86,7 +85,7 @@ export const DictionaryInput = ({ set, isPrimary, property }: TypeInputProps) =>
       )}
       <Button
         disabled={isPrimary}
-        onClick={() => {Ï
+        onClick={() => {
           contents.set(totalSize, ['key' + totalSize, null]);
           setContents(contents);
           set(mapToObj(contents));

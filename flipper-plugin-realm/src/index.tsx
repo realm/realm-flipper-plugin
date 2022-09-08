@@ -408,7 +408,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: RealmObject, propsChanged: Set<string>) => {
     const state = pluginState.get();
-    // console.log('modifyObject', newObject);
+    console.log('modifyObject', newObject);
     // const newFields: Record<string, unknown> = {};
     // propsChanged.forEach((propName) => {
     //   newFields[propName] = newObject[propName];
