@@ -94,16 +94,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     const clone = structuredClone(newObject);
     clone._objectKey = newObjectKey;
+    const copyOfObjects = state.objects;
     const addedObject = convertObjects(
       [clone],
       state.currentSchema,
       downloadData
     )[0];
-    const newObjects = state.objects.splice(index, 0, addedObject);
-    const newLastObject = newObjects[newObjects.length - 1];
+    copyOfObjects.splice(index, 0, addedObject);
+    const newLastObject = copyOfObjects[copyOfObjects.length - 1];
     pluginState.set({
       ...state,
-      objects: [...newObjects],
+      objects: [...copyOfObjects],
       totalObjects: state.totalObjects + 1,
       cursor: newLastObject._objectKey as string,
     });
@@ -144,16 +145,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     const clone = structuredClone(newObject);
     clone._objectKey = newObjectKey;
+    const copyOfObjects = state.objects;
     const addedObject = convertObjects(
       [clone],
       state.currentSchema,
       downloadData
     )[0];
-    const newObjects = state.objects.splice(index, 1, addedObject);
-    const newLastObject = newObjects[newObjects.length - 1];
+    copyOfObjects.splice(index, 1, addedObject);
+    const newLastObject = copyOfObjects[copyOfObjects.length - 1];
     pluginState.set({
       ...state,
-      objects: [...newObjects],
+      objects: [...copyOfObjects],
       cursor: newLastObject._objectKey as string,
     });
   });
