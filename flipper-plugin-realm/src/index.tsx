@@ -188,7 +188,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
     schema?: string | null,
     realm?: string | null,
     toRestore?: RealmObject[],
-    cursor?: string | null
+    cursor?: string | null,
+    query?: string,
   ): Promise<ObjectsMessage> => {
     const state = pluginState.get();
     console.log('called with', schema, realm);
@@ -201,7 +202,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
       cursor: cursor === undefined ? null : cursor,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
-      query: state.query,
+      query: query ? query : state.query,
     });
   };
 
