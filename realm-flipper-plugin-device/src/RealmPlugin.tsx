@@ -52,7 +52,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           if (!realm || !obj.schema) {
             return;
           }
-          realm._objectForObjectKey();
           listenerHandler = new Listener(
             objectsCurrentlyListeningTo,
             obj.schema,
