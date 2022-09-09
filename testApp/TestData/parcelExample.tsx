@@ -52,37 +52,6 @@ export function createParcelTestData(realm: Realm) {
   const deliveryId9 = new UUID();
   const deliveryId10 = new UUID();
 
-  console.log('mailCarrierId1', mailCarrierId1);
-  console.log('mailCarrierId2', mailCarrierId2);
-  console.log('mailCarrierId3', mailCarrierId3);
-  console.log('mailCarrierId4', mailCarrierId4);
-  console.log('mailCarrierId5', mailCarrierId5);
-  console.log('parcelId1', parcelId1);
-  console.log('parcelId2', parcelId2);
-  console.log('parcelId3', parcelId3);
-  console.log('parcelId4', parcelId4);
-  console.log('parcelId5', parcelId5);
-  console.log('parcelId6', parcelId6);
-  console.log('parcelId7', parcelId7);
-  console.log('parcelId8', parcelId8);
-  console.log('parcelId9', parcelId9);
-  console.log('parcelId10', parcelId10);
-  console.log('parcelServiceId1', parcelServiceId1);
-  console.log('parcelServiceId2', parcelServiceId2);
-  console.log('parcelServiceId3', parcelServiceId3);
-  console.log('parcelServiceId4', parcelServiceId4);
-  console.log('parcelServiceId5', parcelServiceId5);
-  console.log('deliveryId1', deliveryId1);
-  console.log('deliveryId2', deliveryId2);
-  console.log('deliveryId3', deliveryId3);
-  console.log('deliveryId4', deliveryId4);
-  console.log('deliveryId5', deliveryId5);
-  console.log('deliveryId6', deliveryId6);
-  console.log('deliveryId7', deliveryId7);
-  console.log('deliveryId8', deliveryId8);
-  console.log('deliveryId9', deliveryId9);
-  console.log('deliveryId10', deliveryId10);
-
   const MailCarrier1 = {
     _id: mailCarrierId1,
     name: 'Lesley Tennison',
