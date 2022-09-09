@@ -2,7 +2,7 @@
   "$schema": "https://fbflipper.com/schemas/plugin-package/v2.json",
   "name": "realm-flipper-plugin",
   "id": "realm",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "pluginType": "client",
   "description": "A Flipper Plugin to debug Realm applications.",
   "main": "dist/bundle.js",

@@ -85,16 +85,29 @@ const convertObjectFromDesktop = (
   schemaName?: string
 ) => {
   delete object._objectKey;
-  // console.log('object:', object, schemaName);
   if (!schemaName) {
     throw new Error("Converting with missing schema name");
   }
   const readObject = (objectType: string, value: any) => {
+    if (value === null) {
+      return null;
+    }
     const objectKey = value._objectKey;
+    if (objectKey !== undefined) {
+      return realm._objectForObjectKey(objectType, objectKey);
+    }
+    // have to use primary key, walkaround for #105
+    const schemaObject = realm.schema.find(
+      (schemaObj) => schemaObj.name === objectType
+    ) as CanonicalObjectSchema;
 
-    return value === null
-      ? null
-      : realm._objectForObjectKey(objectType, objectKey);
+    let primaryKey = object[schemaObject.primaryKey as string];
+    if (
+      schemaObject.properties[schemaObject.primaryKey as string].type === "uuid"
+    ) {
+      primaryKey = new BSON.UUID(primaryKey);
+    }
+    return realm.objectForPrimaryKey(objectType, primaryKey);
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
