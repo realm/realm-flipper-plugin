@@ -4,11 +4,23 @@
   "id": "realm",
   "version": "1.0.8",
   "pluginType": "client",
+  "description": "A Flipper Plugin to debug Realm applications.",
   "main": "dist/bundle.js",
   "flipperBundlerEntry": "src/index.tsx",
-  "license": "MIT",
+  "license": "See the actual license in the file LICENSE",
   "keywords": [
-    "flipper-plugin"
+    "flipper-plugin",
+    "database",
+    "db",
+    "react",
+    "react-native",
+    "persistence",
+    "localstorage",
+    "sqlite",
+    "asyncstorage",
+    "rocksdb",
+    "leveldb",
+    "realm"
   ],
   "icon": "apps",
   "title": "Realm",
@@ -21,6 +33,19 @@
     "lint": "eslint",
     "architecture": "depcruise --exclude \"src/components/objectManipulation/\" --include-only \"^src\" --output-type dot src | dot -T svg > dependencygraph.svg"
   },
+  "author": {
+    "name": "Realm",
+    "email": "help@realm.io",
+    "url": "https://realm.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realm/realm-flipper-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realm/realm-flipper-plugin/issues"
+  },
+  "homepage": "https://github.com/realm/realm-flipper-plugin#readme",
   "peerDependencies": {
     "@emotion/styled": "latest",
     "antd": "latest",
