@@ -1,15 +1,43 @@
 {
   "name": "realm-flipper-plugin-device",
   "version": "1.0.20",
-  "description": "",
+  "description": "Device code for interaction with the Realm Flipper Plugin",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c >> index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "database",
+    "db",
+    "react",
+    "react-native",
+    "persistence",
+    "localstorage",
+    "sqlite",
+    "asyncstorage",
+    "rocksdb",
+    "leveldb",
+    "realm"
+  ],
+  "author": {
+    "name": "Realm",
+    "email": "help@realm.io",
+    "url": "https://realm.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realm/realm-flipper-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realm/realm-flipper-plugin/issues"
+  },
+  "homepage": "https://github.com/realm/realm-flipper-plugin#readme",
+  "license": "See the actual license in the file LICENSE",
+  "peerDependencies": {
+    "react-native-flipper": ">=0.162.0",
+    "react": ">=17"
+  },
   "dependencies": {
     "react": "file:../node_modules/react",
     "react-native-flipper": "^0.162.0",
