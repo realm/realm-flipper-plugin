@@ -12,7 +12,6 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
 
   const [container] = useState(new Set());
   useEffect(() => {
-    console.log('useEffect in here', defaultValue);
     occurences.clear();
     (defaultValue as unknown[]).forEach(val => {
       occurences.set(val, 1);
@@ -32,11 +31,8 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
     mapTo: "",
     optional: property.optional,
   };
-  console.log('innerProp', innerProp);
   const setRow = (val: any, index: number) => {
-    console.log('setRow', val, index);
     const prevValue = arr[index];
-    console.log('prevValue', prevValue);
     if (val === null && prevValue === null) {
       return;
     } else if (val === null) {
@@ -57,7 +53,6 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
 
       container.add(val);
       set(Array.from(container.values()));
-      console.log('values:', container.values())
       arr[index] = val;
       setArr(arr);
       occurences.set(val, (occurences.get(val) || 0) + 1);
@@ -81,7 +76,6 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
     <Layout.Container>
       {arr.map((value: any, index: number) => {
         const count = occurences.get(value) || 0;
-        // console.log('index:', index, ' count is', count)
         return (
           <Row key={index}>
             <Col flex="auto">
@@ -126,7 +120,6 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
           
           setArr(arr => [...arr, newVal]);
           set(Array.from(container.values()));
-          console.log(arr);
         }}
       >
         Add {property.objectType}

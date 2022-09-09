@@ -1,5 +1,5 @@
 import { ClearOutlined } from '@ant-design/icons';
-import { Button, Col, Form, InputNumber, Row } from 'antd';
+import { Button, Col, InputNumber, Row } from 'antd';
 import React, { useState } from 'react';
 import { TypeInputProps } from './TypeInput';
 
@@ -16,7 +16,6 @@ export const IntInput = ({
   );
 
   const onChange = (value: number) => {
-    console.log('onChange', value);
     if (property.type === 'int' && !Number.isInteger(value)) {
       return;
     }

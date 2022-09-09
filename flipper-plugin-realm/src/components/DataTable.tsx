@@ -263,7 +263,7 @@ PropertyType) => {
       },
 
       /** Enabling/Disabling sorting if the property.type is a sortable type */
-      sorter: enableSort && sortableTypes.has(property.type), //TODO: false if object, list, set
+      sorter: enableSort && sortableTypes.has(property.type), 
 
       /** Defining the sorting order. */
       sortOrder:
@@ -317,7 +317,6 @@ PropertyType) => {
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any
   ) => {
-    //TODO: make type of a field
     if (extra.action === 'sort') {
       if (state.loading) {
         return;
@@ -331,7 +330,6 @@ PropertyType) => {
       instance.getObjects();
     }
   };
-  // TODO: think about key as a property in the Realm DB
   return (
     <div
       style={{

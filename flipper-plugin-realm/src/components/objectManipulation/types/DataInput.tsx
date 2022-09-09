@@ -18,7 +18,7 @@ export const DataInput = ({ set, isPrimary, defaultValue }: TypeInputProps) => {
             name:
               'data: ' +
               (defaultValue as Record<'length', number>).length +
-              ' bytes', //TODO: ask Tomasz about this
+              ' bytes',
           },
         ]
       : [],

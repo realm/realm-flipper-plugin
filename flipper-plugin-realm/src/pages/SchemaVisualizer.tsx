@@ -164,7 +164,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     column: string,
     record: SchemaProperty
   ) => {
-    // console.log('rendering, ', value, type, column, record);
     if (column === 'objectType' && isPropertyLinked(record)) {
       return renderPropertyLinked(
         record.objectType as string,
@@ -200,8 +199,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     [columns]
   );
 
-  // console.log('currentSchema', currentSchema);
-  // console.log('createRowsproperties', properties);
   const rows = createRows(order, properties, primaryKey);
 
   return (

@@ -34,7 +34,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
   useEffect(() => {
     let objectsCurrentlyListeningTo: Realm.Results<Realm.Object> = [];
     realms.forEach((realm) => {
-      if (!realm.hasOwnProperty("_objectForObjectKey")) {
+      if (typeof realm._objectForObjectKey !== "function") {
         throw new Error("You need to be on realm 10.20.0 or higher");
       }
       realmsMap.set(realm.path, realm);
@@ -52,6 +52,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           if (!realm || !obj.schema) {
             return;
           }
+          realm._objectForObjectKey();
           listenerHandler = new Listener(
             objectsCurrentlyListeningTo,
             obj.schema,

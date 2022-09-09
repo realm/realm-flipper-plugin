@@ -28,18 +28,14 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
               return old.add(propertyName);
             })
           }
-          // console.log('setting', propertyName, 'to', val)
           setValue({
             ...value,
             [propertyName]: val,
           })
-          // value[propertyName] = val;
-          console.log('after set', value)
         };
         return (
           <Col key={index} span={24}>
             <PropertyRender
-              // key={index}
               property={schema.properties[propertyName]}
               isPrimary={propertyName === schema.primaryKey && Boolean(setPropsChanges)} //if setPropsChanges is null => you are adding an object
               set={set}

@@ -1,7 +1,7 @@
 import { SchemaObject } from '../CommonTypes';
 import React from 'react';
 import BooleanValue from '../components/BooleanValue';
-import { Button, Typography } from 'antd';
+import { Button, message, Typography } from 'antd';
 import fileDownload from 'js-file-download'
 
 type TypeDescription = {
@@ -58,9 +58,7 @@ export const renderValue = (
       returnValue = parseLinkedObject(schema as SchemaObject, value);
       break;
     case 'mixed':
-      // console.log('rendering mixed', value);
       returnValue = parseMixed(value, schemas);
-      // console.log('rendering mixed, return is', returnValue);
       break;
   }
 
@@ -97,7 +95,7 @@ function parseData(input) {
   if (input.downloadData === undefined) {
     return <Typography.Text disabled>data</Typography.Text>;
   }
-  /*
+  /* Structure of binary data:
   input: {
     downloadData: () => Promise<{ data: Uint8Array }>,
     length,
@@ -109,7 +107,7 @@ function parseData(input) {
     }>).then(res => {
       fileDownload(new Uint8Array(res.data).buffer, 'data');
     }, reason => {
-      console.log('downloading failed', reason.message);
+      message.error('downloading failed', reason.message);
     });
   };
   return (

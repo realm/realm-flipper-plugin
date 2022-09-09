@@ -17,7 +17,6 @@ export const FieldEdit = ({
   setVisible,
   visible,
 }: InputType) => {
-    // console.log(`FieldEdit`, schema, fieldName, value, setVisible, visible)
   const mockSchema: SchemaObject = {
     name: fieldName,
     embedded: false,

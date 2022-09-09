@@ -6,14 +6,12 @@ import {
   DeleteLiveObjectRequest,
   EditLiveObjectRequest,
   Events,
-  Methods,
-  ObjectMessage,
-  ObjectsMessage,
+  Methods, ObjectsMessage,
   RealmObject,
   RealmPluginState,
   RealmsMessage,
   SchemaMessage,
-  SchemaObject,
+  SchemaObject
 } from './CommonTypes';
 import { CommonHeader } from './components/common/CommonHeader';
 import { DataVisualizerWrapper } from './components/DataVisualizerWrapper';
@@ -82,9 +80,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
-    console.log('Added', data);
     const state = pluginState.get();
-    const { newObject, index, schema, newObjectKey } = data;
+    const { newObject, index, schema } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
@@ -95,15 +92,12 @@ export function plugin(client: PluginClient<Events, Methods>) {
        });
       return;
     }
-    const clone = structuredClone(newObject);
-    clone._objectKey = newObjectKey;
-    const newObjects = state.objects;
     const addedObject = convertObjects(
-      [clone],
+      [newObject],
       state.currentSchema,
       downloadData
-    )[0]; //TODO: possibly switch clone and newObject here
-    newObjects.splice(index, 0, addedObject);
+    )[0];
+    const newObjects = state.objects.splice(index, 0, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -114,7 +108,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
-    console.log('DELETE', data);
     const state = pluginState.get();
     const { index, schema } = data;
     if (schema != state.currentSchema?.name) {
@@ -139,24 +132,20 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
-    console.log('EDIT');
     const state = pluginState.get();
-    const { index, schema, newObject, newObjectKey } = data;
+    const { index, schema, newObject } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
     if (index > state.objects.length) {
       return;
     }
-    const clone = structuredClone(newObject);
-    clone._objectKey = newObjectKey;
-    const newObjects = state.objects;
     const addedObject = convertObjects(
-      [clone],
+      [newObject],
       state.currentSchema,
       downloadData
     )[0];
-    newObjects.splice(index, 1, addedObject);
+    const newObjects = state.objects.splice(index, 1, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
     pluginState.set({
       ...state,
@@ -192,7 +181,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     query?: string,
   ): Promise<ObjectsMessage> => {
     const state = pluginState.get();
-    console.log('called with', schema, realm);
     if (!state.currentSchema) {
       return Promise.reject();
     }
@@ -227,7 +215,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
       .then(
         (response: ObjectsMessage) => {
           const state = pluginState.get();
-          console.log("response",response)
           if (response.objects && !response.objects.length) {
             pluginState.set({
               ...state,
@@ -327,7 +314,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const addObject = (object: Record<string, unknown>) => {
     const state = pluginState.get();
-    console.log('addObject in index', object);
     if (!state.currentSchema) {
       return;
     }
@@ -416,12 +402,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   const modifyObject = (newObject: RealmObject, propsChanged: Set<string>) => {
     const state = pluginState.get();
-    console.log('modifyObject', newObject);
-    // const newFields: Record<string, unknown> = {};
-    // propsChanged.forEach((propName) => {
-    //   newFields[propName] = newObject[propName];
-    // });
-    // newFields['_id'] = newObject['_id'];
     client
       .send('modifyObject', {
         realm: state.selectedRealm,
@@ -439,7 +419,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const removeObject = (object: RealmObject) => {
-    console.log('sending removeObject', object);
     const state = pluginState.get();
     const schema = state.currentSchema;
     if (!schema) {

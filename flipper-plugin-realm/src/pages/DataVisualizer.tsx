@@ -238,7 +238,6 @@ const DataVisualizer = ({
           dropdownProp={dropdownProp}
           scrollX={scrollX.current}
           scrollY={scrollY.current}
-          //handleDataInspector={handleDataInspector} TODO: is this still used?
           enableSort={enableSort}
           setNewInspectionData={setNewInspectionData}
           fetchMore={fetchMore}
@@ -246,7 +245,6 @@ const DataVisualizer = ({
         />
         <CustomDropdown {...updatedDropdownProp} />
         <RealmDataInspector
-          //currentSchema={currentSchema} TODO: RealmDataInspector doesnt need currentSchema?
           schemas={schemas}
           inspectionData={inspectionData}
           setInspectionData={setInspectionData}

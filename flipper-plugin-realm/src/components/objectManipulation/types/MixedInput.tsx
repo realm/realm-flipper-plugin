@@ -54,7 +54,6 @@ export const MixedInput = ({
   };
 
   const renderChosen = () => {
-    // console.log('renderChosen', value);
     const objectType = schemas.find((schema) => schema.name === chosenType);
     let type;
     if (objectType) {
@@ -131,7 +130,7 @@ export const MixedInput = ({
                   );
                 })}
               </Select.OptGroup>
-              {/*           not supported for now
+              {/* This is for supporting linkedObjects as mixed values, which is not supported yet:
               <Select.OptGroup label="Link types">
                 {schemas.map((item, index) => {
                   return (

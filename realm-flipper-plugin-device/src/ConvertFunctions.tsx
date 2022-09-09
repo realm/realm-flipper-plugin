@@ -136,17 +136,14 @@ const convertObjectFromDesktop = (
     if (val === null) {
       return null;
     }
-    console.log("got type", property);
     switch (property.type) {
       case "set":
-        //console.log('received set:', val);
         // due to a problem with serialization, Set is being passed over as a list
         const realVal = (val as any[]).map((value) => {
           return convertLeaf(value, property.objectType);
         });
         return realVal;
       case "list":
-        // console.log('prop:', property, ' val:', val);
         return val.map((obj) => {
           return convertLeaf(obj, property.objectType as string);
         });

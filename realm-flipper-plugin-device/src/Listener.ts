@@ -81,7 +81,7 @@ export class Listener {
     changes.modifications.forEach((index: number) => {
       const modified = objects[index];
       const schema = this.schemas.find(
-        (schemaObj: Record<string, unknown>) => this.schema === schemaObj.name
+        (schemaObj) => this.schema === schemaObj.name
       );
       const converted = convertObjectsToDesktop([modified], schema)[0];
       if (this.connection) {
@@ -89,7 +89,6 @@ export class Listener {
           newObject: converted,
           index: index,
           schema: this.schema,
-          newObjectKey: modified._objectKey(),
         });
         this.connection.send("getCurrentQuery");
       }

@@ -97,7 +97,6 @@ export const RealmQueryInput = ({ execute }: InputType) => {
                         .filter((suggestion) =>
                           suggestion.value.startsWith(query)
                         )
-                        .filter((suggestion, index) => queryHistory.indexOf(suggestion.value)===index) //TODO: test that you actually filter away duplicate suggestions
                         .reverse(),
                     },
                     {

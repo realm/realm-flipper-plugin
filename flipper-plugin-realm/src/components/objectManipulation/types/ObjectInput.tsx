@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import { plugin } from '../../..';
 import { ObjectsMessage, RealmObject } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
-// import { RealmQueryLanguage } from '../../../pages/RealmQueryLanguage';
 import { TypeInputProps } from './TypeInput';
 
 export const ObjectInput = ({
@@ -14,7 +13,6 @@ export const ObjectInput = ({
   defaultValue,
   isPrimary,
 }: TypeInputProps) => {
-  console.log('objectInput defaultValue:', defaultValue);
   const instance = usePlugin(plugin);
   const { schemas, sortingDirection, sortingColumn, selectedRealm } = useValue(
     instance.state
@@ -68,7 +66,6 @@ export const ObjectInput = ({
       </Row>
     );
   };
-  // style={{ width: '400px', height: '800px' }}
   const renderSelector = () => {
     const onOk = () => {
       setChosen(true);

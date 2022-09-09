@@ -29,7 +29,6 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
   };
 
   const onOk = () => {
-    console.log('onOk, ', values);
     addObject(values);
     hideModal();
   };
@@ -61,5 +60,3 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
     </Layout.Horizontal>
   );
 };
-
-// export default React.memo(ObjectAdd);

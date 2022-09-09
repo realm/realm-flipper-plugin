@@ -190,7 +190,7 @@ We check if the object being deleted is currently in view, then we remove it fro
   });
 ```
 
-Adding and editing are somewhat similiar. We first add the _objectKey property to the new object we receive from the phone. Next we convert the object which handles //TODO: ask tomasz. Finally, we add the new object to the objects in memory and update the pluginState. 
+Adding and editing are somewhat similiar. We first add the _objectKey property to the new object we receive from the phone. Next we convert the object which handles formatting binary data as a downloadable format. Finally, we add the new object to the objects in memory and update the pluginState. 
 
 You may have noticed the function call `this.connection.send("getCurrentQuery");`. This sends a "state-check" to the desktop plugin:
 ```tsx

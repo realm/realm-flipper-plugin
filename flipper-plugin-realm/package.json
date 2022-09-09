@@ -63,7 +63,6 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@types/react-infinite-scroller": "^1.2.3",
-    "@types/react-window-infinite-loader": "^1.0.6",
     "@typescript-eslint/eslint-plugin": "^5.32.0",
     "@typescript-eslint/parser": "^5.32.0",
     "antd": "latest",
@@ -94,18 +93,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "antd-table-infinity": "^1.1.6",
     "bson": "^4.6.5",
     "dot": "^1.1.3",
     "electron": "^20.0.3",
     "jest-environment-jsdom": "^28.1.3",
-    "js-big-decimal": "^1.3.5",
     "js-file-download": "^0.4.12",
     "mermaid": "^9.1.4",
     "moment": "^2.29.4",
-    "pretty-print-json": "^1.2.5",
-    "react-infinite-scroller": "^1.2.6",
-    "react-mermaid2": "^0.1.4",
-    "react-native-uuid": "^2.0.1"
+    "react-infinite-scroller": "^1.2.6"
   }
 }

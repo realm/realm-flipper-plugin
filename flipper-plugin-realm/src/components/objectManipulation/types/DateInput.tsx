@@ -11,8 +11,6 @@ export const DateInput = ({
   extraProps,
   isPrimary
 }: TypeInputProps) => {
-  // console.log('dateInput', property, defaultValue, set, extraProps)
-  console.log('defaultValue as Date:', defaultValue as Date);
   const [reset, setReset] = useState(0);
   const [value, setValue] = useState<Date | undefined>(defaultValue === null ? undefined : defaultValue as Date);
 
