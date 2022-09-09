@@ -22,7 +22,7 @@ export const FieldEdit = ({
     name: fieldName,
     embedded: false,
     asymmetric: false,
-    primaryKey: '',
+    primaryKey: schema.primaryKey,
     properties: { [fieldName]: schema.properties[fieldName] },
     order: [fieldName],
   };

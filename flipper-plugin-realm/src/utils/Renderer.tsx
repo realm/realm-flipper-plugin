@@ -13,12 +13,13 @@ export const renderValue = (
   value: unknown,
   property: TypeDescription,
   schemas: SchemaObject[],
+  inner?: boolean,
 ) => {
   if (value === null) {
-    return <Typography.Text disabled>null</Typography.Text>;
+    return inner ? "null" : <Typography.Text disabled>null</Typography.Text>;
   }
   if (value === undefined) {
-    return <Typography.Text disabled>undefined</Typography.Text>;
+    return inner ? "undefined" : <Typography.Text disabled>undefined</Typography.Text>;
   }
   let schema;
   let returnValue: JSX.Element | string | number = '';
@@ -71,19 +72,18 @@ function parseSimpleData(input: string | number): string | number {
 }
 
 function parseSetOrList(input: unknown, property: TypeDescription, schemas: SchemaObject[]): string {
-  console.log("parseSetOrList", input);
   const output = input.map((value: unknown) => {
     // check if the container holds objects
     if (schemas.some(schema => schema.name === property.objectType)) {
       return renderValue(value, {
         type: 'object',
         objectType: property.objectType,
-      }, schemas);
+      }, schemas, true);
     }
 
     return renderValue(value, {
       type: property.objectType as string,
-    }, schemas);
+    }, schemas, true);
   });
 
   return '[' + output + ']';
@@ -95,7 +95,7 @@ function parseDictionary(input: Record<string, unknown>): string {
 
 function parseData(input) {
   if (input.downloadData === undefined) {
-    return 'data';
+    return <Typography.Text disabled>data</Typography.Text>;
   }
   /*
   input: {

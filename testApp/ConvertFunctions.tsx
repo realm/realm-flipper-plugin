@@ -47,7 +47,13 @@ const convertObjectToDesktop = (
     }
   };
 
-  let after = JSON.parse(JSON.stringify(obj, replacer));
+  let after;
+  try {
+    after = JSON.parse(JSON.stringify(obj, replacer));
+  } catch (err) {
+    // a walkaround for #85
+    return {};
+  }
   // save so that it's sent over -> serialization would remove a function
   after._objectKey = object._objectKey();
   return after;
@@ -79,12 +85,11 @@ const convertObjectFromDesktop = (
   schemaName?: string,
 ) => {
   delete object._objectKey;
-  // console.log('object:', object, schemaName);
   if (!schemaName) {
     throw new Error('Converting with missing schema name');
   }
   const readObject = (objectType: string, value: any) => {
-    const objectKey = value._objectKey;
+    const objectKey = value?._objectKey;
 
     return value === null
       ? null
@@ -92,6 +97,7 @@ const convertObjectFromDesktop = (
   };
 
   const convertLeaf = (value: any, type: string, objectType?: string) => {
+    console.log(`convertLeaf(value: ${value}, type: ${type}, objectType: ${objectType})`);
     if (realm.schema.some(schemaObj => schemaObj.name === type)) {
       return readObject(type, value);
     }

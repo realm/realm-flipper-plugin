@@ -6,16 +6,20 @@ import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
 
 export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [arr, setArr] = useState<any[]>(defaultValue as any[]);
-  const [occurences] = useState(new Map<any, number>());
+  const [arr, setArr] = useState(defaultValue as unknown[]);
+  const [occurences] = useState(new Map<unknown, number>());
   const [deleteOffset, setDeleteOffset] = useState(0);
 
   const [container] = useState(new Set());
   useEffect(() => {
-    (defaultValue as any[]).forEach(val => {
+    console.log('useEffect in here', defaultValue);
+    occurences.clear();
+    (defaultValue as unknown[]).forEach(val => {
       occurences.set(val, 1);
-    })
-  }, [defaultValue]);  
+      container.add(val);
+    });
+    setArr(defaultValue as unknown[]);
+  }, []);
   const typePointed = property.objectType;
   if (!typePointed) {
     return <></>;
@@ -30,7 +34,9 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
   };
   console.log('innerProp', innerProp);
   const setRow = (val: any, index: number) => {
+    console.log('setRow', val, index);
     const prevValue = arr[index];
+    console.log('prevValue', prevValue);
     if (val === null && prevValue === null) {
       return;
     } else if (val === null) {
@@ -41,7 +47,7 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
       }
       arr[index] = null;
     } else {
-      if (prevValue != null) {
+      if (occurences.get(prevValue)) {
         occurences.set(prevValue, (occurences.get(prevValue) || 0) - 1);
         if (occurences.get(prevValue) === 0) {
           occurences.delete(prevValue);
@@ -51,13 +57,14 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
 
       container.add(val);
       set(Array.from(container.values()));
+      console.log('values:', container.values())
       arr[index] = val;
+      setArr(arr);
       occurences.set(val, (occurences.get(val) || 0) + 1);
     }
   };
 
   const deleteRow = (index: number) => {
-    // console.log('deleteRow', occurences);
     const prevValue = arr[index];
     if (prevValue !== null) {
       occurences.set(prevValue, (occurences.get(prevValue) || 0) - 1);
@@ -67,7 +74,7 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
       }
     }
     setArr(arr.filter((_, i) => i !== index));
-    // console.log('deleteRow', occurences);
+    set(Array.from(container.values()));
   };
 
   return (
@@ -113,11 +120,13 @@ export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputP
       <Button
         disabled={isPrimary}
         onClick={() => {
-          // const val = getDefault(innerProp);
           const newVal = getDefault(innerProp);
           container.add(newVal);
           occurences.set(newVal, (occurences.get(newVal) || 0) + 1);
-          setArr([...arr, newVal]);
+          
+          setArr(arr => [...arr, newVal]);
+          set(Array.from(container.values()));
+          console.log(arr);
         }}
       >
         Add {property.objectType}

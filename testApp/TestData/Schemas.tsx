@@ -107,11 +107,6 @@ export const SetsSchema = {
     _id: 'uuid',
     intSet: 'int<>',
     setsSet: 'Sets<>',
-    // decimalSet: 'decimal128<>',
-    decimalSet: {
-      type: 'set',
-      objectType: 'decimal128',
-    },
     mixedSet: 'mixed<>',
     objectSet: 'AllTypes<>',
   },

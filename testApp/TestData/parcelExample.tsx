@@ -85,7 +85,7 @@ export function createParcelTestData(realm: Realm) {
 
   const MailCarrier1 = {
     _id: mailCarrierId1,
-    name: 'Robert Lewandowski',
+    name: 'Lesley Tennison',
     city: 'Dortmund',
     zipCode: '53968',
     street: 'Potsdamer Platz',
@@ -95,7 +95,7 @@ export function createParcelTestData(realm: Realm) {
 
   const MailCarrier2 = {
     _id: mailCarrierId2,
-    name: 'Christiano Ronaldo',
+    name: 'Ariel Freeman',
     city: 'Copenhagen',
     zipCode: '2300',
     street: 'Amagerbrogade',
@@ -105,7 +105,7 @@ export function createParcelTestData(realm: Realm) {
 
   const MailCarrier3 = {
     _id: mailCarrierId3,
-    name: 'Thomas Mueller',
+    name: 'Harlow Norman',
     city: 'Copenhagen',
     zipCode: '2300',
     street: 'Njalsgade',
@@ -115,7 +115,7 @@ export function createParcelTestData(realm: Realm) {
 
   const MailCarrier4 = {
     _id: mailCarrierId4,
-    name: 'Luca Modric',
+    name: 'Favour Botwright',
     city: 'Copenhagen',
     zipCode: '2400',
     street: 'Nørrebrogade',
@@ -125,7 +125,7 @@ export function createParcelTestData(realm: Realm) {
 
   const MailCarrier5 = {
     _id: mailCarrierId5,
-    name: 'Zinedine Zidane',
+    name: 'Vivian Tailor',
     city: 'Copenhagen',
     zipCode: '2400',
     street: 'Englandsvej',
@@ -294,7 +294,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery1 = {
     _id: deliveryId1,
-    receiver: 'Andrew Meyer',
+    receiver: 'Regena Prescott',
     city: 'Stuttgart',
     zipCode: '48373',
     street: 'Porsche Str.',
@@ -305,7 +305,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery2 = {
     _id: deliveryId2,
-    receiver: 'Tom Duncalf',
+    receiver: 'Naomi Rickard',
     city: 'London',
     zipCode: '3452',
     street: 'Picadilly Circus',
@@ -316,7 +316,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery3 = {
     _id: deliveryId3,
-    receiver: 'Tom Duncalf',
+    receiver: 'Sophia Austis',
     city: 'London',
     zipCode: '3452',
     street: 'Picadilly Circus',
@@ -327,7 +327,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery4 = {
     _id: deliveryId4,
-    receiver: 'Nikolaj Borries',
+    receiver: 'Brook Watts',
     city: 'Copenhagen',
     zipCode: '2100',
     street: 'Kongens Nytorv',
@@ -338,7 +338,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery5 = {
     _id: deliveryId5,
-    receiver: 'Yavor Georgiev',
+    receiver: 'Devon Kay',
     city: 'Copenhagen',
     zipCode: '2100',
     street: 'Rantzausgade',
@@ -349,7 +349,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery6 = {
     _id: deliveryId6,
-    receiver: 'Nikolaj Borries',
+    receiver: 'Darcy Harlan',
     city: 'Copenhagen',
     zipCode: '2100',
     street: 'Kongens Nytorv',
@@ -360,7 +360,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery7 = {
     _id: deliveryId7,
-    receiver: 'Nikolaj Borries',
+    receiver: 'Reese Harper',
     city: 'Copenhagen',
     zipCode: '2100',
     street: 'Kongens Nytorv',
@@ -371,7 +371,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery8 = {
     _id: deliveryId8,
-    receiver: 'Andrew Meyer',
+    receiver: 'Adam Wilkie',
     city: 'Stuttgart',
     zipCode: '48373',
     street: 'Porsche Str.',
@@ -382,7 +382,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery9 = {
     _id: deliveryId9,
-    receiver: 'Nikolaj Borries',
+    receiver: 'Riley Beasley',
     city: 'Copenhagen',
     zipCode: '2100',
     street: 'Kongens Nytorv',
@@ -393,7 +393,7 @@ export function createParcelTestData(realm: Realm) {
 
   const delivery10 = {
     _id: deliveryId10,
-    receiver: 'Kenneth Geisshirt',
+    receiver: 'Lesley Elwin',
     city: 'Copenhagen',
     zipCode: '2300',
     street: 'Fasanvej',

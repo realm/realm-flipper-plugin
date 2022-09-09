@@ -14,7 +14,6 @@ export const StringInput = ({
     defaultValue as string | null
   );
   const [reset, setReset] = useState(0);
-  console.log(isPrimary);
   return (
     <Row align="middle">
       <Col flex="auto">
