@@ -81,7 +81,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
-    const { newObject, index, schema } = data;
+    const { index, schema, newObject, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
@@ -92,8 +92,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
        });
       return;
     }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
     const addedObject = convertObjects(
-      [newObject],
+      [clone],
       state.currentSchema,
       downloadData
     )[0];
@@ -133,15 +135,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     const state = pluginState.get();
-    const { index, schema, newObject } = data;
+    const { index, schema, newObject, newObjectKey } = data;
     if (schema != state.currentSchema?.name) {
       return;
     }
     if (index > state.objects.length) {
       return;
     }
+    const clone = structuredClone(newObject);
+    clone._objectKey = newObjectKey;
     const addedObject = convertObjects(
-      [newObject],
+      [clone],
       state.currentSchema,
       downloadData
     )[0];

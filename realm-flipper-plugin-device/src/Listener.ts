@@ -89,6 +89,7 @@ export class Listener {
           newObject: converted,
           index: index,
           schema: this.schema,
+          newObjectKey: modified._objectKey(),
         });
         this.connection.send("getCurrentQuery");
       }
