@@ -89,6 +89,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
       return;
     }
     if (index > state.objects.length) {
+       pluginState.set({
+         ...state,
+         totalObjects: state.totalObjects + 1,
+       });
       return;
     }
     const clone = structuredClone(newObject);
@@ -117,6 +121,10 @@ export function plugin(client: PluginClient<Events, Methods>) {
       return;
     }
     if (index > state.objects.length) {
+      pluginState.set({
+        ...state,
+        totalObjects: state.totalObjects - 1,
+      });
       return;
     }
     const newObjects = state.objects;
@@ -153,7 +161,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     pluginState.set({
       ...state,
       objects: [...newObjects],
-      totalObjects: state.totalObjects,
       cursor: newLastObject._objectKey as string,
     });
   });
