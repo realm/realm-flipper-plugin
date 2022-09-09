@@ -336,7 +336,7 @@ PropertyType) => {
     <div
       style={{
         overflow: 'auto',
-        height: '100%',
+        height: '90%',
         width: '100%',
         textAlign: 'center',
       }}
