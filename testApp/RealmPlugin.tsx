@@ -31,7 +31,7 @@ const RealmPlugin = (props: {realms: Realm[]}) => {
   let listenerHandler: Listener;
   const {realms} = props;
   useEffect(() => {
-    let schemaToObjects = new Map<string, Realm.Results<Realm.Object>>();
+    let objectsCurrentlyListeningTo: Realm.Results<Realm.Object>;
     realms.forEach(realm => {
       realmsMap.set(realm.path, realm);
     });
@@ -51,7 +51,7 @@ const RealmPlugin = (props: {realms: Realm[]}) => {
           }
           console.log(obj);
           listenerHandler = new Listener(
-            schemaToObjects,
+            objectsCurrentlyListeningTo,
             obj.schema,
             realm.objects(obj.schema),
             obj.sortingColumn,
@@ -59,7 +59,7 @@ const RealmPlugin = (props: {realms: Realm[]}) => {
             connection,
             realm.schema,
           );
-          listenerHandler.handleAddListener();
+          objectsCurrentlyListeningTo = listenerHandler.handleAddListener();
         });
 
         connection.receive('getRealms', (_, responder) => {
@@ -86,7 +86,7 @@ const RealmPlugin = (props: {realms: Realm[]}) => {
             connection,
             realm.schema,
           );
-          listenerHandler.handleAddListener();
+          objectsCurrentlyListeningTo = listenerHandler.handleAddListener();
           const totalObjects = objects.length;
           if (!totalObjects || objects.isEmpty()) {
             responder.success({
