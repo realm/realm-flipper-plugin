@@ -44,10 +44,6 @@ export const RealmDataInspector = ({
 }: PropertyType) => {
   if (!showSidebar || inspectionData === undefined) return null;
 
-  // This is a fix to remove the _objectKey property. When issue #93 is resolved, inspectionData can be used directly.
-  let data = { ...inspectionData };
-  delete data.data._objectKey;
-
   /** Utilities to trigger a brief flickering when the InspectionData is updated.
    * In some cases this makes it easier to see when the data changed. */
   const [flickering, setFlickering] = useState(false);
@@ -118,7 +114,7 @@ export const RealmDataInspector = ({
           <Row>
             <Col offset={1} span={22}>
               <DataInspector
-                data={data.data}
+                data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
