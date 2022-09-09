@@ -24,6 +24,7 @@ type getObjectsQuery = {
   limit: number;
   sortingDirection: "ascend" | "descend";
   sortingColumn: string;
+  query: string;
 };
 
 const RealmPlugin = (props: { realms: Realm[] }) => {
@@ -68,7 +69,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           });
         });
 
-        connection.receive("getObjects", (req, responder) => {
+        connection.receive("getObjects", (req: getObjectsQuery, responder) => {
           console.log("message: ", req);
           const realm = realmsMap.get(req.realm);
           if (!realm) {
