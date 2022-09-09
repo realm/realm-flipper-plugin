@@ -32,8 +32,11 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
   let listenerHandler: Listener;
   const { realms } = props;
   useEffect(() => {
-    let schemaToObjects = new Map<string, Realm.Results<Realm.Object>>();
+    let objectsCurrentlyListeningTo: Realm.Results<Realm.Object> = [];
     realms.forEach((realm) => {
+      if (!realm.hasOwnProperty("_objectForObjectKey")) {
+        throw new Error("You need to be on realm 10.20.0 or higher");
+      }
       realmsMap.set(realm.path, realm);
     });
     addPlugin({
@@ -45,14 +48,12 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
         connection.send("getCurrentQuery");
 
         connection.receive("receivedCurrentQuery", (obj) => {
-          console.log("received");
           const realm = realmsMap.get(obj.realm);
           if (!realm || !obj.schema) {
             return;
           }
-          console.log(obj);
           listenerHandler = new Listener(
-            schemaToObjects,
+            objectsCurrentlyListeningTo,
             obj.schema,
             realm.objects(obj.schema),
             obj.sortingColumn,
@@ -60,7 +61,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             connection,
             realm.schema
           );
-          listenerHandler.handleAddListener();
+          objectsCurrentlyListeningTo = listenerHandler.handleAddListener();
         });
 
         connection.receive("getRealms", (_, responder) => {
@@ -70,7 +71,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
         });
 
         connection.receive("getObjects", (req: getObjectsQuery, responder) => {
-          console.log("message: ", req);
           const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({ message: "No realm found" });
@@ -80,7 +80,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             req;
           let objects = realm.objects(schema);
           listenerHandler = new Listener(
-            schemaToObjects,
+            objectsCurrentlyListeningTo,
             schema,
             objects,
             sortingColumn,
@@ -88,7 +88,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             connection,
             realm.schema
           );
-          listenerHandler.handleAddListener();
+          objectsCurrentlyListeningTo = listenerHandler.handleAddListener();
           const totalObjects = objects.length;
           if (!totalObjects || objects.isEmpty()) {
             responder.success({
@@ -116,7 +116,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
             try {
               objects = objects.filtered(query);
             } catch (e) {
-              console.log("error, returning:", e.message);
               responder.error({
                 message: e.message,
               });
@@ -169,7 +168,6 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
           if (!realm) {
             return;
           }
-          // console.log('addObject', obj);
           const converted = convertObjectsFromDesktop(
             [obj.object],
             realm,
@@ -236,14 +234,12 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
       onDisconnect() {
         if (listenerHandler) {
           listenerHandler.removeAllListeners();
-          console.log("Disconnected");
         }
       },
     });
     return () => {
       if (listenerHandler) {
         listenerHandler.removeAllListeners();
-        console.log("Disconnected");
       }
     };
   });
