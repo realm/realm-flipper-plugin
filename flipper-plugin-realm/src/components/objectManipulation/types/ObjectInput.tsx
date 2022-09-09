@@ -97,7 +97,7 @@ export const ObjectInput = ({
         return;
       }
       instance
-        .requestObjects(targetSchema.name, selectedRealm, undefined, cursor)
+        .requestObjects(targetSchema.name, selectedRealm, undefined, cursor, '')
         .then((response: ObjectsMessage) => {
           setObjects([...objects, ...response.objects]);
           setHasMore(response.hasMore);
