@@ -9,7 +9,7 @@ To facilitate communication between the desktop and the Realm Database on the de
 ## Device
 Install [Realm Flipper Plugin Device](https://www.npmjs.com/package/realm-flipper-plugin-device) using NPM:
 
-`npm install realm-flipper-plugin device react-native-flipper`
+`npm install realm-flipper-plugin-device react-native-flipper`
 
 `cd ios && pod install`
 
