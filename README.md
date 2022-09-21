@@ -4,7 +4,7 @@
 </picture>
 
 # Realm Flipper Plugin
-This is a plugin for Flipper to debug Realm databases in react-native applications.
+This is a plugin for [Flipper](https://fbflipper.com/) to inspect Realm databases in [React Native](https://reactnative.dev/) apps.
 
 # Features
 **Live Objects:** See objects in real time.
@@ -16,26 +16,29 @@ This is a plugin for Flipper to debug Realm databases in react-native applicatio
 **Query:** Query the database using [RQL](https://www.mongodb.com/docs/realm/realm-query-language/).
 
 # Getting Started
-To start using the Realm Flipper Plugin, follow our short [getting started guide](./documentation/GettingStarted.md).
+To start using the Realm Flipper Plugin, follow our short [getting started guide](documentation/GettingStarted.md).
+
 # Documentation
 
-- [Communication](/documentation/Communication.md)
-- [Architecture](/documentation/Architecture.md)
+- [Communication](documentation/Communication.md) between React Native app and the Flipper desktop application
+- [Architecture](documentation/Architecture.md)
 
-# Template Apps
+# Code of Conduct
 
+This project adheres to the [MongoDB Code of Conduct](https://www.mongodb.com/community-code-of-conduct). By participating, you are expected to uphold this code. Please report unacceptable behavior to [community-conduct@mongodb.com](mailto:community-conduct@mongodb.com).
 
 # Contributing
 
-# Code of Conduct
-This project adheres to the MongoDB Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to community-conduct@mongodb.com.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details!
 
 # License
-Realm JS and Realm Core are published under the Apache License 2.0.
 
-This product is not being made available to any person located in Cuba, Iran, North Korea, Sudan, Syria or the Crimea region, or to any other person that is not eligible to receive the product under U.S. law.
+The [Realm Flipper plugin](flipper-plugin-realm/README.md) and the [Realm Flipper plugin for Device](realm-flipper-plugin-device/README.md) are published under the [Apache License 2.0](LICENSE).
 
 # Feedback
-If you use Realm and are happy with it, all we ask is that you please consider sending out a tweet mentioning @realm to share your thoughts
 
-And if you don't like it, please let us know what you would like improved, so we can fix it!
+**_If you use Realm and are happy with it, all we ask is that you please consider sending out a tweet mentioning [@realm](https://twitter.com/realm) to share your thoughts_**
+
+**_And if you don't like it, please let us know what you would like improved, so we can fix it!_**
+
+<img style="width: 0px; height: 0px;" src="https://3eaz4mshcd.execute-api.us-east-1.amazonaws.com/prod?s=https://github.com/realm/realm-flipper-plugin/#README.md">
