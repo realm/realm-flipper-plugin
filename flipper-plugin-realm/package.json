@@ -7,7 +7,7 @@
   "description": "A Flipper Plugin to debug Realm applications.",
   "main": "dist/bundle.js",
   "flipperBundlerEntry": "src/index.tsx",
-  "license": "See the actual license in the file LICENSE",
+  "license": "Apache-2.0",
   "keywords": [
     "flipper-plugin",
     "database",
