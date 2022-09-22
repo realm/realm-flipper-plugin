@@ -15,8 +15,6 @@ When filing an issue, please provide as much of the following information as pos
 
 We love contributions to Realm! If you'd like to fix bugs, contribute code, documentation, or add any other improvements, we recommend that you create a new issue to pitch what you would like to work on. Once you are ready to contribute, please [file a Pull Request](https://github.com/realm/realm-flipper-plugin/pulls) on our GitHub repository. Make sure to accept our [CLA](#cla).
 
-If you're on the MongoDB payroll, please ensure you're familiar with [the Realm SDK cross-team working agreement](https://docs.google.com/document/d/1AB9Z1F29oLmubnPAjfphYwGz1xqqeotHaMWK5OKkL3A/edit).
-
 When creating a PR as an external contributor, please express your intent with your PR; what do you want to solve? To avoid duplication, please link your PR to an existing issue.
 
 Moreover, indicate how you would like us to support you. We will happily guide you and work with you to move the PR to a point where it can be merged. It might require considerable work at your end to meet our expectations (code quality, tests, etc.). In the case you want to move on and not work with us, please let us know. If the PR meets our expectations, we will merge it - and if it doesn't, we will either take over or close it, depending on the requirement on our time and our current priorities.
@@ -43,4 +41,4 @@ Below are some guidelines about the format of the commit message itself:
 
 Realm welcomes all contributions! The only requirement we have is that, like many other projects, we need to have a [Contributor License Agreement](https://en.wikipedia.org/wiki/Contributor_License_Agreement) (CLA) in place before we can accept any external code. Our own CLA is a modified version of the Apache Software Foundation’s CLA.
 
-[Please submit your CLA electronically using our Google form](https://docs.google.com/forms/d/e/1FAIpQLSeQ9ROFaTu9pyrmPhXc-dEnLD84DbLuT_-tPNZDOL9J10tOKQ/viewform) so we can accept your submissions. The GitHub username you file there will need to match that of your Pull Requests. If you have any questions or cannot file the CLA electronically, you can email <help@realm.io>.
+[Please submit your CLA electronically using our Google form](https://docs.google.com/forms/d/e/1FAIpQLSeQ9ROFaTu9pyrmPhXc-dEnLD84DbLuT_-tPNZDOL9J10tOKQ/viewform) so we can accept your submissions. The GitHub username you file there will need to match that of your Pull Requests. If you have any questions or cannot file the CLA electronically, you can email <realm-help@mongodb.com>.

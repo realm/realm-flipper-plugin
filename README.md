@@ -4,7 +4,7 @@
 </picture>
 
 # Realm Flipper Plugin
-This is a plugin for [Flipper](https://fbflipper.com/) to inspect Realm databases in [React Native](https://reactnative.dev/) apps.
+This is a plugin for [Flipper](https://fbflipper.com/) to inspect, modify and query Realm databases in [React Native](https://reactnative.dev/) apps.
 
 # Features
 **Live Objects:** See objects in real time.
