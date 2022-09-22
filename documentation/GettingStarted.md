@@ -1,5 +1,5 @@
 # Getting Started
-The Realm Flipper Plugin allows you to debug React Native apps using Realm Databases. 
+The Realm Flipper Plugin allows you to inspect Realm databases in React Native apps. 
 
 ## Desktop
 First, make sure you have downloaded [Flipper](https://fbflipper.com/). You can download the Realm Flipper Plugin from the Flipper plugin manager. Inside the "Install Plugin" tab, you can search for realm-flipper-plugin and install it. After reloading Flipper, the Plugin can be enabled for React Native applications using Realm. 
@@ -9,9 +9,10 @@ To facilitate communication between the desktop and the Realm Database on the de
 ## Device
 Install [Realm Flipper Plugin Device](https://www.npmjs.com/package/realm-flipper-plugin-device) using NPM:
 
-`npm install realm-flipper-plugin-device react-native-flipper`
-
-`cd ios && pod install`
+```sh
+npm install realm-flipper-plugin-device react-native-flipper
+cd ios && pod install
+```
 
 Next, import it and add it to your component tree:
 
@@ -46,6 +47,5 @@ export default function App() {
   );
 }
 ```
-
 
 For a more detailed example using multiple schemas, see our [testApp inside this repository](https://github.com/realm/realm-flipper-plugin/blob/main/testApp/App.tsx).
