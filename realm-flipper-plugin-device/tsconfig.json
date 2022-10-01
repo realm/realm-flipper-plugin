@@ -10,7 +10,8 @@
     "outDir": "./dist",
     "preserveConstEnums": true,
     "target": "es5",
-    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
   },
   "exclude": ["node_modules"]
 }
