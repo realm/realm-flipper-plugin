@@ -39,7 +39,7 @@
     "react": ">=17"
   },
   "dependencies": {
-    "react": "latest",
+    "react": "^18.2.0",
     "react-native-flipper": "^0.162.0",
     "realm": "^10.20.0",
     "rollup-plugin-typescript": "^1.0.1"
