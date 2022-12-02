@@ -7,11 +7,6 @@ import {
 } from "./ConvertFunctions";
 import { Listener } from "./Listener";
 
-const { BSON } = Realm;
-// config: Configuration,
-//     realms: Realm[],
-//     connection: Flipper.FlipperConnection,
-
 type PluginConfig = {
   realms: Realm[];
   connection: Flipper.FlipperConnection;
@@ -27,16 +22,13 @@ type getObjectsQuery = {
   query: string;
 };
 
-const RealmPlugin = (props: { realms: Realm[] }) => {
+const RealmPlugin = React.memo((props: { realms: Realm[] }) => {
   let realmsMap = new Map<string, Realm>();
   let listenerHandler: Listener;
   const { realms } = props;
   useEffect(() => {
     let objectsCurrentlyListeningTo: Realm.Results<Realm.Object> = [];
     realms.forEach((realm) => {
-      if (typeof realm._objectForObjectKey !== "function") {
-        throw new Error("You need to be on realm 10.20.0 or higher");
-      }
       realmsMap.set(realm.path, realm);
     });
     addPlugin({
@@ -45,7 +37,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
       },
       onConnect(connection) {
         // connection.receive
-        connection.send("getCurrentQuery");
+        connection.send("getCurrentQuery", null);
 
         connection.receive("receivedCurrentQuery", (obj) => {
           const realm = realmsMap.get(obj.realm);
@@ -244,6 +236,7 @@ const RealmPlugin = (props: { realms: Realm[] }) => {
     };
   });
   return <></>;
-};
+});
 
-export default React.memo(RealmPlugin);
+export default RealmPlugin;
+export {RealmPlugin};

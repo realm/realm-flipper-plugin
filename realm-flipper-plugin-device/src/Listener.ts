@@ -16,7 +16,7 @@ export class Listener {
     sortingColumn: string,
     sortingDirection: "ascend" | "descend",
     connection: Flipper.FlipperConnection,
-    schemas
+    schemas: Realm.ObjectSchema[]
   ) {
     this.objectsCurrentlyListeningTo = objectsCurrentlyListeningTo;
     this.schema = schema;
