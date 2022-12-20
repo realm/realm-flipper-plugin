@@ -37,7 +37,7 @@ const RealmPlugin = React.memo((props: { realms: Realm[] }) => {
       },
       onConnect(connection) {
         // connection.receive
-        connection.send("getCurrentQuery", null);
+        connection.send("getCurrentQuery", undefined);
 
         connection.receive("receivedCurrentQuery", (obj) => {
           const realm = realmsMap.get(obj.realm);
