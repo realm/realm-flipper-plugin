@@ -1,6 +1,6 @@
 {
   "name": "realm-flipper-plugin-device",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Device code for interaction with the Realm Flipper Plugin",
   "main": "dist/index.js",
   "types": "src/RealmPlugin.tsx",
