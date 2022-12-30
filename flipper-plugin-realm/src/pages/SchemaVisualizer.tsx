@@ -2,19 +2,19 @@ import { message, Table, Typography } from 'antd';
 import { Layout, useMemoize, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../index';
-import { SchemaProperty, SchemaObject } from '../CommonTypes';
 import { isPropertyLinked } from '../utils/linkedObject';
 import BooleanValue from '../components/BooleanValue';
+import {
+  CanonicalObjectSchemaPropertyRow,
+  SortedObjectSchema,
+} from '../CommonTypes';
 
 const { Text } = Typography;
 const { Link } = Typography;
 
-const createRows = (
-  order: string[],
-  properties: { [key: string]: SchemaProperty },
-  primaryKey: string
-) => {
-  const newRows: Record<string, unknown>[] = [];
+const createRows = (currentSchema: SortedObjectSchema) => {
+  const { order, properties, primaryKey } = currentSchema;
+  const newRows: CanonicalObjectSchemaPropertyRow[] = [];
   order.forEach((propName: string, index: number) => {
     const value = properties[propName];
     newRows.push({
@@ -28,8 +28,8 @@ const createRows = (
 };
 const renderPropertyLinked = (
   objectType: string,
-  schemas: SchemaObject[],
-  onSchemaSelected: (selectedSchema: SchemaObject) => void
+  schemas: SortedObjectSchema[],
+  onSchemaSelected: (selectedSchema: SortedObjectSchema) => void,
 ): string | JSX.Element => {
   const targetSchema = schemas.find((schema) => schema.name === objectType);
   if (!targetSchema) {
@@ -43,9 +43,9 @@ const renderPropertyLinked = (
 };
 
 const renderFullType = (
-  property: SchemaProperty,
-  schemas: SchemaObject[],
-  onSchemaSelected: (selectedSchema: SchemaObject) => void
+  property: Realm.CanonicalObjectSchemaProperty,
+  schemas: SortedObjectSchema[],
+  onSchemaSelected: (selectedSchema: SortedObjectSchema) => void,
 ): string | JSX.Element => {
   let title;
 
@@ -59,7 +59,7 @@ const renderFullType = (
           {renderPropertyLinked(
             property.objectType as string,
             schemas,
-            onSchemaSelected
+            onSchemaSelected,
           )}
         </>
       );
@@ -103,8 +103,8 @@ const renderFullType = (
 };
 
 type InputType = {
-  schemas: Array<SchemaObject>;
-  currentSchema: SchemaObject | null;
+  schemas: Array<SortedObjectSchema>;
+  currentSchema: SortedObjectSchema | null;
 };
 
 const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
@@ -115,9 +115,10 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   if (!schemas || !schemas.length) {
     return <div>No schemas found</div>;
   }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const instance = usePlugin(plugin);
 
-  const onSchemaSelected = (selectedSchema: SchemaObject) => {
+  const onSchemaSelected = (selectedSchema: SortedObjectSchema) => {
     if (currentSchema.name === selectedSchema.name) {
       message.info('You are already viewing this schema');
     }
@@ -130,7 +131,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
       title: columnName,
       dataIndex: columnName,
       // onFilter: (value: string, record: any) => record[col].startsWith(value),
-      render: (cellContent: string, record: SchemaProperty) =>
+      render: (cellContent: string, record: CanonicalObjectSchemaPropertyRow) =>
         renderTableCells(cellContent, typeof cellContent, columnName, record),
       // filterSearch: true,
     });
@@ -143,7 +144,10 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
           title: 'full type',
           dataIndex: 'string format',
           key: 'string format',
-          render: (cellContent: string, record: SchemaProperty) => {
+          render: (
+            cellContent: string,
+            record: CanonicalObjectSchemaPropertyRow,
+          ) => {
             return renderFullType(record, schemas, onSchemaSelected);
           },
         },
@@ -151,8 +155,9 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
       ],
     };
 
+    // TODO: Consider using more descriptive column names
     const simpleColumns = ['primaryKey', 'name', 'indexed'].map(
-      simpleColumnGenerator
+      simpleColumnGenerator,
     );
 
     return [...simpleColumns, typeColumnGroup];
@@ -162,20 +167,23 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     value: unknown,
     type: string,
     column: string,
-    record: SchemaProperty
+    record: Realm.CanonicalObjectSchemaProperty,
   ) => {
     if (column === 'objectType' && isPropertyLinked(record)) {
       return renderPropertyLinked(
         record.objectType as string,
         schemas,
-        onSchemaSelected
+        onSchemaSelected,
       );
     }
 
     switch (type) {
       case 'boolean':
         return (
-          <BooleanValue active={!!value as boolean} value={!!value as boolean ? 'True' : 'False'} />
+          <BooleanValue
+            active={!!value as boolean}
+            value={(!!value as boolean) ? 'True' : 'False'}
+          />
         );
       case 'string':
         return <Text>{value as string}</Text>;
@@ -184,7 +192,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     }
   };
 
-  const { order, properties, primaryKey } = currentSchema;
   const columns = [
     'primaryKey',
     'name',
@@ -194,12 +201,10 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     'optional',
     'objectType',
   ];
-  const columnObjs = useMemoize(
-    (columns: string[]) => createColumnConfig(),
-    [columns]
-  );
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const columnObjs = useMemoize((_) => createColumnConfig(), [columns]);
 
-  const rows = createRows(order, properties, primaryKey);
+  const rows = createRows(currentSchema);
 
   return (
     <Layout.Container height={800}>

@@ -2,12 +2,12 @@ import { Modal } from 'antd';
 import React, { useState } from 'react';
 import { PropertiesModify } from './PropertiesModify';
 import { usePlugin } from 'flipper-plugin';
-import { RealmObject, SchemaObject } from '../../CommonTypes';
 import { plugin } from '../..';
+import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
 
 type InputType = {
-  schema: SchemaObject;
-  initialObject: RealmObject;
+  schema: SortedObjectSchema;
+  initialObject: IndexableRealmObject;
   setVisible: (value: boolean) => void;
   visible: boolean;
 };
@@ -44,7 +44,7 @@ export const ObjectEdit = ({
         value={value}
         setValue={setValue}
         setPropsChanges={setPropsChanges}
-      ></PropertiesModify>
+      />
     </Modal>
   );
 };

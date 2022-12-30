@@ -1,11 +1,11 @@
 import React from 'react';
-import { RealmObject, SchemaObject } from '../../CommonTypes';
+import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
 import { ObjectEdit } from './ObjectEdit';
 
 type InputType = {
-  schema: SchemaObject;
+  schema: SortedObjectSchema;
   fieldName: string;
-  value: RealmObject;
+  value: IndexableRealmObject;
   setVisible: (value: boolean) => void;
   visible: boolean;
 };
@@ -17,7 +17,7 @@ export const FieldEdit = ({
   setVisible,
   visible,
 }: InputType) => {
-  const mockSchema: SchemaObject = {
+  const mockSchema: SortedObjectSchema = {
     name: fieldName,
     embedded: false,
     asymmetric: false,

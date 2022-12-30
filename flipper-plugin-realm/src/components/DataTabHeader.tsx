@@ -1,13 +1,13 @@
 import { Col, Row, Typography } from 'antd';
-import { Layout, usePlugin } from 'flipper-plugin';
+import { usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '..';
-import { SchemaObject } from '../CommonTypes';
+import { SortedObjectSchema } from '../CommonTypes';
 import { ObjectAdd } from './objectManipulation/ObjectAdd';
 import { RealmQueryInput } from './Query';
 
 type InputType = {
-  currentSchema: SchemaObject;
+  currentSchema: SortedObjectSchema;
   totalObjects: number;
 };
 

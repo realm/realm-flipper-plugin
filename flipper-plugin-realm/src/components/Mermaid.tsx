@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
 
 mermaid.initialize({
   startOnLoad: true,
-  theme: 'default',
-  securityLevel: 'loose',
+  //@ts-expect-error Mermaid types are not currently properly exported
+  theme: "default",
+  //@ts-expect-error Mermaid types are not currently properly exported
+  securityLevel: "loose",
   themeCSS: `
     g.classGroup rect {
       fill: #282a36;
@@ -50,14 +52,14 @@ mermaid.initialize({
       stroke: #f8f8f2;
       stroke-width: 1;
     }`,
-  fontFamily: 'Fira Code',
 });
 
-export default class Mermaid extends React.Component {
-  componentDidMount() {
-    mermaid.contentLoaded();
-  }
-  render() {
-    return <div className="mermaid">{this.props.chart}</div>;
-  }
+interface MermaidProps {
+  chart: string;
+}
+
+export default function Mermaid({chart}:MermaidProps) {
+  useEffect(mermaid.contentLoaded);
+
+  return <div className="mermaid">{chart}</div>;
 }

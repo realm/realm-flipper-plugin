@@ -1,16 +1,15 @@
 import { Col, Form, Row, Tag } from 'antd';
 import React from 'react';
-import { SchemaProperty } from '../../CommonTypes';
 import { TypeInput } from './types/TypeInput';
 
 type PropertyType = {
   initialValue: unknown;
-  property: SchemaProperty;
+  property: Realm.CanonicalObjectSchemaProperty;
   isPrimary: boolean;
   set: (value: unknown) => void;
 };
 
-export const typeToString = (property: SchemaProperty): string => {
+export const typeToString = (property: Realm.CanonicalObjectSchemaProperty): string => {
   let title = '';
 
   switch (property.type) {

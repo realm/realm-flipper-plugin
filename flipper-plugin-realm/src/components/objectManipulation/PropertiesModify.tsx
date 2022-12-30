@@ -1,13 +1,13 @@
 import { Col, Row } from 'antd';
 import React from 'react';
-import { RealmObject, SchemaObject } from '../../CommonTypes';
+import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
 import { PropertyRender } from './PropertyRender';
 import { getDefault } from './types/TypeInput';
 
 type InputType = {
-  schema: SchemaObject;
-  value: RealmObject;
-  setValue: (v: RealmObject) => void;
+  schema: SortedObjectSchema;
+  value: IndexableRealmObject;
+  setValue: (v: IndexableRealmObject) => void;
   setPropsChanges?: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
@@ -28,10 +28,10 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
               return old.add(propertyName);
             })
           }
-          setValue({
-            ...value,
-            [propertyName]: val,
-          })
+
+          // TODO: check whether this works as intended.
+          value[propertyName] = val;
+          setValue(value);
         };
         return (
           <Col key={index} span={24}>

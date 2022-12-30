@@ -1,11 +1,30 @@
+// A helper interface which extends Realm.Object with
+// a string index signature and object key field for reference.
+export interface IndexableRealmObject extends Realm.Object {
+  [key: string]: unknown;
+  // Contains the object key that was sent by the device.
+  _pluginObjectKey: string;
+}
+
+// A Realm.CanonicalObjectSchema interface sorting order reference.
+export interface SortedObjectSchema extends Realm.CanonicalObjectSchema {
+  order: string[];
+}
+
+export interface CanonicalObjectSchemaPropertyRow
+  extends Realm.CanonicalObjectSchemaProperty {
+  key: number;
+  primaryKey: boolean;
+}
+
 export type RealmPluginState = {
   deviceSerial: string;
   realms: string[];
   selectedRealm: string;
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  currentSchema: SchemaObject | null;
-  schemaHistory: SchemaObject[];
+  objects: IndexableRealmObject[];
+  schemas: SortedObjectSchema[];
+  currentSchema: SortedObjectSchema | null;
+  schemaHistory: SortedObjectSchema[];
   schemaHistoryIndex: number;
   cursor: string | null;
   totalObjects: number;
@@ -17,25 +36,6 @@ export type RealmPluginState = {
   errorMessage?: string;
 };
 
-export type RealmObject = Record<string, unknown> 
-
-export type SchemaObject = {
-  name: string;
-  embedded: boolean;
-  asymmetric: boolean;
-  primaryKey: string;
-  properties: { [key: string]: SchemaProperty };
-  order: Array<string>;
-};
-
-export type SchemaProperty = {
-  name: string;
-  indexed: boolean;
-  optional: boolean;
-  type: string;
-  mapTo: string;
-  objectType?: string;
-};
 export type Events = {
   getObjects: ObjectsMessage;
   getSchemas: SchemaMessage;
@@ -47,12 +47,12 @@ export type Events = {
   executeQuery: QueryResult;
 };
 export type Methods = {
-  executeQuery: (query: QueryObject) => Promise<RealmObject[]>;
+  executeQuery: (query: QueryObject) => Promise<Realm.Object[]>;
   getObjects: (data: getForwardsObjectsRequest) => Promise<ObjectsMessage>;
   getSchemas: (data: RealmRequest) => Promise<SchemaMessage>;
   getRealms: () => Promise<RealmsMessage>;
-  addObject: (object: AddObject) => Promise<RealmObject>;
-  modifyObject: (newObject: EditObject) => Promise<RealmObject>;
+  addObject: (object: AddObject) => Promise<Realm.Object>;
+  modifyObject: (newObject: EditObject) => Promise<Realm.Object>;
   removeObject: (object: RemoveObject) => Promise<void>;
   receivedCurrentQuery: (request: {
     schema: string | null;
@@ -73,7 +73,7 @@ type DataDownloadRequest = {
 export type EditObject = {
   schema?: string;
   realm?: string;
-  object: RealmObject;
+  object: Realm.Object;
   propsChanged?: string[];
   objectKey: string;
 };
@@ -81,14 +81,14 @@ export type EditObject = {
 export type RemoveObject = {
   schema?: string;
   realm?: string;
-  object: RealmObject;
+  object: Realm.Object;
   objectKey: string;
 };
 
 export type AddObject = {
   schema?: string;
   realm?: string;
-  object: RealmObject;
+  object: Realm.Object;
   propsChanged?: string[];
 };
 export type RealmsMessage = {
@@ -97,17 +97,17 @@ export type RealmsMessage = {
   total: number;
 };
 export type ObjectsMessage = {
-  objects: Array<RealmObject>;
+  objects: IndexableRealmObject[];
   total: number;
   nextCursor: string;
   prev_cursor: { [sortingField: string]: number };
   hasMore: boolean;
 };
 export type ObjectMessage = {
-  object: RealmObject;
+  object: Realm.Object;
 };
 export type SchemaMessage = {
-  schemas: Array<SchemaObject>;
+  schemas: Array<Realm.CanonicalObjectSchema>;
 };
 type RealmRequest = {
   realm: string;
@@ -127,7 +127,7 @@ export type ObjectRequest = {
   primaryKey: string;
 };
 export type AddLiveObjectRequest = {
-  newObject: RealmObject;
+  newObject: IndexableRealmObject;
   index: number;
   schema: string;
   newObjectKey: string;
@@ -137,7 +137,7 @@ export type DeleteLiveObjectRequest = {
   schema: string;
 };
 export type EditLiveObjectRequest = {
-  newObject: RealmObject;
+  newObject: IndexableRealmObject;
   index: number;
   schema: string;
   newObjectKey: string;
@@ -148,5 +148,5 @@ type QueryObject = {
   realm: string;
 };
 export type QueryResult = {
-  result: Array<RealmObject> | string;
+  result: Array<Realm.Object> | string;
 };

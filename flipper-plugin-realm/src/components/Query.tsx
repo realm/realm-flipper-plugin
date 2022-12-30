@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { plugin } from '..';
 
 type InputType = {
-  execute: (query: string) => undefined | 'string';
+  execute: (query: string) => Promise<void>;
 };
 
 const wrapItem = (query: string, id: number) => ({

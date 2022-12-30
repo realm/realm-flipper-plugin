@@ -1,6 +1,6 @@
-import { SchemaProperty } from '../CommonTypes';
+import { CanonicalObjectSchemaProperty } from 'realm';
 
-export const isPropertyLinked = (property: SchemaProperty) => {
+export const isPropertyLinked = (property: CanonicalObjectSchemaProperty) => {
   const primitiveTypes = new Set([
     'bool',
     'int',
@@ -18,7 +18,6 @@ export const isPropertyLinked = (property: SchemaProperty) => {
   ]);
 
   return (
-    property.objectType &&
-    !primitiveTypes.has(property.objectType as string)
+    property.objectType && !primitiveTypes.has(property.objectType as string)
   );
 };

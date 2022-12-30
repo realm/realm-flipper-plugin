@@ -1,11 +1,12 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 import { theme } from 'flipper-plugin';
+import { IndexableRealmObject } from '../CommonTypes';
 
 export type DropdownPropertyType = {
-  record: RealmObject;
-  schemaProperty: SchemaProperty | null;
-  currentSchema: SchemaObject;
+  record: IndexableRealmObject | null;
+  schemaProperty: Realm.CanonicalObjectSchemaProperty | null;
+  currentSchema: Realm.ObjectSchema;
   visible: boolean;
   pointerX: number;
   pointerY: number;
@@ -21,12 +22,13 @@ type MenuItem = {
 };
 
 export type MenuItemGenerator = (
-  row: RealmObject,
-  schemaProperty: SchemaProperty,
-  schema: SchemaObject
+  row: IndexableRealmObject,
+  schemaProperty: Realm.CanonicalObjectSchemaProperty,
+  schema: Realm.ObjectSchema,
 ) => Array<MenuItem>;
 
 const listItem = (menuItem: MenuItem) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [hover, setHover] = useState(false);
 
   const handleMouseEnter = () => {
@@ -54,7 +56,7 @@ const listItem = (menuItem: MenuItem) => {
         padding: '5px 12px',
         whiteSpace: 'nowrap',
         backgroundColor: hover ? theme.primaryColor : 'white',
-        zIndex: 99
+        zIndex: 99,
       }}
     >
       {' '}
@@ -72,9 +74,9 @@ export const CustomDropdown = ({
   pointerX,
   pointerY,
   scrollX,
-  scrollY
+  scrollY,
 }: DropdownPropertyType) => {
-  if (visible && schemaProperty) {
+  if (visible && schemaProperty && record) {
     const menuItems = generateMenuItems(record, schemaProperty, currentSchema);
     return (
       <ul
@@ -93,11 +95,13 @@ export const CustomDropdown = ({
           padding: 0,
           textAlign: 'left',
           overflow: 'hidden',
-          zIndex: '10'
+          zIndex: '10',
         }}
       >
         {menuItems.map((menuItem) => listItem(menuItem))}
       </ul>
     );
-  } else return <></>;
+  } else {
+    return <></>;
+  }
 };

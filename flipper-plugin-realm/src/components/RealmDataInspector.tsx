@@ -7,28 +7,37 @@ import {
 import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
-import { RealmObject, SchemaObject } from '../CommonTypes';
 import { BoldSpan } from './SchemaSelect';
 
 export type InspectionDataType = {
-  data: RealmObject;
+  data: Record<string, unknown>;
   view: 'object' | 'schema' | 'property';
 };
 
 type PropertyType = {
-  schemas: SchemaObject[];
+  schemas: Realm.CanonicalObjectSchema[];
   inspectionData: InspectionDataType | undefined;
   setInspectionData: React.Dispatch<
     React.SetStateAction<InspectionDataType | undefined>
   >;
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
-  goBackStack: Array<RealmObject>;
-  setGoBackStack: React.Dispatch<React.SetStateAction<RealmObject[]>>;
-  goForwardStack: Array<RealmObject>;
-  setGoForwardStack: React.Dispatch<React.SetStateAction<RealmObject[]>>;
+  goBackStack: Array<InspectionDataType>;
+  setGoBackStack: React.Dispatch<React.SetStateAction<InspectionDataType[]>>;
+  goForwardStack: Array<InspectionDataType>;
+  setGoForwardStack: React.Dispatch<React.SetStateAction<InspectionDataType[]>>;
   setNewInspectionData: (newInspectionData: InspectionDataType) => void;
 };
+
+  // Helper function to traverse through a Realm object given a path
+  // Can return any type that a Realm Object could contain.
+  function traverseThroughObject<Type>(object: Record<string, unknown>, path: string[]) {
+    let traversedObject: any = object;
+    path.forEach(
+      (key) => (traversedObject = traversedObject[key])
+    );
+    return traversedObject as Type
+  }
 
 export const RealmDataInspector = ({
   schemas,
@@ -113,13 +122,14 @@ export const RealmDataInspector = ({
         <Layout style={flickerStyle}>
           <Row>
             <Col offset={1} span={22}>
+              {/* @ts-expect-error See https://github.com/facebook/flipper/issues/3996 */}
               <DataInspector
                 data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
                   // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
-                  let linkedSchema: SchemaObject | undefined = schemas.find(
+                  let linkedSchema: Realm.CanonicalObjectSchema | undefined = schemas.find(
                     (schema) =>
                       schema.properties[name] && // The schema has the currently rendered property
                       schemas.find(
@@ -131,15 +141,10 @@ export const RealmDataInspector = ({
                       )
                   );
 
-                  // If the current field is named objectType find the SchemaObject corresponding to its value (if there is one) and assign it to linkedSchema.
-                  // Assigning inspectionData to linkedSchemaName and then traverse it using path to get the linkedSchemaName.
+                  // If the current field is named objectType find the Realm.ObjectSchema corresponding to its value (if there is one) and assign it to linkedSchema.
+                  // Traverse the current inspection data using path to get the linkedSchemaName.
                   if (name === 'objectType' && inspectionData.data) {
-                    let linkedSchemaName: string | RealmObject =
-                      inspectionData.data;
-                    path.forEach(
-                      //@ts-ignore
-                      (key) => (linkedSchemaName = linkedSchemaName[key])
-                    );
+                    let linkedSchemaName = traverseThroughObject<string>(inspectionData.data, path) 
 
                     linkedSchema = schemas.find(
                       (schema) => schema.name === linkedSchemaName
@@ -185,13 +190,15 @@ export const RealmDataInspector = ({
                             icon={<SearchOutlined />}
                             ghost
                             onClick={(event) => {
-                              // event.preventDefault()
                               event.stopPropagation();
-                              let object = inspectionData.data;
-                              path.forEach((key) => (object = object[key]));
+                              if (!linkedSchema) {
+                                return;
+                              }
+                              
+                              let traversedObject = traverseThroughObject<any>(inspectionData.data, path)
                               setNewInspectionData({
                                 data: {
-                                  [linkedSchema.name]: object,
+                                  [linkedSchema.name]: traversedObject,
                                 },
                                 view: 'object',
                               });

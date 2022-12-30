@@ -1,16 +1,23 @@
+/* eslint-disable react-native/no-inline-styles */
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
-import { SorterResult } from 'antd/lib/table/interface';
+import {
+  ColumnsType,
+  FilterValue,
+  Key,
+  SorterResult,
+  TablePaginationConfig,
+} from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
 // import { parsePropToCell } from '../utils/Parser';
 import InfiniteScroll from 'react-infinite-scroller';
 import { InspectionDataType } from './RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import { MenuItemGenerator } from './CustomDropdown';
+import { IndexableRealmObject, SortedObjectSchema } from '../CommonTypes';
 
 export type ColumnType = {
   optional: boolean;
@@ -22,37 +29,39 @@ export type ColumnType = {
 
 type PropertyType = {
   columns: ColumnType[];
-  objects: RealmObject[];
-  schemas: SchemaObject[];
-  currentSchema: SchemaObject;
-  sortingDirection: 'ascend' | 'descend' | null;
+  objects: IndexableRealmObject[];
+  schemas: SortedObjectSchema[];
+  currentSchema: Realm.CanonicalObjectSchema;
+  sortingDirection?: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
   setdropdownProp: Function;
   dropdownProp: Object;
-  scrollX: number;
-  scrollY: number;
+  scrollX?: number;
+  scrollY?: number;
   enableSort: boolean;
   hasMore: boolean;
   totalObjects?: number;
-  fetchMore: () => void;
-  setNewInspectionData: (
+  fetchMore?: () => void;
+  setNewInspectionData?: (
     inspectionData: InspectionDataType,
-    wipeStacks?: boolean
+    wipeStacks?: boolean,
   ) => void;
-  clickAction?: (object: RealmObject) => void;
+  clickAction?: (object: IndexableRealmObject) => void;
 };
 
 type ClickableTextType = {
-  displayText: string;
+  displayText: string | number | JSX.Element;
   isLongString: boolean;
   value: Record<string, unknown>;
   inspectorView: 'object' | 'property';
 };
 
 // Receives a schema and returns column objects for the table.
-export const schemaObjToColumns = (schema: SchemaObject): ColumnType[] => {
+export const schemaObjToColumns = (
+  schema: SortedObjectSchema,
+): ColumnType[] => {
   return schema.order.map((propertyName) => {
     const obj = schema.properties[propertyName];
     const isPrimaryKey = obj.name === schema.primaryKey;
@@ -79,10 +88,12 @@ export const DataTable = ({
   setNewInspectionData,
   enableSort,
   hasMore,
-  totalObjects,
-  fetchMore,
+  totalObjects = 0,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  fetchMore = () => {},
   clickAction,
 }: // rowSelection
+// TODO: this should probably not use PropertyType as its type.
 PropertyType) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -99,20 +110,19 @@ PropertyType) => {
 
   const [rowExpansionProp, setRowExpansionProp] = useState({
     expandedRowRender: () => {
-      return;
+      return <></>;
     },
-    expandedRowKeys: [],
     showExpandColumn: false,
   });
 
   /** Hook to close the nested Table when clicked outside of it. */
   useEffect(() => {
     const closeNestedTable = () => {
-      setRowExpansionProp({ ...rowExpansionProp, expandedRowKeys: [] });
+      setRowExpansionProp({ ...rowExpansionProp });
     };
     document.body.addEventListener('click', closeNestedTable);
     return () => document.body.removeEventListener('click', closeNestedTable);
-  }, []);
+  });
 
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -134,9 +144,12 @@ PropertyType) => {
             color: isLongString ? undefined : '#6831c7',
             textDecoration: isHovering ? 'underline' : undefined,
           }}
-          onClick={() =>
-            setNewInspectionData({ data: value, view: inspectorView }, true)
-          }
+          onClick={() => {
+            // TODO: this should probably be defined at all times.
+            if (setNewInspectionData) {
+              setNewInspectionData({ data: value, view: inspectorView }, true);
+            }
+          }}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
@@ -156,21 +169,18 @@ PropertyType) => {
   };
 
   /** Definition of antd-specific columns. This constant is passed to the antd table as a property. */
-  const antdColumns = columns.map((column) => {
-    const property: SchemaProperty = currentSchema.properties[column.name];
+  const antdColumns:ColumnsType<IndexableRealmObject> = columns.map((column) => {
+    const property: Realm.CanonicalObjectSchemaProperty =
+      currentSchema.properties[column.name];
 
     /*  A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
-    const render = (value: unknown, row: RealmObject) => {
+    const render = (value: IndexableRealmObject, row: IndexableRealmObject) => {
       /** Apply the renderValue function on the value in the cell to create a standard cell. */
-      const cellValue: string | number | JSX.Element = renderValue(
-        value,
-        property,
-        schemas
-      );
+      const cellValue = renderValue(value, property, schemas);
 
       const linkedSchema = schemas.find(
-        (schema) => schema.name === property.objectType
+        (schema) => schema.name === property.objectType,
       );
 
       /** Render buttons to expand the row and a clickable text if the cell contains a linked Realm object. */
@@ -190,12 +200,17 @@ PropertyType) => {
               icon={<PlusOutlined />}
               onClick={(event) => {
                 event.stopPropagation();
-                expandRow(row._objectKey, linkedSchema, value as RealmObject);
+                expandRow(
+                  row._pluginObjectKey,
+                  linkedSchema,
+                  value,
+                );
               }}
               ghost
             />
             {
               <ClickableText
+                // TODO: types here were no specific
                 value={value}
                 displayText={cellValue}
                 isLongString={false}
@@ -239,10 +254,10 @@ PropertyType) => {
       property,
 
       /** The function listening for onCell events, here listening for left-clicks on the cell to render the context menu.*/
-      onCell: (object: RealmObject) => {
+      onCell: (object: IndexableRealmObject) => {
         if (generateMenuItems) {
           return {
-            onContextMenu: (env: Event) => {
+            onContextMenu: (env: React.MouseEvent) => {
               env.preventDefault();
               setdropdownProp({
                 ...dropdownProp,
@@ -250,9 +265,7 @@ PropertyType) => {
                 schemaProperty: property,
                 currentSchema: currentSchema,
                 visible: true,
-                //@ts-ignore
                 pointerX: env.clientX - 290,
-                //@ts-ignore
                 pointerY: env.clientY - 225,
                 scrollX,
                 scrollY,
@@ -260,10 +273,11 @@ PropertyType) => {
             },
           };
         }
+        return {}
       },
 
       /** Enabling/Disabling sorting if the property.type is a sortable type */
-      sorter: enableSort && sortableTypes.has(property.type), 
+      sorter: enableSort && sortableTypes.has(property.type),
 
       /** Defining the sorting order. */
       sortOrder:
@@ -274,12 +288,11 @@ PropertyType) => {
   /** Updating the rowExpansion property of the antd table to expand the correct row and render a nested table inside of it. */
   const expandRow = (
     rowToExpandKey: any,
-    linkedSchema: SchemaObject,
-    objectToRender: RealmObject
+    linkedSchema: SortedObjectSchema,
+    objectToRender: IndexableRealmObject,
   ) => {
     const newRowExpansionProp = {
       ...rowExpansionProp,
-      expandedRowKeys: [rowToExpandKey],
       expandedRowRender: () => {
         return (
           <NestedTable
@@ -292,6 +305,7 @@ PropertyType) => {
             generateMenuItems={generateMenuItems}
             setdropdownProp={setdropdownProp}
             dropdownProp={dropdownProp}
+            enableSort={false}
           />
         );
       },
@@ -313,17 +327,22 @@ PropertyType) => {
   /** Handling sorting. Is called when the 'state' of the Ant D Table changes, ie. you sort on a column. */
   const handleOnChange = (
     pagination: TablePaginationConfig,
-    filters: Record<string, Key[] | null>,
+    filters: Record<string, FilterValue | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
-    extra: any
+    extra: any,
   ) => {
     if (extra.action === 'sort') {
       if (state.loading) {
         return;
       }
-      if (state.sortingColumn !== sorter.field) {
+      // TODO: properly handle SorterResult<any>[] case
+      let sortedField = Array.isArray(sorter) ? sorter[0].field : sorter.field
+
+      if (state.sortingColumn !== sortedField) {
         instance.setSortingDirection('ascend');
-        instance.setSortingColumn(sorter.field);
+
+        // TODO: using "as string" may be error-prone
+        instance.setSortingColumn(sortedField as string);
       } else {
         instance.toggleSortingDirection();
       }
@@ -355,7 +374,7 @@ PropertyType) => {
             }}
             key={0}
           >
-            <Spinner size={30}></Spinner>
+            <Spinner size={30} />
           </div>
         }
       >
@@ -364,7 +383,7 @@ PropertyType) => {
           bordered={true}
           showSorterTooltip={false}
           dataSource={objects}
-          onRow={(object: RealmObject) => {
+          onRow={(object: IndexableRealmObject) => {
             if (clickAction) {
               return {
                 onClick: () => {
@@ -372,9 +391,10 @@ PropertyType) => {
                 },
               };
             }
+            return {}
           }}
           rowKey={(record) => {
-            return record._objectKey;
+            return record._pluginObjectKey;
           }}
           expandable={rowExpansionProp}
           columns={antdColumns}
@@ -401,35 +421,14 @@ const createTitle = (column: ColumnType) => {
 };
 
 /** Internal component to render a nested table for exploring linked objects. */
-const NestedTable = ({
-  columns,
-  objects,
-  schemas,
-  currentSchema,
-  sortingColumn,
-  generateMenuItems,
-  setdropdownProp,
-  dropdownProp,
-  hasMore,
-}: PropertyType) => {
+const NestedTable = (props: PropertyType) => {
   return (
     <div
       style={{
         boxShadow: '0px 0px 15px grey',
       }}
     >
-      <DataTable
-        columns={columns}
-        objects={objects}
-        schemas={schemas}
-        hasMore={hasMore}
-        currentSchema={currentSchema}
-        sortingColumn={sortingColumn}
-        generateMenuItems={generateMenuItems}
-        setdropdownProp={setdropdownProp}
-        dropdownProp={dropdownProp}
-        enableSort={false}
-      ></DataTable>
+      <DataTable {...props} />
     </div>
   );
 };
