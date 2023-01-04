@@ -220,7 +220,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     requestObjects(schema, realm, toRestore, cursor)
       .then(
         (response: ObjectsMessage) => {
-          // const state = pluginState.get();
           if (response.objects && !response.objects.length) {
             pluginState.set({
               ...state,

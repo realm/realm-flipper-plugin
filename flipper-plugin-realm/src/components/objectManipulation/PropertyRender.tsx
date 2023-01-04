@@ -2,7 +2,7 @@ import { Col, Form, Row, Tag } from 'antd';
 import React from 'react';
 import { TypeInput } from './types/TypeInput';
 
-type PropertyType = {
+type ProperyRenderProps = {
   initialValue: unknown;
   property: Realm.CanonicalObjectSchemaProperty;
   isPrimary: boolean;
@@ -47,7 +47,7 @@ export const PropertyRender = ({
   property,
   isPrimary,
   set,
-}: PropertyType) => {
+}: ProperyRenderProps) => {
   const title = typeToString(property);
 
   return (

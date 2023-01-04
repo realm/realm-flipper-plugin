@@ -4,7 +4,13 @@
  *
  * @format
  */
-
+const path = require('path');
+const extraNodeModules = {
+  'realm-flipper-plugin-device': path.resolve(__dirname + '/../realm-flipper-plugin-device/'),
+};
+const watchFolders = [
+  path.resolve(__dirname + '/../realm-flipper-plugin-device/'),
+];
 module.exports = {
   transformer: {
     getTransformOptions: async () => ({
@@ -14,4 +20,8 @@ module.exports = {
       },
     }),
   },
+  resolver: {
+    extraNodeModules,
+  },
+  watchFolders,
 };

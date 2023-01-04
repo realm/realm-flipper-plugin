@@ -30,7 +30,6 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
 
   const onOk = () => {
     if (!values) {
-      // TODO: handle this case better.
       return;
     }
     addObject(values);

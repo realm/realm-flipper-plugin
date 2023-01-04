@@ -6,7 +6,7 @@ export interface IndexableRealmObject extends Realm.Object {
   _pluginObjectKey: string;
 }
 
-// A Realm.CanonicalObjectSchema interface sorting order reference.
+// A Realm.CanonicalObjectSchema interface with a sorting order field.
 export interface SortedObjectSchema extends Realm.CanonicalObjectSchema {
   order: string[];
 }

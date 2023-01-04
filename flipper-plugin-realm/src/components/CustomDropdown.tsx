@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { theme } from 'flipper-plugin';
 import { IndexableRealmObject } from '../CommonTypes';
@@ -28,7 +27,6 @@ export type MenuItemGenerator = (
 ) => Array<MenuItem>;
 
 const listItem = (menuItem: MenuItem) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [hover, setHover] = useState(false);
 
   const handleMouseEnter = () => {

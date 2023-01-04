@@ -1,17 +1,14 @@
-/* eslint-disable react-native/no-inline-styles */
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import {
   ColumnsType,
   FilterValue,
-  Key,
   SorterResult,
   TablePaginationConfig,
 } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
 import { plugin } from '..';
-// import { parsePropToCell } from '../utils/Parser';
 import InfiniteScroll from 'react-infinite-scroller';
 import { InspectionDataType } from './RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
@@ -27,7 +24,7 @@ export type ColumnType = {
   isPrimaryKey: boolean;
 };
 
-type PropertyType = {
+type DataTableProps = {
   columns: ColumnType[];
   objects: IndexableRealmObject[];
   schemas: SortedObjectSchema[];
@@ -43,8 +40,8 @@ type PropertyType = {
   enableSort: boolean;
   hasMore: boolean;
   totalObjects?: number;
-  fetchMore?: () => void;
-  setNewInspectionData?: (
+  fetchMore: () => void;
+  setNewInspectionData: (
     inspectionData: InspectionDataType,
     wipeStacks?: boolean,
   ) => void;
@@ -75,26 +72,24 @@ export const schemaObjToColumns = (
   });
 };
 
-export const DataTable = ({
-  columns,
-  objects,
-  schemas,
-  currentSchema,
-  generateMenuItems,
-  setdropdownProp,
-  dropdownProp,
-  scrollX,
-  scrollY,
-  setNewInspectionData,
-  enableSort,
-  hasMore,
-  totalObjects = 0,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  fetchMore = () => {},
-  clickAction,
-}: // rowSelection
-// TODO: this should probably not use PropertyType as its type.
-PropertyType) => {
+export const DataTable = (dataTableProps: DataTableProps) => {
+  const {
+    columns,
+    objects,
+    schemas,
+    currentSchema,
+    generateMenuItems,
+    setdropdownProp,
+    dropdownProp,
+    scrollX,
+    scrollY,
+    setNewInspectionData,
+    enableSort,
+    hasMore,
+    totalObjects = 0,
+    fetchMore = () => undefined, 
+    clickAction,
+  } = dataTableProps;
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
   const sortableTypes = new Set([
@@ -122,7 +117,7 @@ PropertyType) => {
     };
     document.body.addEventListener('click', closeNestedTable);
     return () => document.body.removeEventListener('click', closeNestedTable);
-  });
+  }, []);
 
   if (!currentSchema) {
     return <Layout.Container>Please select schema.</Layout.Container>;
@@ -145,10 +140,7 @@ PropertyType) => {
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() => {
-            // TODO: this should probably be defined at all times.
-            if (setNewInspectionData) {
-              setNewInspectionData({ data: value, view: inspectorView }, true);
-            }
+            setNewInspectionData({ data: value, view: inspectorView }, true);
           }}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
@@ -210,7 +202,6 @@ PropertyType) => {
             />
             {
               <ClickableText
-                // TODO: types here were no specific
                 value={value}
                 displayText={cellValue}
                 isLongString={false}
@@ -287,6 +278,7 @@ PropertyType) => {
 
   /** Updating the rowExpansion property of the antd table to expand the correct row and render a nested table inside of it. */
   const expandRow = (
+    // TODO: figure out the purpose of these variables.
     rowToExpandKey: any,
     linkedSchema: SortedObjectSchema,
     objectToRender: IndexableRealmObject,
@@ -296,16 +288,7 @@ PropertyType) => {
       expandedRowRender: () => {
         return (
           <NestedTable
-            columns={schemaObjToColumns(linkedSchema)}
-            objects={[objectToRender]}
-            schemas={schemas}
-            currentSchema={linkedSchema}
-            sortingColumn={null}
-            hasMore={false}
-            generateMenuItems={generateMenuItems}
-            setdropdownProp={setdropdownProp}
-            dropdownProp={dropdownProp}
-            enableSort={false}
+            { ...dataTableProps }
           />
         );
       },
@@ -326,8 +309,8 @@ PropertyType) => {
 
   /** Handling sorting. Is called when the 'state' of the Ant D Table changes, ie. you sort on a column. */
   const handleOnChange = (
-    pagination: TablePaginationConfig,
-    filters: Record<string, FilterValue | null>,
+    _pagination: TablePaginationConfig,
+    _filters: Record<string, FilterValue | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any,
   ) => {
@@ -336,12 +319,11 @@ PropertyType) => {
         return;
       }
       // TODO: properly handle SorterResult<any>[] case
-      let sortedField = Array.isArray(sorter) ? sorter[0].field : sorter.field
+      const sortedField = Array.isArray(sorter) ? sorter[0].field : sorter.field
 
       if (state.sortingColumn !== sortedField) {
         instance.setSortingDirection('ascend');
 
-        // TODO: using "as string" may be error-prone
         instance.setSortingColumn(sortedField as string);
       } else {
         instance.toggleSortingDirection();
@@ -401,7 +383,6 @@ PropertyType) => {
           onChange={handleOnChange}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
-          // tableLayout="auto"
         />
       </InfiniteScroll>
     </div>
@@ -421,7 +402,7 @@ const createTitle = (column: ColumnType) => {
 };
 
 /** Internal component to render a nested table for exploring linked objects. */
-const NestedTable = (props: PropertyType) => {
+const NestedTable = (props: DataTableProps) => {
   return (
     <div
       style={{
