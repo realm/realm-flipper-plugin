@@ -1772,19 +1772,12 @@
   "resolved" "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.5.tgz"
   "version" "15.7.5"
 
-"@types/react-dom@^18.0.10":
-  "integrity" "sha512-E42GW/JA4Qv15wQdqJq8DL4JhNpB3prJgjgapN3qJT9K2zO5IIAQh4VXvCEDupoqAwnz0cY4RlXeC/ajX5SFHg=="
-  "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.10.tgz"
-  "version" "18.0.10"
+"@types/react-native@^0.67.3":
+  "integrity" "sha512-HYo9XbYPwyf5L7FWhRjawbDQ4ma5k/bEzxrpDjG2olwLbXR/IR5ZghCmUUIcEtHB9KDg0QIAs+WriddtOKVmFg=="
+  "resolved" "https://registry.npmjs.org/@types/react-native/-/react-native-0.67.17.tgz"
+  "version" "0.67.17"
   dependencies:
-    "@types/react" "*"
-
-"@types/react-native@^0.70.8":
-  "integrity" "sha512-jvs5QMOrlyi0ScfT5Brha2roDoOWtbIOadNkp0jsueVen5+pH4SQAYtzL6xu0+dIcx3J/5LtZ/JYby2C1/zUug=="
-  "resolved" "https://registry.npmjs.org/@types/react-native/-/react-native-0.70.8.tgz"
-  "version" "0.70.8"
-  dependencies:
-    "@types/react" "*"
+    "@types/react" "^17"
 
 "@types/react-test-renderer@^17.0.1":
   "integrity" "sha512-+F1KONQTBHDBBhbHuT2GNydeMpPuviduXIVJRB7Y4nma4NR5DrTJfMMZ+jbhEHbpwL+Uqhs1WXh4KHiyrtYTPg=="
@@ -1792,15 +1785,6 @@
   "version" "17.0.2"
   dependencies:
     "@types/react" "^17"
-
-"@types/react@*", "@types/react@^18.0.10", "@types/react@^18.0.25":
-  "integrity" "sha512-hCR3PJQsAIXyxhTNSiDFY//LhnMZWpNNr5etoCqx/iUfGc5gXWtQR2Phl908jVR6uPXacojQWTg4qRpkxTuGug=="
-  "resolved" "https://registry.npmjs.org/@types/react/-/react-18.0.26.tgz"
-  "version" "18.0.26"
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    "csstype" "^3.0.2"
 
 "@types/react@^17":
   "integrity" "sha512-vwk8QqVODi0VaZZpDXQCmEmiOuyjEFPY7Ttaw5vjM112LOq37yz1CDJGrRJwA1fYEq4Iitd5rnjd1yWAc/bT+A=="
@@ -6531,7 +6515,7 @@
     "jscodeshift" "^0.13.1"
     "nullthrows" "^1.1.1"
 
-"react-native-flipper@^0.176.1", "react-native-flipper@>=0.162.0":
+"react-native-flipper@^0.176.1":
   "integrity" "sha512-kioHzO9JzA2ReW9LfopIEUXeD6gDp3Mw6KjQbELvoLVIEMvCfGz59akezw4l/S8i6qkFVcnwh5c/7Z+L3nthQA=="
   "resolved" "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.176.1.tgz"
   "version" "0.176.1"
@@ -6608,7 +6592,7 @@
     "react-shallow-renderer" "^16.15.0"
     "scheduler" "^0.22.0"
 
-"react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^18.1.0", "react@>=17", "react@>=17.0.2", "react@18.1.0":
+"react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^18.1.0", "react@>=17.0.2", "react@18.1.0":
   "integrity" "sha512-4oL8ivCz5ZEPyclFQXaNksK3adutVS8l2xzZU0cqEFrE9Sb7fC0EFK5uEk74wIreL1DERyjvsU915j1pcT2uEQ=="
   "resolved" "https://registry.npmjs.org/react/-/react-18.1.0.tgz"
   "version" "18.1.0"
@@ -6678,10 +6662,9 @@
   "resolved" "file:../realm-flipper-plugin-device"
   "version" "1.0.28"
   dependencies:
-    "react-native-flipper" ">=0.162.0"
     "realm" ">=10.20.0"
 
-"realm@^11.0.0-rc || ^11.0.0", "realm@^11.3.1", "realm@>=10.20.0":
+"realm@^11.0.0-rc || ^11.0.0", "realm@^11.3.1":
   "integrity" "sha512-yctWhfHp4RlQSXXSCJ3+QNK5Nq8ZEiMlO9DLmtrDbSQD0CntfarTDnU55okXWuCkpzykxPO8y5zotA3QVkZcZg=="
   "resolved" "https://registry.npmjs.org/realm/-/realm-11.3.1.tgz"
   "version" "11.3.1"

@@ -14,9 +14,9 @@
     "react": "^18.1.0",
     "react-native": "^0.70.3",
     "react-native-flipper": "^0.176.1",
+    "realm-flipper-plugin-device": "../realm-flipper-plugin-device",
     "react-native-get-random-values": "^1.8.0",
-    "realm": "^11.3.1",
-    "realm-flipper-plugin-device": "../realm-flipper-plugin-device"
+    "realm": "^11.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -25,9 +25,7 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "@realm/babel-plugin": "^0.1.0",
     "@types/jest": "^26.0.23",
-    "@types/react": "^18.0.10",
-    "@types/react-dom": "^18.0.10",
-    "@types/react-native": "^0.70.8",
+    "@types/react-native": "^0.67.3",
     "@types/react-test-renderer": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
@@ -39,8 +37,7 @@
     "typescript": "^4.4.4"
   },
   "resolutions": {
-    "@types/react": "^18.1.0",
-    "@types/react-dom": "^18.1.0"
+    "@types/react": "^17"
   },
   "jest": {
     "preset": "react-native",
