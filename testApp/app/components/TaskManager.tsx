@@ -2,12 +2,12 @@ import React, {useCallback} from 'react';
 import {View, StyleSheet} from 'react-native';
 
 import {Task} from '../models/Task';
+import {TaskRealmContext} from '../models';
 import {IntroText} from './IntroText';
 import {AddTaskForm} from './AddTaskForm';
 import TaskList from './TaskList';
-import {PluginTestRealmContext} from '../flipperTest/Schemas';
 
-const {useRealm} = PluginTestRealmContext;
+const {useRealm} = TaskRealmContext;
 
 export const TaskManager: React.FC<{
   tasks: Realm.Results<Task & Realm.Object>;
@@ -70,6 +70,7 @@ export const TaskManager: React.FC<{
     },
     [realm],
   );
+
   return (
     <View style={styles.content}>
       <AddTaskForm onSubmit={handleAddTask} />

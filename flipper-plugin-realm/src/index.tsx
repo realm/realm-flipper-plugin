@@ -1,7 +1,7 @@
 import { createState, PluginClient, usePlugin, useValue } from 'flipper-plugin';
 
 import React, { useState } from 'react';
-import Realm from 'realm';
+import type Realm from 'realm';
 import {
   AddLiveObjectRequest,
   DeleteLiveObjectRequest,

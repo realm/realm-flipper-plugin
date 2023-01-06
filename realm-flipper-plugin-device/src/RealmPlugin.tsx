@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import {addPlugin} from 'react-native-flipper';
-import Realm, {CanonicalObjectSchema} from 'realm';
+import type Realm from 'realm';
 import {
   convertObjectsFromDesktop,
   convertObjectsToDesktop,
@@ -186,7 +186,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           const propsChanged = obj.propsChanged;
           const schema = realm.schema.find(
             schemaObj => schemaObj.name === obj.schema,
-          ) as CanonicalObjectSchema;
+          ) as Realm.CanonicalObjectSchema;
 
           const converted: Record<string, unknown> = convertObjectsFromDesktop(
             [obj.object],

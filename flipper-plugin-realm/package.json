@@ -80,7 +80,8 @@
     "react": "latest",
     "react-dom": "latest",
     "ts-jest": "^28.0.6",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "realm": "^11.3.1"
   },
   "jest": {
     "testEnvironment": "jsdom",

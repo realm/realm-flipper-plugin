@@ -1,5 +1,4 @@
 import {createRealmContext} from '@realm/react';
-import {Task} from '../models/Task';
 
 export const Person = {
   name: 'Person',
@@ -209,9 +208,8 @@ export const NoPrimaryKeyLink = {
   },
 };
 
-export const PluginTestRealmContext = createRealmContext({
+export const FlipperTestRealmContext = createRealmContext({
   schema: [
-    Task,
     InfoSchema,
     BananaSchema,
     MaybeSchema,
@@ -223,11 +221,10 @@ export const PluginTestRealmContext = createRealmContext({
     Person,
     NoPrimaryKeyLink,
   ],
+  path: 'flipper_test',
 });
 
-export const LegacyTestSecondRealmContext = createRealmContext({
+export const FlipperTestSecondRealmContext = createRealmContext({
   schema: [Parcel, ParcelService, Delivery, MailCarrier],
-});
-export const TaskRealmContext = createRealmContext({
-  schema: [Task],
+  path: 'flipper_test_2',
 });

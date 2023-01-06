@@ -1,4 +1,4 @@
-import { CanonicalObjectSchemaProperty } from 'realm';
+import type { CanonicalObjectSchemaProperty } from 'realm';
 
 export const isPropertyLinked = (property: CanonicalObjectSchemaProperty) => {
   const primitiveTypes = new Set([

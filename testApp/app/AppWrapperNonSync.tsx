@@ -1,18 +1,18 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet} from 'react-native';
 
+import {TaskRealmContext} from './models';
 import colors from './styles/colors';
-import {PluginTestRealmContext} from './flipperTest/Schemas';
-import PluginTestAppNonSync from './flipperTest/PluginTestAppNonSync';
+import {AppNonSync} from './AppNonSync';
 
 export const AppWrapperNonSync = () => {
-  const {RealmProvider} = PluginTestRealmContext;
+  const {RealmProvider} = TaskRealmContext;
 
   // If sync is disabled, setup the app without any sync functionality and return early
   return (
     <SafeAreaView style={styles.screen}>
       <RealmProvider>
-        <PluginTestAppNonSync />
+        <AppNonSync />
       </RealmProvider>
     </SafeAreaView>
   );
