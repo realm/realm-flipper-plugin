@@ -3,9 +3,7 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({
   startOnLoad: true,
-  //@ts-expect-error Mermaid types are not currently properly exported
   theme: "default",
-  //@ts-expect-error Mermaid types are not currently properly exported
   securityLevel: "loose",
   themeCSS: `
     g.classGroup rect {
