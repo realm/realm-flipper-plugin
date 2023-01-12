@@ -3,7 +3,7 @@ import BooleanValue from '../components/BooleanValue';
 import { Button, message, Typography } from 'antd';
 import fileDownload from 'js-file-download';
 import { CanonicalObjectSchema } from 'realm';
-import { IndexableRealmObject } from '../CommonTypes';
+import { DeserializedRealmObject } from '../CommonTypes';
 
 type TypeDescription = {
   type: string;
@@ -15,7 +15,7 @@ export const renderValue = (
   property: TypeDescription,
   schemas: CanonicalObjectSchema[],
   inner?: boolean,
-) => {
+): JSX.Element | string | number => {
   if (value === null) {
     return inner ? 'null' : <Typography.Text disabled>null</Typography.Text>;
   }
@@ -27,49 +27,40 @@ export const renderValue = (
     );
   }
   let schema;
-  let returnValue: JSX.Element | string | number = '';
 
   switch (property.type) {
     case 'string':
-      //@ts-expect-error These type errors are okay because the Realm data types guarantee type safety here.
-      returnValue = parseSimpleData(value);
-      break;
     case 'double':
     case 'int':
     case 'float':
     case 'objectId':
     case 'date':
     case 'uuid': //@ts-expect-error
-      returnValue = parseSimpleData(value);
-      break;
+      return parseSimpleData(value);
     case 'bool': //@ts-expect-error
-      returnValue = parseBoolean(value);
-      break;
+      return parseBoolean(value);
     case 'list':
     case 'set': //@ts-expect-error
-      returnValue = parseSetOrList(value, property, schemas);
-      break;
+      return parseSetOrList(value, property, schemas);
     case 'data': //@ts-expect-error
-      returnValue = parseData(value);
-      break;
+      return parseData(value);
     case 'dictionary': //@ts-expect-error
-      returnValue = parseDictionary(value);
-      break;
+      return parseDictionary(value);
     case 'decimal128': //@ts-expect-error
-      returnValue = parseDecimal128(value);
-      break;
+      return parseDecimal128(value);
     case 'object':
       // eslint-disable-next-line @typescript-eslint/no-shadow
       schema = schemas.find((schema) => schema.name === property.objectType);
+      if(schema?.embedded) {
+        return `[${schema.name}]`
+      }
       //@ts-expect-error
-      returnValue = parseLinkedObject(schema as Realm.ObjectSchema, value);
-      break;
+      return parseLinkedObject(schema as Realm.ObjectSchema, value);
     case 'mixed':
-      returnValue = parseMixed(value);
-      break;
+      return parseMixed(value);
+    default:
+      return <Typography.Text disabled>Unsupported type</Typography.Text>
   }
-
-  return returnValue;
 };
 
 function parseSimpleData(input: string | number): string | number {
@@ -150,25 +141,21 @@ function parseDecimal128(input: { $numberDecimal: string }): string {
 
 function parseLinkedObject(
   schema: Realm.ObjectSchema,
-  linkedObj: IndexableRealmObject,
+  linkedObj: DeserializedRealmObject,
 ): string {
-  let returnValue = '';
   const childSchema: Realm.ObjectSchema | undefined = schema;
-  if (childSchema.primaryKey !== undefined && childSchema !== undefined) {
-    returnValue =
-      '[' +
+  if (linkedObj.realmObject && childSchema.primaryKey !== undefined && childSchema !== undefined) {
+    return '[' +
       childSchema.name +
       ']' +
       '.' +
       childSchema.primaryKey +
       ': ' +
-      linkedObj[childSchema.primaryKey];
+      linkedObj.realmObject[childSchema.primaryKey];
   } else {
-    returnValue =
-      '[' + childSchema.name + ']._objectKey: ' + linkedObj._pluginObjectKey;
+    return '[' + childSchema.name + ']._objectKey: ' + linkedObj.objectKey;
   }
 
-  return returnValue;
 }
 
 function parseMixed(input: unknown): string | JSX.Element | number {

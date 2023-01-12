@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { PropertiesModify } from './PropertiesModify';
 import { usePlugin } from 'flipper-plugin';
 import { plugin } from '../..';
-import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
+import { DeserializedRealmObject, SortedObjectSchema } from '../../CommonTypes';
 
 type InputType = {
   schema: SortedObjectSchema;
-  initialObject: IndexableRealmObject;
+  initialObject: DeserializedRealmObject;
   setVisible: (value: boolean) => void;
   visible: boolean;
 };

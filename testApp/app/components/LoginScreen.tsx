@@ -58,7 +58,7 @@ export const LoginScreen = () => {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          autoCompleteType="email"
+          autoComplete="email"
           textContentType="emailAddress"
           autoCapitalize="none"
           autoCorrect={false}
@@ -71,7 +71,7 @@ export const LoginScreen = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          autoCompleteType="password"
+          autoComplete="password"
           textContentType="password"
           placeholder="Password"
         />

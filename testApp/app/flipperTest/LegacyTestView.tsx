@@ -17,6 +17,7 @@ import {
   FlipperTestSecondRealmContext,
 } from './Schemas';
 import {createParcelTestData} from './testData/createParcelTestData';
+import {createCornerCaseData} from './testData/createCornerCaseData';
 
 function createBanana(realm: Realm) {
   let banana = realm.write(() => {
@@ -78,6 +79,10 @@ const LegacyTestView = () => {
           <Button
             title="Delete + create Parcel Testdata"
             onPress={() => createParcelTestData(realm2)}
+          />
+          <Button
+            title="Delete + create CornerCase Testdata"
+            onPress={() => createCornerCaseData(realm)}
           />
         </View>
       </ScrollView>

@@ -1,16 +1,5 @@
 import {createRealmContext} from '@realm/react';
 
-export const Person = {
-  name: 'Person',
-  properties: {
-    _id: 'int',
-    bestFriend: 'Person?',
-    hobbies: 'string[]',
-    favouriteThing: 'mixed',
-  },
-  primaryKey: '_id',
-};
-
 export const InfoSchema = {
   name: 'Info',
   properties: {
@@ -208,6 +197,35 @@ export const NoPrimaryKeyLink = {
   },
 };
 
+export const NestedObjectSchema: Realm.ObjectSchema = {
+  name: 'NestedObject',
+  properties: {
+    cornerCase: 'CornerCase?',
+    nestedObject: 'NestedObject?',
+  },
+};
+
+export const EmbeddedSchema: Realm.ObjectSchema = {
+  name: 'EmbeddedObject',
+  embedded: true,
+  properties: {
+    items: 'string[]',
+    // Not currently supported.
+    // directCycle: 'EmbeddedObject?',
+    indirectCycle: 'CornerCase?',
+  },
+};
+
+export const CornerCaseSchema: Realm.ObjectSchema = {
+  name: 'CornerCase',
+  properties: {
+    mixed: 'mixed?',
+    embedded: 'EmbeddedObject?',
+    directCycle: 'CornerCase?',
+    indirectCycle: 'NestedObject?',
+  },
+};
+
 export const FlipperTestRealmContext = createRealmContext({
   schema: [
     InfoSchema,
@@ -218,8 +236,10 @@ export const FlipperTestRealmContext = createRealmContext({
     DictSchema,
     SetsSchema,
     DataSchema,
-    Person,
     NoPrimaryKeyLink,
+    NestedObjectSchema,
+    CornerCaseSchema,
+    EmbeddedSchema,
   ],
   path: 'flipper_test',
 });

@@ -1,13 +1,10 @@
-/* eslint-disable react-native/no-inline-styles */
 import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
 import { CanonicalObjectSchemaProperty } from 'realm';
 import { plugin } from '..';
-import { IndexableRealmObject, SortedObjectSchema } from '../CommonTypes';
+import { DropdownPropertyType, MenuItemGenerator, DeserializedRealmObject, SortedObjectSchema, PlainRealmObject, RealmObjectReference } from '../CommonTypes';
 import {
   CustomDropdown,
-  DropdownPropertyType,
-  MenuItemGenerator,
 } from '../components/CustomDropdown';
 import { DataTable, schemaObjToColumns } from '../components/DataTable';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
@@ -18,7 +15,7 @@ import {
 } from '../components/RealmDataInspector';
 
 type PropertyType = {
-  objects: Array<IndexableRealmObject>;
+  objects: Array<DeserializedRealmObject>;
   schemas: Array<SortedObjectSchema>;
   currentSchema: SortedObjectSchema;
   sortingDirection: 'ascend' | 'descend' | null;
@@ -26,7 +23,7 @@ type PropertyType = {
   hasMore: boolean;
   totalObjects?: number;
   enableSort: boolean;
-  clickAction?: (object: IndexableRealmObject) => void;
+  clickAction?: (object: DeserializedRealmObject) => void;
   fetchMore: () => void;
   handleDataInspector?: () => void;
 };
@@ -52,7 +49,7 @@ const DataVisualizer = ({
   /** Hook to open/close the editing dialog and set its properties. */
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
-    object?: IndexableRealmObject;
+    object?: DeserializedRealmObject;
     // schemaProperty?: SchemaProperty;
     type?: 'field' | 'object';
     fieldName?: string;
@@ -60,18 +57,19 @@ const DataVisualizer = ({
     editing: false,
   });
   const pluginState = usePlugin(plugin);
-  const { removeObject } = pluginState;
+  const { removeObject, getObject } = pluginState;
+  const { selectedRealm } = pluginState.state.get();
 
   /** refs to keep track of the current scrolling position for the context menu */
   const scrollX = useRef(0);
   const scrollY = useRef(0);
 
   /** Functions for deleting and editing rows/objects */
-  const deleteRow = (row: IndexableRealmObject) => {
+  const deleteRow = (row: DeserializedRealmObject) => {
     removeObject(row);
   };
   const editField = (
-    row: IndexableRealmObject,
+    row: DeserializedRealmObject,
     schemaProperty: CanonicalObjectSchemaProperty,
   ) => {
     setEditingObject({
@@ -81,7 +79,7 @@ const DataVisualizer = ({
       fieldName: schemaProperty.name,
     });
   };
-  const editObject = (row: IndexableRealmObject) => {
+  const editObject = (row: DeserializedRealmObject) => {
     setEditingObject({
       editing: true,
       object: row,
@@ -91,7 +89,7 @@ const DataVisualizer = ({
 
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
   const generateMenuItems: MenuItemGenerator = (
-    row: IndexableRealmObject,
+    row: DeserializedRealmObject,
     schemaProperty: CanonicalObjectSchemaProperty,
     schema: Realm.ObjectSchema,
   ) => [
@@ -99,16 +97,13 @@ const DataVisualizer = ({
       key: 1,
       text: 'Inspect Object',
       onClick: () => {
-        const object: IndexableRealmObject = Object();
-        Object.keys(row).forEach((key) => {
-          object[key] = row[key];
-        });
         setNewInspectionData(
           {
             data: {
-              [schema.name]: object,
+              [schema.name]: row.realmObject,
             },
             view: 'object',
+            isReference: false,
           },
           true,
         );
@@ -118,16 +113,33 @@ const DataVisualizer = ({
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
-        setNewInspectionData(
-          {
-            data: {
-              [schema.name + '.' + schemaProperty.name]:
-                row[schemaProperty.name],
+        const propertyValue = row.realmObject[schemaProperty.name]
+ 
+        // If it is a linked object
+        //@ts-expect-error Property value should have objectKey
+        if(schemaProperty.objectType && propertyValue.objectKey) {
+          setNewInspectionData(
+            {
+              data: propertyValue as RealmObjectReference,
+              view: 'object',
+              isReference: true,
             },
-            view: 'property',
-          },
-          true,
-        );
+            true,
+          );
+        } else {
+          // Otherwise visualize property as usual.
+          setNewInspectionData(
+            {
+              data: {
+                [schema.name + '.' + schemaProperty.name]:
+                propertyValue,
+              },
+              view: 'property',
+              isReference: false,
+            },
+            true,
+          );
+        }
       },
     },
     {
@@ -175,14 +187,6 @@ const DataVisualizer = ({
     scrollX.current = scrollLeft;
     scrollY.current = scrollTop;
   };
-
-  if (!currentSchema) {
-    return <div>Please select a schema.</div>;
-  }
-
-  if (!schemas || !schemas.length) {
-    return <div>No schemas found. Check selected Realm.</div>;
-  }
 
   /** Take the current dropdownProp and update it with the current x and y scroll values.
    This cannot be done with useState because it would cause too many rerenders.*/
@@ -267,6 +271,7 @@ const DataVisualizer = ({
           goForwardStack={goForwardStack}
           setGoForwardStack={setGoForwardStack}
           setNewInspectionData={setNewInspectionData}
+          getObject={(object: RealmObjectReference) => {return getObject(selectedRealm, object.objectType!, object.objectKey)}}
         />
       </div>
     </div>

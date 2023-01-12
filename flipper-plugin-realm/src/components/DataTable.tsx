@@ -11,8 +11,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { InspectionDataType } from './RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
-import { MenuItemGenerator } from './CustomDropdown';
-import { IndexableRealmObject, SortedObjectSchema } from '../CommonTypes';
+import { DropdownPropertyType, MenuItemGenerator, PlainRealmObject, DeserializedRealmObject, SortedObjectSchema, RealmObjectReference } from '../CommonTypes';
 
 export type ColumnType = {
   optional: boolean;
@@ -22,19 +21,20 @@ export type ColumnType = {
   isPrimaryKey: boolean;
 };
 
+
 type DataTableProps = {
   columns: ColumnType[];
-  objects: IndexableRealmObject[];
+  objects: DeserializedRealmObject[];
   schemas: SortedObjectSchema[];
   currentSchema: Realm.CanonicalObjectSchema;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
-  setdropdownProp: Function;
-  dropdownProp: Object;
-  scrollX?: number;
-  scrollY?: number;
+  dropdownProp: DropdownPropertyType;
+  setdropdownProp: React.Dispatch<React.SetStateAction<DropdownPropertyType>>;
+  scrollX: number;
+  scrollY: number;
   enableSort: boolean;
   hasMore: boolean;
   totalObjects?: number;
@@ -43,14 +43,15 @@ type DataTableProps = {
     inspectionData: InspectionDataType,
     wipeStacks?: boolean,
   ) => void;
-  clickAction?: (object: IndexableRealmObject) => void;
+  clickAction?: (object: DeserializedRealmObject) => void;
 };
 
 type ClickableTextType = {
   /** Content to be displayed for the given value. */
   displayValue: string | number | JSX.Element;
   isLongString: boolean;
-  value: Record<string, unknown>;
+  value: PlainRealmObject | RealmObjectReference;
+  isReference?: boolean;
   inspectorView: 'object' | 'property';
 };
 
@@ -119,7 +120,15 @@ export const DataTable = (dataTableProps: DataTableProps) => {
   }, []);
 
   if (!currentSchema) {
-    return <Layout.Container>Please select schema.</Layout.Container>;
+    return <Layout.Container style={{padding: 20}}>Please select schema.</Layout.Container>;
+  }
+
+  if (currentSchema.embedded) {
+    return <Layout.Container style={{padding: 20}}>Embedded objects cannot be queried. Please view them from their parent schema or select a different schema.</Layout.Container>;
+  }
+
+  if (!schemas || !schemas.length) {
+    return <Layout.Container style={{padding: 20}}>No schemas found. Check selected Realm.</Layout.Container>;
   }
 
   /**  Functional component to render clickable text which opens the DataInspector.*/
@@ -128,6 +137,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     isLongString,
     value,
     inspectorView,
+    isReference = false,
   }: ClickableTextType) => {
     const [isHovering, setHovering] = useState(false);
     return (
@@ -139,7 +149,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
             textDecoration: isHovering ? 'underline' : undefined,
           }}
           onClick={() => {
-            setNewInspectionData({ data: value, view: inspectorView }, true);
+            setNewInspectionData({ data: value, view: inspectorView, isReference }, true);
           }}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
@@ -160,13 +170,13 @@ export const DataTable = (dataTableProps: DataTableProps) => {
   };
 
   /** Definition of antd-specific columns. This constant is passed to the antd table as a property. */
-  const antdColumns:ColumnsType<IndexableRealmObject> = columns.map((column) => {
+  const antdColumns:ColumnsType<DeserializedRealmObject> = columns.map((column) => {
     const property: Realm.CanonicalObjectSchemaProperty =
       currentSchema.properties[column.name];
 
     /*  A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
-    const render = (value: IndexableRealmObject, row: IndexableRealmObject) => {
+    const render = (value: PlainRealmObject, row: DeserializedRealmObject) => {
       /** Apply the renderValue function on the value in the cell to create a standard cell. */
       const cellValue = renderValue(value, property, schemas);
 
@@ -174,8 +184,10 @@ export const DataTable = (dataTableProps: DataTableProps) => {
         (schema) => schema.name === property.objectType,
       );
 
-      /** Render buttons to expand the row and a clickable text if the cell contains a linked Realm object. */
+      /** Render buttons to expand the row and a clickable text if the cell contains a linked or embedded Realm object. */
       if (value !== null && linkedSchema && property.type === 'object') {
+        const isEmbedded = linkedSchema.embedded;
+
         return (
           <Layout.Container
             style={{
@@ -192,7 +204,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
               onClick={(event) => {
                 event.stopPropagation();
                 expandRow(
-                  row._pluginObjectKey,
+                  row.objectKey,
                   linkedSchema,
                   value,
                 );
@@ -201,10 +213,15 @@ export const DataTable = (dataTableProps: DataTableProps) => {
             />
             {
               <ClickableText
-                value={value}
+                value={
+                  isEmbedded 
+                  ? { [`${currentSchema.name}.${column.name}`]: value}
+                  : value
+                }
                 displayValue={cellValue}
                 isLongString={false}
-                inspectorView="object"
+                inspectorView={isEmbedded ? "property" : "object"}
+                isReference={!isEmbedded}
               />
             }
           </Layout.Container>
@@ -229,7 +246,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
       /** Simple antd table props defined in their documentation */
       minWidth: 20000,
       key: property.name,
-      dataIndex: property.name,
+      dataIndex: ["realmObject", property.name],
       width: 300,
       ellipsis: {
         showTitle: false,
@@ -244,7 +261,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
       property,
 
       /** The function listening for onCell events, here listening for left-clicks on the cell to render the context menu.*/
-      onCell: (object: IndexableRealmObject) => {
+      onCell: (object: DeserializedRealmObject) => {
         if (generateMenuItems) {
           return {
             onContextMenu: (env: React.MouseEvent) => {
@@ -279,7 +296,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
   const expandRow = (
     rowToExpandKey: any,
     linkedSchema: SortedObjectSchema,
-    objectToRender: IndexableRealmObject,
+    objectToRender: PlainRealmObject,
   ) => {
     const newRowExpansionProp = {
       ...rowExpansionProp,
@@ -365,7 +382,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           bordered={true}
           showSorterTooltip={false}
           dataSource={objects}
-          onRow={(object: IndexableRealmObject) => {
+          onRow={(object: DeserializedRealmObject) => {
             if (clickAction) {
               return {
                 onClick: () => {
@@ -376,7 +393,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
             return {}
           }}
           rowKey={(record) => {
-            return record._pluginObjectKey;
+            return record.objectKey;
           }}
           expandable={rowExpansionProp}
           columns={antdColumns}

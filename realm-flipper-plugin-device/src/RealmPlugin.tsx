@@ -3,18 +3,24 @@ import {addPlugin} from 'react-native-flipper';
 import type Realm from 'realm';
 import {
   convertObjectsFromDesktop,
-  convertObjectsToDesktop,
+  serializeRealmObject,
+  serializeRealmObjects,
 } from './ConvertFunctions';
 import {PluginConnectedObjects} from './PluginConnectObjects';
 
-type getObjectsQuery = {
+type GetObjectsRequest = {
   schemaName: string;
   realm: string;
-  cursor: string;
-  limit: number;
-  sortingDirection: 'ascend' | 'descend';
-  sortingColumn: string;
+  cursor: string | null;
+  sortingColumn: string | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   query: string;
+};
+
+type GetObjectRequest = {
+  schemaName: string;
+  realm: string;
+  objectKey: string;
 };
 
 const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
@@ -58,7 +64,34 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive('getObjects', (req: getObjectsQuery, responder) => {
+        connection.receive('getObject', (req: GetObjectRequest, responder) => {
+          const realm = realmsMap.get(req.realm);
+          if (!realm) {
+            responder.error({message: 'No realm found'});
+            return;
+          }
+          const {schemaName, objectKey} = req;
+          let objects = realm.objects(schemaName);
+          const totalObjects = objects.length;
+          if (!totalObjects || objects.isEmpty()) {
+            responder.error({message: `No objects found in selected schema "${schemaName}".`});
+            return;
+          }
+         let requestedObject = objects.find(
+            obj => obj._objectKey() === objectKey,
+          );
+          if(requestedObject == undefined) {
+            responder.error({message: `Object with object key: "${objectKey}" not found.`});
+            return;
+          }
+          const serializedObject = serializeRealmObject(
+            requestedObject,
+            requestedObject.objectSchema(),
+          );
+          responder.success(serializedObject);
+        });
+
+        connection.receive('getObjects', (req: GetObjectsRequest, responder) => {
           const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({message: 'No realm found'});
@@ -119,7 +152,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
               : indexOfFirstObject + 1,
             indexOfFirstObject + (LIMIT + 1),
           );
-          const afterConversion = convertObjectsToDesktop(
+          const afterConversion = serializeRealmObjects(
             slicedObjects,
             realm.schema.find(
               convertedSchema => convertedSchema.name === schemaName,

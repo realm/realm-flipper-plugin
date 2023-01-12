@@ -1,30 +1,6 @@
 import React, { useState } from 'react';
 import { theme } from 'flipper-plugin';
-import { IndexableRealmObject } from '../CommonTypes';
-
-export type DropdownPropertyType = {
-  record: IndexableRealmObject | null;
-  schemaProperty: Realm.CanonicalObjectSchemaProperty | null;
-  currentSchema: Realm.ObjectSchema;
-  visible: boolean;
-  pointerX: number;
-  pointerY: number;
-  scrollX: number;
-  scrollY: number;
-  generateMenuItems: MenuItemGenerator;
-};
-
-type MenuItem = {
-  key: number;
-  text: string;
-  onClick: () => void;
-};
-
-export type MenuItemGenerator = (
-  row: IndexableRealmObject,
-  schemaProperty: Realm.CanonicalObjectSchemaProperty,
-  schema: Realm.ObjectSchema,
-) => Array<MenuItem>;
+import { DropdownPropertyType, MenuItem } from '../CommonTypes';
 
 const listItem = (menuItem: MenuItem) => {
   const [hover, setHover] = useState(false);

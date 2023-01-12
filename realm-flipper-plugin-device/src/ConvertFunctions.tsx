@@ -1,4 +1,3 @@
-// let JSObject = Object;
 import {
   BSON,
   CanonicalObjectSchema,
@@ -6,69 +5,81 @@ import {
   Object as RealmObject,
   ObjectSchema,
 } from 'realm';
+import {toJSON} from 'flatted';
 
-type PropertyDescription = {
-  type: string;
-  objectType?: string;
-};
+/**
+ * An interface containing refereence information about a Realm object sent
+ * from the device plugin.
+ */
+export interface RealmObjectReference {
+  // The object key of the stored Realm object
+  objectKey: string;
+  objectType?: string; 
+}
 
-// TODO: this function can probably be simplified as it largely just
-// serializes object.toJSON() which supports circular relationships now.
-const convertObjectToDesktop = (
-  object: RealmObject,
-  properties: Realm.PropertiesTypes,
-) => {
-  const obj = Object();
+/** 
+ * An interface for receiving and sending Realm Objects between
+ * the desktop plugin and the device.
+ * @see DeserializedRealmObject
+**/
+export interface SerializedRealmObject extends RealmObjectReference {
+  // Result of serializaing a Realm object from flatted.toJSON(realmObject.toJSON())
+  realmObject: any;
+}
+
+export const serializeRealmObject = (
+  realmObject: Realm.Object,
+  objectSchema: ObjectSchema,
+): SerializedRealmObject => {
+  const properties = objectSchema.properties;
+  const jsonifiedObject = realmObject.toJSON();
+
   Object.keys(properties).forEach(key => {
-    const jsonifiedObject = object.toJSON();
-    const property = properties[key] as PropertyDescription;
-    // make a copy of the object
-    obj[key] = jsonifiedObject[key];
+    const property = properties[key];
 
-    if (property.type === 'object' && obj[key]) {
-      //@ts-expect-error We know the key exists
-      const objectKey = object[key]._objectKey();
-      // Store object key as a seperate key for the plugin
-      obj[key]._pluginObjectKey = objectKey;
+    //@ts-expect-error The field will exist on the Realm object
+    const propertyValue = realmObject[key];
+    const propertyType = typeof property == "string" ? property : property.type;
+
+    if (propertyValue) {
+      // Handle cases of property types where different information is needed than 
+      // what is given from the default `toJSON` serialization.
+      switch(propertyType) {
+        case "object":
+          const objectKey = propertyValue._objectKey();
+          const objectType = typeof property == "string" ? property : property.objectType;
+          const isEmbedded = (propertyValue.objectSchema() as ObjectSchema).embedded
+          if (!isEmbedded) {
+            // If the object is linked (not embedded), store only the object key and type
+            // as a seperate key for later plugin lazy loading
+            jsonifiedObject[key] = {objectKey, objectType} as SerializedRealmObject;
+          } else {
+            jsonifiedObject[key] = serializeRealmObject(jsonifiedObject[key] as Realm.Object, propertyValue.objectSchema());
+          }
+          break;
+        case "data":
+          jsonifiedObject[key] = {
+            $binaryData: (propertyValue as Realm.Types.Data)?.byteLength,
+          }
+          break;
+        case "mixed":
+          jsonifiedObject[key] = propertyValue;
+          break;
+      }
     }
   });
-  const replacer = (key: keyof typeof properties, value: unknown) => {
-    if (!key) {
-      return value;
-    }
-    const property = properties[key] as PropertyDescription;
-    if (!property) {
-      return value;
-    }
-    if (property.type === 'data') {
-      return {
-        //@ts-expect-error Realm data type will have byteLength field.
-        $binaryData: value?.byteLength,
-      };
-    } else if (property.type === 'mixed') {
-      return value;
-    } else {
-      return value;
-    }
+  return {
+    objectKey: realmObject._objectKey(),
+    // flatted.toJSON is used to ensure circular objects can get stringified by Flutter.
+    realmObject: toJSON(jsonifiedObject),
   };
-
-  let after;
-  try {
-    after = JSON.parse(JSON.stringify(obj, replacer));
-  } catch (err) {
-    // a walkaround for #85
-    return {};
-  }
-  // save so that it's sent over -> serialization would remove a function
-  after._pluginObjectKey = object._objectKey();
-  return after;
 };
 
-export const convertObjectsToDesktop = (
+export const serializeRealmObjects = (
   objects: RealmObject<Object>[],
   schema: ObjectSchema,
-) => {
-  return objects.map(obj => convertObjectToDesktop(obj, schema.properties));
+):SerializedRealmObject[] => {
+  return objects.map(obj => serializeRealmObject(obj, schema));
 };
 
 /*
