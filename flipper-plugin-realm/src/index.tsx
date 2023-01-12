@@ -120,7 +120,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (index > state.objects.length) {
       return;
     }
-    // const newObjects = state.objects;
     state.objects.splice(index, 1);
     const newLastObject = state.objects[state.objects.length - 1];
     pluginState.set({
