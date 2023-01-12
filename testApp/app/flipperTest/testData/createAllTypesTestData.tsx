@@ -43,7 +43,7 @@ export function createAllTypesTestData(realm: Realm) {
       price: 400123,
     },
     set: [1, 2, 3, 4],
-    mixed: new Date('August 17, 2020'),
+    mixed: new Date('2006-11-17T03:24:00'),
     uuid: new UUID(),
   };
   realm.write(() => {
@@ -134,7 +134,6 @@ export function createAllTypesTestData(realm: Realm) {
 
   realm.write(() => {
     realm.create('AllTypes', AllTypes3);
-    // console.log('create object', t)
   });
 
   let NoPrimaryKey1 = {

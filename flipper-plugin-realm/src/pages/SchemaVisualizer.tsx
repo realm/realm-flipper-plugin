@@ -115,7 +115,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
   if (!schemas || !schemas.length) {
     return <div>No schemas found</div>;
   }
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const instance = usePlugin(plugin);
 
   const onSchemaSelected = (selectedSchema: SortedObjectSchema) => {
@@ -201,7 +200,7 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     'optional',
     'objectType',
   ];
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const columnObjs = useMemoize((_) => createColumnConfig(), [columns]);
 
   const rows = createRows(currentSchema);

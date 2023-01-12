@@ -29,15 +29,16 @@ type PropertyType = {
   setNewInspectionData: (newInspectionData: InspectionDataType) => void;
 };
 
-  // Helper function to traverse through a Realm object given a path
-  // Can return any type that a Realm Object could contain.
-  function traverseThroughObject<Type>(object: Record<string, unknown>, path: string[]) {
-    let traversedObject: any = object;
-    path.forEach(
-      (key) => (traversedObject = traversedObject[key])
-    );
-    return traversedObject as Type
-  }
+// Helper function to traverse through a Realm object given a path
+// Can return any type that a Realm Object could contain.
+function traverseThroughObject<Type>(object: any, path: string[]) {
+  let traversedObject: unknown = object;
+  path.forEach(
+    //@ts-expect-error We expect traversal path to be correct.
+    (key) => (traversedObject = traversedObject[key])
+  );
+  return traversedObject as Type
+}
 
 export const RealmDataInspector = ({
   schemas,

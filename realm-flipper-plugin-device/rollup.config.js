@@ -6,5 +6,5 @@ export default {
     file: "./dist/index.js",
   },
   plugins: [typescript()],
-  external: ["react", "react-dom", "react-native-flipper", "realm"],
+  external: ["react", "react-dom", "react-native-flipper", "realm", "flatted"],
 };
