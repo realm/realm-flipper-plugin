@@ -278,17 +278,20 @@ export const DataTable = (dataTableProps: DataTableProps) => {
 
   /** Updating the rowExpansion property of the antd table to expand the correct row and render a nested table inside of it. */
   const expandRow = (
-    // TODO: figure out the purpose of these variables.
     rowToExpandKey: any,
     linkedSchema: SortedObjectSchema,
     objectToRender: IndexableRealmObject,
   ) => {
     const newRowExpansionProp = {
       ...rowExpansionProp,
+      expandedRowKeys: [rowToExpandKey],
       expandedRowRender: () => {
         return (
           <NestedTable
             { ...dataTableProps }
+            objects={[objectToRender]}
+            currentSchema={linkedSchema}
+
           />
         );
       },
