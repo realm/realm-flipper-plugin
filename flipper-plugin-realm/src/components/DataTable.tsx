@@ -2,6 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import {
   ColumnsType,
+  ExpandableConfig,
   SorterResult,
 } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
@@ -23,10 +24,9 @@ export type ColumnType = {
 
 
 type DataTableProps = {
-  columns: ColumnType[];
   objects: DeserializedRealmObject[];
   schemas: SortedObjectSchema[];
-  currentSchema: Realm.CanonicalObjectSchema;
+  currentSchema: SortedObjectSchema;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
@@ -44,9 +44,10 @@ type DataTableProps = {
     wipeStacks?: boolean,
   ) => void;
   clickAction?: (object: DeserializedRealmObject) => void;
+  getObject: (object: RealmObjectReference, objectSchemaName: string) => Promise<DeserializedRealmObject | null>;
 };
 
-type ClickableTextType = {
+type ClickableTextProps = {
   /** Content to be displayed for the given value. */
   displayValue: string | number | JSX.Element;
   isLongString: boolean;
@@ -56,7 +57,7 @@ type ClickableTextType = {
 };
 
 // Receives a schema and returns column objects for the table.
-export const schemaObjToColumns = (
+const schemaObjectToColumns = (
   schema: SortedObjectSchema,
 ): ColumnType[] => {
   return schema.order.map((propertyName) => {
@@ -74,7 +75,6 @@ export const schemaObjToColumns = (
 
 export const DataTable = (dataTableProps: DataTableProps) => {
   const {
-    columns,
     objects,
     schemas,
     currentSchema,
@@ -89,6 +89,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     totalObjects = 0,
     fetchMore = () => undefined, 
     clickAction,
+    getObject,
   } = dataTableProps;
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
@@ -107,13 +108,14 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     expandedRowRender: () => {
       return <></>;
     },
+    expandedRowKeys: [],
     showExpandColumn: false,
-  });
+  } as ExpandableConfig<DeserializedRealmObject>);
 
   /** Hook to close the nested Table when clicked outside of it. */
   useEffect(() => {
     const closeNestedTable = () => {
-      setRowExpansionProp({ ...rowExpansionProp });
+      setRowExpansionProp({ ...rowExpansionProp, expandedRowKeys: [] });
     };
     document.body.addEventListener('click', closeNestedTable);
     return () => document.body.removeEventListener('click', closeNestedTable);
@@ -138,7 +140,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     value,
     inspectorView,
     isReference = false,
-  }: ClickableTextType) => {
+  }: ClickableTextProps) => {
     const [isHovering, setHovering] = useState(false);
     return (
       <div>
@@ -170,19 +172,17 @@ export const DataTable = (dataTableProps: DataTableProps) => {
   };
 
   /** Definition of antd-specific columns. This constant is passed to the antd table as a property. */
-  const antdColumns:ColumnsType<DeserializedRealmObject> = columns.map((column) => {
+  const antdColumns:ColumnsType<DeserializedRealmObject> = schemaObjectToColumns(currentSchema).map((column) => {
     const property: Realm.CanonicalObjectSchemaProperty =
       currentSchema.properties[column.name];
-
+    const linkedSchema = schemas.find(
+      (schema) => property && schema.name === property.objectType,
+    );
     /*  A function that is applied for every cell to specify what to render in each cell
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
-    const render = (value: PlainRealmObject, row: DeserializedRealmObject) => {
+    const render = (value: PlainRealmObject | RealmObjectReference, row: DeserializedRealmObject) => {
       /** Apply the renderValue function on the value in the cell to create a standard cell. */
       const cellValue = renderValue(value, property, schemas);
-
-      const linkedSchema = schemas.find(
-        (schema) => schema.name === property.objectType,
-      );
 
       /** Render buttons to expand the row and a clickable text if the cell contains a linked or embedded Realm object. */
       if (value !== null && linkedSchema && property.type === 'object') {
@@ -196,21 +196,26 @@ export const DataTable = (dataTableProps: DataTableProps) => {
               gap: '5px',
             }}
           >
-            <Button
+          {/* Embedded objects cannot be queried in the row. */
+          !isEmbedded && <Button
               shape="circle"
               type="primary"
               size="small"
               icon={<PlusOutlined />}
-              onClick={(event) => {
+              onClick={async (event) => {
                 event.stopPropagation();
-                expandRow(
-                  row.objectKey,
-                  linkedSchema,
-                  value,
-                );
+                // Fetch the linked object and if found, expand the table with the row.
+                let linkedObject = await getObject(value as RealmObjectReference, linkedSchema.name)
+                if(linkedObject) {
+                  expandRow(
+                    row.objectKey,
+                    linkedSchema,
+                    linkedObject,
+                  );
+                }
               }}
               ghost
-            />
+            />}
             {
               <ClickableText
                 value={
@@ -296,7 +301,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
   const expandRow = (
     rowToExpandKey: any,
     linkedSchema: SortedObjectSchema,
-    objectToRender: PlainRealmObject,
+    objectToRender: DeserializedRealmObject,
   ) => {
     const newRowExpansionProp = {
       ...rowExpansionProp,
@@ -307,7 +312,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
             { ...dataTableProps }
             objects={[objectToRender]}
             currentSchema={linkedSchema}
-
           />
         );
       },

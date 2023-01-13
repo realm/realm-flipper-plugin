@@ -4,10 +4,10 @@ import {
   CloseOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
+import { Button, Col, Layout, Radio, Row, Space, Tag, Tooltip } from 'antd';
 import { DataInspector, DetailSidebar, Spinner } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
-import { PlainRealmObject, RealmObjectReference } from '../CommonTypes';
+import { DeserializedRealmObject, PlainRealmObject, RealmObjectReference } from '../CommonTypes';
 import { BoldSpan } from './SchemaSelect';
 
 export type InspectionDataType = {
@@ -30,7 +30,7 @@ type RealmDataInspectorProps = {
   goForwardStack: Array<InspectionDataType>;
   setGoForwardStack: React.Dispatch<React.SetStateAction<InspectionDataType[]>>;
   setNewInspectionData: (newInspectionData: InspectionDataType) => void;
-  getObject: (object: RealmObjectReference) => Promise<PlainRealmObject | null>;
+  getObject: (object: RealmObjectReference) => Promise<DeserializedRealmObject | null>;
 };
 
 // Helper function to traverse through a Realm object given a path
@@ -72,7 +72,7 @@ export const RealmDataInspector = ({
         setInspectionData({
           data: {
             [inspectionData.data.objectType as string]:
-            loadedObject,
+            loadedObject.realmObject,
           },
           view: inspectionData.view,
           isReference: false,
@@ -89,6 +89,16 @@ export const RealmDataInspector = ({
   const flickerStyle = {
     backgroundColor: flickering ? '#6932c9' : 'transparent',
   };
+
+  // // TODO: not sure if this is best way to go about this.
+  // let formattedObjects: any = {};
+  // Object.entries(inspectionData.data).forEach(([field, fieldValue]) => {
+  //   if (typeof fieldValue === "object" && fieldValue.objectKey && fieldValue.objectType) {
+  //     formattedObjects[field] = `[${fieldValue.objectType}]._objectKey=${fieldValue.objectKey}`
+  //   } else {
+  //     formattedObjects[field] = fieldValue;
+  //   }
+  // })
 
   return (
     <DetailSidebar>
@@ -160,7 +170,7 @@ export const RealmDataInspector = ({
                   if(linkedSchema) {
                     ownSchema = schemas.find(
                       (
-                        innerSchema // And there exists some non-embedded schema that fits the objectType of that property
+                        innerSchema // And there exists some schema that fits the objectType of that property
                       ) =>
                         linkedSchema && linkedSchema.properties[name].objectType ===
                         innerSchema.name
@@ -174,7 +184,8 @@ export const RealmDataInspector = ({
                     return (
                       <>
                         {name + ' '}
-                        <Tooltip title="Inspect Linked Object" placement="topLeft">
+                        <Tag color="processing">Ref</Tag>
+                        <Tooltip title="Inspect Referenced Object" placement="topLeft">
                           <Button
                             shape="circle"
                             type="primary"

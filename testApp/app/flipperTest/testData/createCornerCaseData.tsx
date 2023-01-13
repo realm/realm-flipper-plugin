@@ -9,6 +9,7 @@ export function createCornerCaseData(realm: Realm) {
     var nestedObject: any = realm.create('NestedObject', {
       _id: 0,
     } as any);
+
     const cornerCase: any = {
       embedded: {
         items: ['one', 'two', 'three'],
@@ -16,11 +17,21 @@ export function createCornerCaseData(realm: Realm) {
       mixed: null,
       indirectObject: nestedObject,
     };
-    // cornerCase.embedded.indirectCycle = cornerCase;
+
     nestedObject.nestedObject = nestedObject;
     let cornerCaseObject: any = realm.create('CornerCase', cornerCase);
     nestedObject.cornerCase = cornerCaseObject;
     cornerCaseObject.indirectCycle = nestedObject;
     cornerCaseObject.directCycle = cornerCaseObject;
+
+    const cornerCaseB: any = {
+      embedded: {
+        items: [],
+      },
+      mixed: null,
+    };
+    let cornerCaseObjectB: any = realm.create('CornerCase', cornerCaseB);
+
+    cornerCaseObject.embedded.embeddedReference = cornerCaseObjectB;
   });
 }

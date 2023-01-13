@@ -6,7 +6,7 @@ import { DropdownPropertyType, MenuItemGenerator, DeserializedRealmObject, Sorte
 import {
   CustomDropdown,
 } from '../components/CustomDropdown';
-import { DataTable, schemaObjToColumns } from '../components/DataTable';
+import { DataTable } from '../components/DataTable';
 import { FieldEdit } from '../components/objectManipulation/FieldEdit';
 import { ObjectEdit } from '../components/objectManipulation/ObjectEdit';
 import {
@@ -241,7 +241,6 @@ const DataVisualizer = ({
           />
         ) : null}
         <DataTable
-          columns={schemaObjToColumns(currentSchema)}
           objects={objects}
           schemas={schemas}
           hasMore={hasMore}
@@ -258,6 +257,7 @@ const DataVisualizer = ({
           setNewInspectionData={setNewInspectionData}
           fetchMore={fetchMore}
           clickAction={clickAction}
+          getObject={(object: RealmObjectReference, schemaName: string) => {return getObject(selectedRealm, schemaName, object.objectKey)}}
         />
         <CustomDropdown {...updatedDropdownProp} />
         <RealmDataInspector

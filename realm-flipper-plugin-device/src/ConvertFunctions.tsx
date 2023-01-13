@@ -27,10 +27,8 @@ export interface SerializedRealmObject extends RealmObjectReference {
   realmObject: any;
 }
 
-export const serializeRealmObject = (
-  realmObject: Realm.Object,
-  objectSchema: ObjectSchema,
-): SerializedRealmObject => {
+/** Helper to recursively serialize Realm objects and embedded objects into plain JavaScript objects. */
+const serializeObject = (realmObject: RealmObject, objectSchema: Realm.ObjectSchema): Record<string, unknown> => {
   const properties = objectSchema.properties;
   const jsonifiedObject = realmObject.toJSON();
 
@@ -51,10 +49,10 @@ export const serializeRealmObject = (
           const isEmbedded = (propertyValue.objectSchema() as ObjectSchema).embedded
           if (!isEmbedded) {
             // If the object is linked (not embedded), store only the object key and type
-            // as a seperate key for later plugin lazy loading
+            // as a seperate key for later plugin lazy loading reference
             jsonifiedObject[key] = {objectKey, objectType} as SerializedRealmObject;
           } else {
-            jsonifiedObject[key] = serializeRealmObject(jsonifiedObject[key] as Realm.Object, propertyValue.objectSchema());
+            jsonifiedObject[key] = serializeObject(propertyValue as Realm.Object, propertyValue.objectSchema());
           }
           break;
         case "data":
@@ -68,10 +66,18 @@ export const serializeRealmObject = (
       }
     }
   });
+  return jsonifiedObject;
+}
+
+/** Serialized a given Realm Object into a SerializedRealmObject, providing circular dependency safe format. */
+export const serializeRealmObject = (
+  realmObject: Realm.Object,
+  objectSchema: ObjectSchema,
+): SerializedRealmObject => {
   return {
     objectKey: realmObject._objectKey(),
     // flatted.toJSON is used to ensure circular objects can get stringified by Flutter.
-    realmObject: toJSON(jsonifiedObject),
+    realmObject: toJSON(serializeObject(realmObject, objectSchema)),
   };
 };
 
