@@ -242,9 +242,11 @@ export const FlipperTestRealmContext = createRealmContext({
     EmbeddedSchema,
   ],
   path: 'flipper_test',
+  deleteRealmIfMigrationNeeded: true,
 });
 
 export const FlipperTestSecondRealmContext = createRealmContext({
   schema: [Parcel, ParcelService, Delivery, MailCarrier],
   path: 'flipper_test_2',
+  deleteRealmIfMigrationNeeded: true,
 });

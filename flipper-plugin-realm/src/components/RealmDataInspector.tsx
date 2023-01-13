@@ -90,16 +90,6 @@ export const RealmDataInspector = ({
     backgroundColor: flickering ? '#6932c9' : 'transparent',
   };
 
-  // // TODO: not sure if this is best way to go about this.
-  // let formattedObjects: any = {};
-  // Object.entries(inspectionData.data).forEach(([field, fieldValue]) => {
-  //   if (typeof fieldValue === "object" && fieldValue.objectKey && fieldValue.objectType) {
-  //     formattedObjects[field] = `[${fieldValue.objectType}]._objectKey=${fieldValue.objectKey}`
-  //   } else {
-  //     formattedObjects[field] = fieldValue;
-  //   }
-  // })
-
   return (
     <DetailSidebar>
       <Space direction="vertical" size="middle" style={flickerStyle}>

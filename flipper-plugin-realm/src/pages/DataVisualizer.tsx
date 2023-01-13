@@ -14,7 +14,7 @@ import {
   RealmDataInspector,
 } from '../components/RealmDataInspector';
 
-type PropertyType = {
+type DataVisualizerProps = {
   objects: Array<DeserializedRealmObject>;
   schemas: Array<SortedObjectSchema>;
   currentSchema: SortedObjectSchema;
@@ -39,7 +39,7 @@ const DataVisualizer = ({
   enableSort,
   clickAction,
   fetchMore,
-}: PropertyType) => {
+}: DataVisualizerProps) => {
   /** Hooks to manage the state of the DataInspector and open/close the sidebar. */
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);

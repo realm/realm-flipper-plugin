@@ -222,7 +222,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
             return null;
           }
           const deserializedObject = deserializeRealmObject(serializedObject, actualSchema, downloadData);
-          return deserializedObject.realmObject;
+          return deserializedObject;
         },
         (reason) => {
           pluginState.set({
