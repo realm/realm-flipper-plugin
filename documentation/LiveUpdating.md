@@ -150,7 +150,6 @@ We check if the object being deleted is currently in view, then we remove it fro
     const addedObject = convertObjects(
       [clone],
       state.currentSchema,
-      downloadData
     )[0]; 
     newObjects.splice(index, 0, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
@@ -178,7 +177,6 @@ We check if the object being deleted is currently in view, then we remove it fro
     const addedObject = convertObjects(
       [clone],
       state.currentSchema,
-      downloadData
     )[0];
     newObjects.splice(index, 1, addedObject);
     const newLastObject = newObjects[newObjects.length - 1];
