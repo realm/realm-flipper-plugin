@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { plugin } from '../../..';
 import { DeserializedRealmObject, GetObjectsResponse } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
+import { deserializeRealmObjects } from '../../../utils/ConvertFunctions';
 import { TypeInputProps } from './TypeInput';
 
 export const ObjectInput = ({
@@ -29,6 +30,8 @@ export const ObjectInput = ({
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
   );
+  const isEmbedded = targetSchema?.embedded;
+
 
   if (!targetSchema) {
     return <>Target schema {property.objectType} not found</>;
@@ -36,7 +39,10 @@ export const ObjectInput = ({
 
   const renderChosen = () => {
     let content;
-    if (targetSchema?.primaryKey !== undefined) {
+    if(isEmbedded) {
+      content = ``;
+    }
+    else if (targetSchema?.primaryKey !== undefined) {
       const val = serializedObject.realmObject[targetSchema.primaryKey];
       content = `${targetSchema.primaryKey}: ${val}`;
     }
@@ -96,7 +102,8 @@ export const ObjectInput = ({
       instance
         .requestObjects(targetSchema.name, selectedRealm, undefined, cursor, '')
         .then((response: GetObjectsResponse) => {
-          setObjects([...objects, ...response.objects]);
+          //@ts-expect-error TODO: Remove the need to downloadData here as this will be display-only.
+          setObjects([...objects, ...deserializeRealmObjects(response.objects, targetSchema)]);
           setHasMore(response.hasMore);
           setCursor(response.nextCursor);
           setTotalObjects(response.total);
@@ -105,7 +112,7 @@ export const ObjectInput = ({
 
     const openModal = () => {
       setVisible(true);
-      if (!targetSchema) {
+      if (!targetSchema || targetSchema.embedded) {
         return;
       }
       fetchMore();
@@ -113,7 +120,7 @@ export const ObjectInput = ({
 
     return (
       <Layout.Container grow>
-        <Button onClick={() => openModal()}>
+        <Button disabled={targetSchema?.embedded} onClick={() => openModal()}>
           Select {property.objectType}
         </Button>
         <Modal

@@ -114,7 +114,7 @@ const convertObjectFromDesktop = (
     if (value === null) {
       return null;
     }
-    const objectKey = value._objectKey;
+    const objectKey = value.objectKey;
     if (objectKey !== undefined) {
       //@ts-expect-error _objectForObjectKey is not public.
       return realm._objectForObjectKey(objectType, objectKey);
@@ -123,7 +123,9 @@ const convertObjectFromDesktop = (
     const schema = realm.schema.find(
       schemaObj => schemaObj.name === objectType,
     ) as CanonicalObjectSchema;
-
+    if(schema.embedded) {
+      return value;
+    }
     let primaryKey = object[schema.primaryKey as string];
     if (schema.properties[schema.primaryKey as string].type === 'uuid') {
       primaryKey = new BSON.UUID(primaryKey);

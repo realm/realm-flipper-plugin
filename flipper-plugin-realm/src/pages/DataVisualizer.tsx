@@ -114,38 +114,25 @@ const DataVisualizer = ({
       text: 'Inspect Property',
       onClick: () => {
         const propertyValue = row.realmObject[schemaProperty.name]
- 
-        // If it is a linked object
-        //@ts-expect-error Property value should have objectKey
-        if(schemaProperty.objectType && propertyValue.objectKey) {
-          setNewInspectionData(
-            {
-              data: propertyValue as RealmObjectReference,
-              view: 'object',
-              isReference: true,
+        //@ts-expect-error Property value should have objectKey if it has objectType.
+        const isReference = propertyValue && schemaProperty.objectType && propertyValue.objectKey
+        setNewInspectionData(
+          {
+            data: isReference ? propertyValue as RealmObjectReference : {
+              [schema.name + '.' + schemaProperty.name]:
+              propertyValue,
             },
-            true,
-          );
-        } else {
-          // Otherwise visualize property as usual.
-          setNewInspectionData(
-            {
-              data: {
-                [schema.name + '.' + schemaProperty.name]:
-                propertyValue,
-              },
-              view: 'property',
-              isReference: false,
-            },
-            true,
-          );
+            view: isReference ? 'object' : 'property',
+            isReference,
+          },
+          true,
+        );
         }
       },
-    },
     {
       key: 3,
       text: 'Edit Object',
-      onClick: () => editObject(row),
+      onClick: () => editObject(row)
     },
     {
       key: 4,
