@@ -6,7 +6,7 @@ import {convertObjectsToDesktop} from './ConvertFunctions';
 export class PluginConnectedObjects {
   // Connected objects that the listener is attached to.
   connectedObjects: Realm.Results<Object>;
-  schema: string;
+  schemaName: string;
   objects: Realm.Results<Object>;
   sortingColumn: string;
   sortingDirection: 'ascend' | 'descend';
@@ -14,13 +14,13 @@ export class PluginConnectedObjects {
   schemas;
   constructor(
     objects: Realm.Results<Object>,
-    schema: string,
+    schemaName: string,
     sortingColumn: string,
     sortingDirection: 'ascend' | 'descend',
     connection: Flipper.FlipperConnection,
     schemas: Realm.ObjectSchema[],
   ) {
-    this.schema = schema;
+    this.schemaName = schemaName;
     this.objects = objects;
     const shouldSortDescending = sortingDirection === 'descend';
     if (sortingColumn) {
@@ -51,7 +51,7 @@ export class PluginConnectedObjects {
       if (this.connection) {
         this.connection.send('liveObjectDeleted', {
           index: index,
-          schema: this.schema,
+          schemaName: this.schemaName,
         });
         this.connection.send('getCurrentQuery', undefined);
       }
@@ -60,32 +60,31 @@ export class PluginConnectedObjects {
     changes.insertions.forEach((index: number) => {
       const inserted = objects[index];
       const schema = this.schemas.find(
-        (schemaObj: Realm.ObjectSchema) => this.schema === schemaObj.name,
+        (schemaObj: Realm.ObjectSchema) => this.schemaName === schemaObj.name,
       );
       const converted = convertObjectsToDesktop([inserted], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectAdded', {
           newObject: converted,
           index: index,
-          schema: this.schema,
+          schemaName: this.schemaName,
           objects: objects,
         });
         this.connection.send('getCurrentQuery', undefined);
       }
     });
 
-    // TODO: should oldModifications be considered too?
     changes.newModifications.forEach((index: number) => {
       const modified = objects[index];
       const schema = this.schemas.find(
-        schemaObj => this.schema === schemaObj.name,
+        schemaObj => this.schemaName === schemaObj.name,
       );
       const converted = convertObjectsToDesktop([modified], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectEdited', {
           newObject: converted,
           index: index,
-          schema: this.schema,
+          schemaName: this.schemaName,
         });
         this.connection.send('getCurrentQuery', undefined);
       }

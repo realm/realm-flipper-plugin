@@ -8,7 +8,7 @@ import {
 import {PluginConnectedObjects} from './PluginConnectObjects';
 
 type getObjectsQuery = {
-  schema: string;
+  schemaName: string;
   realm: string;
   cursor: string;
   limit: number;
@@ -36,15 +36,15 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
 
         connection.receive('receivedCurrentQuery', obj => {
           const realm = realmsMap.get(obj.realm);
-          if (!realm || !obj.schema) {
+          if (!realm || !obj.schemaName) {
             return;
           }
           if (connectedObjects != null) {
             connectedObjects.removeListener();
           }
           connectedObjects = new PluginConnectedObjects(
-            realm.objects(obj.schema),
-            obj.schema,
+            realm.objects(obj.schemaName),
+            obj.schemaName,
             obj.sortingColumn,
             obj.sortingDirection,
             connection,
@@ -64,14 +64,14 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
             responder.error({message: 'No realm found'});
             return;
           }
-          const {schema, sortingColumn, sortingDirection, query, cursor} = req;
-          let objects = realm.objects(schema);
+          const {schemaName, sortingColumn, sortingDirection, query, cursor} = req;
+          let objects = realm.objects(schemaName);
           if (connectedObjects != null) {
             connectedObjects.removeListener();
           }
           connectedObjects = new PluginConnectedObjects(
             objects,
-            schema,
+            schemaName,
             sortingColumn,
             sortingDirection,
             connection,
@@ -97,7 +97,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           }
 
           //@ts-expect-error This is not a method which is exposed publically
-          const firstObject = realm._objectForObjectKey(schema, queryCursor); //First object to send
+          const firstObject = realm._objectForObjectKey(schemaName, queryCursor); //First object to send
           let indexOfFirstObject = objects.findIndex(
             obj => obj._objectKey() === firstObject._objectKey(),
           );
@@ -122,7 +122,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           const afterConversion = convertObjectsToDesktop(
             slicedObjects,
             realm.schema.find(
-              convertedSchema => convertedSchema.name === schema,
+              convertedSchema => convertedSchema.name === schemaName,
             ),
           );
           responder.success({
@@ -150,7 +150,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
             return;
           }
           //@ts-expect-error This is not a method which is exposed publically
-          const object = realm._objectForObjectKey(obj.schema, obj.objectKey);
+          const object = realm._objectForObjectKey(obj.schemaName, obj.objectKey);
           responder.success({
             data: Array.from(new Uint8Array(object[obj.propertyName])),
           });
@@ -164,11 +164,11 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           const converted = convertObjectsFromDesktop(
             [obj.object],
             realm,
-            obj.schema,
+            obj.schemaName,
           )[0];
           try {
             realm.write(() => {
-              realm.create(obj.schema, converted);
+              realm.create(obj.schemaName, converted);
             });
           } catch (err) {
             responder.error({
@@ -191,7 +191,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           const converted: Record<string, unknown> = convertObjectsFromDesktop(
             [obj.object],
             realm,
-            obj.schema,
+            obj.schemaName,
           )[0];
 
           //@ts-expect-error This is not a method which is exposed publically
@@ -219,7 +219,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
 
           //@ts-expect-error This is not a method which is exposed publically
           const foundObject = realm._objectForObjectKey(
-            obj.schema,
+            obj.schemaName,
             obj.objectKey,
           );
           realm.write(() => {

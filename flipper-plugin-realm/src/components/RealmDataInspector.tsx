@@ -196,7 +196,7 @@ export const RealmDataInspector = ({
                                 return;
                               }
                               
-                              let traversedObject = traverseThroughObject<any>(inspectionData.data, path)
+                              const traversedObject = traverseThroughObject<any>(inspectionData.data, path)
                               setNewInspectionData({
                                 data: {
                                   [linkedSchema.name]: traversedObject,

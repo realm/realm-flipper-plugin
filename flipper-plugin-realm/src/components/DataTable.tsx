@@ -2,9 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Table } from 'antd';
 import {
   ColumnsType,
-  FilterValue,
   SorterResult,
-  TablePaginationConfig,
 } from 'antd/lib/table/interface';
 import { Layout, Spinner, usePlugin, useValue } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
@@ -29,7 +27,7 @@ type DataTableProps = {
   objects: IndexableRealmObject[];
   schemas: SortedObjectSchema[];
   currentSchema: Realm.CanonicalObjectSchema;
-  sortingDirection?: 'ascend' | 'descend' | null;
+  sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   generateMenuItems?: MenuItemGenerator;
   style?: Record<string, unknown>;
@@ -49,7 +47,8 @@ type DataTableProps = {
 };
 
 type ClickableTextType = {
-  displayText: string | number | JSX.Element;
+  /** Content to be displayed for the given value. */
+  displayValue: string | number | JSX.Element;
   isLongString: boolean;
   value: Record<string, unknown>;
   inspectorView: 'object' | 'property';
@@ -125,7 +124,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
 
   /**  Functional component to render clickable text which opens the DataInspector.*/
   const ClickableText = ({
-    displayText,
+    displayValue,
     isLongString,
     value,
     inspectorView,
@@ -145,7 +144,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
-          {displayText}
+          {displayValue}
         </div>
         {isLongString ? (
           <div
@@ -203,7 +202,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
             {
               <ClickableText
                 value={value}
-                displayText={cellValue}
+                displayValue={cellValue}
                 isLongString={false}
                 inspectorView="object"
               />
@@ -217,7 +216,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
         return (
           <ClickableText
             value={value}
-            displayText={cellValue.substring(0, 70)}
+            displayValue={cellValue.substring(0, 70)}
             isLongString={true}
             inspectorView="property"
           />
@@ -312,8 +311,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
 
   /** Handling sorting. Is called when the 'state' of the Ant D Table changes, ie. you sort on a column. */
   const handleOnChange = (
-    _pagination: TablePaginationConfig,
-    _filters: Record<string, FilterValue | null>,
     sorter: SorterResult<any> | SorterResult<any>[],
     extra: any,
   ) => {
@@ -383,7 +380,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           }}
           expandable={rowExpansionProp}
           columns={antdColumns}
-          onChange={handleOnChange}
+          onChange={(_, __, sorter, extra) => handleOnChange(sorter, extra)}
           pagination={false}
           scroll={{ scrollToFirstRowOnChange: false }}
         />

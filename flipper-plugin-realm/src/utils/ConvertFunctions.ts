@@ -6,7 +6,7 @@ const convertObject = (
   object: IndexableRealmObject,
   schema: Realm.CanonicalObjectSchema,
   downloadData: (
-    schema: string,
+    schemaName: string,
     objectKey: string,
     propertyName: string,
   ) => Promise<Uint8Array>,
@@ -34,7 +34,7 @@ export const convertObjects = (
   objects: IndexableRealmObject[],
   schema: Realm.CanonicalObjectSchema,
   downloadData: (
-    schema: string,
+    schemaName: string,
     objectKey: string,
     propertyName: string,
   ) => Promise<Uint8Array>,

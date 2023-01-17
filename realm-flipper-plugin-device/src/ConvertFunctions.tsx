@@ -32,7 +32,7 @@ const convertObjectToDesktop = (
       obj[key]._pluginObjectKey = objectKey;
     }
   });
-  const replacer = (key: any, value: any) => {
+  const replacer = (key: keyof typeof properties, value: unknown) => {
     if (!key) {
       return value;
     }
@@ -42,6 +42,7 @@ const convertObjectToDesktop = (
     }
     if (property.type === 'data') {
       return {
+        //@ts-expect-error Realm data type will have byteLength field.
         $binaryData: value?.byteLength,
       };
     } else if (property.type === 'mixed') {

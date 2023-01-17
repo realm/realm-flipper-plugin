@@ -29,7 +29,6 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
             })
           }
 
-          // TODO: check whether this works as intended.
           value[propertyName] = val;
           setValue(value);
         };

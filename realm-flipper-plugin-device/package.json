@@ -42,8 +42,7 @@
     "realm": ">=10.0.0"
   },
   "dependencies": {
-    "flatted": "^3.2.7",
-    "react-native-flipper": ">=0.162.0"
+    "flatted": "^3.2.7"
   },
   "devDependencies": {
     "@types/react": "^18.0.25",

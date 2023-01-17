@@ -54,24 +54,26 @@ export type Methods = {
   addObject: (object: AddObject) => Promise<Realm.Object>;
   modifyObject: (newObject: EditObject) => Promise<Realm.Object>;
   removeObject: (object: RemoveObject) => Promise<void>;
-  receivedCurrentQuery: (request: {
-    schema: string | null;
-    realm: string;
-    sortingDirection: 'ascend' | 'descend' | null;
-    sortingColumn: string | null;
-  }) => Promise<void>;
+  receivedCurrentQuery: (request: ReceivedCurrentQueryRequest) => Promise<void>;
   downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
 };
 
+type ReceivedCurrentQueryRequest =  {
+  schemaName: string | null;
+  realm: string;
+  sortingDirection: 'ascend' | 'descend' | null;
+  sortingColumn: string | null;
+}
+
 type DataDownloadRequest = {
-  schema: string;
+  schemaName: string;
   realm: string;
   objectKey: string;
   propertyName: string;
 };
 
 export type EditObject = {
-  schema?: string;
+  schemaName?: string;
   realm?: string;
   object: Realm.Object;
   propsChanged?: string[];
@@ -79,14 +81,14 @@ export type EditObject = {
 };
 
 export type RemoveObject = {
-  schema?: string;
+  schemaName?: string;
   realm?: string;
   object: Realm.Object;
   objectKey: string;
 };
 
 export type AddObject = {
-  schema?: string;
+  schemaName?: string;
   realm?: string;
   object: Realm.Object;
   propsChanged?: string[];
@@ -113,7 +115,7 @@ type RealmRequest = {
   realm: string;
 };
 type getForwardsObjectsRequest = {
-  schema: string;
+  schemaName: string;
   realm: string;
   cursor: string | null;
   sortingColumn: string | null;
@@ -122,28 +124,28 @@ type getForwardsObjectsRequest = {
 };
 
 export type ObjectRequest = {
-  schema: string;
+  schemaName: string;
   realm: string;
   primaryKey: string;
 };
 export type AddLiveObjectRequest = {
   newObject: IndexableRealmObject;
   index: number;
-  schema: string;
+  schemaName: string;
   newObjectKey: string;
 };
 export type DeleteLiveObjectRequest = {
   index: number;
-  schema: string;
+  schemaName: string;
 };
 export type EditLiveObjectRequest = {
   newObject: IndexableRealmObject;
   index: number;
-  schema: string;
+  schemaName: string;
   newObjectKey: string;
 };
 type QueryObject = {
-  schema: string;
+  schemaName: string;
   query: string;
   realm: string;
 };

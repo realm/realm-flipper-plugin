@@ -47,7 +47,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   client.onMessage('getCurrentQuery', () => {
     const state = pluginState.get();
     client.send('receivedCurrentQuery', {
-      schema: state.currentSchema ? state.currentSchema.name : null,
+      schemaName: state.currentSchema ? state.currentSchema.name : null,
       realm: state.selectedRealm,
       sortingColumn: state.sortingColumn,
       sortingDirection: state.sortingDirection,
@@ -83,8 +83,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectAdded', (data: AddLiveObjectRequest) => {
     const state = pluginState.get();
-    const { index, schema, newObject } = data;
-    if (schema !== state.currentSchema?.name) {
+    const { index, schemaName, newObject } = data;
+    if (schemaName !== state.currentSchema?.name) {
       return;
     }
  
@@ -111,8 +111,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectDeleted', (data: DeleteLiveObjectRequest) => {
     const state = pluginState.get();
-    const { index, schema } = data;
-    if (schema !== state.currentSchema?.name) {
+    const { index, schemaName } = data;
+    if (schemaName !== state.currentSchema?.name) {
       return;
     }
 
@@ -132,8 +132,8 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
   client.onMessage('liveObjectEdited', (data: EditLiveObjectRequest) => {
     const state = pluginState.get();
-    const { index, schema, newObject } = data;
-    if (schema !== state.currentSchema?.name) {
+    const { index, schemaName, newObject } = data;
+    if (schemaName !== state.currentSchema?.name) {
       return;
     }
     if (index > state.objects.length) {
@@ -179,7 +179,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   };
 
   const requestObjects = (
-    schema?: string | null,
+    schemaName?: string | null,
     realm?: string | null,
     toRestore?: Realm.Object[],
     cursor?: string | null,
@@ -190,17 +190,17 @@ export function plugin(client: PluginClient<Events, Methods>) {
       return Promise.reject();
     }
     return client.send('getObjects', {
-      schema: schema ?? state.currentSchema?.name,
+      schemaName: schemaName ?? state.currentSchema?.name,
       realm: realm ?? state.selectedRealm,
       cursor: cursor === undefined ? null : cursor,
       sortingColumn: state.sortingColumn,
-      sortingDirection: state.sortingDirection,
+      sortingDirection: state.sortingDirection ? state.sortingDirection : null,
       query: query ? query : state.query,
     });
   };
 
   const getObjects = (
-    schema?: string | null,
+    schemaName?: string | null,
     realm?: string | null,
     toRestore?: Realm.Object[],
     cursor?: string | null,
@@ -209,14 +209,14 @@ export function plugin(client: PluginClient<Events, Methods>) {
     if (!state.currentSchema) {
       return;
     }
-    schema = schema ?? state.currentSchema.name;
+    schemaName = schemaName ?? state.currentSchema.name;
     realm = realm ?? state.selectedRealm;
     cursor = cursor ?? state.cursor;
     pluginState.set({
       ...state,
       loading: true,
     });
-    requestObjects(schema, realm, toRestore, cursor)
+    requestObjects(schemaName, realm, toRestore, cursor)
       .then(
         (response: ObjectsMessage) => {
           if (response.objects && !response.objects.length) {
@@ -232,7 +232,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
 
           const nextCursor = response.nextCursor;
 
-          if (!state.currentSchema || state.currentSchema?.name !== schema) {
+          if (!state.currentSchema || state.currentSchema?.name !== schemaName) {
             return;
           }
           const objects = convertObjects(
@@ -269,16 +269,16 @@ export function plugin(client: PluginClient<Events, Methods>) {
       });
   };
   const downloadData = (
-    schema: string,
+    schemaName: string,
     objectKey: string,
     propertyName: string,
   ) => {
     const state = pluginState.get();
     return client.send('downloadData', {
-      schema: schema,
+      schemaName,
       realm: state.selectedRealm,
-      objectKey: objectKey,
-      propertyName: propertyName,
+      objectKey,
+      propertyName,
     });
   };
 
@@ -323,7 +323,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client
       .send('addObject', {
         realm: state.selectedRealm,
-        schema: state.currentSchema?.name,
+        schemaName: state.currentSchema?.name,
         object,
       })
       .catch((reason) => {
@@ -411,7 +411,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     client
       .send('modifyObject', {
         realm: state.selectedRealm,
-        schema: state.currentSchema?.name,
+        schemaName: state.currentSchema?.name,
         object: newObject,
         objectKey: newObject._pluginObjectKey,
         propsChanged: Array.from(propsChanged.values()),
@@ -432,7 +432,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     }
     client.send('removeObject', {
       realm: state.selectedRealm,
-      schema: schema.name,
+      schemaName: schema.name,
       object: object,
       objectKey: object._pluginObjectKey,
     });
