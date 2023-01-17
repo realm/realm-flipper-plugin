@@ -99,7 +99,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const addedObject = deserializeRealmObject(
       clone,
       state.currentSchema,
-      downloadData,
     );
     copyOfObjects.splice(index, 0, addedObject);
     const newLastObject = copyOfObjects[copyOfObjects.length - 1];
@@ -150,7 +149,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
     const addedObject = deserializeRealmObject(
       clone,
       state.currentSchema,
-      downloadData,
     );
     copyOfObjects.splice(index, 1, addedObject);
     const newLastObject = copyOfObjects[copyOfObjects.length - 1];
@@ -221,7 +219,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
           if (!actualSchema) {
             return null;
           }
-          const deserializedObject = deserializeRealmObject(serializedObject, actualSchema, downloadData);
+          const deserializedObject = deserializeRealmObject(serializedObject, actualSchema);
           return deserializedObject;
         },
         (reason) => {
@@ -280,7 +278,6 @@ export function plugin(client: PluginClient<Events, Methods>) {
           const objects = deserializeRealmObjects(
             response.objects,
             state.currentSchema,
-            downloadData,
           );
           pluginState.set({
             ...state,
@@ -566,6 +563,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     refreshState,
     clearError,
     requestObjects,
+    downloadData,
   };
 }
 

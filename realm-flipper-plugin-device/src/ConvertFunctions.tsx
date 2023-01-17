@@ -38,14 +38,26 @@ const serializeObject = (realmObject: RealmObject, objectSchema: Realm.ObjectSch
     //@ts-expect-error The field will exist on the Realm object
     const propertyValue = realmObject[key];
     const propertyType = typeof property == "string" ? property : property.type;
+    const objectType = typeof property == "string" ? undefined : property.objectType;
 
     if (propertyValue) {
       // Handle cases of property types where different information is needed than 
       // what is given from the default `toJSON` serialization.
       switch(propertyType) {
+        case "set":
+        case "list":
+          // TODO: is there a better way to determine whether this is a list of objects?
+          if(objectType != "mixed"
+          && propertyValue && (propertyValue as any[]).length > 0
+          && propertyValue[0].objectSchema) {
+            // let schema = propertyValue.objectSchema() as ObjectSchema;
+            jsonifiedObject[key] = (propertyValue as RealmObject[]).map(
+              (object) => {return {objectKey: object._objectKey(), objectType}},
+            )
+          }
+          break;
         case "object":
           const objectKey = propertyValue._objectKey();
-          const objectType = typeof property == "string" ? property : property.objectType;
           const isEmbedded = (propertyValue.objectSchema() as ObjectSchema).embedded
           if (!isEmbedded) {
             // If the object is linked (not embedded), store only the object key and type
@@ -61,7 +73,10 @@ const serializeObject = (realmObject: RealmObject, objectSchema: Realm.ObjectSch
           }
           break;
         case "mixed":
-          jsonifiedObject[key] = propertyValue;
+          // TODO: better mixed type support. This likely does not properly cover all scenarios.
+          if(propertyValue && propertyValue.objectSchema) {
+            jsonifiedObject[key] = serializeObject(propertyValue, propertyValue.objectSchema());
+          }
           break;
       }
     }
@@ -76,7 +91,7 @@ export const serializeRealmObject = (
 ): SerializedRealmObject => {
   return {
     objectKey: realmObject._objectKey(),
-    // flatted.toJSON is used to ensure circular objects can get stringified by Flutter.
+    // flatted.toJSON is used to ensure circular objects can get stringified by flipper plugin.
     realmObject: toJSON(serializeObject(realmObject, objectSchema)),
   };
 };
@@ -162,10 +177,9 @@ const convertObjectFromDesktop = (
     switch (property.type) {
       case 'set':
         // due to a problem with serialization, Set is being passed over as a list
-        const realVal = (val as unknown[]).map(value => {
+        return (val as unknown[]).map(value => {
           return convertLeaf(value, property.objectType);
         });
-        return realVal;
       case 'list':
         return val.map((obj: unknown) => {
           return convertLeaf(obj, property.objectType as string);

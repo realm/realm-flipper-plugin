@@ -182,7 +182,7 @@ export const DataTable = (dataTableProps: DataTableProps) => {
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: PlainRealmObject | RealmObjectReference, row: DeserializedRealmObject) => {
       /** Apply the renderValue function on the value in the cell to create a standard cell. */
-      const cellValue = renderValue(value, property, schemas);
+      const cellValue = renderValue(value, property, schemas, instance.downloadData);
 
       /** Render buttons to expand the row and a clickable text if the cell contains a linked or embedded Realm object. */
       if (value !== null && linkedSchema && property.type === 'object') {

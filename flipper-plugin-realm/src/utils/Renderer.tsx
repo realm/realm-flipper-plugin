@@ -3,7 +3,9 @@ import BooleanValue from '../components/BooleanValue';
 import { Button, message, Typography } from 'antd';
 import fileDownload from 'js-file-download';
 import { CanonicalObjectSchema } from 'realm';
-import { DeserializedRealmObject } from '../CommonTypes';
+import { DeserializedRealmData, DeserializedRealmDecimal128, DeserializedRealmObject, DownloadDataFunction } from '../CommonTypes';
+import { usePlugin } from 'flipper-plugin';
+import { plugin } from '../index';
 
 type TypeDescription = {
   type: string;
@@ -14,6 +16,7 @@ export const renderValue = (
   value: unknown,
   property: TypeDescription,
   schemas: CanonicalObjectSchema[],
+  downloadData: DownloadDataFunction,
   inner?: boolean,
 ): JSX.Element | string | number => {
   if (value === null) {
@@ -35,27 +38,26 @@ export const renderValue = (
     case 'float':
     case 'objectId':
     case 'date':
-    case 'uuid': //@ts-expect-error
-      return parseSimpleData(value);
-    case 'bool': //@ts-expect-error
-      return parseBoolean(value);
+    case 'uuid':
+      return parseSimpleData(value as string | number);
+    case 'bool':
+      return parseBoolean(value as boolean);
     case 'list':
-    case 'set': //@ts-expect-error
-      return parseSetOrList(value, property, schemas);
-    case 'data': //@ts-expect-error
-      return parseData(value);
-    case 'dictionary': //@ts-expect-error
-      return parseDictionary(value);
-    case 'decimal128': //@ts-expect-error
-      return parseDecimal128(value);
+    case 'set':
+      return parseSetOrList(value as Realm.Set<unknown>, property, schemas, downloadData);
+    case 'data':
+      return parseData(value as DeserializedRealmData, downloadData);
+    case 'dictionary':
+      return parseDictionary(value as Record<string, unknown>);
+    case 'decimal128':
+      return parseDecimal128(value as DeserializedRealmDecimal128);
     case 'object':
       // eslint-disable-next-line @typescript-eslint/no-shadow
       schema = schemas.find((schema) => schema.name === property.objectType);
       if(schema?.embedded) {
         return `[${schema.name}]`
       }
-      //@ts-expect-error
-      return parseLinkedObject(schema as Realm.ObjectSchema, value);
+      return parseLinkedObject(schema as Realm.ObjectSchema, value as DeserializedRealmObject);
     case 'mixed':
       return parseMixed(value);
     default:
@@ -71,6 +73,7 @@ function parseSetOrList(
   input: Realm.Set<unknown> | Realm.List<unknown>,
   property: TypeDescription,
   schemas: Realm.CanonicalObjectSchema[],
+  downloadData: DownloadDataFunction,
 ): string {
   const output = input.map((value: unknown) => {
     // check if the container holds objects
@@ -82,6 +85,7 @@ function parseSetOrList(
           objectType: property.objectType,
         },
         schemas,
+        downloadData,
         true,
       );
     }
@@ -92,6 +96,7 @@ function parseSetOrList(
         type: property.objectType as string,
       },
       schemas,
+      downloadData,
       true,
     );
   });
@@ -103,23 +108,16 @@ function parseDictionary(input: Record<string, unknown>): string {
   return JSON.stringify(input);
 }
 
-function parseData(input: {
-  downloadData: () => Promise<{ data: Uint8Array }>;
-  length: number;
-}) {
-  if (input.downloadData === undefined) {
+function parseData(input: DeserializedRealmData,
+  downloadData: DownloadDataFunction,
+) {
+  if (input.info === undefined) {
     return <Typography.Text disabled>data</Typography.Text>;
   }
-  /* Structure of binary data:
-  input: {
-    downloadData: () => Promise<{ data: Uint8Array }>,
-    length,
-  }
-  */
   const handleDownload = () => {
-    input.downloadData().then(
+    downloadData(input.info[0], input.info[1], input.info[2]).then(
       (res) => {
-        fileDownload(new Uint8Array(res.data).buffer, 'data');
+        fileDownload(new Uint8Array(res).buffer, 'data');
       },
       (reason) => {
         message.error('downloading failed', reason.message);
@@ -135,7 +133,7 @@ function parseBoolean(input: boolean): JSX.Element {
   return <BooleanValue active={input} value={inputAsString} />;
 }
 
-function parseDecimal128(input: { $numberDecimal: string }): string {
+function parseDecimal128(input: DeserializedRealmDecimal128): string {
   return input.$numberDecimal ?? input;
 }
 

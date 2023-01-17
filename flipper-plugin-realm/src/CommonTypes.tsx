@@ -41,6 +41,17 @@ export interface CanonicalObjectSchemaPropertyRow
   primaryKey: boolean;
 }
 
+export interface DeserializedRealmData {
+  length: number;
+  info: [string, string, string];
+}
+
+export interface DeserializedRealmDecimal128 { 
+  $numberDecimal: string
+}
+
+export type DownloadDataFunction = (schema: string, objectKey: string, propertyName: string) => Promise<Uint8Array>;
+
 export type RealmPluginState = {
   deviceSerial: string;
   realms: string[];

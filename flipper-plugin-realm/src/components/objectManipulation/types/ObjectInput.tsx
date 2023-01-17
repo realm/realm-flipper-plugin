@@ -42,10 +42,11 @@ export const ObjectInput = ({
     if(isEmbedded) {
       content = ``;
     }
-    else if (targetSchema?.primaryKey !== undefined) {
-      const val = serializedObject.realmObject[targetSchema.primaryKey];
-      content = `${targetSchema.primaryKey}: ${val}`;
-    }
+    // TODO: Fetch object with getObject to display primary key instead of objectKey
+    // else if (targetSchema?.primaryKey !== undefined) {
+    //   const val = serializedObject.realmObject[targetSchema.primaryKey];
+    //   content = `${targetSchema.primaryKey}: ${val}`;
+    // }
     else {
       const val = serializedObject.objectKey;
       content = `_objectKey: ${val}`;
@@ -102,7 +103,6 @@ export const ObjectInput = ({
       instance
         .requestObjects(targetSchema.name, selectedRealm, undefined, cursor, '')
         .then((response: GetObjectsResponse) => {
-          //@ts-expect-error TODO: Remove the need to downloadData here as this will be display-only.
           setObjects([...objects, ...deserializeRealmObjects(response.objects, targetSchema)]);
           setHasMore(response.hasMore);
           setCursor(response.nextCursor);

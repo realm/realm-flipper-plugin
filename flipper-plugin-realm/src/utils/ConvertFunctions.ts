@@ -6,11 +6,6 @@ import { DeserializedRealmObject, SerializedRealmObject } from '../CommonTypes';
 export const deserializeRealmObject = (
   receivedObject: SerializedRealmObject,
   schema: Realm.CanonicalObjectSchema,
-  downloadData: (
-    schemaName: string,
-    objectKey: string,
-    propertyName: string,
-  ) => Promise<Uint8Array>,
 ) => {
   if(receivedObject.realmObject == undefined) {
     return receivedObject;
@@ -26,8 +21,7 @@ export const deserializeRealmObject = (
     if (property && property.type === 'data') {
       convertedObject.realmObject[key] = {
         length: (value as Record<'$binaryData', number>).$binaryData,
-        downloadData: () =>
-          downloadData(schema.name, receivedObject.objectKey, property.name),
+        info: [schema.name, receivedObject.objectKey, property.name],
       };
     } else {
       convertedObject.realmObject[key] = value;
@@ -39,11 +33,6 @@ export const deserializeRealmObject = (
 export const deserializeRealmObjects = (
   serializedObjects: SerializedRealmObject[],
   schema: Realm.CanonicalObjectSchema,
-  downloadData: (
-    schemaName: string,
-    objectKey: string,
-    propertyName: string,
-  ) => Promise<Uint8Array>,
 ) => {
-  return serializedObjects.map((object) => deserializeRealmObject(object, schema, downloadData));
+  return serializedObjects.map((object) => deserializeRealmObject(object, schema));
 };

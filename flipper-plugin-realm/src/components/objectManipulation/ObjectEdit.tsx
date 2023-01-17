@@ -19,11 +19,13 @@ export const ObjectEdit = ({
   visible,
 }: InputType) => {
   const [value, setValue] = useState(initialObject);
+  // Use a different state for modification to prevent updating the global state on cancellation.
+  const [displayValue, setDisplayValue] = useState(structuredClone({...value}));
   const { modifyObject } = usePlugin(plugin);
   const [propsChanged, setPropsChanges] = useState<Set<string>>(new Set());
-
   const onOk = () => {
-    modifyObject(value, propsChanged);
+    setValue(displayValue);
+    modifyObject(displayValue, propsChanged);
     hideModal();
   };
 
@@ -41,8 +43,8 @@ export const ObjectEdit = ({
     >
       <PropertiesModify
         schema={schema}
-        value={value}
-        setValue={setValue}
+        value={displayValue}
+        setValue={setDisplayValue}
         setPropsChanges={setPropsChanges}
       />
     </Modal>

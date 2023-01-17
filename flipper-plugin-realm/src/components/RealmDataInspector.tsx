@@ -152,22 +152,29 @@ export const RealmDataInspector = ({
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
+                  const nameAsIndex = Number(name);
+                  // Check whether we are rendering a list item, i.e. object.listName[0]
+                  const isCollectionItem = Number.isInteger(nameAsIndex) && path.length > 1
+                  // TODO: Unsure if this is good enough to handle collection items.
+                  const fieldName:string = isCollectionItem ? path.at(-2) as string : name;
+
                   // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
                   let ownSchema: Realm.CanonicalObjectSchema | undefined;
                   let linkedSchema: Realm.CanonicalObjectSchema | undefined = schemas.find(
-                    (schema) => schema.properties[name]
+                    (schema) => schema.properties[fieldName]
                   );
                   if(linkedSchema) {
                     ownSchema = schemas.find(
                       (
                         innerSchema // And there exists some schema that fits the objectType of that property
                       ) =>
-                        linkedSchema && linkedSchema.properties[name].objectType ===
+                        linkedSchema && linkedSchema.properties[fieldName].objectType ===
                         innerSchema.name
                     )
                   }
-                  // If there is a linked existing, non-embedded schema on the property then this is a linked object
-                  const isLinkedObject = linkedSchema && ownSchema && !ownSchema.embedded
+                  // If there is a linked existing, non-collection, non-embedded schema on the property then this is a linked object
+                  const isCollection = !isCollectionItem && linkedSchema?.properties[fieldName].type == "list"  || linkedSchema?.properties[fieldName].type == "set"
+                  const isLinkedObject = linkedSchema && !isCollection && ownSchema && !ownSchema.embedded
 
                   // If this is a linked object field and there is a value assigned to it, add a clickable reference.
                   if (isLinkedObject && traverseThroughObject<RealmObjectReference>(inspectionData.data, path)) {

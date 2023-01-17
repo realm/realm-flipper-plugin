@@ -19,7 +19,7 @@ export const MixedInput = ({
   const [value, setValue] = useState<unknown | undefined>(
     defaultValue === null ? undefined : defaultValue
   );
-  const { state } = usePlugin(plugin);
+  const { state, downloadData } = usePlugin(plugin);
   const { schemas } = useValue(state);
 
   const addObject = () => {
@@ -65,7 +65,7 @@ export const MixedInput = ({
       <Row align="middle">
         <Col flex="auto">
           <Tag color="success">{chosenType}</Tag>
-          {renderValue(value, { type, objectType: objectType?.name }, schemas)}
+          {renderValue(value, { type, objectType: objectType?.name }, schemas, downloadData)}
         </Col>
         <Col>
           <Button
