@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {addPlugin} from 'react-native-flipper';
 import type Realm from 'realm';
+import { AddObjectRequest, DownloadDataRequest, DownloadDataResponse, GetObjectRequest, GetObjectsResponse, GetRealmsResponse, GetSchemasRequest, GetSchemasResponse, ModifyObjectRequest, ReceivedCurrentQueryRequest, RemoveObjectRequest, SerializedRealmObject } from '../SharedTypes';
 import {
   convertObjectsFromDesktop,
   serializeRealmObject,
@@ -15,12 +16,6 @@ type GetObjectsRequest = {
   sortingColumn: string | null;
   sortingDirection: 'ascend' | 'descend' | null;
   query: string;
-};
-
-type GetObjectRequest = {
-  schemaName: string;
-  realm: string;
-  objectKey: string;
 };
 
 const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
@@ -40,19 +35,19 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
       onConnect(connection) {
         connection.send('getCurrentQuery', undefined);
 
-        connection.receive('receivedCurrentQuery', obj => {
-          const realm = realmsMap.get(obj.realm);
-          if (!realm || !obj.schemaName) {
+        connection.receive('receivedCurrentQuery', (req:ReceivedCurrentQueryRequest) => {
+          const realm = realmsMap.get(req.realm);
+          if (!realm || !req.schemaName) {
             return;
           }
           if (connectedObjects != null) {
             connectedObjects.removeListener();
           }
           connectedObjects = new PluginConnectedObjects(
-            realm.objects(obj.schemaName),
-            obj.schemaName,
-            obj.sortingColumn,
-            obj.sortingDirection,
+            realm.objects(req.schemaName),
+            req.schemaName,
+            req.sortingColumn,
+            req.sortingDirection,
             connection,
             realm.schema,
           );
@@ -61,7 +56,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
         connection.receive('getRealms', (_, responder) => {
           responder.success({
             realms: Array.from(realmsMap.keys()),
-          });
+          } as GetRealmsResponse);
         });
 
         connection.receive('getObject', (req: GetObjectRequest, responder) => {
@@ -78,7 +73,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
             return;
           }
          let requestedObject = objects.find(
-            obj => obj._objectKey() === objectKey,
+            req => req._objectKey() === objectKey,
           );
           if(requestedObject == undefined) {
             responder.error({message: `Object with object key: "${objectKey}" not found.`});
@@ -88,7 +83,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
             requestedObject,
             requestedObject.objectSchema(),
           );
-          responder.success(serializedObject);
+          responder.success(serializedObject as SerializedRealmObject);
         });
 
         connection.receive('getObjects', (req: GetObjectsRequest, responder) => {
@@ -117,7 +112,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
               total: totalObjects,
               hasMore: false,
               nextCursor: null,
-            });
+            } as GetObjectsResponse);
             return;
           }
           let queryCursor = null;
@@ -132,7 +127,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           //@ts-expect-error This is not a method which is exposed publically
           const firstObject = realm._objectForObjectKey(schemaName, queryCursor); //First object to send
           let indexOfFirstObject = objects.findIndex(
-            obj => obj._objectKey() === firstObject._objectKey(),
+            req => req._objectKey() === firstObject._objectKey(),
           );
           if (query) {
             //Filtering if RQL query is provided
@@ -163,45 +158,45 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
             total: totalObjects,
             hasMore: objects.length >= LIMIT,
             nextCursor: objects[objects.length - 1]?._objectKey(),
-          });
+          } as GetObjectsResponse);
         });
 
-        connection.receive('getSchemas', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
+        connection.receive('getSchemas', (req:GetSchemasRequest, responder) => {
+          const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({message: 'No realm found,'});
             return;
           }
           const schemas = realm.schema;
-          responder.success({schemas: schemas});
+          responder.success({schemas: schemas} as GetSchemasResponse);
         });
 
-        connection.receive('downloadData', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
+        connection.receive('downloadData', (req:DownloadDataRequest, responder) => {
+          const realm = realmsMap.get(req.realm);
           if (!realm) {
             responder.error({message: 'Realm not found'});
             return;
           }
           //@ts-expect-error This is not a method which is exposed publically
-          const object = realm._objectForObjectKey(obj.schemaName, obj.objectKey);
+          const object = realm._objectForObjectKey(req.schemaName, req.objectKey);
           responder.success({
-            data: Array.from(new Uint8Array(object[obj.propertyName])),
-          });
+            data: Array.from(new Uint8Array(object[req.propertyName])),
+          } as DownloadDataResponse);
         });
 
-        connection.receive('addObject', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
+        connection.receive('addObject', (req:AddObjectRequest, responder) => {
+          const realm = realmsMap.get(req.realm);
           if (!realm) {
             return;
           }
           const converted = convertObjectsFromDesktop(
-            [obj.object],
+            [req.object],
             realm,
-            obj.schemaName,
+            req.schemaName,
           )[0];
           try {
             realm.write(() => {
-              realm.create(obj.schemaName, converted);
+              realm.create(req.schemaName, converted);
             });
           } catch (err) {
             responder.error({
@@ -211,26 +206,26 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           }
           responder.success(undefined);
         });
-        connection.receive('modifyObject', (obj, responder) => {
-          const realm = realmsMap.get(obj.realm);
+        connection.receive('modifyObject', (req:ModifyObjectRequest, responder) => {
+          const realm = realmsMap.get(req.realm);
           if (!realm) {
             return;
           }
-          const propsChanged = obj.propsChanged;
+          const propsChanged = req.propsChanged;
           const schema = realm.schema.find(
-            schemaObj => schemaObj.name === obj.schema,
+            schemaObj => schemaObj.name === req.schemaName,
           ) as Realm.CanonicalObjectSchema;
 
           const converted: Record<string, unknown> = convertObjectsFromDesktop(
-            [obj.object],
+            [req.object],
             realm,
-            obj.schemaName,
+            req.schemaName,
           )[0];
 
           //@ts-expect-error This is not a method which is exposed publically
           const realmObj = realm._objectForObjectKey(
             schema.name,
-            obj.objectKey,
+            req.objectKey,
           );
           if (!realmObj) {
             responder.error({message: 'Realm Object removed while editing.'});
@@ -244,16 +239,16 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           });
         });
 
-        connection.receive('removeObject', obj => {
-          const realm = realmsMap.get(obj.realm);
+        connection.receive('removeObject', (req:RemoveObjectRequest) => {
+          const realm = realmsMap.get(req.realm);
           if (!realm) {
             return;
           }
 
           //@ts-expect-error This is not a method which is exposed publically
           const foundObject = realm._objectForObjectKey(
-            obj.schemaName,
-            obj.objectKey,
+            req.schemaName,
+            req.objectKey,
           );
           realm.write(() => {
             realm.delete(foundObject);

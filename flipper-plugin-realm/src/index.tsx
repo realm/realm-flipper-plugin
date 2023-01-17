@@ -11,7 +11,7 @@ import {
   GetObjectsResponse,
   RealmPluginState,
   PlainRealmObject,
-  GetRealmResponse,
+  GetRealmsResponse,
   GetSchemasResponse,
   DeserializedRealmObject,
   SortedObjectSchema,
@@ -167,7 +167,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
   });
 
   const getRealms = () => {
-    client.send('getRealms', undefined).then((realms: GetRealmResponse) => {
+    client.send('getRealms', undefined).then((realms: GetRealmsResponse) => {
       const state = pluginState.get();
       pluginState.set({
         ...state,
@@ -211,7 +211,7 @@ export function plugin(client: PluginClient<Events, Methods>) {
     });
     return client.send('getObject', {
       realm,
-      schema: schemaName,
+      schemaName,
       objectKey,
     }).then(
         (serializedObject: SerializedRealmObject) => {

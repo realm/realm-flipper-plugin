@@ -6,26 +6,8 @@ import {
   ObjectSchema,
 } from 'realm';
 import {toJSON} from 'flatted';
+import { PlainRealmObject, SerializedRealmObject } from '../SharedTypes';
 
-/**
- * An interface containing refereence information about a Realm object sent
- * from the device plugin.
- */
-export interface RealmObjectReference {
-  // The object key of the stored Realm object
-  objectKey: string;
-  objectType?: string; 
-}
-
-/** 
- * An interface for receiving and sending Realm Objects between
- * the desktop plugin and the device.
- * @see DeserializedRealmObject
-**/
-export interface SerializedRealmObject extends RealmObjectReference {
-  // Result of serializaing a Realm object from flatted.toJSON(realmObject.toJSON())
-  realmObject: any;
-}
 
 /** Helper to recursively serialize Realm objects and embedded objects into plain JavaScript objects. */
 const serializeObject = (realmObject: RealmObject, objectSchema: Realm.ObjectSchema): Record<string, unknown> => {
@@ -109,7 +91,7 @@ the other way around complicated because we send entire inner objects
 if that's not the case, can be changed to shallow conversion of all the properties
 */
 export const convertObjectsFromDesktop = (
-  objects: RealmObject[],
+  objects: PlainRealmObject[],
   realm: Realm,
   schemaName?: string,
 ) => {
