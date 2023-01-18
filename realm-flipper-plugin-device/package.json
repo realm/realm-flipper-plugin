@@ -1,6 +1,6 @@
 {
   "name": "realm-flipper-plugin-device",
-  "version": "1.0.28",
+  "version": "1.1.0",
   "description": "Device code for interaction with the Realm Flipper Plugin",
   "main": "dist/index.js",
   "types": "src/RealmPlugin.tsx",
@@ -39,7 +39,7 @@
   "peerDependencies": {
     "react": ">=17",
     "react-native-flipper": ">=0.162.0",
-    "realm": ">=10.0.0"
+    "realm": ">=11.0.0"
   },
   "dependencies": {
     "flatted": "^3.2.7"

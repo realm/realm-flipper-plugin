@@ -15,7 +15,7 @@ export default function FlipperTestAppNonSync() {
   const secondRealm = FlipperTestSecondRealmContext.useRealm();
   const templateAppRealm = TaskRealmContext.useRealm();
 
-  const [isLegacyTester, setIsLegacyTester] = useState(false);
+  const [isLegacyTester, setIsLegacyTester] = useState(true);
   const toggleSwitch = () => setIsLegacyTester(previousState => !previousState);
   const textStyle = {
     color: '#fff',

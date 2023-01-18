@@ -1,5 +1,5 @@
 import {Flipper} from 'react-native-flipper';
-import {convertObjectsToDesktop} from './ConvertFunctions';
+import {serializeRealmObjects} from './ConvertFunctions';
 
 // Attaches a listener to the collections which sends update
 // notifications to the Flipper plugin.
@@ -62,13 +62,12 @@ export class PluginConnectedObjects {
       const schema = this.schemas.find(
         (schemaObj: Realm.ObjectSchema) => this.schemaName === schemaObj.name,
       );
-      const converted = convertObjectsToDesktop([inserted], schema)[0];
+      const converted = serializeRealmObjects([inserted], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectAdded', {
           newObject: converted,
           index: index,
           schemaName: this.schemaName,
-          objects: objects,
         });
         this.connection.send('getCurrentQuery', undefined);
       }
@@ -79,7 +78,7 @@ export class PluginConnectedObjects {
       const schema = this.schemas.find(
         schemaObj => this.schemaName === schemaObj.name,
       );
-      const converted = convertObjectsToDesktop([modified], schema)[0];
+      const converted = serializeRealmObjects([modified], schema)[0];
       if (this.connection) {
         this.connection.send('liveObjectEdited', {
           newObject: converted,

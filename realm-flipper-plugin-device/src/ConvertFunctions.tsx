@@ -1,4 +1,3 @@
-// let JSObject = Object;
 import {
   BSON,
   CanonicalObjectSchema,
@@ -6,69 +5,84 @@ import {
   Object as RealmObject,
   ObjectSchema,
 } from 'realm';
+import {toJSON} from 'flatted';
+import { PlainRealmObject, SerializedRealmObject } from '../SharedTypes';
 
-type PropertyDescription = {
-  type: string;
-  objectType?: string;
-};
 
-// TODO: this function can probably be simplified as it largely just
-// serializes object.toJSON() which supports circular relationships now.
-const convertObjectToDesktop = (
-  object: RealmObject,
-  properties: Realm.PropertiesTypes,
-) => {
-  const obj = Object();
+/** Helper to recursively serialize Realm objects and embedded objects into plain JavaScript objects. */
+const serializeObject = (realmObject: RealmObject, objectSchema: Realm.ObjectSchema): Record<string, unknown> => {
+  const properties = objectSchema.properties;
+  const jsonifiedObject = realmObject.toJSON();
+
   Object.keys(properties).forEach(key => {
-    const jsonifiedObject = object.toJSON();
-    const property = properties[key] as PropertyDescription;
-    // make a copy of the object
-    obj[key] = jsonifiedObject[key];
+    const property = properties[key];
 
-    if (property.type === 'object' && obj[key]) {
-      //@ts-expect-error We know the key exists
-      const objectKey = object[key]._objectKey();
-      // Store object key as a seperate key for the plugin
-      obj[key]._pluginObjectKey = objectKey;
+    //@ts-expect-error The field will exist on the Realm object
+    const propertyValue = realmObject[key];
+    const propertyType = typeof property == "string" ? property : property.type;
+    const objectType = typeof property == "string" ? undefined : property.objectType;
+
+    if (propertyValue) {
+      // Handle cases of property types where different information is needed than 
+      // what is given from the default `toJSON` serialization.
+      switch(propertyType) {
+        case "set":
+        case "list":
+          // TODO: is there a better way to determine whether this is a list of objects?
+          if(objectType != "mixed"
+          && propertyValue && (propertyValue as any[]).length > 0
+          && propertyValue[0].objectSchema) {
+            // let schema = propertyValue.objectSchema() as ObjectSchema;
+            jsonifiedObject[key] = (propertyValue as RealmObject[]).map(
+              (object) => {return {objectKey: object._objectKey(), objectType}},
+            )
+          }
+          break;
+        case "object":
+          const objectKey = propertyValue._objectKey();
+          const isEmbedded = (propertyValue.objectSchema() as ObjectSchema).embedded
+          if (!isEmbedded) {
+            // If the object is linked (not embedded), store only the object key and type
+            // as a seperate key for later plugin lazy loading reference
+            jsonifiedObject[key] = {objectKey, objectType} as SerializedRealmObject;
+          } else {
+            jsonifiedObject[key] = serializeObject(propertyValue as Realm.Object, propertyValue.objectSchema());
+          }
+          break;
+        case "data":
+          jsonifiedObject[key] = {
+            $binaryData: (propertyValue as Realm.Types.Data)?.byteLength,
+          }
+          break;
+        case "mixed":
+          // TODO: better mixed type support. This likely does not properly cover all scenarios.
+          if(propertyValue && propertyValue.objectSchema) {
+            jsonifiedObject[key] = serializeObject(propertyValue, propertyValue.objectSchema());
+          }
+          break;
+      }
     }
   });
-  const replacer = (key: keyof typeof properties, value: unknown) => {
-    if (!key) {
-      return value;
-    }
-    const property = properties[key] as PropertyDescription;
-    if (!property) {
-      return value;
-    }
-    if (property.type === 'data') {
-      return {
-        //@ts-expect-error Realm data type will have byteLength field.
-        $binaryData: value?.byteLength,
-      };
-    } else if (property.type === 'mixed') {
-      return value;
-    } else {
-      return value;
-    }
-  };
+  return jsonifiedObject;
+}
 
-  let after;
-  try {
-    after = JSON.parse(JSON.stringify(obj, replacer));
-  } catch (err) {
-    // a walkaround for #85
-    return {};
-  }
-  // save so that it's sent over -> serialization would remove a function
-  after._pluginObjectKey = object._objectKey();
-  return after;
+/** Serialized a given Realm Object into a SerializedRealmObject, providing circular dependency safe format. */
+export const serializeRealmObject = (
+  realmObject: Realm.Object,
+  objectSchema: ObjectSchema,
+): SerializedRealmObject => {
+  return {
+    objectKey: realmObject._objectKey(),
+    // flatted.toJSON is used to ensure circular objects can get stringified by flipper plugin.
+    realmObject: toJSON(serializeObject(realmObject, objectSchema)),
+  };
 };
 
-export const convertObjectsToDesktop = (
+export const serializeRealmObjects = (
   objects: RealmObject<Object>[],
   schema: ObjectSchema,
-) => {
-  return objects.map(obj => convertObjectToDesktop(obj, schema.properties));
+):SerializedRealmObject[] => {
+  return objects.map(obj => serializeRealmObject(obj, schema));
 };
 
 /*
@@ -77,7 +91,7 @@ the other way around complicated because we send entire inner objects
 if that's not the case, can be changed to shallow conversion of all the properties
 */
 export const convertObjectsFromDesktop = (
-  objects: RealmObject[],
+  objects: PlainRealmObject[],
   realm: Realm,
   schemaName?: string,
 ) => {
@@ -97,7 +111,7 @@ const convertObjectFromDesktop = (
     if (value === null) {
       return null;
     }
-    const objectKey = value._objectKey;
+    const objectKey = value.objectKey;
     if (objectKey !== undefined) {
       //@ts-expect-error _objectForObjectKey is not public.
       return realm._objectForObjectKey(objectType, objectKey);
@@ -106,7 +120,9 @@ const convertObjectFromDesktop = (
     const schema = realm.schema.find(
       schemaObj => schemaObj.name === objectType,
     ) as CanonicalObjectSchema;
-
+    if(schema.embedded) {
+      return value;
+    }
     let primaryKey = object[schema.primaryKey as string];
     if (schema.properties[schema.primaryKey as string].type === 'uuid') {
       primaryKey = new BSON.UUID(primaryKey);
@@ -143,10 +159,9 @@ const convertObjectFromDesktop = (
     switch (property.type) {
       case 'set':
         // due to a problem with serialization, Set is being passed over as a list
-        const realVal = (val as unknown[]).map(value => {
+        return (val as unknown[]).map(value => {
           return convertLeaf(value, property.objectType);
         });
-        return realVal;
       case 'list':
         return val.map((obj: unknown) => {
           return convertLeaf(obj, property.objectType as string);

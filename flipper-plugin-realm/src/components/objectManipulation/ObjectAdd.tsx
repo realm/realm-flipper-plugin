@@ -6,7 +6,7 @@ import { Layout, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../..';
 import { PropertiesModify } from './PropertiesModify';
-import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
+import { DeserializedRealmObject, SortedObjectSchema } from '../../CommonTypes';
 
 type PropertyType = {
   schema: SortedObjectSchema;
@@ -15,7 +15,7 @@ type PropertyType = {
 export const ObjectAdd = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
-  const [values, setValues] = useState<IndexableRealmObject | null>(null);
+  const [values, setValues] = useState<DeserializedRealmObject | null>(null);
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
@@ -32,7 +32,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
     if (!values) {
       return;
     }
-    addObject(values);
+    addObject(values.realmObject);
     hideModal();
   };
 

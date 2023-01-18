@@ -51,8 +51,6 @@ export const PropertyRender = ({
   const title = typeToString(property);
 
   return (
-    // <Layout.Container>
-
     <>
       <Row gutter={[0, 16]}>
         <Col>{property.name}</Col>

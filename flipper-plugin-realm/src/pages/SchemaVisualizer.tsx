@@ -200,7 +200,6 @@ const SchemaVisualizer = ({ schemas, currentSchema }: InputType) => {
     'optional',
     'objectType',
   ];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const columnObjs = useMemoize((_) => createColumnConfig(), [columns]);
 
   const rows = createRows(currentSchema);

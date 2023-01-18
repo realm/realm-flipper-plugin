@@ -1,11 +1,11 @@
 import React from 'react';
-import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
+import { DeserializedRealmObject, SortedObjectSchema } from '../../CommonTypes';
 import { ObjectEdit } from './ObjectEdit';
 
 type InputType = {
   schema: SortedObjectSchema;
   fieldName: string;
-  value: IndexableRealmObject;
+  value: DeserializedRealmObject;
   setVisible: (value: boolean) => void;
   visible: boolean;
 };

@@ -1,6 +1,7 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
+import { SortedObjectSchema } from '../CommonTypes';
 import { plugin } from '../index';
 import SchemaHistoryActions from './SchemaHistoryActions';
 
@@ -12,29 +13,32 @@ export const BoldSpan = styled.span({
   fontWeight: 'bold',
   textTransform: 'uppercase',
 });
-type InputType = {
-  schemas: Realm.CanonicalObjectSchema[];
+type SchemaSelectProps = {
+  schemas: SortedObjectSchema[];
 }
 
 const SchemaSelect = ({
   schemas,
-}: InputType) => {
+}: SchemaSelectProps) => {
   const instance = usePlugin(plugin);
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    let selectedObjectSchema: Realm.CanonicalObjectSchema | null = null;
-    schemas.forEach((schema) => {
-      if (schema.name === selected) {
-        selectedObjectSchema = schema;
-        return;
-      }
-    });
+    let selectedObjectSchema: SortedObjectSchema | undefined = schemas.find((schema) => schema.name === selected);
     if (!selectedObjectSchema) {
       return;
     }
     instance.setSelectedSchema(selectedObjectSchema);
-    instance.getObjects();
+    if(selectedObjectSchema && !selectedObjectSchema.embedded) {
+      instance.getObjects();
+    }
+    else {
+      instance.state.set({
+      ...instance.state.get(),
+      totalObjects: 0,
+      objects: [],
+    })
+  }
   };
 
   const schemaOptions = schemas.map((schema) => (

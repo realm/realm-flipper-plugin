@@ -1,13 +1,13 @@
 import { Col, Row } from 'antd';
 import React from 'react';
-import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
+import { DeserializedRealmObject, SortedObjectSchema } from '../../CommonTypes';
 import { PropertyRender } from './PropertyRender';
 import { getDefault } from './types/TypeInput';
 
 type InputType = {
   schema: SortedObjectSchema;
-  value: IndexableRealmObject;
-  setValue: (v: IndexableRealmObject) => void;
+  value: DeserializedRealmObject;
+  setValue: (v: DeserializedRealmObject) => void;
   setPropsChanges?: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
@@ -16,7 +16,7 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
   if (Object.keys(value).length === 0) {
     schema.order.forEach((propertyName: string) => {
       const property = schema.properties[propertyName];
-      value[propertyName] = getDefault(property);
+      value.realmObject[propertyName] = getDefault(property);
     });
   }
   return (
@@ -29,7 +29,7 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
             })
           }
 
-          value[propertyName] = val;
+          value.realmObject[propertyName] = val;
           setValue(value);
         };
         return (
@@ -38,7 +38,7 @@ export const PropertiesModify = ({ schema, value, setValue, setPropsChanges }: I
               property={schema.properties[propertyName]}
               isPrimary={propertyName === schema.primaryKey && Boolean(setPropsChanges)} //if setPropsChanges is null => you are adding an object
               set={set}
-              initialValue={value[propertyName]} />
+              initialValue={value.realmObject[propertyName]} />
           </Col>
         );
       })}

@@ -4,17 +4,20 @@ import {
   CloseOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { Button, Col, Layout, Radio, Row, Space, Tooltip } from 'antd';
-import { DataInspector, DetailSidebar } from 'flipper-plugin';
+import { Button, Col, Layout, Radio, Row, Space, Tag, Tooltip } from 'antd';
+import { DataInspector, DetailSidebar, Spinner } from 'flipper-plugin';
 import React, { useEffect, useState } from 'react';
+import { DeserializedRealmObject, PlainRealmObject, RealmObjectReference } from '../CommonTypes';
 import { BoldSpan } from './SchemaSelect';
 
 export type InspectionDataType = {
-  data: Record<string, unknown>;
+  data: PlainRealmObject | RealmObjectReference;
+  // Whether the data specified is a reference to another object that needs to be lazy loaded.
+  isReference: boolean;
   view: 'object' | 'schema' | 'property';
 };
 
-type PropertyType = {
+type RealmDataInspectorProps = {
   schemas: Realm.CanonicalObjectSchema[];
   inspectionData: InspectionDataType | undefined;
   setInspectionData: React.Dispatch<
@@ -27,6 +30,7 @@ type PropertyType = {
   goForwardStack: Array<InspectionDataType>;
   setGoForwardStack: React.Dispatch<React.SetStateAction<InspectionDataType[]>>;
   setNewInspectionData: (newInspectionData: InspectionDataType) => void;
+  getObject: (object: RealmObjectReference) => Promise<DeserializedRealmObject | null>;
 };
 
 // Helper function to traverse through a Realm object given a path
@@ -51,15 +55,35 @@ export const RealmDataInspector = ({
   goForwardStack,
   setGoForwardStack,
   setNewInspectionData,
-}: PropertyType) => {
+  getObject,
+}: RealmDataInspectorProps) => {
   if (!showSidebar || inspectionData === undefined) return null;
 
   /** Utilities to trigger a brief flickering when the InspectionData is updated.
    * In some cases this makes it easier to see when the data changed. */
   const [flickering, setFlickering] = useState(false);
   const doFlicker = () => {
-    setFlickering(true);
-    setTimeout(() => setFlickering(false), 5);
+    if(inspectionData.isReference && inspectionData.data != null) {
+      getObject(inspectionData.data as RealmObjectReference).then((loadedObject) => {
+        if(loadedObject === null) {
+          // TODO: Better handling.
+          return;
+        }
+        setInspectionData({
+          data: {
+            [inspectionData.data.objectType as string]:
+            loadedObject.realmObject,
+          },
+          view: inspectionData.view,
+          isReference: false,
+        })
+      })
+      return;
+    } else if(!inspectionData.isReference) {
+      // Do not flicker when referenced data is being fetched.
+      setFlickering(true);
+      setTimeout(() => setFlickering(false), 5);
+    }
   };
   useEffect(doFlicker, [inspectionData]);
   const flickerStyle = {
@@ -100,7 +124,6 @@ export const RealmDataInspector = ({
                   padding: '5px',
                 }}
               >
-                {/* <Radio.Group> */}
                 <Button
                   disabled={!goBackStack.length}
                   onClick={() => goBackInspector()}
@@ -119,71 +142,47 @@ export const RealmDataInspector = ({
             </Row>
           </Space>
         </Layout>
-
         <Layout style={flickerStyle}>
           <Row>
             <Col offset={1} span={22}>
-              {/* @ts-expect-error See https://github.com/facebook/flipper/issues/3996 */}
+              {inspectionData.isReference ? <Spinner /> :
+              /* @ts-expect-error See https://github.com/facebook/flipper/issues/3996 */
               <DataInspector
                 data={inspectionData.data}
                 expandRoot={true}
                 collapsed={false}
                 onRenderName={(path, name) => {
+                  const nameAsIndex = Number(name);
+                  // Check whether we are rendering a list item, i.e. object.listName[0]
+                  const isCollectionItem = Number.isInteger(nameAsIndex) && path.length > 1
+                  // TODO: Unsure if this is good enough to handle collection items.
+                  const fieldName:string = isCollectionItem ? path.at(-2) as string : name;
+
                   // Finding out if the currently rendered value has a schema belonging to it and assigning it to linkedSchema
+                  let ownSchema: Realm.CanonicalObjectSchema | undefined;
                   let linkedSchema: Realm.CanonicalObjectSchema | undefined = schemas.find(
-                    (schema) =>
-                      schema.properties[name] && // The schema has the currently rendered property
-                      schemas.find(
-                        (
-                          innerSchema // And there is a schema that fits the objectType of that property
-                        ) =>
-                          schema.properties[name].objectType ===
-                          innerSchema.name
-                      )
+                    (schema) => schema.properties[fieldName]
                   );
-
-                  // If the current field is named objectType find the Realm.ObjectSchema corresponding to its value (if there is one) and assign it to linkedSchema.
-                  // Traverse the current inspection data using path to get the linkedSchemaName.
-                  if (name === 'objectType' && inspectionData.data) {
-                    let linkedSchemaName = traverseThroughObject<string>(inspectionData.data, path) 
-
-                    linkedSchema = schemas.find(
-                      (schema) => schema.name === linkedSchemaName
-                    );
+                  if(linkedSchema) {
+                    ownSchema = schemas.find(
+                      (
+                        innerSchema // And there exists some schema that fits the objectType of that property
+                      ) =>
+                        linkedSchema && linkedSchema.properties[fieldName].objectType ===
+                        innerSchema.name
+                    )
                   }
+                  // If there is a linked existing, non-collection, non-embedded schema on the property then this is a linked object
+                  const isCollection = !isCollectionItem && linkedSchema?.properties[fieldName].type == "list"  || linkedSchema?.properties[fieldName].type == "set"
+                  const isLinkedObject = linkedSchema && !isCollection && ownSchema && !ownSchema.embedded
 
-                  // If there is a schema for the object to be rendered.
-                  if (linkedSchema !== undefined) {
-                    // Deprecated code for inspecting schemas. Might be relevant later when implementing DataInspector into schemas tab
-                    // if (name === 'objectType') {
-                    //   return (
-                    //     <>
-                    //       {name + ' '}
-                    //       <Tooltip title="Explore Schema" placement="topLeft">
-                    //         <Button
-                    //           shape="circle"
-                    //           type="primary"
-                    //           size="small"
-                    //           icon={<SearchOutlined />}
-                    //           ghost
-                    //           onClick={() => {
-                    //             setNewInspectionData({
-                    //               data: {
-                    //                 [linkedSchema.name]: linkedSchema,
-                    //               },
-                    //               view: 'schema',
-                    //             });
-                    //           }}
-                    //         />
-                    //       </Tooltip>
-                    //     </>
-                    //   );
-                    // }
-
+                  // If this is a linked object field and there is a value assigned to it, add a clickable reference.
+                  if (isLinkedObject && traverseThroughObject<RealmObjectReference>(inspectionData.data, path)) {
                     return (
                       <>
                         {name + ' '}
-                        <Tooltip title="Explore" placement="topLeft">
+                        <Tag color="processing">Ref</Tag>
+                        <Tooltip title="Inspect Referenced Object" placement="topLeft">
                           <Button
                             shape="circle"
                             type="primary"
@@ -195,13 +194,11 @@ export const RealmDataInspector = ({
                               if (!linkedSchema) {
                                 return;
                               }
-                              
-                              const traversedObject = traverseThroughObject<any>(inspectionData.data, path)
+                              const traversedObject = traverseThroughObject<RealmObjectReference | PlainRealmObject>(inspectionData.data, path)
                               setNewInspectionData({
-                                data: {
-                                  [linkedSchema.name]: traversedObject,
-                                },
+                                data: traversedObject,
                                 view: 'object',
+                                isReference: true,
                               });
                             }}
                           />
@@ -213,11 +210,10 @@ export const RealmDataInspector = ({
                     return <>{name}</>;
                   }
                 }}
-              />
+              />}
             </Col>
           </Row>
         </Layout>
-        {/* </Content> */}
       </Space>
     </DetailSidebar>
   );

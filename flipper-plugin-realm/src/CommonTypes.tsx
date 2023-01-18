@@ -1,12 +1,26 @@
-// A helper interface which extends Realm.Object with
-// a string index signature and object key field for reference.
-export interface IndexableRealmObject extends Realm.Object {
-  [key: string]: unknown;
-  // Contains the object key that was sent by the device.
-  _pluginObjectKey: string;
+import { AddLiveObjectRequest, AddObjectRequest, DownloadDataRequest, DeleteLiveObjectRequest, EditLiveObjectRequest, ModifyObjectRequest, GetObjectRequest, GetObjectsRequest, GetObjectsResponse, GetRealmsResponse, GetSchemasRequest, GetSchemasResponse, PlainRealmObject, ReceivedCurrentQueryRequest, RemoveObjectRequest, SerializedRealmObject, RealmObjectReference} from "./SharedTypes";
+
+
+/** 
+ * A helper interface which wraps Realm.Object with
+ * information about its object type and key for reference.
+ * @see SerializedRealmObject
+**/
+export interface DeserializedRealmObject extends RealmObjectReference {
+  // A plain representation of the Realm object
+  realmObject: PlainRealmObject;
 }
 
-// A Realm.CanonicalObjectSchema interface with a sorting order field.
+export interface DeserializedRealmData {
+  length: number;
+  info: [string, string, string];
+}
+
+export interface DeserializedRealmDecimal128 { 
+  $numberDecimal: string
+}
+
+/**  A Realm.CanonicalObjectSchema interface with a sorting order field. */
 export interface SortedObjectSchema extends Realm.CanonicalObjectSchema {
   order: string[];
 }
@@ -17,11 +31,13 @@ export interface CanonicalObjectSchemaPropertyRow
   primaryKey: boolean;
 }
 
+export type DownloadDataFunction = (schema: string, objectKey: string, propertyName: string) => Promise<Uint8Array>;
+
 export type RealmPluginState = {
   deviceSerial: string;
   realms: string[];
   selectedRealm: string;
-  objects: IndexableRealmObject[];
+  objects: DeserializedRealmObject[];
   schemas: SortedObjectSchema[];
   currentSchema: SortedObjectSchema | null;
   schemaHistory: SortedObjectSchema[];
@@ -37,113 +53,29 @@ export type RealmPluginState = {
 };
 
 export type Events = {
-  getObjects: ObjectsMessage;
-  getSchemas: SchemaMessage;
+  getObjects: GetObjectsResponse;
+  getSchemas: GetSchemasResponse;
   liveObjectAdded: AddLiveObjectRequest;
   liveObjectDeleted: DeleteLiveObjectRequest;
   liveObjectEdited: EditLiveObjectRequest;
   getCurrentQuery: undefined;
-  getRealms: RealmsMessage;
+  getRealms: GetRealmsResponse;
   executeQuery: QueryResult;
 };
+
 export type Methods = {
   executeQuery: (query: QueryObject) => Promise<Realm.Object[]>;
-  getObjects: (data: getForwardsObjectsRequest) => Promise<ObjectsMessage>;
-  getSchemas: (data: RealmRequest) => Promise<SchemaMessage>;
-  getRealms: () => Promise<RealmsMessage>;
-  addObject: (object: AddObject) => Promise<Realm.Object>;
-  modifyObject: (newObject: EditObject) => Promise<Realm.Object>;
-  removeObject: (object: RemoveObject) => Promise<void>;
+  getObjects: (data: GetObjectsRequest) => Promise<GetObjectsResponse>;
+  getObject: (data: GetObjectRequest) => Promise<SerializedRealmObject>;
+  getSchemas: (data: GetSchemasRequest) => Promise<GetSchemasResponse>;
+  getRealms: () => Promise<GetRealmsResponse>;
+  addObject: (object: AddObjectRequest) => Promise<PlainRealmObject>;
+  modifyObject: (newObject: ModifyObjectRequest) => Promise<PlainRealmObject>;
+  removeObject: (object: RemoveObjectRequest) => Promise<void>;
   receivedCurrentQuery: (request: ReceivedCurrentQueryRequest) => Promise<void>;
-  downloadData: (data: DataDownloadRequest) => Promise<Uint8Array>;
+  downloadData: (data: DownloadDataRequest) => Promise<Uint8Array>;
 };
 
-type ReceivedCurrentQueryRequest =  {
-  schemaName: string | null;
-  realm: string;
-  sortingDirection: 'ascend' | 'descend' | null;
-  sortingColumn: string | null;
-}
-
-type DataDownloadRequest = {
-  schemaName: string;
-  realm: string;
-  objectKey: string;
-  propertyName: string;
-};
-
-export type EditObject = {
-  schemaName?: string;
-  realm?: string;
-  object: Realm.Object;
-  propsChanged?: string[];
-  objectKey: string;
-};
-
-export type RemoveObject = {
-  schemaName?: string;
-  realm?: string;
-  object: Realm.Object;
-  objectKey: string;
-};
-
-export type AddObject = {
-  schemaName?: string;
-  realm?: string;
-  object: Realm.Object;
-  propsChanged?: string[];
-};
-export type RealmsMessage = {
-  realms: string[];
-  objects: Record<string, unknown>[];
-  total: number;
-};
-export type ObjectsMessage = {
-  objects: IndexableRealmObject[];
-  total: number;
-  nextCursor: string;
-  prev_cursor: { [sortingField: string]: number };
-  hasMore: boolean;
-};
-export type ObjectMessage = {
-  object: Realm.Object;
-};
-export type SchemaMessage = {
-  schemas: Array<Realm.CanonicalObjectSchema>;
-};
-type RealmRequest = {
-  realm: string;
-};
-type getForwardsObjectsRequest = {
-  schemaName: string;
-  realm: string;
-  cursor: string | null;
-  sortingColumn: string | null;
-  sortingDirection: 'ascend' | 'descend' | null;
-  query: string;
-};
-
-export type ObjectRequest = {
-  schemaName: string;
-  realm: string;
-  primaryKey: string;
-};
-export type AddLiveObjectRequest = {
-  newObject: IndexableRealmObject;
-  index: number;
-  schemaName: string;
-  newObjectKey: string;
-};
-export type DeleteLiveObjectRequest = {
-  index: number;
-  schemaName: string;
-};
-export type EditLiveObjectRequest = {
-  newObject: IndexableRealmObject;
-  index: number;
-  schemaName: string;
-  newObjectKey: string;
-};
 type QueryObject = {
   schemaName: string;
   query: string;
@@ -152,3 +84,30 @@ type QueryObject = {
 export type QueryResult = {
   result: Array<Realm.Object> | string;
 };
+
+
+export type MenuItem = {
+  key: number;
+  text: string;
+  onClick: () => void;
+};
+
+export type MenuItemGenerator = (
+  row: DeserializedRealmObject,
+  schemaProperty: Realm.CanonicalObjectSchemaProperty,
+  schema: Realm.ObjectSchema,
+) => Array<MenuItem>;
+
+export type DropdownPropertyType = {
+  record: DeserializedRealmObject | null;
+  schemaProperty: Realm.CanonicalObjectSchemaProperty | null;
+  currentSchema: Realm.ObjectSchema;
+  visible: boolean;
+  pointerX: number;
+  pointerY: number;
+  scrollX: number;
+  scrollY: number;
+  generateMenuItems: MenuItemGenerator;
+};
+export { AddLiveObjectRequest, AddObjectRequest, DownloadDataRequest, DeleteLiveObjectRequest, EditLiveObjectRequest, ModifyObjectRequest, GetObjectRequest, GetObjectsRequest, GetObjectsResponse, GetRealmsResponse, GetSchemasRequest, GetSchemasResponse, PlainRealmObject, ReceivedCurrentQueryRequest, RemoveObjectRequest, SerializedRealmObject, RealmObjectReference };
+

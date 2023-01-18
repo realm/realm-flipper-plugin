@@ -3,8 +3,9 @@ import { Button, Col, Modal, Row, Tag, Typography } from 'antd';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
-import { IndexableRealmObject, ObjectsMessage } from '../../../CommonTypes';
+import { DeserializedRealmObject, GetObjectsResponse } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
+import { deserializeRealmObjects } from '../../../utils/ConvertFunctions';
 import { TypeInputProps } from './TypeInput';
 
 export const ObjectInput = ({
@@ -18,10 +19,10 @@ export const ObjectInput = ({
     instance.state
   );
 
-  const [value, setValue] = useState<IndexableRealmObject>(defaultValue as IndexableRealmObject);
-  const [chosen, setChosen] = useState(!!value);
+  const [serializedObject, setSerializedObject] = useState<DeserializedRealmObject>(defaultValue as DeserializedRealmObject);
+  const [chosen, setChosen] = useState(!!serializedObject);
   const [visible, setVisible] = useState(false);
-  const [objects, setObjects] = useState<IndexableRealmObject[]>([]);
+  const [objects, setObjects] = useState<DeserializedRealmObject[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [totalObjects, setTotalObjects] = useState(0);
@@ -29,6 +30,8 @@ export const ObjectInput = ({
   const targetSchema = schemas.find(
     (schema) => schema.name === property.objectType
   );
+  const isEmbedded = targetSchema?.embedded;
+
 
   if (!targetSchema) {
     return <>Target schema {property.objectType} not found</>;
@@ -36,12 +39,16 @@ export const ObjectInput = ({
 
   const renderChosen = () => {
     let content;
-    if (targetSchema?.primaryKey !== undefined) {
-      const val = value[targetSchema.primaryKey];
-      content = `${targetSchema.primaryKey}: ${val}`;
+    if(isEmbedded) {
+      content = ``;
     }
+    // TODO: Fetch object with getObject to display primary key instead of objectKey
+    // else if (targetSchema?.primaryKey !== undefined) {
+    //   const val = serializedObject.realmObject[targetSchema.primaryKey];
+    //   content = `${targetSchema.primaryKey}: ${val}`;
+    // }
     else {
-      const val = value._pluginObjectKey;
+      const val = serializedObject.objectKey;
       content = `_objectKey: ${val}`;
     }
 
@@ -76,11 +83,11 @@ export const ObjectInput = ({
       setObjects([]);
       setCursor(null);
     };
-    const onChosen = (object: IndexableRealmObject) => {
+    const onChosen = (object: DeserializedRealmObject) => {
       if (!object) {
         return;
       }
-      setValue(object);
+      setSerializedObject(object);
       set(object);
       setChosen(true);
       setVisible(false);
@@ -95,8 +102,8 @@ export const ObjectInput = ({
       }
       instance
         .requestObjects(targetSchema.name, selectedRealm, undefined, cursor, '')
-        .then((response: ObjectsMessage) => {
-          setObjects([...objects, ...response.objects]);
+        .then((response: GetObjectsResponse) => {
+          setObjects([...objects, ...deserializeRealmObjects(response.objects, targetSchema)]);
           setHasMore(response.hasMore);
           setCursor(response.nextCursor);
           setTotalObjects(response.total);
@@ -105,7 +112,7 @@ export const ObjectInput = ({
 
     const openModal = () => {
       setVisible(true);
-      if (!targetSchema) {
+      if (!targetSchema || targetSchema.embedded) {
         return;
       }
       fetchMore();
@@ -113,7 +120,7 @@ export const ObjectInput = ({
 
     return (
       <Layout.Container grow>
-        <Button onClick={() => openModal()}>
+        <Button disabled={targetSchema?.embedded} onClick={() => openModal()}>
           Select {property.objectType}
         </Button>
         <Modal
