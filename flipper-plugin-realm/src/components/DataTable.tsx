@@ -108,14 +108,13 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     expandedRowRender: () => {
       return <></>;
     },
-    expandedRowKeys: [],
     showExpandColumn: false,
   } as ExpandableConfig<DeserializedRealmObject>);
 
   /** Hook to close the nested Table when clicked outside of it. */
   useEffect(() => {
     const closeNestedTable = () => {
-      setRowExpansionProp({ ...rowExpansionProp, expandedRowKeys: [] });
+      setRowExpansionProp({ ...rowExpansionProp });
     };
     document.body.addEventListener('click', closeNestedTable);
     return () => document.body.removeEventListener('click', closeNestedTable);

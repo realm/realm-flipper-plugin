@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
 import { CanonicalObjectSchemaProperty } from 'realm';
