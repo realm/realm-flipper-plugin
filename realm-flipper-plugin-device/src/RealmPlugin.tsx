@@ -127,7 +127,7 @@ const RealmPlugin = React.memo((props: {realms: Realm[]}) => {
           //@ts-expect-error This is not a method which is exposed publically
           const firstObject = realm._objectForObjectKey(schemaName, queryCursor); //First object to send
           let indexOfFirstObject = objects.findIndex(
-            req => req._objectKey() === firstObject._objectKey(),
+            realmObject => realmObject._objectKey() === firstObject._objectKey(),
           );
           if (query) {
             //Filtering if RQL query is provided
