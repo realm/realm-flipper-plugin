@@ -3,7 +3,7 @@ import { Button, Col, Modal, Row, Tag, Typography } from 'antd';
 import { Layout, usePlugin, useValue } from 'flipper-plugin';
 import React, { useState } from 'react';
 import { plugin } from '../../..';
-import { ObjectsMessage, RealmObject } from '../../../CommonTypes';
+import { IndexableRealmObject, ObjectsMessage } from '../../../CommonTypes';
 import DataVisualizer from '../../../pages/DataVisualizer';
 import { TypeInputProps } from './TypeInput';
 
@@ -18,12 +18,12 @@ export const ObjectInput = ({
     instance.state
   );
 
-  const [value, setValue] = useState<RealmObject>(defaultValue as RealmObject);
+  const [value, setValue] = useState<IndexableRealmObject>(defaultValue as IndexableRealmObject);
   const [chosen, setChosen] = useState(!!value);
   const [visible, setVisible] = useState(false);
-  const [objects, setObjects] = useState<RealmObject[]>([]);
+  const [objects, setObjects] = useState<IndexableRealmObject[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const [cursor, setCursor] = useState<number | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
   const [totalObjects, setTotalObjects] = useState(0);
 
   const targetSchema = schemas.find(
@@ -41,7 +41,7 @@ export const ObjectInput = ({
       content = `${targetSchema.primaryKey}: ${val}`;
     }
     else {
-      const val = value._objectKey;
+      const val = value._pluginObjectKey;
       content = `_objectKey: ${val}`;
     }
 
@@ -76,7 +76,7 @@ export const ObjectInput = ({
       setObjects([]);
       setCursor(null);
     };
-    const onChosen = (object: RealmObject) => {
+    const onChosen = (object: IndexableRealmObject) => {
       if (!object) {
         return;
       }

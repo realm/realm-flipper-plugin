@@ -1,7 +1,6 @@
 import { Layout } from 'flipper-plugin';
 import React from 'react';
-import Mermaid from '../components/Mermaid.js';
-import { SchemaObject, SchemaProperty } from '../CommonTypes';
+import Mermaid from '../components/Mermaid';
 
 // based on https://github.com/realm/realm-js/blob/master/packages/realm-tools/src/realm-schema.ts
 
@@ -11,12 +10,11 @@ type Relationship = {
 };
 
 type InputType = {
-  schemas: SchemaObject[];
+  schemas: Realm.ObjectSchema[];
   selectedRealm: string;
 };
 
-
-const calculateMermaid = (schemas: SchemaObject[]): string => {
+const calculateMermaid = (schemas: Realm.ObjectSchema[]): string => {
   let str = '';
   function writer(line: string) {
     str += line + '\n';
@@ -43,7 +41,7 @@ const calculateMermaid = (schemas: SchemaObject[]): string => {
     const name = objectSchema.name;
     writer(`class ${name} {`);
     Object.keys(objectSchema.properties).forEach((propertyName) => {
-      const prop = objectSchema.properties[propertyName] as SchemaProperty;
+      const prop = objectSchema.properties[propertyName] as Realm.CanonicalObjectSchemaProperty;
       if (collectionTypes.includes(prop.type) || prop.type === 'object') {
         const objectType = prop.objectType ?? '__unknown__';
         if (!primitiveTypes.includes(objectType)) {
@@ -69,10 +67,10 @@ const calculateMermaid = (schemas: SchemaObject[]): string => {
 // let fd = fs.openSync(args.outputFileName, "w");
 export const SchemaGraph = ({ schemas }: InputType) => {
   const str = calculateMermaid(schemas);
-  
+
   return (
     <Layout.ScrollContainer style={{ height: '800px' }}>
-      <Mermaid key={Math.random()*10} chart={str}/>
+      <Mermaid key={Math.random() * 10} chart={str} />
     </Layout.ScrollContainer>
   );
 };

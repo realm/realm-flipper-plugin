@@ -1,0 +1,23 @@
+{
+    "root": true,
+    "extends": [
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+      // "./header.eslintrc"
+    ],
+    "rules": {
+      "no-restricted-globals": ["error", "globalThis"]
+    },
+    "env": {
+      "es2020": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "settings": {
+      "react": {
+        "version": "16.6.3"
+      }
+    }
+  }
+  

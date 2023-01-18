@@ -1,39 +1,42 @@
 import { Modal, Radio } from 'antd';
 import { useState } from 'react';
-import { RealmObject, SchemaObject } from '../../CommonTypes';
 
 import { PlusOutlined } from '@ant-design/icons';
 import { Layout, usePlugin } from 'flipper-plugin';
 import React from 'react';
 import { plugin } from '../..';
 import { PropertiesModify } from './PropertiesModify';
+import { IndexableRealmObject, SortedObjectSchema } from '../../CommonTypes';
 
 type PropertyType = {
-  schema: SchemaObject;
+  schema: SortedObjectSchema;
 };
 
 export const ObjectAdd = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
-  const [values, setValues] = useState<RealmObject>({});
+  const [values, setValues] = useState<IndexableRealmObject | null>(null);
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
-    setValues({});
+    setValues(null);
     setVisible(true);
   };
 
   const hideModal = () => {
-    setValues({});
+    setValues(null);
     setVisible(false);
   };
 
   const onOk = () => {
+    if (!values) {
+      return;
+    }
     addObject(values);
     hideModal();
   };
 
-  if (!schema) {
+  if (!schema || !values) {
     return <></>;
   }
 
@@ -55,7 +58,7 @@ export const ObjectAdd = ({ schema }: PropertyType) => {
         cancelText="Cancel"
         destroyOnClose
       >
-        <PropertiesModify schema={schema} value={values} setValue={setValues} />
+      <PropertiesModify schema={schema} value={values} setValue={setValues} />
       </Modal>
     </Layout.Horizontal>
   );

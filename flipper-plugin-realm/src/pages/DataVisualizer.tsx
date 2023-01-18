@@ -1,7 +1,9 @@
+/* eslint-disable react-native/no-inline-styles */
 import { usePlugin } from 'flipper-plugin';
 import React, { useEffect, useRef, useState } from 'react';
+import { CanonicalObjectSchemaProperty } from 'realm';
 import { plugin } from '..';
-import { RealmObject, SchemaObject, SchemaProperty } from '../CommonTypes';
+import { IndexableRealmObject, SortedObjectSchema } from '../CommonTypes';
 import {
   CustomDropdown,
   DropdownPropertyType,
@@ -16,15 +18,15 @@ import {
 } from '../components/RealmDataInspector';
 
 type PropertyType = {
-  objects: Array<RealmObject>;
-  schemas: Array<SchemaObject>;
-  currentSchema: SchemaObject;
+  objects: Array<IndexableRealmObject>;
+  schemas: Array<SortedObjectSchema>;
+  currentSchema: SortedObjectSchema;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;
   totalObjects?: number;
   enableSort: boolean;
-  clickAction?: (object: RealmObject) => void;
+  clickAction?: (object: IndexableRealmObject) => void;
   fetchMore: () => void;
   handleDataInspector?: () => void;
 };
@@ -45,12 +47,12 @@ const DataVisualizer = ({
   const [inspectionData, setInspectionData] = useState<InspectionDataType>();
   const [showSidebar, setShowSidebar] = useState(false);
   const [goBackStack, setGoBackStack] = useState<Array<InspectionDataType>>([]);
-  const [goForwardStack, setGoForwardStack] = useState<Array<RealmObject>>([]);
+  const [goForwardStack, setGoForwardStack] = useState<Array<InspectionDataType>>([]);
 
   /** Hook to open/close the editing dialog and set its properties. */
   const [editingObject, setEditingObject] = useState<{
     editing: boolean;
-    object?: RealmObject;
+    object?: IndexableRealmObject;
     // schemaProperty?: SchemaProperty;
     type?: 'field' | 'object';
     fieldName?: string;
@@ -65,10 +67,13 @@ const DataVisualizer = ({
   const scrollY = useRef(0);
 
   /** Functions for deleting and editing rows/objects */
-  const deleteRow = (row: RealmObject) => {
+  const deleteRow = (row: IndexableRealmObject) => {
     removeObject(row);
   };
-  const editField = (row: RealmObject, schemaProperty: SchemaProperty) => {
+  const editField = (
+    row: IndexableRealmObject,
+    schemaProperty: CanonicalObjectSchemaProperty,
+  ) => {
     setEditingObject({
       editing: true,
       object: row,
@@ -76,7 +81,7 @@ const DataVisualizer = ({
       fieldName: schemaProperty.name,
     });
   };
-  const editObject = (row: RealmObject) => {
+  const editObject = (row: IndexableRealmObject) => {
     setEditingObject({
       editing: true,
       object: row,
@@ -86,36 +91,43 @@ const DataVisualizer = ({
 
   /**  Generate MenuItem objects for the context menu with all necessary data and functions.*/
   const generateMenuItems: MenuItemGenerator = (
-    row: RealmObject,
-    schemaProperty: SchemaProperty,
-    schema: SchemaObject
+    row: IndexableRealmObject,
+    schemaProperty: CanonicalObjectSchemaProperty,
+    schema: Realm.ObjectSchema,
   ) => [
     {
       key: 1,
       text: 'Inspect Object',
       onClick: () => {
-        const object: RealmObject = {};
+        const object: IndexableRealmObject = Object();
         Object.keys(row).forEach((key) => {
-          object[key as keyof RealmObject] = row[key];
+          object[key] = row[key];
         });
-        setNewInspectionData({
-          data: {
-            [schema.name]: object,
+        setNewInspectionData(
+          {
+            data: {
+              [schema.name]: object,
+            },
+            view: 'object',
           },
-          view: 'object',
-        },true);
+          true,
+        );
       },
     },
     {
       key: 2,
       text: 'Inspect Property',
       onClick: () => {
-        setNewInspectionData({
-          data: {
-            [schema.name + '.' + schemaProperty.name]: row[schemaProperty.name],
+        setNewInspectionData(
+          {
+            data: {
+              [schema.name + '.' + schemaProperty.name]:
+                row[schemaProperty.name],
+            },
+            view: 'property',
           },
-          view: 'property',
-        },true);
+          true,
+        );
       },
     },
     {
@@ -139,7 +151,7 @@ const DataVisualizer = ({
   const [dropdownProp, setdropdownProp] = useState<DropdownPropertyType>({
     generateMenuItems,
     currentSchema: currentSchema,
-    record: {},
+    record: null,
     schemaProperty: null,
     visible: false,
     pointerX: 0,
@@ -155,7 +167,7 @@ const DataVisualizer = ({
     };
     document.body.addEventListener('click', closeDropdown);
     return () => document.body.removeEventListener('click', closeDropdown);
-  }, []);
+  });
 
   /** Handler to keep track of the current x and y position of the scrollcontainer. This is needed to render the dropdown in the correct place when scrolled. */
   const handleScroll = (event: React.BaseSyntheticEvent) => {
@@ -184,7 +196,7 @@ const DataVisualizer = ({
     <div
       onScroll={handleScroll}
       style={{
-        flex: `1 1 0`,
+        flex: '1 1 0',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'auto',
@@ -196,10 +208,10 @@ const DataVisualizer = ({
           height: '100%',
         }}
       >
-        {editingObject.editing && editingObject.type === 'object' ? (
+        {editingObject.object && editingObject.editing && editingObject.type === 'object' ? (
           <ObjectEdit
             schema={currentSchema}
-            initialObject={editingObject.object as RealmObject}
+            initialObject={editingObject.object}
             setVisible={(val: boolean) => {
               setEditingObject((obj) => ({
                 ...obj,
@@ -207,7 +219,7 @@ const DataVisualizer = ({
               }));
             }}
             visible={editingObject.editing}
-          ></ObjectEdit>
+          />
         ) : editingObject.editing &&
           editingObject.type === 'field' &&
           editingObject.object ? (
@@ -263,7 +275,7 @@ const DataVisualizer = ({
   // update inspectionData and push object to GoBackStack
   function setNewInspectionData(
     newInspectionData: InspectionDataType,
-    wipeStacks?: boolean
+    wipeStacks?: boolean,
   ) {
     showSidebar ? null : setShowSidebar(true);
     if (inspectionData !== undefined && !wipeStacks) {

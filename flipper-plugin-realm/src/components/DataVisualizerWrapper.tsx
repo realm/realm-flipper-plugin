@@ -1,15 +1,15 @@
 import { Layout } from 'flipper-plugin';
 import React from 'react';
-import { SchemaObject, RealmObject } from '../CommonTypes';
+import { IndexableRealmObject, SortedObjectSchema } from '../CommonTypes';
 import DataVisualizer from '../pages/DataVisualizer';
 
 import { DataTabHeader } from './DataTabHeader';
 import SchemaSelect from './SchemaSelect';
 
 type InputType = {
-  schemas: SchemaObject[];
-  objects: RealmObject[];
-  currentSchema: SchemaObject;
+  schemas: SortedObjectSchema[];
+  objects: IndexableRealmObject[];
+  currentSchema: SortedObjectSchema;
   sortingDirection: 'ascend' | 'descend' | null;
   sortingColumn: string | null;
   hasMore: boolean;

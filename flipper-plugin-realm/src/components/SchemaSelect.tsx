@@ -1,7 +1,6 @@
 import { Button, Select } from 'antd';
 import { styled, Toolbar, usePlugin, useValue } from 'flipper-plugin';
 import React from 'react';
-import { SchemaObject } from '../CommonTypes';
 import { plugin } from '../index';
 import SchemaHistoryActions from './SchemaHistoryActions';
 
@@ -14,7 +13,7 @@ export const BoldSpan = styled.span({
   textTransform: 'uppercase',
 });
 type InputType = {
-  schemas: SchemaObject[];
+  schemas: Realm.CanonicalObjectSchema[];
 }
 
 const SchemaSelect = ({
@@ -24,17 +23,17 @@ const SchemaSelect = ({
   const state = useValue(instance.state);
 
   const onSchemaSelected = (selected: string) => {
-    let selectedSchemaObject: SchemaObject | null = null;
+    let selectedObjectSchema: Realm.CanonicalObjectSchema | null = null;
     schemas.forEach((schema) => {
       if (schema.name === selected) {
-        selectedSchemaObject = schema;
+        selectedObjectSchema = schema;
         return;
       }
     });
-    if (!selectedSchemaObject) {
+    if (!selectedObjectSchema) {
       return;
     }
-    instance.setSelectedSchema(selectedSchemaObject);
+    instance.setSelectedSchema(selectedObjectSchema);
     instance.getObjects();
   };
 
