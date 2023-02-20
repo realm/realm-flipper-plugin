@@ -12,19 +12,21 @@ type PropertyType = {
   schema: SortedObjectSchema;
 };
 
+const emptyRealmObject: DeserializedRealmObject = { realmObject: {} };
+
 export const ObjectAdd = ({ schema }: PropertyType) => {
   const { addObject } = usePlugin(plugin);
 
-  const [values, setValues] = useState<DeserializedRealmObject | null>(null);
+  const [values, setValues] = useState<DeserializedRealmObject>(emptyRealmObject);
   const [visible, setVisible] = useState(false);
 
   const showModal = () => {
-    setValues(null);
+    setValues(emptyRealmObject);
     setVisible(true);
   };
 
   const hideModal = () => {
-    setValues(null);
+    setValues(emptyRealmObject);
     setVisible(false);
   };
 
