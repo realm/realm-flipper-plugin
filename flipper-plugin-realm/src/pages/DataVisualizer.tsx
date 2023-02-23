@@ -191,7 +191,7 @@ const DataVisualizer = ({
         flex: '1 1 0',
         boxSizing: 'border-box',
         position: 'relative',
-        overflow: 'auto',
+        overflow: 'scroll',
       }}
     >
       <div

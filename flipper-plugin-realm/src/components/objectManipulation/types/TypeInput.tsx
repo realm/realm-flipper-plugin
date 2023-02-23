@@ -22,6 +22,14 @@ export type TypeInputProps = {
   isPrimary: boolean;
 };
 
+export type CollectionInputProps = {
+  property: TypeDescription;
+  defaultValue?: unknown[];
+  set: (val: unknown[]) => void;
+  extraProps?: Record<string, unknown>;
+  isPrimary: boolean;
+};
+
 type TypeDescription = {
   type: string;
   optional: boolean;
@@ -82,9 +90,9 @@ export const TypeInput = (props: TypeInputProps) => {
     case 'uuid':
       return <UUIDInput {...props} />;
     case 'set':
-      return <SetInput {...props} />;
+      return <SetInput {...props as CollectionInputProps} />;
     case 'list':
-      return <ListInput {...props} />;
+      return <ListInput {...props as CollectionInputProps} />;
     case 'mixed':
       return <MixedInput {...props} />;
     case 'decimal128':

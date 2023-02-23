@@ -1,10 +1,11 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Col, Row } from 'antd';
 import React, { useState } from 'react';
-import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
+import { CollectionInputProps, getDefault, TypeInput } from './TypeInput';
 
-export const ListInput = ({ property, set, defaultValue, isPrimary }: TypeInputProps) => {
-  const [array, setArray] = useState(defaultValue as unknown[]);
+export const ListInput = ({ property, set, defaultValue, isPrimary }: CollectionInputProps) => {
+  // TODO: Refactor this input file to ensure proper type safety of defaultValue and cleaner structure. Same in Set.
+  const [array, setArray] = useState(defaultValue as unknown[] ?? []);
   const [removalOffset, setRemovalOffset] = useState(0);
   const typePointed = property.objectType;
   if (!typePointed) {

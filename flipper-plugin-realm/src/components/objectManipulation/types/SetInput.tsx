@@ -2,22 +2,23 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Col, Row } from 'antd';
 import { Layout } from "flipper-plugin";
 import React, { useEffect, useState } from "react";
-import { getDefault, TypeInput, TypeInputProps } from './TypeInput';
+import { getDefault, TypeInput, CollectionInputProps } from './TypeInput';
 
-export const SetInput = ({  property, set, defaultValue, isPrimary }: TypeInputProps) => {
+export const SetInput = ({  property, set, defaultValue, isPrimary }:  CollectionInputProps) => {
+  // TODO: Refactor this input file to ensure proper type safety of defaultValue and cleaner structure. Same in List.
   const [_, setReset] = useState(0);
-  const [arr, setArr] = useState(defaultValue as unknown[]);
+  const [arr, setArr] = useState(defaultValue as unknown[] | undefined ?? []);
   const [occurences] = useState(new Map<unknown, number>());
   const [deleteOffset, setDeleteOffset] = useState(0);
 
   const [container] = useState(new Set());
   useEffect(() => {
     occurences.clear();
-    (defaultValue as unknown[]).forEach(val => {
+    (defaultValue ?? []).forEach(val => {
       occurences.set(val, 1);
       container.add(val);
     });
-    setArr(defaultValue as unknown[]);
+    setArr(defaultValue ?? []);
   }, []);
   const typePointed = property.objectType;
   if (!typePointed) {

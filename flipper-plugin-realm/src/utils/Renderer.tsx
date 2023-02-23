@@ -4,8 +4,7 @@ import { Button, message, Typography } from 'antd';
 import fileDownload from 'js-file-download';
 import { CanonicalObjectSchema } from 'realm';
 import { DeserializedRealmData, DeserializedRealmDecimal128, DeserializedRealmObject, DownloadDataFunction } from '../CommonTypes';
-import { usePlugin } from 'flipper-plugin';
-import { plugin } from '../index';
+import { ClickableText } from '../components/ClickableText';
 
 type TypeDescription = {
   type: string;
@@ -16,9 +15,14 @@ export const renderValue = (
   value: unknown,
   property: TypeDescription,
   schemas: CanonicalObjectSchema[],
-  downloadData: DownloadDataFunction,
+  helpers: {
+    downloadData: DownloadDataFunction; 
+    inspectValue?: (value: any) => void;
+  },
   inner?: boolean,
+  /** Inspect longer length values */
 ): JSX.Element | string | number => {
+  const {downloadData, inspectValue} = helpers;
   if (value === null) {
     return inner ? 'null' : <Typography.Text disabled>null</Typography.Text>;
   }
@@ -31,26 +35,42 @@ export const renderValue = (
   }
   let schema;
 
+  const withCutoff = (displayValue: string, cutoff: number) => {
+    /** If the cell contains a string which is too long cut it off and render it as a clickable text. */
+    if (!inner && inspectValue && displayValue.length > cutoff) {
+      return (
+        <ClickableText
+        displayValue={displayValue.substring(0, cutoff)}
+        onClick={() => inspectValue(value)}
+        ellipsis
+        />
+      );
+    }
+    return displayValue
+  }
+
   switch (property.type) {
     case 'string':
+      return withCutoff(value as string, 40);
     case 'double':
     case 'int':
     case 'float':
-    case 'objectId':
+      return withCutoff(value.toString(), 10);
     case 'date':
+    case 'objectId':
     case 'uuid':
-      return parseSimpleData(value as string | number);
+      return value as string;
     case 'bool':
       return parseBoolean(value as boolean);
     case 'list':
     case 'set':
-      return parseSetOrList(value as Realm.Set<unknown>, property, schemas, downloadData);
+      return withCutoff(parseSetOrList(value as Realm.Set<unknown>, property, schemas, downloadData), 40);
     case 'data':
       return parseData(value as DeserializedRealmData, downloadData);
     case 'dictionary':
-      return parseDictionary(value as Record<string, unknown>);
+      return withCutoff(parseDictionary(value as Record<string, unknown>), 20);
     case 'decimal128':
-      return parseDecimal128(value as DeserializedRealmDecimal128);
+      return withCutoff(parseDecimal128(value as DeserializedRealmDecimal128), 20);
     case 'object':
       // eslint-disable-next-line @typescript-eslint/no-shadow
       schema = schemas.find((schema) => schema.name === property.objectType);
@@ -59,15 +79,11 @@ export const renderValue = (
       }
       return parseLinkedObject(schema as Realm.ObjectSchema, value as DeserializedRealmObject);
     case 'mixed':
-      return parseMixed(value);
+      return withCutoff(parseMixed(value), 40);
     default:
       return <Typography.Text disabled>Unsupported type</Typography.Text>
   }
 };
-
-function parseSimpleData(input: string | number): string | number {
-  return input;
-}
 
 function parseSetOrList(
   input: Realm.Set<unknown> | Realm.List<unknown>,
@@ -85,7 +101,7 @@ function parseSetOrList(
           objectType: property.objectType,
         },
         schemas,
-        downloadData,
+        {downloadData},
         true,
       );
     }
@@ -96,7 +112,7 @@ function parseSetOrList(
         type: property.objectType as string,
       },
       schemas,
-      downloadData,
+      {downloadData},
       true,
     );
   });
@@ -156,6 +172,6 @@ function parseLinkedObject(
 
 }
 
-function parseMixed(input: unknown): string | JSX.Element | number {
+function parseMixed(input: unknown): string {
   return JSON.stringify(input);
 }
