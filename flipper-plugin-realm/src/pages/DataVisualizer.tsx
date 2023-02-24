@@ -188,18 +188,15 @@ const DataVisualizer = ({
     <div
       onScroll={handleScroll}
       style={{
-        flex: '1 1 0',
+        width: '100%',
+        height: '100%',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'scroll',
+        // TODO: This is a temporary solution to help force the horizontal scrollbar to appear. https://github.com/realm/realm-flipper-plugin/issues/90
+        marginBottom: 200,
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          height: '100%',
-        }}
-      >
         {editingObject.object && editingObject.editing && editingObject.type === 'object' ? (
           <ObjectEdit
             schema={currentSchema}
@@ -261,7 +258,6 @@ const DataVisualizer = ({
           setNewInspectionData={setNewInspectionData}
           getObject={(object: RealmObjectReference) => {return getObject(selectedRealm, object.objectType!, object.objectKey)}}
         />
-      </div>
     </div>
   );
 

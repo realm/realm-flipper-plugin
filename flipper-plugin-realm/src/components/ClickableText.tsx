@@ -1,6 +1,5 @@
 import React from "react";
 import { useState } from "react";
-import { PlainRealmObject, RealmObjectReference } from "../SharedTypes";
 
 type ClickableTextProps = {
     /** Content to be displayed for the given value. */
@@ -20,6 +19,7 @@ type ClickableTextProps = {
       <div>
         <div
           style={{
+            cursor: 'pointer',
             display: 'inline',
             color: ellipsis ? undefined : '#6831c7',
             textDecoration: isHovering ? 'underline' : undefined,

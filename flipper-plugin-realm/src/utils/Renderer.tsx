@@ -51,11 +51,11 @@ export const renderValue = (
 
   switch (property.type) {
     case 'string':
-      return withCutoff(value as string, 40);
+      return withCutoff(value as string, 30);
     case 'double':
     case 'int':
     case 'float':
-      return withCutoff(value.toString(), 10);
+      return withCutoff(value.toString(), 20);
     case 'date':
     case 'objectId':
     case 'uuid':
@@ -64,11 +64,11 @@ export const renderValue = (
       return parseBoolean(value as boolean);
     case 'list':
     case 'set':
-      return withCutoff(parseSetOrList(value as Realm.Set<unknown>, property, schemas, downloadData), 40);
+      return withCutoff(parseSetOrList(value as Realm.Set<unknown>, property, schemas, downloadData), 30);
     case 'data':
       return parseData(value as DeserializedRealmData, downloadData);
     case 'dictionary':
-      return withCutoff(parseDictionary(value as Record<string, unknown>), 20);
+      return withCutoff(parseDictionary(value as Record<string, unknown>), 30);
     case 'decimal128':
       return withCutoff(parseDecimal128(value as DeserializedRealmDecimal128), 20);
     case 'object':
@@ -79,7 +79,7 @@ export const renderValue = (
       }
       return parseLinkedObject(schema as Realm.ObjectSchema, value as DeserializedRealmObject);
     case 'mixed':
-      return withCutoff(parseMixed(value), 40);
+      return withCutoff(parseMixed(value), 30);
     default:
       return <Typography.Text disabled>Unsupported type</Typography.Text>
   }

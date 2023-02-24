@@ -200,9 +200,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
       /** Simple antd table props defined in their documentation */
       key: property.name,
       dataIndex: ["realmObject", property.name],
-      ellipsis: {
-        showTitle: false,
-      },
 
       /** The title appearing in the tables title row. */
       title: createTitle(column),
@@ -300,13 +297,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     }
   };
   return (
-    <div
-      style={{
-        overflow: 'auto',
-        height: '90%',
-        textAlign: 'center',
-      }}
-    >
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
@@ -317,9 +307,8 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           <div
             style={{
               marginTop: '20px',
-              marginBottom: '25px',
+              marginBottom: '100px',
               display: 'inline-block',
-              paddingBottom: '100px',
             }}
             key={0}
           >
@@ -328,6 +317,9 @@ export const DataTable = (dataTableProps: DataTableProps) => {
         }
       >
         <Table
+          style={{
+            wordBreak: "break-all",
+          }}
           bordered={true}
           showSorterTooltip={false}
           dataSource={objects}
@@ -344,7 +336,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           rowKey={(record) => {
             return record.objectKey;
           }}
-          tableLayout="auto"
           expandable={rowExpansionProp}
           columns={antdColumns}
           onChange={(_, __, sorter, extra) => handleOnChange(sorter, extra)}
@@ -352,7 +343,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           scroll={{ scrollToFirstRowOnChange: false }}
         />
       </InfiniteScroll>
-    </div>
   );
 };
 
