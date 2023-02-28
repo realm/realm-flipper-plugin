@@ -13,6 +13,7 @@ import { InspectionDataType } from './RealmDataInspector';
 import { renderValue } from '../utils/Renderer';
 import { ColumnTitle } from './ColumnTitle';
 import { DropdownPropertyType, MenuItemGenerator, PlainRealmObject, DeserializedRealmObject, SortedObjectSchema, RealmObjectReference } from '../CommonTypes';
+import { ClickableText } from './ClickableText';
 
 export type ColumnType = {
   optional: boolean;
@@ -45,15 +46,6 @@ type DataTableProps = {
   ) => void;
   clickAction?: (object: DeserializedRealmObject) => void;
   getObject: (object: RealmObjectReference, objectSchemaName: string) => Promise<DeserializedRealmObject | null>;
-};
-
-type ClickableTextProps = {
-  /** Content to be displayed for the given value. */
-  displayValue: string | number | JSX.Element;
-  isLongString: boolean;
-  value: PlainRealmObject | RealmObjectReference;
-  isReference?: boolean;
-  inspectorView: 'object' | 'property';
 };
 
 // Receives a schema and returns column objects for the table.
@@ -132,44 +124,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     return <Layout.Container style={{padding: 20}}>No schemas found. Check selected Realm.</Layout.Container>;
   }
 
-  /**  Functional component to render clickable text which opens the DataInspector.*/
-  const ClickableText = ({
-    displayValue,
-    isLongString,
-    value,
-    inspectorView,
-    isReference = false,
-  }: ClickableTextProps) => {
-    const [isHovering, setHovering] = useState(false);
-    return (
-      <div>
-        <div
-          style={{
-            display: 'inline',
-            color: isLongString ? undefined : '#6831c7',
-            textDecoration: isHovering ? 'underline' : undefined,
-          }}
-          onClick={() => {
-            setNewInspectionData({ data: value, view: inspectorView, isReference }, true);
-          }}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-        >
-          {displayValue}
-        </div>
-        {isLongString ? (
-          <div
-            style={{
-              display: 'inline',
-            }}
-          >
-            ...
-          </div>
-        ) : null}
-      </div>
-    );
-  };
-
   /** Definition of antd-specific columns. This constant is passed to the antd table as a property. */
   const antdColumns:ColumnsType<DeserializedRealmObject> = schemaObjectToColumns(currentSchema).map((column) => {
     const property: Realm.CanonicalObjectSchemaProperty =
@@ -181,7 +135,16 @@ export const DataTable = (dataTableProps: DataTableProps) => {
       on top of the pure value specified in the 'dataSource' property of the antd table.*/
     const render = (value: PlainRealmObject | RealmObjectReference, row: DeserializedRealmObject) => {
       /** Apply the renderValue function on the value in the cell to create a standard cell. */
-      const cellValue = renderValue(value, property, schemas, instance.downloadData);
+      const cellValue = renderValue(value, property, schemas, {
+        downloadData: instance.downloadData,
+        inspectValue: (value: any) => {
+          setNewInspectionData({ 
+            data: { [`${currentSchema.name}.${column.name}`]: value}, 
+            view: "property",
+            isReference: false, 
+          }, true)
+        }
+      });
 
       /** Render buttons to expand the row and a clickable text if the cell contains a linked or embedded Realm object. */
       if (value !== null && linkedSchema && property.type === 'object') {
@@ -216,45 +179,27 @@ export const DataTable = (dataTableProps: DataTableProps) => {
               ghost
             />}
             {
-              <ClickableText
-                value={
-                  isEmbedded 
-                  ? { [`${currentSchema.name}.${column.name}`]: value}
-                  : value
-                }
-                displayValue={cellValue}
-                isLongString={false}
-                inspectorView={isEmbedded ? "property" : "object"}
-                isReference={!isEmbedded}
-              />
+            <ClickableText
+              displayValue={cellValue}
+              onClick={() => {
+                setNewInspectionData({ 
+                  data: isEmbedded ? { [`${currentSchema.name}.${column.name}`]: value} : value, 
+                  view: isEmbedded ? "property" : "object",
+                  isReference: !isEmbedded 
+                }, true);
+              }}/>
             }
           </Layout.Container>
         );
       }
 
-      /** If the cell contains a string which is too long cut it off and render it as a clickable text. */
-      if (typeof cellValue === 'string' && cellValue.length > 70) {
-        return (
-          <ClickableText
-            value={value}
-            displayValue={cellValue.substring(0, 70)}
-            isLongString={true}
-            inspectorView="property"
-          />
-        );
-      }
       return cellValue;
-    };
+    }
 
     return {
       /** Simple antd table props defined in their documentation */
-      minWidth: 20000,
       key: property.name,
       dataIndex: ["realmObject", property.name],
-      width: 300,
-      ellipsis: {
-        showTitle: false,
-      },
 
       /** The title appearing in the tables title row. */
       title: createTitle(column),
@@ -352,14 +297,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
     }
   };
   return (
-    <div
-      style={{
-        overflow: 'auto',
-        height: '90%',
-        width: '100%',
-        textAlign: 'center',
-      }}
-    >
       <InfiniteScroll
         initialLoad={false}
         pageStart={0}
@@ -370,9 +307,8 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           <div
             style={{
               marginTop: '20px',
-              marginBottom: '25px',
+              marginBottom: '100px',
               display: 'inline-block',
-              paddingBottom: '100px',
             }}
             key={0}
           >
@@ -381,7 +317,9 @@ export const DataTable = (dataTableProps: DataTableProps) => {
         }
       >
         <Table
-          sticky={true}
+          style={{
+            wordBreak: "break-all",
+          }}
           bordered={true}
           showSorterTooltip={false}
           dataSource={objects}
@@ -405,7 +343,6 @@ export const DataTable = (dataTableProps: DataTableProps) => {
           scroll={{ scrollToFirstRowOnChange: false }}
         />
       </InfiniteScroll>
-    </div>
   );
 };
 

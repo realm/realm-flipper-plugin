@@ -65,7 +65,7 @@ export const MixedInput = ({
       <Row align="middle">
         <Col flex="auto">
           <Tag color="success">{chosenType}</Tag>
-          {renderValue(value, { type, objectType: objectType?.name }, schemas, downloadData)}
+          {renderValue(value, { type, objectType: objectType?.name }, schemas, {downloadData})}
         </Col>
         <Col>
           <Button

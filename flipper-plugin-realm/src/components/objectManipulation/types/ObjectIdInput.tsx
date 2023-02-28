@@ -12,7 +12,7 @@ export const ObjectIdInput = ({
   isPrimary
 }: TypeInputProps) => {
   const [_, setReset] = useState(0);
-  const [value, setValue] = useState<string | null>(defaultValue !== null ? (defaultValue as ObjectId).toString() : null);
+  const [value, setValue] = useState<string | null>(defaultValue ? (defaultValue as ObjectId).toString() : null);
 
   const onChange = (value: string) => {
     setValue(value);
